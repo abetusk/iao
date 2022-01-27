@@ -9,7 +9,9 @@
 
 // requires jsclipper
 
+
 var g_info = {
+  "VERSION" : "0.1.0",
   "ctx" : {},
   "tick" : 0,
   "tick_val" : 0,
