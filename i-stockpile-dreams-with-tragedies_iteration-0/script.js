@@ -12,10 +12,13 @@
 
 var g_info = {
   "VERSION" : "0.6.0",
+  "canvas": {},
   "ctx" : {},
   "tick" : 0,
   "tick_val" : 0,
   "anim": true,
+
+  "bg_color" : "#111",
   "f_list": [
     "stripe_45_square",
     "stripe_m45_square",
@@ -1058,8 +1061,14 @@ function anim() {
     [200,400],
     [300,400] ];
 
+  let _cw = g_info.canvas.width;
+  let _ch = g_info.canvas.height;
   let ctx = g_info.ctx;
-  ctx.clearRect(0, 0, 1000, 1000);
+  ctx.clearRect(0, 0, _cw, _ch);
+  ctx.fillStyle = g_info.bg_color;
+  ctx.rect(0,0, _cw, _ch);
+  ctx.fill();
+
 
   for (let i=0; i<g_info.f_hist.length; i++) {
     g_info.f_hist[i]();
@@ -1088,6 +1097,7 @@ function anim() {
 
   let dS = ((W<H) ? W : H);
 
+  g_info.canvas = canvas;
   g_info.ctx = ctx;
   g_info.size = dS - 25;
   g_info.tick = 0;
