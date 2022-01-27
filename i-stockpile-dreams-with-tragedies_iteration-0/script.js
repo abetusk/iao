@@ -11,10 +11,11 @@
 
 
 var g_info = {
-  "VERSION" : "0.5.0",
+  "VERSION" : "0.6.0",
   "ctx" : {},
   "tick" : 0,
   "tick_val" : 0,
+  "anim": true,
   "f_list": [
     "stripe_45_square",
     "stripe_m45_square",
@@ -647,8 +648,6 @@ function circle_square(ctx, x, y, r, width, color, phase) {
     [ width/2, -width/2]
   ];
 
-  //let _c = Math.cos(g_info.tick_val);
-  //let _s = Math.sin(g_info.tick_val);
   let _c = Math.cos(2.0*Math.PI*phase);
   let _s = Math.sin(2.0*Math.PI*phase);
   for (let i=0; i<pnts.length; i++) {
@@ -976,14 +975,22 @@ function disp_r(ctx, x, y, w, sub_n, recur_level, max_recur) {
   else if (p < 0.75) {
     let _f = g_info.f_list[ Math.floor(g_info.f_list.length * fxrand()) ],
         _c = "rgba(255,255,255," + (1.0 - fxrand()*0.125) + ")";
-    //disp(ctx, _f, x, y, w, _c);
+
+    let _freq = 1.0 - fxrand()*0.5;
+    let _init_phase =  fxrand();
+
+    if (!g_info.anim) {
+      _freq = 0;
+      _init_phase = 0;
+    }
+
 
     let _func = (function(_p_ctx, _p_f, _p_x, _p_y, _p_w, _p_c, _p_F, _p_i_p) {
       return function() {
         let _phase = (1.0 + Math.sin(Math.PI*2*_p_F*(g_info.tick/512 + _p_i_p)))/2.0;
         disp(_p_ctx, _p_f, _p_x, _p_y, _p_w, _p_c, _phase);
       };
-    })(ctx, _f, x, y, w, _c, 1.0 - fxrand()*0.5 , fxrand());
+    })(ctx, _f, x, y, w, _c, _freq, _init_phase);
 
     g_info.f_hist.push(_func);
 
@@ -992,14 +999,21 @@ function disp_r(ctx, x, y, w, sub_n, recur_level, max_recur) {
   else {
     let _f = g_info.f_list[ Math.floor(g_info.f_list.length * fxrand()) ],
         _c = "rgba(255,255,255," + (0.6 - fxrand()*0.25) + ")";
-    //disp(ctx, _f, x, y, w, _c);
+
+    let _freq = 1.0 - fxrand()*0.5;
+    let _init_phase =  fxrand();
+
+    if (!g_info.anim) {
+      _freq = 0;
+      _init_phase = 0.0;
+    }
 
     let _func = (function(_p_ctx, _p_f, _p_x, _p_y, _p_w, _p_c, _p_F, _p_i_p) {
       return function() {
         let _phase = (1.0 + Math.sin(Math.PI*2*_p_F*(g_info.tick/512 + _p_i_p)))/2.0;
         disp(_p_ctx, _p_f, _p_x, _p_y, _p_w, _p_c, _phase);
       };
-    })(ctx, _f, x, y, w, _c, 1.0 - fxrand()*0.5, fxrand());
+    })(ctx, _f, x, y, w, _c, _freq, _init_phase);
 
     g_info.f_hist.push(_func);
 
@@ -1053,18 +1067,16 @@ function anim() {
 
   window.requestAnimationFrame(anim);
 
-  g_info.tick += 1;
-  g_info.tick_val = 16*(1.0 + Math.sin(Math.PI*2.0*g_info.tick/512));
-  //g_info.tick %= 512;
+  if (g_info.anim) {
+    g_info.tick += 1;
+    g_info.tick_val = 16*(1.0 + Math.sin(Math.PI*2.0*g_info.tick/512));
+  }
 
-  // disable for now
-  //
-  //g_info.tick_val = 0;
 }
 
 (()=>{
 
-  console.log(">>>", fxhash);
+  console.log("fxhash:",fxhash);
 
   let canvas = document.getElementById("canvas");
   canvas.width = window.innerWidth;
