@@ -109,4 +109,4 @@ See the file [clipper.js](clipper.js) for it's various licensing and copyright i
 All other source code and other assets in this directory are, to the extent possible, licensed
 under [CC0](https://creativecommons.org/publicdomain/zero/1.0/).
 
-![CC0]((../img/cc0_88x31.png).
+![CC0](../img/cc0_88x31.png).
