@@ -4,7 +4,7 @@ I Stockpile Dreams With Tragedies
 Example
 ---
 
-![sample image](../img/stockpile-dream-tragedies_0.png)
+[![sample image](../img/stockpile-dream-tragedies_0.png)](https://github.com/abetusk/iao/tree/main/i-stockpile-dreams-with-tragedies_iteration-0)
 
 Quick Start
 ---
