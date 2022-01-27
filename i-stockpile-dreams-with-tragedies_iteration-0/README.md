@@ -116,6 +116,13 @@ stream of incredulous dismissals and start to examine
 the reality of the ecosystem that we've developed
 around digital goods and intellectual property.
 
+Reference
+---
+
+* [Dreamstime: Gary Killian](https://www.dreamstime.com/stock-illustration-vector-minimal-covers-procedural-design-futuristic-minimalistic-layout-conceptual-generative-background-journal-vector-minimal-image99452072)
+* [iStockPhoto: Gary Killian](https://www.istockphoto.com/vector/vector-minimal-covers-procedural-design-futuristic-minimalistic-layout-conceptual-gm954662046-260653001)
+* [Aleksandar Bradic](https://ello.co/randomwalks) ([isntagram](https://www.instagram.com/alek/))
+
 
 License
 ---
