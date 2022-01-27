@@ -11,7 +11,7 @@
 
 
 var g_info = {
-  "VERSION" : "0.2.0",
+  "VERSION" : "0.3.0",
   "ctx" : {},
   "tick" : 0,
   "tick_val" : 0,
