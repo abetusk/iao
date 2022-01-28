@@ -100,8 +100,6 @@ Reference
 License
 ---
 
-See the file [clipper.js](clipper.js) for its various licensing and copyright information.
-
 All other source code and other assets in this directory are, to the extent possible, licensed
 under [CC0](https://creativecommons.org/publicdomain/zero/1.0/).
 
