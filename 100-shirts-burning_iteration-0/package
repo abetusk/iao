@@ -11,4 +11,4 @@
 outfn=100_shirts_burning.zip
 rm -f $outfn
 
-zip $outfn clipper.js script.js index.html style.css LICENSE README.md
+zip $outfn script.js index.html style.css LICENSE README.md
