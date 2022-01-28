@@ -1,10 +1,9 @@
 100 Shirts, Burning
 ===
 
-Example
----
-
 [![100 shirts, burning screenshot](../img/100shirts_0.png)](https://github.com/abetusk/iao/tree/main/100-shirts-burning_iteration-0)
+
+Available on [fxhash](https://www.fxhash.xyz/generative/slug/100-shirts-burning)
 
 Quick Start
 ---

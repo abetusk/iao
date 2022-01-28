@@ -1,9 +1,6 @@
 I Stockpile Dreams With Tragedies
 ===
 
-Example
----
-
 [![sample image](../img/stockpile-dream-tragedies_0.png)](https://github.com/abetusk/iao/tree/main/i-stockpile-dreams-with-tragedies_iteration-0)
 
 Available on [fxhash](https://www.fxhash.xyz/generative/slug/i-stockpile-dreams-with-tragedies).
