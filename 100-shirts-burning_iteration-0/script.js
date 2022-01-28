@@ -718,14 +718,13 @@ function screenshot() {
   let ox = Math.floor(dS/6),
       oy = Math.floor(dS/6);
 
-  let c_size = 500;
+  let c_size = g_info.size;
   let isubdiv = 2;
   for (let i=0; i<isubdiv; i++) {
     for (let j=0; j<isubdiv; j++) {
       let _x = i*c_size/isubdiv;
       let _y = j*c_size/isubdiv;
       disp_r(ctx, ox + _x , oy + _y , c_size/isubdiv, 2, 1, 5, fg_color, bg_color);
-      //disp_r(ctx, ox + _x , oy + _y , c_size/isubdiv, 2, 1, 2, fg_color, bg_color);
     }
   }
 
