@@ -30,6 +30,8 @@ a - toggle animation
 
 . - speed up animation
 
+p - pause animation
+
 s - take screenshot
 
 To the extent possible, the source code is dedicated to the public domain (CC0) and can be used for any purpose, even commercial, by anyone.

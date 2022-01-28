@@ -11,12 +11,13 @@
 
 
 var g_info = {
-  "VERSION" : "0.1.0",
+  "VERSION" : "0.2.0",
   "canvas": {},
   "ctx" : {},
   "tick" : 0,
   "tick_val" : 0,
   "anim": true,
+  "pause": false,
   "speed_factor":256,
   "shimmer_speed":16,
   "shimmer_breadth":(1.0/64.0),
@@ -357,8 +358,12 @@ function anim() {
   window.requestAnimationFrame(anim);
 
   if (g_info.anim) {
-    g_info.tick += 1;
-    g_info.tick_val = 16*(1.0 + Math.sin(Math.PI*2.0*g_info.tick/g_info.speed_factor));
+
+    if (!g_info.pause) {
+      g_info.tick += 1;
+      g_info.tick_val = 16*(1.0 + Math.sin(Math.PI*2.0*g_info.tick/g_info.speed_factor));
+    }
+
   }
 
 }
@@ -845,6 +850,9 @@ function screenshot() {
     }
     else if (ev.key == 's') {
       screenshot();
+    }
+    else if (ev.key == 'p') {
+      g_info.pause = ((g_info.pause) ? false : true);
     }
     return false;
   });
