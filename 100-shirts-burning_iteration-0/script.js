@@ -11,15 +11,19 @@
 
 
 var g_info = {
-  "VERSION" : "0.6.0",
+  "VERSION" : "0.1.0",
   "canvas": {},
   "ctx" : {},
   "tick" : 0,
   "tick_val" : 0,
   "anim": true,
   "speed_factor":256,
+  "shimmer_speed":16,
+  "shimmer_breadth":(1.0/64.0),
 
   "color": [ ],
+
+  "rnd":[],
 
   "bg_color" : "#111",
   "f_list": [
@@ -194,18 +198,54 @@ function disp_r(ctx, x, y, w, sub_n, recur_level, max_recur, fg_color, bg_color)
     // allow call back to save the history and to independently
     // adjust the frequencey of each
     //
-    let _func = (function(_p_ctx, _p_f, _p_x, _p_y, _p_w, _p_fg_c, _p_bg_c, _p_F, _p_i_p) {
-      return function() {
+    let _func = (function(_p_ctx, _p_f, _p_x, _p_y, _p_w, _p_fg_c, _p_bg_c, _p_F, _p_i_p, _p_lvl) {
+      return function(_opt) {
+        _opt = ((typeof _opt === "undefined") ? {} : _opt);
         let _phase = (1.0 + Math.sin(Math.PI*2*_p_F*(g_info.tick/g_info.speed_factor + _p_i_p)))/2.0;
 
-        //console.log(g_info.speed_factor);
+        let _g_rnd_0 = Math.sin(Math.PI*2*((g_info.tick/g_info.shimmer_speed)*g_info.rnd[0])) * g_info.rnd[1] * g_info.shimmer_breadth;
 
-        let _fc = _rgb2hex( _p_fg_c.rgb );
-        let _bc = _rgb2hex( _p_bg_c.rgb );
-        //disp(_p_ctx, _p_f, _p_x, _p_y, _p_w, _p_fg_c, _p_bg_c, _phase);
+        let _fg_hsv = {"h":_p_fg_c.hsv.h, "s":_p_fg_c.hsv.s, "v":_p_fg_c.hsv.v };
+        let _bg_hsv = {"h":_p_bg_c.hsv.h, "s":_p_bg_c.hsv.s, "v":_p_bg_c.hsv.v };
+
+        // The 'shimmer' effect is done by knowing which is the "actual" foreground
+        // and tweaking the hue.
+        //
+        // There was an attempt at being able to highlight one tile but it just looks
+        // bad so I'm disabling it.
+        // Left here in case it's worth coming back to.
+        //
+        if ((_p_lvl%2)==1)  {
+          _fg_hsv.h += _g_rnd_0;
+          if (("last" in _opt) && (_opt.last)) {
+            //_fg_hsv.h += (1.0/32);
+            //_bg_hsv.h += (1.0/32);
+          }
+        }
+        else {
+          _bg_hsv.h += _g_rnd_0;
+          if (("last" in _opt) && (_opt.last)) {
+            //_bg_hsv.h += (1.0/32);
+            //_fg_hsv.h += (1.0/32);
+          }
+        }
+
+
+        if (_fg_hsv.h > 1.0) { _fg_hsv.h -= 1.0; }
+        if (_bg_hsv.h > 1.0) { _bg_hsv.h -= 1.0; }
+
+        if (_fg_hsv.h < 0.0) { _fg_hsv.h += 1.0; }
+        if (_bg_hsv.h < 0.0) { _bg_hsv.h += 1.0; }
+
+        let _fg_rgb = HSVtoRGB(_fg_hsv);
+        let _bg_rgb = HSVtoRGB(_bg_hsv);
+
+        let _fc = _rgb2hex( _fg_rgb );
+        let _bc = _rgb2hex( _bg_rgb );
         disp(_p_ctx, _p_f, _p_x, _p_y, _p_w, _fc, _bc, _phase);
+
       };
-    })(ctx, _f, x, y, w, fg_color, bg_color, _freq, _init_phase);
+    })(ctx, _f, x, y, w, fg_color, bg_color, _freq, _init_phase, recur_level);
 
     g_info.f_hist.push({ "lvl": recur_level, "idx": g_info.f_hist.length, "f": _func });
   }
@@ -223,16 +263,54 @@ function disp_r(ctx, x, y, w, sub_n, recur_level, max_recur, fg_color, bg_color)
     // allow call back to save the history and to independently
     // adjust the frequencey of each
     //
-    let _func = (function(_p_ctx, _p_f, _p_x, _p_y, _p_w, _p_fg_c, _p_bg_c, _p_F, _p_i_p) {
-      return function() {
+    let _func = (function(_p_ctx, _p_f, _p_x, _p_y, _p_w, _p_fg_c, _p_bg_c, _p_F, _p_i_p, _p_lvl) {
+      return function(_opt) {
+        _opt = ((typeof _opt === "undefined") ? {} : _opt);
         let _phase = (1.0 + Math.sin(Math.PI*2*_p_F*(g_info.tick/g_info.speed_factor + _p_i_p)))/2.0;
 
-        let _fc = _rgb2hex( _p_fg_c.rgb );
-        let _bc = _rgb2hex( _p_bg_c.rgb );
-        //disp(_p_ctx, _p_f, _p_x, _p_y, _p_w, _p_fg_c, _p_bg_c, _phase);
+        let _g_rnd_0 = Math.sin(Math.PI*2*((g_info.tick/g_info.shimmer_speed)*g_info.rnd[0])) * g_info.rnd[1] * g_info.shimmer_breadth;
+
+        let _fg_hsv = {"h":_p_fg_c.hsv.h, "s":_p_fg_c.hsv.s, "v":_p_fg_c.hsv.v };
+        let _bg_hsv = {"h":_p_bg_c.hsv.h, "s":_p_bg_c.hsv.s, "v":_p_bg_c.hsv.v };
+
+        // The 'shimmer' effect is done by knowing which is the "actual" foreground
+        // and tweaking the hue.
+        //
+        // There was an attempt at being able to highlight one tile but it just looks
+        // bad so I'm disabling it.
+        // Left here in case it's worth coming back to.
+        //
+        if ((_p_lvl%2)==1)  {
+          _fg_hsv.h += _g_rnd_0;
+          if (("last" in _opt) && (_opt.last)) {
+            //_fg_hsv.h += (1.0/32);
+            //_bg_hsv.h += (1.0/32);
+          }
+        }
+        else {
+          _bg_hsv.h += _g_rnd_0;
+          if (("last" in _opt) && (_opt.last)) {
+            //_bg_hsv.h += (1.0/32);
+            //_fg_hsv.h += (1.0/32);
+          }
+        }
+
+
+        if (_fg_hsv.h > 1.0) { _fg_hsv.h -= 1.0; }
+        if (_bg_hsv.h > 1.0) { _bg_hsv.h -= 1.0; }
+
+        if (_fg_hsv.h < 0.0) { _fg_hsv.h += 1.0; }
+        if (_bg_hsv.h < 0.0) { _bg_hsv.h += 1.0; }
+
+        let _fg_rgb = HSVtoRGB(_fg_hsv);
+        let _bg_rgb = HSVtoRGB(_bg_hsv);
+
+        let _fc = _rgb2hex( _fg_rgb );
+        let _bc = _rgb2hex( _bg_rgb );
         disp(_p_ctx, _p_f, _p_x, _p_y, _p_w, _fc, _bc, _phase);
+
       };
-    })(ctx, _f, x, y, w, fg_color, bg_color, _freq, _init_phase);
+    })(ctx, _f, x, y, w, fg_color, bg_color, _freq, _init_phase, recur_level);
 
     g_info.f_hist.push({ "lvl": recur_level, "idx": g_info.f_hist.length, "f": _func });
   }
@@ -264,14 +342,16 @@ function anim() {
   let _cw = g_info.canvas.width;
   let _ch = g_info.canvas.height;
   let ctx = g_info.ctx;
-  clear(ctx, _cw, _ch, g_info.bg_color);
-  //ctx.clearRect(0, 0, _cw, _ch);
-  //ctx.fillStyle = g_info.bg_color;
-  //ctx.rect(0,0, _cw, _ch);
-  //ctx.fill();
 
+  clear(ctx, _cw, _ch, g_info.bg_color);
   for (let i=0; i<g_info.f_hist.length; i++) {
-    g_info.f_hist[i].f();
+
+    if (i == (g_info.f_hist.length-1)) {
+      g_info.f_hist[i].f( { "last": true } );
+    }
+    else {
+      g_info.f_hist[i].f();
+    }
   }
 
   window.requestAnimationFrame(anim);
@@ -379,7 +459,8 @@ function disp_tile_0(ctx, pos_x, pos_y, width, color_fg, color_bg, phase) {
   // top fg wing
   //
   ctx.moveTo(pos_x + w2, pos_y );
-  ctx.arc(pos_x + w2, pos_y, phase*w_1_6, 0, 2*pi, true);
+  //ctx.arc(pos_x + w2, pos_y, phase*w_1_6, 0, 2*pi, true);
+  ctx.arc(pos_x + w2, pos_y, phase*w_1_6, 0, 2*pi, false);
 
   // bottom fg wing
   //
@@ -552,7 +633,8 @@ function disp_tile_1(ctx, pos_x, pos_y, width, color_fg, color_bg, phase) {
   // top fg wing
   //
   ctx.moveTo(pos_x + w2, pos_y );
-  ctx.arc(pos_x + w2, pos_y, phase*w_1_6, pi, 0);
+  ctx.arc(pos_x + w2, pos_y, phase*w_1_6, pi, 0, false);
+  //ctx.arc(pos_x + w2, pos_y, phase*(w_1_6+0.125), 0, pi, true);
 
   // bottom fg wing
   //
@@ -665,6 +747,10 @@ function screenshot() {
 (()=>{
 
   console.log("fxhash:",fxhash);
+
+  // have some persistent global random numbers for later use
+  //
+  for (let i=0; i<10; i++) { g_info.rnd.push( fxrand() ); }
 
   let canvas = document.getElementById("canvas");
   canvas.width = window.innerWidth;
