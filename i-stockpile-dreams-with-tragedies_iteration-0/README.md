@@ -6,6 +6,8 @@ Example
 
 [![sample image](../img/stockpile-dream-tragedies_0.png)](https://github.com/abetusk/iao/tree/main/i-stockpile-dreams-with-tragedies_iteration-0)
 
+Available on [fxhash](https://www.fxhash.xyz/generative/slug/i-stockpile-dreams-with-tragedies).
+
 Quick Start
 ---
 
@@ -20,7 +22,7 @@ chromium 'http://localhost:8000'
 Short Statement
 ---
 
-"I Stockpile Dreams With Tragedies" is an experimental generative art piece that is an attempt to highlight some of the inherent contradictions surrounding the discussion of non-fungible tokens (NFTs) and it's place as a vehicle for artistic creation, artistic expression and the potential of remuneration for artists.
+"I Stockpile Dreams With Tragedies" is an experimental generative art piece that is an attempt to highlight some of the inherent contradictions surrounding the discussion of non-fungible tokens (NFTs) and its place as a vehicle for artistic creation, artistic expression and the potential of remuneration for artists.
 
 To the extent possible, the source code is dedicated to the public domain (CC0) and can be used for any purpose, even commercial, by anyone. Third party libraries are used that are not CC0 licensed but have libre/free licensing terms that allow for commercial reuse (please see the LICENSE section for more details).
 
@@ -41,7 +43,7 @@ is an experimental generative art piece
 that is an attempt to highlight
 some of the inherent contradictions
 surrounding the discussion of non-fungible
-tokens (NFTs) and it's place as a vehicle
+tokens (NFTs) and its place as a vehicle
 for artistic creation, artistic expression
 and the potential of remuneration for artists.
 
@@ -127,7 +129,7 @@ Reference
 License
 ---
 
-See the file [clipper.js](clipper.js) for it's various licensing and copyright information.
+See the file [clipper.js](clipper.js) for its various licensing and copyright information.
 
 All other source code and other assets in this directory are, to the extent possible, licensed
 under [CC0](https://creativecommons.org/publicdomain/zero/1.0/).
