@@ -34,7 +34,10 @@ var g_info = {
   "ready": false,
 
   //"toks" : ["head", "chest", "leg", "feet", "arm", "arch", "board" ],
-  "toks" : ["head", "chest", "leg", "feet", "arm", "board" ],
+  //"toks" : ["head", "chest", "leg", "feet", "arm", "board" ],
+  //"toks" : ["head", "chest", "leg", "feet", "arm", "item", "bg", "bg_float" ],
+  "toks"    : ["head", "chest", "leg", "feet", "arm", "item", "bg", "creature", "critter" ],
+  "zorder"  : [ 1,      2,        3,    4,      5,      -1,    -5,    -2,         -3 ],
 
   "sprite": {
     "head": [],
@@ -43,8 +46,15 @@ var g_info = {
     "feet":[],
     "arm":[],
 
-    //"arch":[],
-    "board":[]
+    "arch":[],
+    "board":[],
+
+    "item":[],
+    "creature":[],
+    "critter":[],
+
+    "bg":[],
+    "bg_float":[]
   },
 
   "active" : {
@@ -54,8 +64,15 @@ var g_info = {
     "feet": "",
     "arm": "",
 
-    //"arch":"",
-    "board":""
+    "arch":"",
+    "board":"",
+
+    "item":"",
+    "creature":"",
+    "critter":"",
+
+    "bg":"",
+    "bg_float":""
   },
 
 
@@ -68,14 +85,32 @@ var g_info = {
 
 
   "state" : {
-    "head" : { "v": false, "idx": 0, "anim_idx":0, "di":180, "x":60, "y":70, "dx":0, "dy":0, "da":0, "dp":0, "lx": 1, "ly": 2, "scale": 0.72, "disp_w":0, "disp_h":0 },
-    "chest": { "v": false, "idx": 0, "anim_idx":0, "di":185, "x":60, "y":70, "dx":0, "dy":0, "da":0, "dp":0, "lx": 1, "ly": 2, "scale": 0.72, "disp_w":0, "disp_h":0  },
-    "leg"  : { "v": false, "idx": 0, "anim_idx":0, "di":190, "x":60, "y":70, "dx":0, "dy":0, "da":0, "dp":0, "lx": 1, "ly": 2, "scale": 0.72, "disp_w":0, "disp_h":0  },
-    "feet" : { "v": false, "idx": 0, "anim_idx":0, "di":175, "x":60, "y":70, "dx":0, "dy":0, "da":0, "dp":0, "lx": 1, "ly": 2, "scale": 0.72, "disp_w":0, "disp_h":0  },
-    "arm"  : { "v": false, "idx": 0, "anim_idx":0, "di":170, "x":60, "y":70, "dx":0, "dy":0, "da":0, "dp":0, "lx": 1, "ly": 2, "scale": 0.72, "disp_w":0, "disp_h":0  },
+    "head" : { "v": false, "idx": 0, "anim_idx":0, "di":180, "x":60, "y":70, "dx":0, "dy":0, "da":0, "dp":0, "lx": 1, "ly": 2, "scale": 0.8, "disp_w":0, "disp_h":0, },
+    "chest": { "v": false, "idx": 0, "anim_idx":0, "di":185, "x":60, "y":70, "dx":0, "dy":0, "da":0, "dp":0, "lx": 1, "ly": 2, "scale": 0.8, "disp_w":0, "disp_h":0  },
+    "leg"  : { "v": false, "idx": 0, "anim_idx":0, "di":190, "x":60, "y":70, "dx":0, "dy":0, "da":0, "dp":0, "lx": 1, "ly": 2, "scale": 0.8, "disp_w":0, "disp_h":0  },
+    "feet" : { "v": false, "idx": 0, "anim_idx":0, "di":175, "x":60, "y":70, "dx":0, "dy":0, "da":0, "dp":0, "lx": 1, "ly": 2, "scale": 0.8, "disp_w":0, "disp_h":0  },
+    "arm"  : { "v": false, "idx": 0, "anim_idx":0, "di":170, "x":60, "y":70, "dx":0, "dy":0, "da":0, "dp":0, "lx": 1, "ly": 2, "scale": 0.8, "disp_w":0, "disp_h":0  },
 
-    //"arch" :  { "v": false, "idx": 0, "anim_idx":0, "di":1, "x":0, "y":0, "dx":0, "dy":0, "da":0, "dp":0, "lx":1, "ly":2, "scale":0.95, "disp_w":0, "disp_h":0  },
+    "arch" :  { "v": false, "idx": 0, "anim_idx":0, "di":1, "x":0, "y":0, "dx":0, "dy":0, "da":0, "dp":0, "lx":1, "ly":2, "scale":0.95, "disp_w":0, "disp_h":0  },
     "board" : { "v": false, "idx": 0, "anim_idx":0, "di":1, "x":0, "y":0, "dx":0, "dy":0, "da":0, "dp":0, "lx":1, "ly":2, "scale":1.0, "disp_w":0, "disp_h":0  },
+    "item" :  { "v": false, "idx": 0, "anim_idx":0, "di":1, "x":0, "y":0, "dx":0, "dy":0, "da":0, "dp":0, "lx":1, "ly":2, "scale":0.35, "disp_w":0, "disp_h":0,
+      //"offset_x": -75, "offset_y": 225, "parent": "arm"
+      "offset_x": -25, "offset_y": 300, "parent": "arm"
+    },
+
+    "creature" :  { "v": false, "idx": 0, "anim_idx":0, "di":1, "x":0, "y":0, "dx":0, "dy":0, "da":0, "dp":0, "lx":1, "ly":2, "scale":0.35, "disp_w":0, "disp_h":0,
+      "offset_x": 275, "offset_y": 350, "parent": "leg"
+    },
+
+    "critter" :  { "v": false, "idx": 0, "anim_idx":0, "di":1, "x":0, "y":0, "dx":0, "dy":0, "da":0, "dp":0, "lx":1, "ly":2, "scale":0.35, "disp_w":0, "disp_h":0,
+      "offset_x": -85, "offset_y": -80, "parent": "leg"
+    },
+
+    "bg" :    { "v": false, "idx": 0, "anim_idx":0, "di":1, "x":0, "y":0, "dx":0, "dy":0, "da":0, "dp":0, "lx":1, "ly":2, "scale":1.0, "disp_w":0, "disp_h":0  },
+
+    "bg_float" :    { "v": false, "idx": 0, "anim_idx":0, "di":1, "x":0, "y":0, "dx":0, "dy":0, "da":0, "dp":0, "lx":1, "ly":2, "scale":0.75, "disp_w":0, "disp_h":0,
+      "offset_x":0, "offset_y": -150, "parent":"bg"
+    },
 
     "name" : { "v": false, "idx": 0 }
   },
@@ -87,9 +122,17 @@ var g_info = {
     "feet" : { "w": 826, "h" : 1425 },
     "arm"  : { "w": 826, "h" : 1425 },
 
-    //"arch" :  { "w": 1250, "h" : 1650 },
+    "arch" :  { "w": 1250, "h" : 1650 },
     "board" : { "w": 1500, "h" : 1500 },
+
+    "item": { "w":546, "h":1076},
+    "creature": { "w":945, "h":1377},
+    "critter": { "w":458, "h":590},
+
+    "bg": { "w":1806, "h":2703 },
+    "bg_float": { "w":1306, "h":1640}
   },
+
 
   "count":0,
 
@@ -131,9 +174,35 @@ var g_info = {
       "img/arm_15.png"
     ],
 
-    //"arch" : [ "img/arches_0.png", "img/arches_1.png", "img/arches_2.png", "img/arches_3.png" ],
+    "arch" : [ "img/arches_0.png", "img/arches_1.png", "img/arches_2.png", "img/arches_3.png" ],
 
-    "board" : [ "img/board_0.png" ]
+    "board" : [ "img/board_0.png" ],
+    "item" : [
+      "img/item_0.png", "img/item_1.png", "img/item_2.png",
+      "img/item_3.png", "img/item_4.png", "img/item_5.png",
+      "img/item_6.png", "img/item_7.png"
+    ],
+
+    "creature" : [
+      "img/creature_0.png", "img/creature_1.png", "img/creature_2.png",
+      "img/creature_3.png", "img/creature_4.png", "img/creature_5.png",
+      "img/creature_6.png", "img/creature_7.png", "img/creature_8.png",
+      "img/creature_9.png", "img/creature_10.png", "img/creature_11.png"
+    ],
+
+    "critter" : [
+      "img/critter_0.png", "img/critter_1.png", "img/critter_2.png",
+      "img/critter_3.png", "img/critter_4.png", "img/critter_5.png",
+      "img/critter_6.png", "img/critter_7.png", "img/critter_8.png",
+      "img/critter_9.png", "img/critter_10.png", "img/critter_11.png",
+      "img/critter_12.png"
+    ],
+
+    "bg" : [ "img/bg_0.png", "img/bg_1.png" ],
+    "bg_float" : [
+      "img/bg_float_0.png", "img/bg_float_1.png", "img/bg_float_2.png", "img/bg_float_3.png",
+      "img/bg_float_4.png", "img/bg_float_5.png"
+    ]
 
   },
 
@@ -349,7 +418,7 @@ function screenshot() {
   g_info.app.renderer.extract.canvas( g_info.app.stage ).toBlob(function(x) {
     let link = document.createElement("a");
     let imguri = URL.createObjectURL(x);
-    link.download = "grift_graft_corpse.png";
+    link.download = "grift_graft_tarot.png";
 
     link.href = imguri;
     document.body.appendChild(link);
@@ -374,23 +443,40 @@ function draw_clear() {
   }
 }
 
-function draw_rand(h_idx, c_idx, a_idx, l_idx, f_idx) {
+  //h_idx, c_idx, a_idx, l_idx, f_idx) {
+function draw_rand(idx_choice) {
   //let toks = ["feet", "leg", "chest", "arm", "head"];
   let toks = g_info.toks;
 
-  let zord = [ 1, 2, 3, 4, 5, -2, -1 ];
+  //let zord = [ 1, 2, 3, 4, 5, -2, -1 ];
   //for (let i=0; i<toks.length; i++) { zord.push(toks.length - i+1); }
+  let zord = g_info.zorder;
 
   let _idx = [];
 
   draw_clear();
 
+  /*
   h_idx = _clamp(h_idx, 0, g_info.sprite["head"].length-1);
   c_idx = _clamp(c_idx, 0, g_info.sprite["chest"].length-1);
   a_idx = _clamp(a_idx, 0, g_info.sprite["arm"].length-1);
   l_idx = _clamp(l_idx, 0, g_info.sprite["leg"].length-1);
   f_idx = _clamp(f_idx, 0, g_info.sprite["feet"].length-1);
+  */
 
+  for (let i=0; i<g_info.toks.length; i++) {
+    let tok = g_info.toks[i];
+    g_info.container.addChild( g_info.sprite[tok][idx_choice[i]] );
+    g_info.active[tok] = g_info.sprite[tok][idx_choice[i]];
+
+    g_info.state[tok].dp  = 2.0*Math.PI*fxrand();
+    g_info.state[tok].v = true;
+
+    g_info.active[tok].zIndex = zord[i];
+    g_info.state[toks[i]].idx = idx_choice[i];
+  }
+
+  /*
   g_info.container.addChild( g_info.sprite["head"][h_idx] );
   g_info.container.addChild( g_info.sprite["chest"][c_idx] );
   g_info.container.addChild( g_info.sprite["arm"][a_idx] );
@@ -408,7 +494,9 @@ function draw_rand(h_idx, c_idx, a_idx, l_idx, f_idx) {
 
   //g_info.active["arch"]  = g_info.sprite["arch"][0] ;
   g_info.active["board"]  = g_info.sprite["board"][0] ;
+  */
 
+  /*
   _idx.push(f_idx);
   _idx.push(l_idx);
   _idx.push(c_idx);
@@ -438,6 +526,7 @@ function draw_rand(h_idx, c_idx, a_idx, l_idx, f_idx) {
 
   //g_info.state.arch.idx     = 0;
   g_info.state.board.idx     = 0;
+  */
 
 }
 
@@ -448,7 +537,16 @@ function draw_rand(h_idx, c_idx, a_idx, l_idx, f_idx) {
 // and should be the final endpoint of the initialization process
 //
 function init_finalize() {
-  draw_rand(0, 0, 0, 0, 0);
+  //draw_rand(0, 0, 0, 0, 0);
+  let rand_idx = [];
+  for (let i=0; i<g_info.toks.length; i++) {
+    let tok = g_info.toks[i];
+    let n = g_info.sprite[tok].length;
+
+    rand_idx.push( _irnd(n) );
+  }
+
+  draw_rand(rand_idx);
 }
 
 
@@ -460,23 +558,39 @@ function animate_pixi(dt) {
 
     if (g_info.state[tok].v) {
 
-        //board NaN 2 1 0 2.6627873094710455
-      //console.log("before:", tok, g_info.active[tok].y);
+      if ("parent" in g_info.state[tok]) { continue; }
 
-      //console.log( tok, g_info.state[tok].dy , g_info.state[tok].ly, g_info.state[tok].anim_idx , g_info.state[tok].di, g_info.state[tok].dp );
+      let _offset_x = 0, _offset_y = 0;
+      if ("offset_x" in g_info.state[tok]) { _offset_x = g_info.state[tok].offset_x; }
+      if ("offset_y" in g_info.state[tok]) { _offset_y = g_info.state[tok].offset_y; }
 
       g_info.state[tok].anim_idx++;
       g_info.state[tok].dy =
         g_info.state[tok].ly*Math.sin( (2.0*Math.PI*g_info.state[tok].anim_idx / g_info.state[tok].di) + g_info.state[tok].dp );
-      g_info.active[tok].y = g_info.state[tok].y + g_info.state[tok].dy;
-      g_info.active[tok].x = g_info.state[tok].x + g_info.state[tok].dx;
+      g_info.active[tok].y = g_info.state[tok].y + g_info.state[tok].dy + _offset_y;
+      g_info.active[tok].x = g_info.state[tok].x + g_info.state[tok].dx + _offset_x;
 
-      //console.log("after:", tok, g_info.active[tok].y);
-
-
-      //console.log(tok, g_info.active[tok].y);
     }
   }
+
+  for (let i=0; i<g_info.toks.length; i++) {
+    let tok = g_info.toks[i];
+
+    if (g_info.state[tok].v) {
+
+      if (!("parent" in g_info.state[tok])) { continue; }
+
+      let _offset_x = 0, _offset_y = 0;
+      if ("offset_x" in g_info.state[tok]) { _offset_x = g_info.state[tok].offset_x; }
+      if ("offset_y" in g_info.state[tok]) { _offset_y = g_info.state[tok].offset_y; }
+
+      let ptok = g_info.state[tok].parent;
+      g_info.active[tok].x = g_info.state[ptok].x + g_info.state[ptok].dx + _offset_x;
+      g_info.active[tok].y = g_info.state[ptok].y + g_info.state[ptok].dy + _offset_y;
+
+    }
+  }
+
 
   g_info.count++;
 }
@@ -512,8 +626,29 @@ function texture_setup(x) {
   parts_hsv[3].v = 0.9;
 
   parts_hsv[5].h = _mod1(parts_hsv[0].h + 0.5);
-  parts_hsv[5].s = 0.35;
-  parts_hsv[5].v = 0.45;
+  parts_hsv[5].s = 0.5;
+  parts_hsv[5].v = 0.55;
+
+  // bg
+  parts_hsv[6].h = _mod1(parts_hsv[0].h + 0.5);
+  parts_hsv[6].s = 0.15;
+  parts_hsv[6].v = 0.85;
+
+  // creature
+  parts_hsv[7].h = _mod1(parts_hsv[0].h + 0.5);
+  parts_hsv[7].s = 0.15;
+  parts_hsv[7].v = 0.45;
+
+  // critter
+  parts_hsv[8].h = _mod1(parts_hsv[0].h + 0.5);
+  parts_hsv[8].s = 0.15;
+  parts_hsv[8].v = 0.45;
+
+  /*(
+  parts_hsv[7].h = _mod1(parts_hsv[0].h + 0.5);
+  parts_hsv[7].s = 0.1;
+  parts_hsv[7].v = 0.2;
+  */
 
   /*
   parts_hsv[6].h = _mod1(parts_hsv[0].h + 0.5);
@@ -613,19 +748,6 @@ function texture_load() {
   g_info.eff_size = Math.floor(dS - dS/3);
   g_info.tick = 0;
 
-
-  for (let i=0; i<g_info.toks.length; i++) {
-    let tok = g_info.toks[i];
-    //let _disp_width = g_info.native_width * ( g_info.height * g_info.state[tok].scale / g_info.native_height );
-    //let _disp_width = g_info.img[tok].w * (g_info.state[tok].scale * g_info.img[tok].w / g_info.size);
-
-    //let _disp_height = (g_info.state[tok].scale * g_info.size );
-    //let _disp_width  = (g_info.state[tok].scale * g_info.size );
-
-    //g_info.state[tok].x = Math.floor(g_info.width/2 - _disp_width/2 );
-
-    //console.log("w:h[", g_info.width, g_info.height, "], img:", g_info.img[tok].w, g_info.img[tok].h, ", effwidth(", _disp_width , ")");
-  }
 
   //---
   //
