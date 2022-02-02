@@ -13,13 +13,11 @@ I Like Em
 * [Upon Boogie by 111v1ab](https://www.fxhash.xyz/generative/slug/upon-boogie)
 * [Grid Subdivision I #233 by Reinder Nijhoff](https://www.fxhash.xyz/generative/slug/grid-subdivision-i-1)
 * [Ever-evolving Truchet by Reinder Nijhoff](https://www.fxhash.xyz/generative/2708)
-* [Natalie.J](https://www.fxhash.xyz/u/Natalie.J)
 * [f o l i a g e by rcrdlvs](https://www.fxhash.xyz/generative/slug/f-o-l-i-a-g-e)
 * [imperium strike #81 by petStarChippy](https://www.fxhash.xyz/generative/slug/imperium-strike)
 * [under the sea #49 by x0y0z0](https://www.fxhash.xyz/generative/slug/under-the-sea-1)
-* [Yi-Wen LIN](https://www.fxhash.xyz/u/Yi-Wen%20LIN)
 * [Lemon Princess #175 by Presstube](https://www.fxhash.xyz/generative/slug/lemon-princess)
-* [Nouveau Dillsack](https://www.fxhash.xyz/generative/41)
+* [Nouveau Dillsack by Presstube](https://www.fxhash.xyz/generative/41)
 * [Chromoplams #165 by {protocell:labs}](https://www.fxhash.xyz/generative/slug/chromoplasm)
 * [_ribbon study_ by hailpixel](https://www.fxhash.xyz/generative/6620)
 * [MID-CENTURY MODERN #94 by Aleksandra](https://www.fxhash.xyz/generative/slug/mid-century-modern)
@@ -29,4 +27,19 @@ I Like Em
 * [BWP#5: Dead trees by Stephan Vasement](https://www.fxhash.xyz/generative/slug/bwp5:-dead-trees-1)
 * [Mono Ciphers by perkwerk](https://www.fxhash.xyz/generative/slug/mono-ciphers-1)
 * [Network by jambonbill](https://www.fxhash.xyz/generative/slug/network)
+* [Joshua Tree by Nat Sarkissian](https://www.fxhash.xyz/generative/slug/joshua-tree)
+* [Sierras by Nat Sarkissian](https://www.fxhash.xyz/generative/7266)
+* [Subject Red by ykxotkx](https://www.fxhash.xyz/generative/7263)
+* [drift by bren](https://www.fxhash.xyz/generative/8527)
+* [Ugly Sweaters by Estienne](https://www.fxhash.xyz/generative/slug/ugly-sweaters-1)
+* [thick growth of grass by yuzks](https://www.fxhash.xyz/generative/slug/thick-growth-of-grass-1)
+* [Polygon Packing by gin_graphic](https://www.fxhash.xyz/generative/slug/polygon-packing)
+
+Artists
+---
+
+* [Natalie.J](https://www.fxhash.xyz/u/Natalie.J)
+* [Yi-Wen LIN](https://www.fxhash.xyz/u/Yi-Wen%20LIN)
+* [Estienne](https://www.fxhash.xyz/u/Estienne)
+* [Presstube](https://www.fxhash.xyz/u/Presstube)
 
