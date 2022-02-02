@@ -9,10 +9,7 @@
 
 
 var g_info = {
-  "VERSION" : "0.1.0",
-
-  //"native_width" : 826,
-  //"native_height" : 1425,
+  "VERSION" : "0.3.0",
 
   "canvas": {},
   "ctx" : {},
@@ -35,10 +32,14 @@ var g_info = {
 
   "pattern": {},
   "pattern_realization": {},
-  //"scene_sprite" : [],
 
   "scene_item" : [],
   "scene_item_bg" : [],
+
+  "blood_moon": false,
+  "blood_background":false,
+  "bg_idx" : -1,
+  "template_idx": -1,
 
   // a - arch
   // p - plant
@@ -46,6 +47,10 @@ var g_info = {
   // r - critter medeium
   // R - critter large
   // c - creature
+  // M - moon
+  // l - left graphic
+  // z - right graphic
+  // u - under graphic
   // . - nothing
   //
   "pattern_template":[
@@ -98,17 +103,33 @@ var g_info = {
 
   ],
 
-  "toks"    : [ "creature", "critter" ],
-  "zorder"  : [ 0,           1 ],
+  "feature":[],
 
+  "_feature": {
+    "Monster Type": "",
+    "Plant 0" : "",
+    "Plant 1" : "",
+    "Plant 2" : "",
+    "Plant 3" : "",
+    "Plant 4" : "",
+    "Plant 5" : "",
+    "Plant 6" : "",
+    "Plant 7" : "",
+    "Plant 8" : "",
+    "Moon" : "",
+    "Arch 0" : "",
+    "Arch 1" : "",
+    "Arch 2" : "",
+    "Arch 3" : "",
+    "Left Medallion" : "",
+    "Right Medallion" : "",
+    "Bottom Item" : "",
+    "Background" : "",
+    "Blood Moon":"",
+    "Blood Boy":""
+  },
 
-  "tarot_major_name" : [
-    "The Fool", "The Magician", "The Papess/High Priestess", "The Empress",
-    "The Emperor","The Pope/Hierophant","The Lovers","The Chariot","Strength",
-    "The Hermit","The Wheel","Justice","The Hanged Man","Death","Temperance",
-    "The Devil","The Tower","The Star","The Moon","The Sun","Judgement","The World"
-  ],
-
+  "sched": [],
 
   // offsets are in images local pixel width and height values
   //
@@ -130,7 +151,6 @@ var g_info = {
     "arch" : { "w":350, "h": 458, "offset_x":0, "offset_y": 5},
     "plant" : { "w":285, "h": 420},
     "moon" : { "w":852, "h": 892, "offset_x":-10, "offset_y": 0},
-    //"under" : { "w":691, "h": 746, "offset_x":-35, "offset_y": -20},
     "under" : { "w":691, "h": 746, "offset_x":-15, "offset_y": 0},
     "midl" : { "w":375, "h": 363, "offset_x":-20, "offset_y": 0},
     "midr" : { "w":261, "h": 283, "offset_x":-20, "offset_y": 0},
@@ -140,8 +160,6 @@ var g_info = {
     "bg_flatleaf": { "w":519, "h":264},
     "bg_star": { "w":273, "h":369}
 
-    //"bg": { "w":1806, "h":2703 },
-    //"bg_float": { "w":1306, "h":1640}
   },
 
 
@@ -286,22 +304,12 @@ var g_info = {
       "img/bg_star_6.png"
     ]
 
-    //"bg" : [ "img/bg_0.png", "img/bg_1.png" ],
-    //"bg_float" : [
-    //  "img/bg_float_0.png", "img/bg_float_1.png", "img/bg_float_2.png", "img/bg_float_3.png",
-    //  "img/bg_float_4.png", "img/bg_float_5.png"
-    //]
-
   },
 
 
   "bg_choice" : ["bg_bottle", "bg_tv", "bg_flatleaf", "bg_star"],
+  "bg_description": ["Bottles", "Games", "Leaves", "Stars"]
 
-  //"bg_color" : "#111",
-  //"bg_color" : "#eee",
-  "bg_color" : "#722",
-  "f_list": [ ],
-  "f_hist":[]
 
 };
 
@@ -452,19 +460,6 @@ function _rnd(l,u) {
 //-----
 //-----
 
-function screenshot_() {
-  let canvas = document.getElementById("canvas");
-  let imguri = canvas.toDataURL(canvas);
-
-  let link = document.createElement("a");
-  link.download = "grift_graft.png";
-  link.href = imguri;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  delete link;
-}
-
 function screenshot() {
 
   let _oc = g_info.app.renderer.extract.canvas( g_info.app.stage );
@@ -493,6 +488,8 @@ function screenshot() {
 
 }
 
+// doesn't pick up background color
+//
 function screenshot_pixi() {
 
   g_info.app.renderer.extract.canvas( g_info.app.stage ).toBlob(function(x) {
@@ -512,19 +509,6 @@ function screenshot_pixi() {
 
 //---
 
-
-function draw_clear() {
-  //let toks = ["head", "chest", "leg", "feet", "arm", "arch" ];
-  let toks = g_info.toks;
-  for (let i=0; i<toks.length; i++) {
-    let tok = toks[i];
-    g_info.container.removeChild( g_info.active[tok] );
-    g_info.active[tok] = {};
-  }
-}
-
-
-//---
 
 // after all texture loading is done, this function is called
 // and should be the final endpoint of the initialization process
@@ -759,7 +743,8 @@ function scene_setup(x) {
 
         // blood moon
         //
-        if (fxrand() < (1.0/128.0)) {
+        //if (fxrand() < (1.0/128.0)) {
+        if (g_info.blood_moon) {
           _tint = 0xfb0c0c;
         }
       }
@@ -896,10 +881,13 @@ function scene_setup(x) {
 
   //---
 
-  let bg_name = g_info.bg_choice[ _irnd(g_info.bg_choice.length) ];
+  //let bg_name = g_info.bg_choice[ _irnd(g_info.bg_choice.length) ];
+  let bg_name = g_info.bg_choice[ g_info.bg_idx ];
+
 
   let bg_tint = 0xffffff;
-  if (fxrand() < (1.0/32.0)) {
+  //if (fxrand() < (1.0/32.0)) {
+  if (g_info.blood_background) {
     bg_tint = 0xff0000;
   }
 
@@ -1030,6 +1018,10 @@ function texture_load() {
 
 function random_template() {
 
+  let _plant_n = 0;
+  let _arch_n = 0;
+  let _crit_n = 0;
+
   let n_x = 5, n_y = 5;
   g_info.pattern = g_info.pattern_template[ _irnd(g_info.pattern_template.length) ];
 
@@ -1049,23 +1041,39 @@ function random_template() {
 
         if (_code == '_') {
           _idx = _irnd( g_info.location.critter.length );
+
+          g_info.feature.push( { "name": "Critter " + _crit_n, "value": _idx })
+          _crit_n++;
         }
         else if (_code == 'r') {
           _idx = _irnd( g_info.location.critter.length );
+
+          g_info.feature.push( { "name": "Critter " + _crit_n, "value": _idx })
+          _crit_n++;
         }
         else if (_code == 'R') {
           _idx = _irnd( g_info.location.critter.length );
+
+          g_info.feature.push( { "name": "Critter", "value": _idx })
         }
 
         else if (_code == 'c') {
           _idx = _irnd( g_info.location.creature.length );
+
+          g_info.feature.push( { "name": "Creature", "value": _idx })
         }
 
         else if (_code == 'a') {
           _idx = _irnd( g_info.location.arch.length );
+
+          g_info.feature.push( { "name": "Arch " + _arch_n, "value": _idx })
+          _arch_n++;
         }
         else if (_code == 'p') {
           _idx = _irnd( g_info.location.plant.length );
+
+          g_info.feature.push( { "name": "Plant " + _plant_n, "value": _idx })
+          _plant_n++;
         }
 
         else if (_code == 'M') {
@@ -1074,20 +1082,40 @@ function random_template() {
 
         else if (_code == 'u') {
           _idx = _irnd( g_info.location.under.length );
+
+          g_info.feature.push( { "name": "Moon", "value" : _idx });
+
+          if (fxrand() < (1.0/128.0)) {
+            g_info.feature.push( { "name":"Blood Moon", "value": true });
+            g_info.blood_moon = true;
+          }
         }
 
         else if (_code == 'l') {
           _idx = _irnd( g_info.location.midl.length );
+
+          g_info.feature.push( { "name": "Left Medallion", "value" : _idx });
         }
 
         else if (_code == 'z') {
           _idx = _irnd( g_info.location.midl.length );
+
+          g_info.feature.push( { "name": "Right Medallion", "value" : _idx });
         }
 
         g_info.pattern_realization[i].push({"idx":_idx, "v":false, "sprite":{}, "code": _code });
       }
 
     }
+  }
+
+  g_info.bg_idx = _irnd( g_info.bg_choice.length );
+
+  g_info.feature.push( { "name":"Background", "value": g_info.bg_description[ g_info.bg_idx] });
+  if (fxrand() < (1.0/32.0)) {
+    g_info.blood_background = true;
+
+    g_info.feature.push( { "name":"Blood Background", "value": true });
   }
 
 }
@@ -1183,8 +1211,7 @@ function random_template() {
     return false;
   });
 
-  window.$fxhashFeatures = {
-  };
+  window.$fxhashFeatures = g_info.feature;
 
   //window.requestAnimationFrame(anim);
 
