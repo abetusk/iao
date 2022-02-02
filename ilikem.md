@@ -28,4 +28,5 @@ I Like Em
 * [Plottable Mountain Moons by greweb](https://www.fxhash.xyz/generative/slug/plottable-mountain-moons-1)
 * [BWP#5: Dead trees by Stephan Vasement](https://www.fxhash.xyz/generative/slug/bwp5:-dead-trees-1)
 * [Mono Ciphers by perkwerk](https://www.fxhash.xyz/generative/slug/mono-ciphers-1)
+* [Network by jambonbill](https://www.fxhash.xyz/generative/slug/network)
 

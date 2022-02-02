@@ -33,47 +33,73 @@ var g_info = {
 
   "ready": false,
 
-  //"toks" : ["head", "chest", "leg", "feet", "arm", "arch", "board" ],
-  //"toks" : ["head", "chest", "leg", "feet", "arm", "board" ],
-  //"toks" : ["head", "chest", "leg", "feet", "arm", "item", "bg", "bg_float" ],
-  "toks"    : ["head", "chest", "leg", "feet", "arm", "item", "bg", "creature", "critter" ],
-  "zorder"  : [ 1,      2,        3,    4,      5,      -1,    -5,    -2,         -3 ],
+  "pattern": {},
+  "pattern_realization": {},
+  //"scene_sprite" : [],
 
-  "sprite": {
-    "head": [],
-    "chest": [],
-    "leg": [],
-    "feet":[],
-    "arm":[],
+  "scene_item" : [],
+  "scene_item_bg" : [],
 
-    "arch":[],
-    "board":[],
+  // a - arch
+  // p - plant
+  // _ - critter small
+  // r - critter medeium
+  // R - critter large
+  // c - creature
+  // . - nothing
+  //
+  "pattern_template":[
 
-    "item":[],
-    "creature":[],
-    "critter":[],
+    /*
+    { "prob": 0.5,
+      "template":
+        "appa" +
+        "p_rp" +
+        "p_.p" +
+        "appa" },
 
-    "bg":[],
-    "bg_float":[]
-  },
+    { "prob": 0.5,
+      "template":
+        "appa" +
+        "pr_p" +
+        "p._p" +
+        "appa" },
 
-  "active" : {
-    "head": "",
-    "chest": "",
-    "leg": "",
-    "feet": "",
-    "arm": "",
+    { "prob": 0.5,
+      "template":
+        "appa" +
+        "pr_p" +
+        "p._p" +
+        "appa" },
 
-    "arch":"",
-    "board":"",
+    { "prob": 0.5,
+      "template":
+        "appa" +
+        "prrp" +
+        "p..p" +
+        "appa" },
+*/
 
-    "item":"",
-    "creature":"",
-    "critter":"",
+    { "prob": 0.5,
+      "template":
+        "apMpa" +
+        "pR..p" +
+        "l...z" +
+        "p...p" +
+        "apupa" },
 
-    "bg":"",
-    "bg_float":""
-  },
+    { "prob": 0.5,
+      "template":
+        "apMpa" +
+        "pc..p" +
+        "l...z" +
+        "p...p" +
+        "apupa" }
+
+  ],
+
+  "toks"    : [ "creature", "critter" ],
+  "zorder"  : [ 0,           1 ],
 
 
   "tarot_major_name" : [
@@ -84,36 +110,8 @@ var g_info = {
   ],
 
 
-  "state" : {
-    "head" : { "v": false, "idx": 0, "anim_idx":0, "di":180, "x":60, "y":70, "dx":0, "dy":0, "da":0, "dp":0, "lx": 1, "ly": 2, "scale": 0.8, "disp_w":0, "disp_h":0, },
-    "chest": { "v": false, "idx": 0, "anim_idx":0, "di":185, "x":60, "y":70, "dx":0, "dy":0, "da":0, "dp":0, "lx": 1, "ly": 2, "scale": 0.8, "disp_w":0, "disp_h":0  },
-    "leg"  : { "v": false, "idx": 0, "anim_idx":0, "di":190, "x":60, "y":70, "dx":0, "dy":0, "da":0, "dp":0, "lx": 1, "ly": 2, "scale": 0.8, "disp_w":0, "disp_h":0  },
-    "feet" : { "v": false, "idx": 0, "anim_idx":0, "di":175, "x":60, "y":70, "dx":0, "dy":0, "da":0, "dp":0, "lx": 1, "ly": 2, "scale": 0.8, "disp_w":0, "disp_h":0  },
-    "arm"  : { "v": false, "idx": 0, "anim_idx":0, "di":170, "x":60, "y":70, "dx":0, "dy":0, "da":0, "dp":0, "lx": 1, "ly": 2, "scale": 0.8, "disp_w":0, "disp_h":0  },
-
-    "arch" :  { "v": false, "idx": 0, "anim_idx":0, "di":1, "x":0, "y":0, "dx":0, "dy":0, "da":0, "dp":0, "lx":1, "ly":2, "scale":0.95, "disp_w":0, "disp_h":0  },
-    "board" : { "v": false, "idx": 0, "anim_idx":0, "di":1, "x":0, "y":0, "dx":0, "dy":0, "da":0, "dp":0, "lx":1, "ly":2, "scale":1.0, "disp_w":0, "disp_h":0  },
-    "item" :  { "v": false, "idx": 0, "anim_idx":0, "di":1, "x":0, "y":0, "dx":0, "dy":0, "da":0, "dp":0, "lx":1, "ly":2, "scale":0.35, "disp_w":0, "disp_h":0,
-      //"offset_x": -75, "offset_y": 225, "parent": "arm"
-      "offset_x": -25, "offset_y": 300, "parent": "arm"
-    },
-
-    "creature" :  { "v": false, "idx": 0, "anim_idx":0, "di":1, "x":0, "y":0, "dx":0, "dy":0, "da":0, "dp":0, "lx":1, "ly":2, "scale":0.35, "disp_w":0, "disp_h":0,
-      "offset_x": 275, "offset_y": 350, "parent": "leg"
-    },
-
-    "critter" :  { "v": false, "idx": 0, "anim_idx":0, "di":1, "x":0, "y":0, "dx":0, "dy":0, "da":0, "dp":0, "lx":1, "ly":2, "scale":0.35, "disp_w":0, "disp_h":0,
-      "offset_x": -85, "offset_y": -80, "parent": "leg"
-    },
-
-    "bg" :    { "v": false, "idx": 0, "anim_idx":0, "di":1, "x":0, "y":0, "dx":0, "dy":0, "da":0, "dp":0, "lx":1, "ly":2, "scale":1.0, "disp_w":0, "disp_h":0  },
-
-    "bg_float" :    { "v": false, "idx": 0, "anim_idx":0, "di":1, "x":0, "y":0, "dx":0, "dy":0, "da":0, "dp":0, "lx":1, "ly":2, "scale":0.75, "disp_w":0, "disp_h":0,
-      "offset_x":0, "offset_y": -150, "parent":"bg"
-    },
-
-    "name" : { "v": false, "idx": 0 }
-  },
+  // offsets are in images local pixel width and height values
+  //
 
   "img" : {
     "head" : { "w": 826, "h" : 1425 }, 
@@ -122,12 +120,23 @@ var g_info = {
     "feet" : { "w": 826, "h" : 1425 },
     "arm"  : { "w": 826, "h" : 1425 },
 
-    "arch" :  { "w": 1250, "h" : 1650 },
+    "arches" :  { "w": 1250, "h" : 1650 },
     "board" : { "w": 1500, "h" : 1500 },
 
     "item": { "w":546, "h":1076},
-    "creature": { "w":945, "h":1377},
-    "critter": { "w":458, "h":590},
+    "creature": { "w":945, "h":1377, "offset_x": 50, "offset_y":0 },
+    "critter": { "w":458, "h":590, "offset_x": 20, "offset_y":0},
+
+    "arch" : { "w":350, "h": 458, "offset_x":0, "offset_y": 5},
+    "plant" : { "w":285, "h": 420},
+    "moon" : { "w":852, "h": 892, "offset_x":-10, "offset_y": 0},
+    "under" : { "w":691, "h": 746, "offset_x":-35, "offset_y": -20},
+    "midl" : { "w":375, "h": 363, "offset_x":-20, "offset_y": 0},
+    "midr" : { "w":261, "h": 283, "offset_x":-20, "offset_y": 0},
+
+    "bg_bottle": { "w":219, "h":284},
+    "bg_tv": { "w":272, "h":304},
+    "bg_flatleaf": { "w":519, "h":264},
 
     "bg": { "w":1806, "h":2703 },
     "bg_float": { "w":1306, "h":1640}
@@ -174,7 +183,7 @@ var g_info = {
       "img/arm_15.png"
     ],
 
-    "arch" : [ "img/arches_0.png", "img/arches_1.png", "img/arches_2.png", "img/arches_3.png" ],
+    "arches" : [ "img/arches_0.png", "img/arches_1.png", "img/arches_2.png", "img/arches_3.png" ],
 
     "board" : [ "img/board_0.png" ],
     "item" : [
@@ -198,6 +207,73 @@ var g_info = {
       "img/critter_12.png"
     ],
 
+    "plant": [
+      "img/plant_0.png", "img/plant_1.png", "img/plant_2.png", "img/plant_3.png",
+      "img/plant_4.png", "img/plant_5.png", "img/plant_6.png", "img/plant_7.png",
+      "img/plant_8.png", "img/plant_9.png", "img/plant_10.png", "img/plant_11.png",
+      "img/plant_12.png", "img/plant_13.png", "img/plant_14.png", "img/plant_15.png"
+    ],
+
+    "arch" : [
+      "img/arch_0.png", "img/arch_1.png", "img/arch_2.png", "img/arch_3.png",
+      "img/arch_4.png", "img/arch_5.png", "img/arch_6.png", "img/arch_7.png",
+      "img/arch_8.png", "img/arch_9.png", "img/arch_10.png", "img/arch_11.png",
+      "img/arch_12.png", "img/arch_13.png", "img/arch_14.png", "img/arch_15.png",
+      "img/arch_16.png", "img/arch_17.png", "img/arch_18.png", "img/arch_19.png",
+      "img/arch_20.png", "img/arch_21.png", "img/arch_22.png", "img/arch_23.png",
+      "img/arch_24.png", "img/arch_25.png", "img/arch_26.png", "img/arch_27.png",
+      "img/arch_28.png", "img/arch_29.png", "img/arch_30.png", "img/arch_31.png"
+    ],
+
+
+    "moon" : [
+      "img/moon_0.png", "img/moon_1.png", "img/moon_2.png", "img/moon_3.png"
+    ],
+
+
+    "under" : [
+      "img/under_0.png", "img/under_1.png", "img/under_2.png", "img/under_3.png",
+      "img/under_4.png", "img/under_5.png", "img/under_6.png", "img/under_7.png",
+      "img/under_8.png", "img/under_9.png"
+    ],
+
+    "midl" : [
+      "img/midl_0.png", "img/midl_1.png", "img/midl_2.png", "img/midl_3.png"
+    ],
+
+    "midr" : [
+      "img/midr_0.png", "img/midr_1.png", "img/midr_2.png", "img/midr_3.png"
+    ],
+
+    "bg_bottle": [
+      "img/bg_bottle_0.png",
+      "img/bg_bottle_1.png",
+      "img/bg_bottle_2.png",
+      "img/bg_bottle_3.png",
+      "img/bg_bottle_4.png",
+      "img/bg_bottle_5.png",
+      "img/bg_bottle_6.png",
+      "img/bg_bottle_7.png"
+    ],
+
+    "bg_tv": [
+      "img/bg_tv_0.png",
+      "img/bg_tv_1.png",
+      "img/bg_tv_2.png"
+    ],
+
+    "bg_flatleaf": [
+      "img/bg_flatleaf_0.png",
+      "img/bg_flatleaf_1.png",
+      "img/bg_flatleaf_2.png",
+      "img/bg_flatleaf_3.png",
+      "img/bg_flatleaf_4.png",
+      "img/bg_flatleaf_5.png",
+      "img/bg_flatleaf_6.png",
+      "img/bg_flatleaf_7.png",
+      "img/bg_flatleaf_8.png"
+    ],
+
     "bg" : [ "img/bg_0.png", "img/bg_1.png" ],
     "bg_float" : [
       "img/bg_float_0.png", "img/bg_float_1.png", "img/bg_float_2.png", "img/bg_float_3.png",
@@ -206,6 +282,8 @@ var g_info = {
 
   },
 
+
+  "bg_choice" : ["bg_bottle", "bg_tv", "bg_flatleaf"],
 
   //"bg_color" : "#111",
   //"bg_color" : "#eee",
@@ -362,57 +440,6 @@ function _rnd(l,u) {
 //-----
 //-----
 
-// dispaly dispatch, called every animation frame,
-// most likely originating from the callbacks setup
-// in f_hist.
-//
-// By convention, phase takes on a value from 0 to 1
-//
-// phase is the parameter that controls any animation
-//
-function disp(ctx, fname, x, y, w, phase) {
-
-  let v=1;
-
-  if (g_info.anim == false) { phase = 1; }
-
-  if (fname == "") {
-  }
-  else if (fname == "") {
-  }
-
-}
-
-function anim() {
-
-  let _cw = g_info.canvas.width;
-  let _ch = g_info.canvas.height;
-  let ctx = g_info.ctx;
-
-  clear(ctx, _cw, _ch, g_info.bg_color);
-  for (let i=0; i<g_info.f_hist.length; i++) {
-
-    if (i == (g_info.f_hist.length-1)) {
-      g_info.f_hist[i].f( { "last": true } );
-    }
-    else {
-      g_info.f_hist[i].f();
-    }
-  }
-
-  window.requestAnimationFrame(anim);
-
-  if (g_info.anim) {
-
-    if (!g_info.pause) {
-      g_info.tick += 1;
-      g_info.tick_val = 16*(1.0 + Math.sin(Math.PI*2.0*g_info.tick/g_info.speed_factor));
-    }
-
-  }
-
-}
-
 function screenshot() {
 
   g_info.app.renderer.extract.canvas( g_info.app.stage ).toBlob(function(x) {
@@ -443,93 +470,6 @@ function draw_clear() {
   }
 }
 
-  //h_idx, c_idx, a_idx, l_idx, f_idx) {
-function draw_rand(idx_choice) {
-  //let toks = ["feet", "leg", "chest", "arm", "head"];
-  let toks = g_info.toks;
-
-  //let zord = [ 1, 2, 3, 4, 5, -2, -1 ];
-  //for (let i=0; i<toks.length; i++) { zord.push(toks.length - i+1); }
-  let zord = g_info.zorder;
-
-  let _idx = [];
-
-  draw_clear();
-
-  /*
-  h_idx = _clamp(h_idx, 0, g_info.sprite["head"].length-1);
-  c_idx = _clamp(c_idx, 0, g_info.sprite["chest"].length-1);
-  a_idx = _clamp(a_idx, 0, g_info.sprite["arm"].length-1);
-  l_idx = _clamp(l_idx, 0, g_info.sprite["leg"].length-1);
-  f_idx = _clamp(f_idx, 0, g_info.sprite["feet"].length-1);
-  */
-
-  for (let i=0; i<g_info.toks.length; i++) {
-    let tok = g_info.toks[i];
-    g_info.container.addChild( g_info.sprite[tok][idx_choice[i]] );
-    g_info.active[tok] = g_info.sprite[tok][idx_choice[i]];
-
-    g_info.state[tok].dp  = 2.0*Math.PI*fxrand();
-    g_info.state[tok].v = true;
-
-    g_info.active[tok].zIndex = zord[i];
-    g_info.state[toks[i]].idx = idx_choice[i];
-  }
-
-  /*
-  g_info.container.addChild( g_info.sprite["head"][h_idx] );
-  g_info.container.addChild( g_info.sprite["chest"][c_idx] );
-  g_info.container.addChild( g_info.sprite["arm"][a_idx] );
-  g_info.container.addChild( g_info.sprite["leg"][l_idx] );
-  g_info.container.addChild( g_info.sprite["feet"][f_idx] );
-
-  //g_info.container.addChild( g_info.sprite["arch"][0] );
-  g_info.container.addChild( g_info.sprite["board"][0] );
-
-  g_info.active["head"]  = g_info.sprite["head"][h_idx] ;
-  g_info.active["chest"] = g_info.sprite["chest"][c_idx] ;
-  g_info.active["arm"]   = g_info.sprite["arm"][a_idx] ;
-  g_info.active["leg"]   = g_info.sprite["leg"][l_idx] ;
-  g_info.active["feet"]  = g_info.sprite["feet"][f_idx] ;
-
-  //g_info.active["arch"]  = g_info.sprite["arch"][0] ;
-  g_info.active["board"]  = g_info.sprite["board"][0] ;
-  */
-
-  /*
-  _idx.push(f_idx);
-  _idx.push(l_idx);
-  _idx.push(c_idx);
-  _idx.push(a_idx);
-  _idx.push(h_idx);
-
-  //_idx.push(0);
-  _idx.push(0);
-
-  for (let i=0; i<toks.length; i++) {
-    let tok = toks[i];
-    g_info.state[tok].dp  = 2.0*Math.PI*fxrand();
-    g_info.state[tok].v = true;
-
-    g_info.active[tok].zIndex = zord[i];
-
-    // init
-    //
-    g_info.state[toks[i]].idx = 0;
-  }
-
-  g_info.state.head.idx    = h_idx;
-  g_info.state.arm.idx     = a_idx;
-  g_info.state.chest.idx   = c_idx;
-  g_info.state.feet.idx    = f_idx;
-  g_info.state.leg.idx     = l_idx;
-
-  //g_info.state.arch.idx     = 0;
-  g_info.state.board.idx     = 0;
-  */
-
-}
-
 
 //---
 
@@ -537,60 +477,37 @@ function draw_rand(idx_choice) {
 // and should be the final endpoint of the initialization process
 //
 function init_finalize() {
-  //draw_rand(0, 0, 0, 0, 0);
-  let rand_idx = [];
-  for (let i=0; i<g_info.toks.length; i++) {
-    let tok = g_info.toks[i];
-    let n = g_info.sprite[tok].length;
-
-    rand_idx.push( _irnd(n) );
-  }
-
-  draw_rand(rand_idx);
 }
 
 
 function animate_pixi(dt) {
   if (!g_info.ready) { return; }
 
-  for (let i=0; i<g_info.toks.length; i++) {
-    let tok = g_info.toks[i];
+  for (let i=0; i<g_info.scene_item.length; i++) {
+    let item  = g_info.scene_item[i];
 
-    if (g_info.state[tok].v) {
+    item.anim_idx++;
+    item.dy =
+      item.ly * Math.sin( (2.0*Math.PI*item.anim_idx / item.di) + item.dp );
+    item.y = item.y + item.dy;
+    item.x = item.x + item.dx;
 
-      if ("parent" in g_info.state[tok]) { continue; }
-
-      let _offset_x = 0, _offset_y = 0;
-      if ("offset_x" in g_info.state[tok]) { _offset_x = g_info.state[tok].offset_x; }
-      if ("offset_y" in g_info.state[tok]) { _offset_y = g_info.state[tok].offset_y; }
-
-      g_info.state[tok].anim_idx++;
-      g_info.state[tok].dy =
-        g_info.state[tok].ly*Math.sin( (2.0*Math.PI*g_info.state[tok].anim_idx / g_info.state[tok].di) + g_info.state[tok].dp );
-      g_info.active[tok].y = g_info.state[tok].y + g_info.state[tok].dy + _offset_y;
-      g_info.active[tok].x = g_info.state[tok].x + g_info.state[tok].dx + _offset_x;
-
-    }
+    item.sprite.x = item.x;
+    item.sprite.y = item.y;
   }
 
-  for (let i=0; i<g_info.toks.length; i++) {
-    let tok = g_info.toks[i];
+  for (let i=0; i<g_info.scene_item_bg.length; i++) {
+    let bg_item = g_info.scene_item_bg[i];
 
-    if (g_info.state[tok].v) {
+    bg_item.anim_idx++;
+    bg_item.dy = 
+      bg_item.ly * Math.sin( (2.0*Math.PI*bg_item.anim_idx / bg_item.di) + bg_item.dpy );
+    bg_item.dx = 
+      bg_item.lx * Math.sin( (2.0*Math.PI*bg_item.anim_idx / bg_item.di) + bg_item.dpx );
+    bg_item.sprite.x = bg_item.x + bg_item.dx;
+    bg_item.sprite.y = bg_item.y + bg_item.dy;
 
-      if (!("parent" in g_info.state[tok])) { continue; }
-
-      let _offset_x = 0, _offset_y = 0;
-      if ("offset_x" in g_info.state[tok]) { _offset_x = g_info.state[tok].offset_x; }
-      if ("offset_y" in g_info.state[tok]) { _offset_y = g_info.state[tok].offset_y; }
-
-      let ptok = g_info.state[tok].parent;
-      g_info.active[tok].x = g_info.state[ptok].x + g_info.state[ptok].dx + _offset_x;
-      g_info.active[tok].y = g_info.state[ptok].y + g_info.state[ptok].dy + _offset_y;
-
-    }
   }
-
 
   g_info.count++;
 }
@@ -602,102 +519,374 @@ function _mod1(v) {
   return v-q;
 }
 
-function texture_setup(x) {
-  //let toks = ["head", "chest", "leg", "feet", "arm" , "arch"];
-  let toks = g_info.toks;
+function scene_setup(x) {
 
-  let parts_hsv = [];
+  console.log(">>", x);
 
-  let _s = 0.2;
-  let _v = 0.85;
+  //let _Ry = 4.5;
+  //let _Rx = 4.5;
 
+  let _Ry = 5.5;
+  let _Rx = 5.5;
 
-  //parts_hsv.push( { "h": fxrand(), "s": 0.5, "v": 0.2 } )
-  parts_hsv.push( { "h": fxrand(), "s": _s, "v": _v } )
-  for (let i=1; i<toks.length; i++) {
-    let _A = (2.0*fxrand() - 1.0)*0.1;
-    _A = 0;
-    parts_hsv.push( { "h": parts_hsv[0].h, "s": _A+_s, "v": _A+_v } );
-  }
-  parts_hsv[1].v = 0.7;
-  parts_hsv[2].v = 0.7;
+  let _margin_x = (0.25/_Rx)*g_info.size;
+  let _cellsize_x = (1/_Rx)*g_info.size;
 
-  parts_hsv[3].s = 0.5;
-  parts_hsv[3].v = 0.9;
+  let _margin_y = (0.25/_Ry)*g_info.size;
+  let _cellsize_y = (1/_Ry)*g_info.size;
 
-  parts_hsv[5].h = _mod1(parts_hsv[0].h + 0.5);
-  parts_hsv[5].s = 0.5;
-  parts_hsv[5].v = 0.55;
+  let _lx = 0;
+  let _ly = 0.25;
 
-  // bg
-  parts_hsv[6].h = _mod1(parts_hsv[0].h + 0.5);
-  parts_hsv[6].s = 0.15;
-  parts_hsv[6].v = 0.85;
+  let _xmajor = true;
+  if (g_info.width > g_info.height) { _xmajor = false; }
 
-  // creature
-  parts_hsv[7].h = _mod1(parts_hsv[0].h + 0.5);
-  parts_hsv[7].s = 0.15;
-  parts_hsv[7].v = 0.45;
-
-  // critter
-  parts_hsv[8].h = _mod1(parts_hsv[0].h + 0.5);
-  parts_hsv[8].s = 0.15;
-  parts_hsv[8].v = 0.45;
-
-  /*(
-  parts_hsv[7].h = _mod1(parts_hsv[0].h + 0.5);
-  parts_hsv[7].s = 0.1;
-  parts_hsv[7].v = 0.2;
-  */
-
-  /*
-  parts_hsv[6].h = _mod1(parts_hsv[0].h + 0.5);
-  parts_hsv[6].s = 0.55;
-  parts_hsv[6].v = 0.7;
-  */
+  console.log(_margin_x, _margin_y, _cellsize_x, _cellsize_y);
 
 
-  /*
-  parts_hsv.push( { "h": parts_hsv[0].h, "s": 0.25, "v": 0.2 } )
-  parts_hsv.push( { "h": parts_hsv[0].h, "s": 0.3, "v": 0.2 } )
-  parts_hsv.push( { "h": parts_hsv[0].h, "s": 0.27, "v": 0.2 } )
-  parts_hsv.push( { "h": parts_hsv[0].h, "s": 0.55, "v": 0.2 } )
-  parts_hsv.push( { "h": parts_hsv[0].h, "s": 0.47, "v": 0.2 } )
-  */
+  // a - arch
+  // p - plant
+  // _ - critter small
+  // r - critter medeium
+  // R - critter large
+  // c - creature
+  // . - nothing
+  //
+  let _pr = g_info.pattern_realization;
+  for (let i=0; i<_pr.length; i++) {
+    for (let j=0; j<_pr[i].length; j++) {
+
+      let _code = _pr[i][j].code;
+      let _idx = _pr[i][j].idx;
+      let loc = "";
+
+      let s_w = _cellsize_x;
+      let s_h = _cellsize_y;
+
+      let _x = _margin_x + j*_cellsize_x;
+      let _y = _margin_y + i*_cellsize_y;
+
+      let _tint = 0xffffff;
+
+      if (_code == '_') {
+        loc = g_info.location.critter[ _idx ];
+
+        if (_xmajor) {
+          s_w = _cellsize_x;
+          s_h = s_w * g_info.img.critter.h / g_info.img.critter.w;
+        }
+        else {
+          s_h = _cellsize_y;
+          s_w = s_h * g_info.img.critter.w / g_info.img.critter.h;
+        }
+
+        _ly = 0.25;
+      }
+      else if (_code == 'r') {
+        loc = g_info.location.critter[ _idx ];
+
+        if (_xmajor) {
+          s_w = 2*_cellsize_x;
+          s_h = s_w * g_info.img.critter.h / g_info.img.critter.w;
+        }
+        else {
+          s_h = 2*_cellsize_y;
+          s_w = s_h * g_info.img.critter.w / g_info.img.critter.h;
+        }
+
+        _ly = 0.25;
+      }
+      else if (_code == 'R') {
+        loc = g_info.location.critter[ _idx ];
+
+        if (_xmajor) {
+          let _r = g_info.img.critter.h / g_info.img.critter.w;
+          s_w = 3*_cellsize_x;
+          s_h = s_w * _r;
+          _x += g_info.img.critter.offset_x / _r;
+          _y += g_info.img.critter.offset_y * _r;
+        }
+        else {
+          let _r = g_info.img.critter.w / g_info.img.critter.h;
+          s_h = 3*_cellsize_y;
+          s_w = s_h * _r;
+          _x += g_info.img.critter.offset_x * _r;
+          _y += g_info.img.critter.offset_y / _r;
+        }
+
+        _ly = 0.25;
+      }
+      else if (_code == 'c') {
+        loc = g_info.location.creature[ _idx ];
+
+        if (_xmajor) {
+          let _r = g_info.img.creature.h / g_info.img.creature.w;
+          s_w = 3*_cellsize_x;
+          s_h = s_w * g_info.img.creature.h / g_info.img.creature.w;
+          _x += g_info.img.creature.offset_x / _r;
+          _y += g_info.img.creature.offset_y * _r;
+        }
+        else {
+          let _r = g_info.img.creature.w / g_info.img.creature.h;
+          s_h = 3*_cellsize_y;
+          s_w = s_h * g_info.img.creature.w / g_info.img.creature.h;
+          _x += g_info.img.creature.offset_x * _r;
+          _y += g_info.img.creature.offset_y / _r;
+        }
+
+        _ly = 0.25;
+      }
+      else if (_code == 'a') {
+        loc = g_info.location.arch[ _idx ];
+
+        if (_xmajor) {
+          let _r = g_info.img.arch.h / g_info.img.arch.w;
+          s_w = _cellsize_x;
+          s_h = s_w * _r;
+          _y += g_info.img.arch.offset_y * _r;
+        }
+        else {
+          let _r = g_info.img.arch.w / g_info.img.arch.h;
+          s_h = _cellsize_y;
+          s_w = s_h * _r;
+          _y += g_info.img.arch.offset_y * _r;
+        }
+
+        _ly = 0.025;
+      }
+      else if (_code == 'p') {
+        loc = g_info.location.plant[ _idx ];
+
+        if (_xmajor) {
+          s_w = _cellsize_x;
+          s_h = s_w * g_info.img.plant.h / g_info.img.plant.w;
+        }
+        else {
+          s_h = _cellsize_y;
+          s_w = s_h * g_info.img.plant.w / g_info.img.plant.h;
+        }
+
+        _ly = 0.025;
+      }
+
+      else if (_code == 'M') {
+        loc = g_info.location.moon[ _idx ];
+
+        if (_xmajor) {
+          let _r = g_info.img.moon.h / g_info.img.moon.w;
+          s_w = _cellsize_x;
+          s_h = s_w * _r;
+          _x += g_info.img.moon.offset_x / _r;
+          _y += g_info.img.moon.offset_y * _r;
+        }
+        else {
+          let _r = g_info.img.moon.w / g_info.img.moon.h;
+          s_h = _cellsize_y;
+          s_w = s_h * _r;
+          _x += g_info.img.moon.offset_x * _r;
+          _y += g_info.img.moon.offset_y / _r;
+        }
+
+        _ly = 0.025;
+
+        // blood moon
+        //
+        if (fxrand() < (1.0/128.0)) {
+          _tint = 0xfb0c0c;
+        }
+      }
+
+      else if (_code == 'u') {
+        let _type = "under";
+        let _scale = 1.5;
+
+        loc = g_info.location[_type][ _idx ];
+
+        if (_xmajor) {
+          let _r = g_info.img[_type].h / g_info.img[_type].w;
+          s_w = _scale * _cellsize_x;
+          s_h = s_w * _r;
+          _x += _scale * g_info.img[_type].offset_x / _r;
+          _y += _scale *g_info.img[_type].offset_y * _r;
+        }
+        else {
+          let _r = g_info.img[_type].w / g_info.img[_type].h;
+          s_h = _scale * _cellsize_y;
+          s_w = s_h * _r;
+          _x += _scale * g_info.img[_type].offset_x * _r;
+          _y += _scale * g_info.img[_type].offset_y / _r;
+        }
+
+        _ly = 0.025;
+      }
+
+      else if (_code == 'l') {
+        let _type = "midl";
+        let _scale = 1.0;
+
+        loc = g_info.location[_type][ _idx ];
+
+        if (_xmajor) {
+          let _r = g_info.img[_type].h / g_info.img[_type].w;
+          s_w = _scale * _cellsize_x;
+          s_h = s_w * _r;
+          _x += _scale * g_info.img[_type].offset_x / _r;
+          _y += _scale *g_info.img[_type].offset_y * _r;
+        }
+        else {
+          let _r = g_info.img[_type].w / g_info.img[_type].h;
+          s_h = _scale * _cellsize_y;
+          s_w = s_h * _r;
+          _x += _scale * g_info.img[_type].offset_x * _r;
+          _y += _scale * g_info.img[_type].offset_y / _r;
+        }
+
+        _ly = 0.025;
+      }
+
+      else if (_code == 'z') {
+        let _type = "midr";
+        let _scale = 1.0;
+
+        loc = g_info.location[_type][ _idx ];
+
+        if (_xmajor) {
+          let _r = g_info.img[_type].h / g_info.img[_type].w;
+          s_w = _scale * _cellsize_x;
+          s_h = s_w * _r;
+          _x += _scale * g_info.img[_type].offset_x / _r;
+          _y += _scale *g_info.img[_type].offset_y * _r;
+        }
+        else {
+          let _r = g_info.img[_type].w / g_info.img[_type].h;
+          s_h = _scale * _cellsize_y;
+          s_w = s_h * _r;
+          _x += _scale * g_info.img[_type].offset_x * _r;
+          _y += _scale * g_info.img[_type].offset_y / _r;
+        }
+
+        _ly = 0.025;
+      }
 
 
-  for (let i=0; i<toks.length; i++) {
-    let tok = toks[i];
-
-    let _scale = g_info.state[tok].scale;
-
-    let s_h = g_info.height ;
-    //let s_w = Math.floor((g_info.native_width/g_info.native_height) * s_h);
-    let s_w = Math.floor((g_info.img[tok].w/g_info.img[tok].h) * s_h);
-
-    s_h *= _scale;
-    s_w *= _scale;
-
-    g_info.state[tok].x = Math.floor(g_info.width/2 - s_w/2);
-
-    for (let j=0; j<g_info.location[tok].length; j++) {
-      let loc = g_info.location[tok][j];
+      else if (_code == '.') { continue; }
+      else {
+        console.log("uncrecognized code:", i, j, _code, _idx);
+        continue;
+      }
 
       let _sprite  = new PIXI.Sprite(PIXI.Loader.shared.resources[loc].texture);
 
+      _sprite.x = _x;
+      _sprite.y = _y;
+
       _sprite.width   = s_w;
       _sprite.height  = s_h;
+      _sprite.tint = _tint;
 
-      g_info.state[tok].disp_w = s_w;
-      g_info.state[tok].disp_h = s_h;
+      _sprite.zIndex = 1;
 
-      let rgb = HSVtoRGB(parts_hsv[i].h, parts_hsv[i].s, parts_hsv[i].v);
-      _sprite.tint = rgb2num(rgb);
+      let item = {
+        "sprite": _sprite,
+        "v": true,
+        "idx": 0,
+        "anim_idx":0,
+        "di":180,
+        //"x": _margin_x + j*_cellsize_x,
+        //"y": _margin_y + i*_cellsize_y,
+        "x": _x,
+        "y": _y,
+        "dx":0,
+        "dy":0,
+        "da":0,
+        "dp": fxrand()*60.0,
+        "lx": _lx,
+        "ly": _ly,
+        "scale": 1.0,
+        "disp_w": s_w,
+        "disp_h": s_h
+      };
 
-      g_info.sprite[tok].push( _sprite );
+      g_info.scene_item.push(item);
+
+      g_info.scene_item
+
     }
-
   }
+
+  for (let i=0; i<g_info.scene_item.length; i++) {
+    g_info.container.addChild( g_info.scene_item[i].sprite );
+  }
+
+  //---
+
+  let bg_name = g_info.bg_choice[ _irnd(g_info.bg_choice.length) ];
+
+  let bg_tint = 0xffffff;
+  if (fxrand() < (1.0/32.0)) {
+    bg_tint = 0xff0000;
+  }
+
+  for (let i=-5; i<20; i++) {
+    for (let j=-5; j<20; j++) {
+
+      let n = g_info.location[bg_name].length;
+      let loc = g_info.location[bg_name][ _irnd(n) ];
+
+      //let n = g_info.location.bg_tv.length;
+      //let loc = g_info.location.bg_tv[ _irnd(n) ];
+
+      let _sprite  = new PIXI.Sprite(PIXI.Loader.shared.resources[loc].texture);
+
+      let _w = g_info.img[bg_name].w;
+      let _h = g_info.img[bg_name].h;
+      let _cs = 80;
+
+      let x_offset = ( ((i%2)==0) ? _cs/2 : 0 );
+
+
+      _sprite.x = j*_cs + x_offset;
+      _sprite.y = i*_cs;
+      _sprite.width = _cs;
+      _sprite.height = _cs * _h / _w;
+      _sprite.zIndex = -1;
+
+      _sprite.alpha = 0.1;
+      _sprite.blendMode = PIXI.BLEND_MODES.MULTIPLY;
+      _sprite.visible = true;
+      _sprite.tint = bg_tint;
+
+      let bg_item = {
+        "sprite": _sprite,
+        "v": true,
+        "idx": 0,
+        "anim_idx":0,
+        "di":360,
+        "x": _cs*j + x_offset,
+        "y": _cs*i,
+        "dx":0,
+        "dy":0,
+        "da":0,
+        "dp": 0,
+        "dpx" : fxrand()*360,
+        "dpy" : fxrand()*360,
+        "lx": 5,
+        "ly": 5,
+        "scale": 1.0,
+        "disp_w": _cs,
+        "disp_h": _cs
+      };
+
+      g_info.scene_item_bg.push(bg_item);
+    }
+  }
+
+
+  for (let i=0; i<g_info.scene_item_bg.length; i++) {
+    g_info.container.addChild( g_info.scene_item_bg[i].sprite );
+  }
+
+
 
   g_info.ready = true;
 
@@ -706,20 +895,121 @@ function texture_setup(x) {
 
 
 function texture_load() {
-  let toks = g_info.toks;
-
   let img_list = [];
-  for (let i=0; i<toks.length; i++) {
-    let tok = toks[i];
-    for (let j=0; j<g_info.location[tok].length; j++) {
-      let loc = g_info.location[tok][j];
-      img_list.push(loc);
+
+  for (let i=0; i<g_info.location.plant.length; i++) {
+    img_list.push(g_info.location.plant[i]);
+  }
+
+  for (let i=0; i<g_info.location.arch.length; i++) {
+    img_list.push(g_info.location.arch[i]);
+  }
+
+  for (let i=0; i<g_info.location.creature.length; i++) {
+    img_list.push(g_info.location.creature[i]);
+  }
+
+  for (let i=0; i<g_info.location.critter.length; i++) {
+    img_list.push(g_info.location.critter[i]);
+  }
+
+  for (let i=0; i<g_info.location.moon.length; i++) {
+    img_list.push(g_info.location.moon[i]);
+  }
+
+  for (let i=0; i<g_info.location.under.length; i++) {
+    img_list.push(g_info.location.under[i]);
+  }
+
+  for (let i=0; i<g_info.location.midl.length; i++) {
+    img_list.push(g_info.location.midl[i]);
+  }
+
+  for (let i=0; i<g_info.location.midr.length; i++) {
+    img_list.push(g_info.location.midr[i]);
+  }
+
+  for (let i=0; i<g_info.location.bg_bottle.length; i++) {
+    img_list.push(g_info.location.bg_bottle[i]);
+  }
+
+  for (let i=0; i<g_info.location.bg_tv.length; i++) {
+    img_list.push(g_info.location.bg_tv[i]);
+  }
+
+  for (let i=0; i<g_info.location.bg_flatleaf.length; i++) {
+    img_list.push(g_info.location.bg_flatleaf[i]);
+  }
+
+
+  PIXI.Loader.shared.add(img_list).load(scene_setup);
+
+}
+
+
+function random_template() {
+
+  let n_x = 5, n_y = 5;
+  g_info.pattern = g_info.pattern_template[ _irnd(g_info.pattern_template.length) ];
+
+  g_info.pattern_realization = [];
+  for (let i=0; i<n_y; i++) {
+    g_info.pattern_realization.push([]);
+    for (let j=0; j<n_x; j++) {
+
+      let _code = g_info.pattern.template[i*n_x + j];
+
+      if (g_info.pattern.template[ i*n_x + j ]=='.') {
+        g_info.pattern_realization[i].push({"idx":-1, "v":false, "sprite":{}, "code": _code});
+      }
+      else {
+
+        let _idx = -1;
+
+        if (_code == '_') {
+          _idx = _irnd( g_info.location.critter.length );
+        }
+        else if (_code == 'r') {
+          _idx = _irnd( g_info.location.critter.length );
+        }
+        else if (_code == 'R') {
+          _idx = _irnd( g_info.location.critter.length );
+        }
+
+        else if (_code == 'c') {
+          _idx = _irnd( g_info.location.creature.length );
+        }
+
+        else if (_code == 'a') {
+          _idx = _irnd( g_info.location.arch.length );
+        }
+        else if (_code == 'p') {
+          _idx = _irnd( g_info.location.plant.length );
+        }
+
+        else if (_code == 'M') {
+          _idx = _irnd( g_info.location.moon.length );
+        }
+
+        else if (_code == 'u') {
+          _idx = _irnd( g_info.location.under.length );
+        }
+
+        else if (_code == 'l') {
+          _idx = _irnd( g_info.location.midl.length );
+        }
+
+        else if (_code == 'z') {
+          _idx = _irnd( g_info.location.midl.length );
+        }
+
+        g_info.pattern_realization[i].push({"idx":_idx, "v":false, "sprite":{}, "code": _code });
+      }
+
     }
   }
 
-  PIXI.Loader.shared.add(img_list).load(texture_setup);
 }
-
 
 
 (()=>{
@@ -748,6 +1038,12 @@ function texture_load() {
   g_info.eff_size = Math.floor(dS - dS/3);
   g_info.tick = 0;
 
+  //---
+
+  random_template();
+
+  //---
+
 
   //---
   //
@@ -772,7 +1068,12 @@ function texture_load() {
   g_info.container.sortableChildren = true;
 
   g_info.app.stage.addChild(g_info.container);
+
+  //----
+  //----
   texture_load();
+  //----
+  //----
 
   let ele = document.getElementById("canvas_container");
   ele.appendChild(g_info.app.view);
@@ -787,9 +1088,7 @@ function texture_load() {
     return 0;
   });
 
-
-  //---
-
+  
 
   // keyboard input and functions
   //
@@ -797,21 +1096,6 @@ function texture_load() {
   // s - screenshot
   //
   document.addEventListener('keydown', function(ev) {
-    /*
-    if (ev.key == 'a') {
-      g_info.anim = ((g_info.anim == true) ? false : true);
-    }
-    else if ((ev.key == '.') || (ev.key == '>')) {
-      g_info.speed_factor -= 1;
-      if (g_info.speed_factor <= 1) {
-        g_info.speed_factor = 1;
-      }
-    }
-    else if ((ev.key == ',') || (ev.key == '<')) {
-      g_info.speed_factor += 1;
-    }
-    else 
-    */
     if (ev.key == 's')      { screenshot(); }
     else if (ev.key == 'p') { g_info.pause = ((g_info.pause) ? false : true); }
 
