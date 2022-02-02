@@ -21,10 +21,6 @@ Short Statement
 
 "Grift Graft" is an experimental generative art piece that attempts to highlight some of the inherent contradictions surrounding the discussion of non-fungible tokens (NFTs) and its place as a vehicle for artistic creation, artistic expression and the potential of remuneration for artists.
 
-p - pause
-
-s - screenshot
-
 To the extent possible, source code is dedicated to the public domain (CC0). Third party libraries are used that are not CC0 but are libre/free licensed, allowing for commercial reuse (see source for details). Artwork is copyright Caleb Harrington and is used with permission under a CC-BY-SA (3.0) license.
 
 "Grift Graft" attempts to subvert the narrative that NFTs are only a vehicle for theft by offering a generative NFT that can be minted at no cost. "Grift Graft" offers an NFT to anyone that wants one, free of charge.

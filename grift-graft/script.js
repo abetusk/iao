@@ -462,6 +462,8 @@ function _rnd(l,u) {
 
 function screenshot() {
 
+  g_info.app.renderer.render(g_info.app.stage);
+
   let _oc = g_info.app.renderer.extract.canvas( g_info.app.stage );
 
   let _c = document.createElement('canvas');
@@ -469,7 +471,7 @@ function screenshot() {
   _c.height = _oc.height;
 
   let _ctx = _c.getContext('2d');
-  _ctx.fillStyle = 'white';
+  _ctx.fillStyle = "#e0e0e0";
   _ctx.fillRect(0, 0, _oc.width, _oc.height);
   _ctx.drawImage(_oc, 0, 0);
 
@@ -495,7 +497,7 @@ function screenshot_pixi() {
   g_info.app.renderer.extract.canvas( g_info.app.stage ).toBlob(function(x) {
     let link = document.createElement("a");
     let imguri = URL.createObjectURL(x);
-    link.download = "grift_graft_tarot.png";
+    link.download = "grift_graft.png";
 
     link.href = imguri;
     document.body.appendChild(link);
@@ -753,7 +755,7 @@ function scene_setup(x) {
           _y += g_info.img[_type].offset_y / _r;
         }
 
-        _ly = 0.025;
+        _ly = 1;
       }
 
       else if (_code == 'l') {
@@ -822,7 +824,7 @@ function scene_setup(x) {
       _sprite.height  = s_h;
       _sprite.tint = _tint;
 
-      _sprite.zIndex = 1;
+      _sprite.zIndex = 2;
 
       let item = {
         "sprite": _sprite,
@@ -889,7 +891,7 @@ function scene_setup(x) {
       _sprite.y = i*_cs;
       _sprite.width = _cs;
       _sprite.height = _cs * _h / _w;
-      _sprite.zIndex = -1;
+      _sprite.zIndex = 1;
 
       _sprite.alpha = 0.1;
       _sprite.blendMode = PIXI.BLEND_MODES.MULTIPLY;
