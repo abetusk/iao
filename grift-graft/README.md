@@ -1,9 +1,9 @@
-Grift Graft Tarot
+Grift Graft
 ===
 
-[![screenshot](../img/grift_graft_tarot_preview.png)](https://github.com/abetusk/iao/tree/main/grift-graft-tarot)
+[![screenshot](../img/grift_graft_preview.png)](https://github.com/abetusk/iao/tree/main/grift-graft)
 
-Available on [fxhash](https://www.fxhash.xyz/generative/slug/Grift Graft Tarot)
+Available on [fxhash](https://www.fxhash.xyz/u/abetusk)
 
 Quick Start
 ---
@@ -19,80 +19,80 @@ chromium 'http://localhost:8000'
 Short Statement
 ---
 
+"Grift Graft" is an experimental generative art piece that attempts to highlight some of the inherent contradictions surrounding the discussion of non-fungible tokens (NFTs) and its place as a vehicle for artistic creation, artistic expression and the potential of remuneration for artists.
 
+p - pause
 
-"Grift Graft Tarot" is an experimental generative art piece that attempts to highlight some of the inherent contradictions surrounding the discussion of non-fungible tokens (NFTs) and its place as a vehicle for artistic creation, artistic expression and the potential of remuneration for artists.
+s - screenshot
 
-Controls:
+To the extent possible, source code is dedicated to the public domain (CC0). Third party libraries are used that are not CC0 but are libre/free licensed, allowing for commercial reuse (see source for details). Artwork is copyright Caleb Harrington and is used with permission under a CC-BY-SA (3.0) license.
 
-p - pause animation
-
-s - take screenshot
-
-To the extent possible, the source code is dedicated to the public domain (CC0) and can be used for any purpose, even commercial, by anyone. Third party libraries are used that are not CC0 licensed but have libre/free licensing terms that allow for commercial reuse (please see the individual source files for more details). Artwork is copyright Caleb Harrington and is used with permission under a CC-BY-SA (3.0) license.
-
-"Grift Graft Tarot" attempts to subvert this argument by offering a generative NFT that can be minted at no cost, save the gas fees to enable the transaction.
-
+"Grift Graft" attempts to subvert the narrative that NFTs are only a vehicle for theft by offering a generative NFT that can be minted at no cost. "Grift Graft" offers an NFT to anyone that wants one, free of charge.
 
 This work hopes to add to the conversation about examining the reality of the ecosystem that we've developed around digital goods and intellectual property.
 
 Tags
 ---
 
-minimal, generative, tarot, exquisite corpse, character
+generative, exquisite corpse, character, howdy
 
 Statement
 ---
 
-"Grift Graft Tarot" is an experimental generative art piece that
+"Grift Graft" is an experimental generative art piece that
 attempts to highlight some of the inherent contradictions
 surrounding the discussion of non-fungible tokens (NFTs) and
 its place as a vehicle for artistic creation, artistic expression
 and the potential of remuneration for artists.
 
-To the extent possible, the source code is dedicated to the public
-domain (CC0) and can be used for any purpose, even commercial, by anyone.
+To the extent possible, source code for this project is dedicated to
+the public domain (CC0) and can be used by for any purpose, even commercially, by anyone.
+This project uses third party libraries that are not CC0 licensed but are libre/free licensed
+and allow for commercial reuse (see the source for details).
+Artwork is copyright
+[Caleb Harrington](https://calebharrington.com/) and is used with permission under a CC-BY-SA (3.0) license.
 
-Many people dismiss NFTs as being a scam, ponzi scheme or multi level
+Many people dismiss NFTs as being a scam, Ponzi scheme or multi level
 marketing (MLM).
 A common argument is that people try to push NFT art in a "pay to earn"
 scheme, where NFT art is created to earn royalties on subsequent resale
 and where bought NFT art is purchased with the sole purpose of selling
 for a higher price to someone else.
 
-"Grift Graft Tarot" attempts to subvert this argument by offering
-a generative NFT that can be minted at no cost, save the gas fees
-to enable the transaction.
+"Grift Graft" attempts to subvert this argument by offering
+a generative NFT that can be minted at no cost except for the
+infrastructural "gas" fees.
+This project allows anyone who wants an NFT to create one for negligible fees
+(often times for pennies to fund the transaction).
 
 There is a 10% royalty on resale, which is the minimum royalty number that
 the platform `fxhash.xyz` allows NFTs to be sold for.
-I've made a judgement call to push this art forward, even with the 10% royalty,
+I've made a judgment call to push this art forward, even with the 10% royalty,
 because of the complications in creating my own NFT independent of a platform
 and because the `fxhash.xyz` platform offers higher visibility to allow
-the art to be traded.
+the NFTs associated with the art to be owned.
 
 Should I make any royalties from this project, I will be giving all royalties
 to the original artist, Caleb Harrington, and will not keep any for myself.
 If possible, I will hand over ownership of the generative token to Caleb Harrington
-so that I'm completely out of the loop of having to receive royalties
-that I will then transfer.
+so that I'm completely out of the loop of having to receive royalties.
 
 `fxhash.xyz` also limits the number of NFTs that can be minted.
-Should the maximum limit be reached, another "generation" will be
-minted with the same criteria as above.
+Should the maximum limit of minting for this generative token be reached,
+another "generation" will be minted with the same criteria as above.
 
-I don't know if "Grift Graft Tarot"
+I don't know if "Grift Graft"
 is worth anything nor do I know if NFTs are
-a worthwhile idea but perhaps we can start
-to have a conversation that isn't a continuous
-stream of incredulous dismissals and start to examine
+a worthwhile idea.
+The hope is that this project helps
+continue a good faith conversation to examine
 the reality of the ecosystem that we've developed
 around digital goods and intellectual property.
 
 Reference
 ---
 
-
+* [CalebHarrington.com](https://calebharrington.com/)
 
 License
 ---

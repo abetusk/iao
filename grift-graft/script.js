@@ -9,7 +9,7 @@
 
 
 var g_info = {
-  "VERSION" : "0.3.0",
+  "VERSION" : "0.4.0",
 
   "canvas": {},
   "ctx" : {},
@@ -476,7 +476,7 @@ function screenshot() {
   _c.toBlob(function(x) {
     let link = document.createElement("a");
     let imguri = URL.createObjectURL(x);
-    link.download = "OK.png";
+    link.download = "grift_graft.png";
 
     link.href = imguri;
     document.body.appendChild(link);
@@ -520,6 +520,8 @@ function init_finalize() {
 function animate_pixi(dt) {
   if (!g_info.ready) { return; }
 
+  if (g_info.pause) { return; }
+
   let _cx = 30;
   let _cy = 0;
 
@@ -532,7 +534,6 @@ function animate_pixi(dt) {
     item.dx =
       item.lx * Math.sin( (2.0*Math.PI*item.anim_idx / item.di) + item.dpy );
     item.y = item.cy + item.dy;
-    //item.x = item.cx + item.dx;
     item.x = _cx + item.cx + item.dx;
 
     item.sprite.x = item.x;
@@ -564,11 +565,6 @@ function _mod1(v) {
 
 function scene_setup(x) {
 
-  console.log(">>", x);
-
-  //let _Ry = 4.5;
-  //let _Rx = 4.5;
-
   let _Ry = 5.5;
   let _Rx = 5.5;
 
@@ -578,20 +574,12 @@ function scene_setup(x) {
   let _margin_y = (0.25/_Ry)*g_info.size;
   let _cellsize_y = (1/_Ry)*g_info.size;
 
-  //let _lx = 0;
-  //let _ly = 0.25;
-
   let _ds = g_info.width - (g_info.size);
   let _offset_x = ((_ds > 0) ? (_ds/2) : 0);
-
-  console.log(">>>", _offset_x, _ds, g_info.width, g_info.size);
 
   let _xmajor = true;
   if (g_info.width > g_info.height) { _xmajor = false; }
   _xmajor=false;
-
-  console.log(_margin_x, _margin_y, _cellsize_x, _cellsize_y);
-
 
   // a - arch
   // p - plant
@@ -632,7 +620,6 @@ function scene_setup(x) {
           s_w = s_h * g_info.img.critter.w / g_info.img.critter.h;
         }
 
-        //_ly = 0.25;
       }
       else if (_code == 'r') {
         loc = g_info.location.critter[ _idx ];
@@ -646,7 +633,6 @@ function scene_setup(x) {
           s_w = s_h * g_info.img.critter.w / g_info.img.critter.h;
         }
 
-        //_ly = 0.25;
       }
       else if (_code == 'R') {
         loc = g_info.location.critter[ _idx ];
@@ -666,7 +652,6 @@ function scene_setup(x) {
           _y += g_info.img.critter.offset_y / _r;
         }
 
-        //_ly = 0.25;
       }
       else if (_code == 'c') {
         loc = g_info.location.creature[ _idx ];
@@ -686,7 +671,6 @@ function scene_setup(x) {
           _y += g_info.img.creature.offset_y / _r;
         }
 
-        //_ly = 0.25;
       }
       else if (_code == 'a') {
         loc = g_info.location.arch[ _idx ];
@@ -704,7 +688,6 @@ function scene_setup(x) {
           _y += g_info.img.arch.offset_y * _r;
         }
 
-        //_ly = 0.025;
       }
       else if (_code == 'p') {
         loc = g_info.location.plant[ _idx ];
@@ -718,7 +701,6 @@ function scene_setup(x) {
           s_w = s_h * g_info.img.plant.w / g_info.img.plant.h;
         }
 
-        //_ly = 0.025;
       }
 
       else if (_code == 'M') {
@@ -739,11 +721,9 @@ function scene_setup(x) {
           _y += g_info.img.moon.offset_y / _r;
         }
 
-        //_ly = 0.025;
 
         // blood moon
         //
-        //if (fxrand() < (1.0/128.0)) {
         if (g_info.blood_moon) {
           _tint = 0xfb0c0c;
         }
@@ -769,8 +749,6 @@ function scene_setup(x) {
           let _r = g_info.img[_type].w / g_info.img[_type].h;
           s_h = _csy;
           s_w = s_h * _r;
-          //_x += _scale * g_info.img[_type].offset_x * _r;
-          //_y += _scale * g_info.img[_type].offset_y / _r;
           _x += g_info.img[_type].offset_x * _r;
           _y += g_info.img[_type].offset_y / _r;
         }
@@ -799,7 +777,6 @@ function scene_setup(x) {
           _y += _scale * g_info.img[_type].offset_y / _r;
         }
 
-        //_ly = 0.025;
         _lx = 1;
         _ly = 0;
       }
@@ -825,7 +802,6 @@ function scene_setup(x) {
           _y += _scale * g_info.img[_type].offset_y / _r;
         }
 
-        //_ly = 0.025;
         _lx = 1;
         _ly = 0;
       }
@@ -881,12 +857,10 @@ function scene_setup(x) {
 
   //---
 
-  //let bg_name = g_info.bg_choice[ _irnd(g_info.bg_choice.length) ];
   let bg_name = g_info.bg_choice[ g_info.bg_idx ];
 
 
   let bg_tint = 0xffffff;
-  //if (fxrand() < (1.0/32.0)) {
   if (g_info.blood_background) {
     bg_tint = 0xff0000;
   }
@@ -1189,7 +1163,7 @@ function random_template() {
 
   g_info.app.ticker.add(animate_pixi);
 
-  // wip...don't know how to tell pixi to do the spirte z index sorting
+  // sort spirtes by zorder
   //
   g_info.app.stage.children.sort( function(a,b) {
     if (a.zIndex > b.zIndex) { return -1; }
@@ -1211,8 +1185,10 @@ function random_template() {
     return false;
   });
 
-  window.$fxhashFeatures = g_info.feature;
-
-  //window.requestAnimationFrame(anim);
+  let _feat = {};
+  for (let i=0; i<g_info.feature.length; i++)  {
+    _feat[ g_info.feature[i].name ] = g_info.feature[i].value ;
+  }
+  window.$fxhashFeatures = _feat;
 
 })();
