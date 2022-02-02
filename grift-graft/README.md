@@ -3,7 +3,7 @@ Grift Graft
 
 [![screenshot](../img/grift_graft_preview.png)](https://github.com/abetusk/iao/tree/main/grift-graft)
 
-Available on [fxhash](https://www.fxhash.xyz/u/abetusk)
+Available on [fxhash](https://www.fxhash.xyz/generative/8486)
 
 Quick Start
 ---
