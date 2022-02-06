@@ -43,6 +43,69 @@ var g_info = {
 
 };
 
+
+
+function _tohex(c) {
+  var hex = c.toString(16);
+  return hex.length == 1 ? "0" + hex : hex;
+}
+
+function _rgb2hex(r, g, b) {
+  if (typeof g === "undefined") {
+    return "#" + _tohex(r.r) + _tohex(r.g) + _tohex(r.b);
+  }
+  return "#" + _tohex(r) + _tohex(g) + _tohex(b);
+}
+
+
+function palette_gorillasu(offset) {
+  let theta = 2*Math.PI*offset;
+  let r = 127.5 + 127.5*Math.cos(theta);
+  let g = 127.5 + 127.5*Math.sin(theta);
+  let b = 127.5;
+
+  return {"r": r, "g": g, "b": b, "rgb": _rgb2hex(r,g,b) };
+}
+
+function _rnd(l,u) {
+  if (typeof l === "undefined") { l = 1; }
+  if (typeof u === "undefined") {
+    u = l;
+    l = 0;
+  }
+  return l + ((u-l) * fxrand()) ;
+}
+
+// Standard Normal variate using Box-Muller transform.
+function randn_bm() {
+  var u = 0, v = 0;
+  return Math.sqrt(-2 * Math.log(1 - _rnd())) * Math.cos(2 * Math.PI * _rnd()) 
+
+  //while(u === 0) u = _rnd(); //Converting [0,1) to (0,1)
+  //while(v === 0) v = _rnd();
+  //return Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v );
+}
+
+// https://stackoverflow.com/questions/25582882/javascript-math-random-normal-distribution-gaussian-bell-curve
+// returns a gaussian random function with the given mean and stdev.
+//
+function gaussian(mean, stdev) {
+  let y1, y2;
+  let x1, x2, w;
+  do {
+    x1 = 2.0 * _rnd() - 1.0;
+    x2 = 2.0 * _rnd() - 1.0;
+    w = x1 * x1 + x2 * x2;
+  } while (w >= 1.0);
+  w = Math.sqrt((-2.0 * Math.log(w)) / w);
+  y1 = x1 * w;
+  y2 = x2 * w;
+
+  let retval = mean + stdev * y1;
+  if (retval > 0) { return retval; }
+  return -retval;
+}
+
 function _irnd(l,u) {
   if (typeof l === "undefined") { l = 2; }
   if (typeof u === "undefined") {
@@ -60,6 +123,14 @@ function _max(a,b) {
 function _min(a,b) {
   if (a<b) { return a; }
   return b;
+}
+
+function _clamp(x,a,b) {
+  if (typeof a === "undefined") { a = 0.0; }
+  if (typeof b === "undefined") { b = a; a = 0.0; }
+  if (x<a) { return a; }
+  if (x>b) { return b; }
+  return x;
 }
 
 //---
@@ -1514,6 +1585,14 @@ function anim() {
   ctx.rect(0,0, _cw, _ch);
   ctx.fill();
 
+  //DEBUG
+  floop(ctx, _cw, _ch);
+  g_info.tick++;
+  window.requestAnimationFrame(anim);
+  return;
+  //debug
+
+
   for (let i=0; i<g_info.hist.length; i++) {
     let _x = g_info.hist[i].x;
     let _y = g_info.hist[i].y;
@@ -1585,6 +1664,431 @@ function get_bbox(pgns) {
   return bbox;
 }
 
+function floop(ctx, w, h) {
+  ctx.fillStyle = "#ddd";
+  ctx.fillRect(0,0,w,h);
+
+
+  let w2 = Math.floor(w/2);
+  let h2 = Math.floor(h/2);
+
+  let r = _max(h2,w2);
+  r *= Math.sqrt(2);
+  r = Math.floor(r);
+
+  let _t = g_info.tick / 60;
+
+  let color = "rgba(0,0,0,0.05125)";
+  noise_donut(ctx, 300, 300, 100, 100, 40, 1000, _t);
+  //disc_noise(ctx, 300, 300, 300, color, 0.5, 50000);
+  //noise_donut(ctx, 300, 300, 100, 100, 1, 1000);
+
+  return;
+  //let color = "rgba(0,0,0,0.05125)";
+  console.log("...");
+  hatch_noise(ctx, w, h, 30, 30, 100000);
+  return;
+
+  cloud_vortex(ctx, w, h);
+  disc_noise(ctx, w2, h2, r, color, 0.35, 1000000);
+  return;
+
+
+  // clip disc example
+  //
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(100, 100, 60, 0, Math.PI * 2, true);
+  ctx.clip();
+  disc_noise(ctx, 130,110, 120, color, 2.0, 150000);
+  disc_noise(ctx, 100,120, 120, color, 2.0, 150000);
+  ctx.restore();
+
+  //ctx.save();
+  //ctx.
+
+
+  return;
+
+  ctx.save();
+  shaded_clip(ctx, w, h);
+  radial_lines_even_spaced(ctx, w, h);
+  ctx.restore();
+
+  ctx.fillStyle = '#f00';
+  ctx.fillRect(300,300,10,10);
+  return;
+
+
+  //disk_test(ctx, w, h);
+  //disk_test(ctx, w, h);
+  //disk_test(ctx, w, h);
+  //disk_test(ctx, w, h);
+
+  //radial_lines(ctx, w, h);
+
+  return;
+
+  shaded_clip(ctx, w, h);
+  radial_lines_even_spaced(ctx, w, h);
+  ctx.restore();
+
+}
+
+function noise_donut(ctx, cx, cy, rw, rh, M, N, _t) {
+
+  //let _t = 0.3;
+  let _f = 4;
+  let _f_offset = 0.25;
+  let _f_noise = 30.0;
+
+  let _n_x = 0.0;
+  let _n_y = _t/1.0;
+
+
+  //ctx.fillStyle = "rgba(0,0,0,1)";
+  ctx.strokeStyle = "rgba(0,0,0,0.2)";
+
+  let _min_r = 100;
+
+  for (let idx=0; idx<M; idx++) {
+    let r = 350*(idx/M) + _min_r;
+    let _prv_x = 0, _prv_y = 0;
+
+    for (let i=0; i<=N; i++) {
+
+      let _a = Math.PI*2*i/N;
+
+      //let _fac = _f*(idx/M) + _f_offset;
+      //let _fac = _f*(1-(idx/M)) + _f_offset;
+      let _fac = 4*_f*(idx/M)*(1-(idx/M)) + _f_offset;
+
+      let _Mr = _f_noise*noise.perlin3( _n_x + Math.cos(_a)*_fac, _n_y + Math.sin(_a)*_fac, _t ) + r;
+      _Mr /= 2;
+      _Mr += 0.5;
+
+      let _x = cx + Math.cos(_a)*_Mr;
+      let _y = cy + Math.sin(_a)*_Mr;
+
+      if (i==0) {
+        _prv_x = _x;
+        _prv_y = _y;
+        ctx.beginPath();
+        ctx.moveTo(_prv_x, _prv_y);
+        continue;
+      }
+
+      //ctx.fillRect(_x, _y, 1,1);
+      ctx.lineTo(_x,_y);
+
+      _prv_x = _x;
+      _prv_y = _y;
+
+    }
+    ctx.stroke();
+  }
+
+}
+
+function hatch_noise(ctx, w, h, dx, dy, N) {
+  let c = 'rgba(0,0,0,0.2)';
+  //let c = 'rgba(255,255,255,0.2)';
+
+  let ix = Math.floor((w + dx - 1) / dx);
+  let iy = Math.floor((h + dy - 1) / dy);
+
+  let s = 1.5;
+
+  let n_w = dx/4;
+  let n_h = dy/4;
+
+  let px, py;
+
+  ctx.fillStyle = c;
+  for (let i=0; i<N; i++) {
+
+    if ((i%2)==0) {
+      //px = Math.floor(_rnd(-n_w/2,n_w/2) + _irnd(ix)*dx);
+      px = Math.floor(_irnd(ix)*dx + gaussian(0,dx/8));
+      py = _irnd(h);
+    }
+    else {
+      px = _irnd(w);
+      //py = Math.floor(_rnd(-n_h/2,n_h/2) + _irnd(iy)*dy);
+      py = Math.floor(_irnd(iy)*dy + gaussian(0,dy/8));
+    }
+
+    ctx.fillRect(px,py,s,s);
+  }
+}
+
+function cloud_vortex(ctx, w, h) {
+  //let step = Math.floor(w/M);
+
+  let sz = _min(w,h);
+
+  let N_outer = 128;
+  let r_outer = 2*Math.sqrt(2)*Math.PI*2*sz/(2*N_outer);
+
+  let step_n = 10;
+
+  let step_size = w/step_n;
+
+  let cx = w/2;
+  let cy = h/2;
+
+  console.log("N_outer:", N_outer, "step_size:", step_size, "step_n:", step_n, "r_outer:", r_outer);
+
+  for (let s_idx=0; s_idx<step_n; s_idx++) {
+
+    let c = _clamp(_irnd(10) + Math.floor((s_idx/step_n) * 255), 0, 255);
+
+    let _cur_r = (s_idx/step_n)*w/2;
+    let _cur_circ = Math.PI*2*_cur_r;
+
+    let N = N_outer;
+
+    ctx.fillStyle = "rgba(" + c +"," + c + "," + c + ",0.9)";
+    for (let i=0; i<N; i++) {
+      let R = _cur_r + fxrand()*step_size/4;
+      //let r = fxrand()*step*15;
+      //let r = fxrand()*step_size;
+      //let r = _rnd(0.9,1.1)*step_size;
+      let r = _rnd(0.75,2.2)*r_outer;
+
+      let a = (i/N)*Math.PI*2 + fxrand() + fxrand()*30;
+
+      let x = cx + R*Math.cos(a);
+      let y = cy + R*Math.sin(a);
+
+      ctx.beginPath();
+      ctx.arc(x,y, r, 0, 2*Math.PI);
+      ctx.fill();
+
+    }
+  }
+}
+
+function disc_noise(ctx, x, y, R, c, gamma, N) {
+  x = ((typeof x === "undefined") ? 0 : x);
+  y = ((typeof y === "undefined") ? 0 : y);
+  R = ((typeof R === "undefined") ? 100 : R);
+  c = ((typeof c === "undefined") ? "rgba(0,0,0,0.125)" : c);
+  gamma = ((typeof gamma === "undefined") ? 0.5 : gamma);
+  N = ((typeof N === "undefined") ? 0.5 : N);
+
+  ctx.fillStyle = c;
+  let s = 1;
+  for (let i=0; i<N; i++) {
+    //let r = fxrand()*Math.pow(R, 1/gamma);
+    let r = Math.pow(fxrand(), gamma)*R;
+    let a = fxrand()*2.0*Math.PI;
+    //let px = Math.floor(x + Math.pow(r, gamma)*Math.cos(a));
+    //let py = Math.floor(y + Math.pow(r, gamma)*Math.sin(a));
+
+    let px = Math.floor(x + r*Math.cos(a));
+    let py = Math.floor(y + r*Math.sin(a));
+
+    ctx.fillRect(px,py,s,s);
+  }
+
+}
+
+function drawStar(ctx, r) {
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(r, 0);
+  for (var i = 0; i < 9; i++) {
+    ctx.rotate(Math.PI / 5);
+    if (i % 2 === 0) {
+      ctx.lineTo((r / 0.525731) * 0.200811, 0);
+    } else {
+      ctx.lineTo(r, 0);
+    }
+  }
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+}
+
+function shaded_clip(ctx, w, h) {
+
+  /*
+  ctx.fillStyle = '#ddd';
+  ctx.fillRect(0, 0, 150, 150);
+  ctx.translate(75, 75);
+  */
+
+  // Create a circular clipping path
+  ctx.beginPath();
+  ctx.arc(100, 100, 60, 0, Math.PI * 2, true);
+  ctx.clip();
+
+  return;
+
+  // draw background
+  var lingrad = ctx.createLinearGradient(0, -75, 0, 75);
+  lingrad.addColorStop(0, '#232256');
+  lingrad.addColorStop(1, '#143778');
+
+  ctx.fillStyle = lingrad;
+  ctx.fillRect(-75, -75, 150, 150);
+
+
+  // draw stars
+  for (var j = 1; j < 50; j++) {
+    ctx.save();
+    ctx.fillStyle = '#fff';
+    ctx.translate(75 - Math.floor(Math.random() * 150),
+                  75 - Math.floor(Math.random() * 150));
+    drawStar(ctx, Math.floor(Math.random() * 4) + 2);
+    ctx.restore();
+  }
+
+}
+
+function radial_lines_even_spaced(ctx, w, h) {
+  ctx.fillStyle = "rgba(0,0,0,0.25)";
+  ctx.strokeStyle = "rgba(0,0,0,0.125)";
+
+  let gamma = 0.5;
+
+  let c0 = 300;
+  let c1 = 300;
+  let R = 300;
+  let N = 10000;
+  for (let i=0; i<N; i++) {
+    let r = fxrand()*Math.pow(R, 1/gamma);
+    let a = (3.0/N)*fxrand() + ((i/N)*2.0*Math.PI);
+    let x = Math.pow(r, gamma)*Math.cos(a) + R;
+    let y = Math.pow(r, gamma)*Math.sin(a) + R;
+
+    let px = Math.floor(x);
+    let py = Math.floor(y);
+
+    let px1 = Math.floor(R*Math.cos(a) + R);
+    let py1 = Math.floor(R*Math.sin(a) + R);
+
+    ctx.beginPath();
+    ctx.moveTo(px,py);
+    ctx.lineTo(px1,py1);
+    ctx.stroke();
+  }
+
+}
+
+function radial_lines(ctx, w, h) {
+  ctx.fillStyle = "rgba(0,0,0,0.25)";
+  ctx.strokeStyle = "rgba(0,0,0,0.125)";
+
+  let gamma = 0.5;
+
+  let c0 = 300;
+  let c1 = 300;
+  let R = 300;
+  let N = 10000;
+  for (let i=0; i<N; i++) {
+    let r = fxrand()*Math.pow(R, 1/gamma);
+    let a = fxrand()*2.0*Math.PI;
+    let x = Math.pow(r, gamma)*Math.cos(a) + R;
+    let y = Math.pow(r, gamma)*Math.sin(a) + R;
+
+    let px = Math.floor(x);
+    let py = Math.floor(y);
+
+    let px1 = Math.floor(R*Math.cos(a) + R);
+    let py1 = Math.floor(R*Math.sin(a) + R);
+
+    ctx.beginPath();
+    ctx.moveTo(px,py);
+    ctx.lineTo(px1,py1);
+    ctx.stroke();
+
+  }
+}
+
+function disk_test(ctx, w, h) {
+
+  ctx.fillStyle = "rgba(0,0,0,0.25)";
+
+  let s =1.05;
+
+  let gamma = 1.0;
+  //let gamma = 0.5;
+
+  let R = 300;
+  let N = 100000;
+  for (let i=0; i<N; i++) {
+    let r = fxrand()*Math.pow(R, 1/gamma);
+    let a = fxrand()*2.0*Math.PI;
+    let x = Math.pow(r, gamma)*Math.cos(a) + R;
+    let y = Math.pow(r, gamma)*Math.sin(a) + R;
+
+    let px = Math.floor(x);
+    let py = Math.floor(y);
+
+    ctx.fillRect(x,y,s,s);
+
+  }
+
+}
+
+// https://javascript.tutorialink.com/how-can-i-stop-the-alpha-premultiplication-with-canvas-imagedata/
+//
+function disk_test_canvas(ctx, w, h) {
+
+  console.log("??");
+
+  let ok = ctx.getImageData(0,0,w,h);
+
+  // uniform
+  //let gamma = 0.5;
+
+  // uniform
+  let gamma = 1.0;
+
+
+
+  let R = 300;
+  let N = 100000;
+  for (let i=0; i<N; i++) {
+    let r = fxrand()*Math.pow(R, 1/gamma);
+    let a = fxrand()*2.0*Math.PI;
+    let x = Math.pow(r, gamma)*Math.cos(a) + R;
+    let y = Math.pow(r, gamma)*Math.sin(a) + R;
+
+    let px = Math.floor(x);
+    let py = Math.floor(y);
+
+    let idx = (px + py*w)*4;
+
+    ok.data[idx + 0] = 30;
+    ok.data[idx + 1] = 30;
+    ok.data[idx + 2] = 30;
+    ok.data[idx + 3] = 32;
+
+    /*
+
+    for (let dx=-3; dx<=3; dx++) {
+      for (let dy=-3; dy<=3; dy++) {
+        let px = _clamp(Math.floor(x+dx), 0, w);
+        let py = _clamp(Math.floor(y+dy), 0, h);
+
+        let idx = (px + py*w)*4;
+
+        ok.data[idx + 0] = 255;
+        ok.data[idx + 1] = 0;
+        ok.data[idx + 2] = 0;
+        ok.data[idx + 3] = 10;
+      }
+    }
+    */
+
+  }
+
+  ctx.putImageData(ok, 0, 0);
+
+}
 
 (()=>{
 
@@ -1606,6 +2110,19 @@ function get_bbox(pgns) {
   g_info.tick = 0;
   g_info.width = canvas.width;
   g_info.height = canvas.height;
+
+
+  //DEBUG
+  //DEBUG
+  //DEBUG
+  window.requestAnimationFrame(anim);
+  return;
+
+  floop(ctx, g_info.width, g_info.height);
+  return;
+  //DEBUG
+  //DEBUG
+  //DEBUG
 
   //DEBUG
   //DEBUG

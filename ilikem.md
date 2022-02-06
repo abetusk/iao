@@ -73,6 +73,9 @@ I Like Em
 * [Bougainvillea by gpitombo](https://www.fxhash.xyz/generative/5030)
 * [waves by Chris Randall](https://www.fxhash.xyz/generative/slug/waves-2)
 * [connexio by Xeronimo](https://www.fxhash.xyz/generative/slug/connexio)
+* [Screw Emotions by lomz](https://www.fxhash.xyz/generative/8645)
+* [SUMMONING GATES by SCHOLOMANCY](https://www.fxhash.xyz/generative/6353)
+* [Jellybean Singularity by Chris McCully](https://www.fxhash.xyz/generative/slug/jellybean-singularity-1)
 
 Artists
 ---
