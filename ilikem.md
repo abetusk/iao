@@ -67,7 +67,7 @@ I Like Em
 * [ZANCANISM by Lunin](https://www.fxhash.xyz/generative/slug/zancanism-1)
 * [Hyper Construct I by Cannaerts](https://www.fxhash.xyz/generative/slug/hyper-construct-i-1)
 * [KLNY by Lolo Armdz](https://www.fxhash.xyz/generative/slug/klny-1)
-* [Astronomic Comics](https://www.fxhash.xyz/generative/slug/astronomic-comics)
+* [Astronomic Comics by KilledByAPixel](https://www.fxhash.xyz/generative/slug/astronomic-comics)
 * [LONGING by dominikus](https://www.fxhash.xyz/generative/4268)
 * [Industrial by gpitombo](https://www.fxhash.xyz/generative/slug/industrial)
 * [Bougainvillea by gpitombo](https://www.fxhash.xyz/generative/5030)
@@ -77,6 +77,15 @@ I Like Em
 * [SUMMONING GATES by SCHOLOMANCY](https://www.fxhash.xyz/generative/6353)
 * [Jellybean Singularity by Chris McCully](https://www.fxhash.xyz/generative/slug/jellybean-singularity-1)
 * [Bisections by bubits](https://www.fxhash.xyz/generative/slug/bisections)
+* [sky_tensnoi by dcRay](https://www.fxhash.xyz/generative/slug/sky_tensnoi)
+* [the maelstrom by inifnite](https://www.fxhash.xyz/generative/5120)
+* [deep, eep down, far, far in by infinite](https://www.fxhash.xyz/generative/2860)
+* [collective consciousness by infinite](https://www.fxhash.xyz/generative/3872)
+* [NATURAL 04 by quentinhocde](https://www.fxhash.xyz/generative/slug/natural-04)
+* [Stacked Flows by James Wesc](https://www.fxhash.xyz/generative/slug/stacked-flows-1)
+* [Hex Grid by Dan Gries](https://www.fxhash.xyz/generative/slug/hex-grid-1)
+* [Recycled Chaos by Vamk](https://www.fxhash.xyz/generative/7756)
+* [Torsion by Estienne](https://www.fxhash.xyz/generative/slug/torsion)
 
 Artists
 ---
