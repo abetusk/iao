@@ -26,3 +26,11 @@ Works
 | |
 |---|
 | [![Grift Graft](img/grift_graft_preview.png)](https://github.com/abetusk/iao/tree/main/grift-graft) |
+
+---
+
+###### [Screenshot Heist](https://github.com/abetusk/iao/tree/main/screenshot-heist)
+
+| |
+|---|
+| [![Screenshot Heist](img/screenshot_heist.png)](https://github.com/abetusk/iao/tree/main/screenshot-heist) |
