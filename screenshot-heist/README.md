@@ -27,6 +27,22 @@ s - screenshot
 
 To the extent possible, source code is dedicated to the public domain (CC0).
 
+"Screenshot Heist" is an attempt to address a common bad faith argument against NFTs that claims the value of an NFT is worthless because taking a "screenshot" of the underlying asset is so easy. Digital property enforcement is commonplace while transactions about on a public blockchain are treated as irrational. Why is legal action to prevent copying normalized while a public record of ownership on a blockchain absurd?
+
+This work hopes to add to the conversation about examining the ecosystem that we've developed around digital goods and intellectual property.
+
+This work is influenced by the artists `01000010`.
+
+---
+
+"Screenshot Heist" is an experimental generative art piece that attempts to highlight some of the inherent contradictions surrounding the discussion of non-fungible tokens (NFTs) and its place as a vehicle for artistic creation, artistic expression and the potential of remuneration for artists.
+
+p - pause
+
+s - screenshot
+
+To the extent possible, source code is dedicated to the public domain (CC0).
+
 "Screenshot Heist" is an attempt to address 
 a common bad faith argument against NFTs that claim to render the value
 of an NFT worthless because taking a "screenshot" of the underlying asset is so easy.
