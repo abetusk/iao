@@ -3,7 +3,7 @@ Screenshot Heist
 
 [![screenshot](../img/screenshot_heist.png)](https://github.com/abetusk/iao/tree/main/screeshot_heist)
 
-Available on [fxhash](https://www.fxhash.xyz/generative/slug/Screenshot Heist)
+Available on [fxhash](https://www.fxhash.xyz/generative/8779)
 
 Quick Start
 ---
@@ -31,7 +31,7 @@ To the extent possible, source code is dedicated to the public domain (CC0).
 
 This work hopes to add to the conversation about examining the ecosystem that we've developed around digital goods and intellectual property.
 
-This work is influenced by the artists `01000010`.
+This work is influenced by the artist `01000010`.
 
 ---
 
