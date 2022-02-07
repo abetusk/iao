@@ -76,6 +76,7 @@ I Like Em
 * [Screw Emotions by lomz](https://www.fxhash.xyz/generative/8645)
 * [SUMMONING GATES by SCHOLOMANCY](https://www.fxhash.xyz/generative/6353)
 * [Jellybean Singularity by Chris McCully](https://www.fxhash.xyz/generative/slug/jellybean-singularity-1)
+* [Bisections by bubits](https://www.fxhash.xyz/generative/slug/bisections)
 
 Artists
 ---
