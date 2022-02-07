@@ -11,4 +11,4 @@
 outfn=screenshot_heist.zip
 rm -f $outfn
 
-zip $outfn script.js chroma.js index.html style.css LICENSE README.md
+zip $outfn script.js index.html style.css LICENSE README.md

@@ -13,21 +13,32 @@ var g_info = {
   "canvas": {},
   "ctx" : {},
   "tick" : 0,
-  "tick_val" : 0,
 
   "anim": false,
   "pause": false,
 
-  "speed_factor":256,
-  "color": [ ],
 
-  "monochrome": false,
+  // https://kgolid.github.io/chromotome-site/
+  //
   "palette" : [
     {
       name: 'floratopia',
       colors: ['#bf4a2b', '#cd902a', '#4e4973', '#f5d4bc'],
       stroke: '#1e1a43',
       background: '#1e1a43',
+    },
+
+    {
+      name: 'frozen-rose',
+      colors: ['#29368f', '#e9697b', '#1b164d', '#f7d996'],
+      background: '#f2e8e4',
+    },
+
+    {
+      name: 'ducci_jb',
+      colors: ['#395e54', '#e77b4d', '#050006', '#e55486'],
+      stroke: '#050006',
+      background: '#efe0bc'
     },
 
     {
@@ -38,16 +49,20 @@ var g_info = {
     }
   ],
 
+  "monochrome": false,
+  "palette_choice": -1,
+  "angle": 0,
+  "rotating": false,
+  "rotate_sign" : 1,
+
+  "dist": {"x":0, "y":0},
+
   "rnd":[],
   "hue": fxrand()*360,
 
-  //"bg_color" : "#111",
   "bg_color" : "#222",
 
-  "hot_idx":0,
-
-  "data" : [],
-  "state" : []
+  "data" : []
 
 };
 
@@ -90,20 +105,12 @@ function _rnd_color() {
     let _color = "rgb(" + _b + "," + _b  + "," + _b + ")";
     return _color;
   }
-
-  return g_info.palette[0].colors[ _irnd(g_info.palette[0].colors.length) ];
-
-  //let _h = Math.floor(fxrand()*360);
-  let _h = g_info.hue;
-  let _c = Math.floor(_rnd(20, 40));
-  let _l = Math.floor(_rnd(0, 80));
-
-  let _rgb = chroma.hcl( _h, _c, _l ).rgb();
-  let _color = "rgba(" + _rgb.join(",") + ",0.95)";
-
-  return _color;
+  return g_info.palette_choice.colors[ _irnd(g_info.palette_choice.colors.length) ];
 }
 
+function _rnd_velocity() {
+  return _clamp( 2*Math.pow(fxrand(), 4), 1.0/32, 2);
+}
 
 // https://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
 // https://stackoverflow.com/users/96100/tim-down
@@ -262,18 +269,10 @@ function update_package(_sq, sx, sy, distx, disty, gen_w, gen_h, gamma) {
   let _cos = Math.cos(theta);
   let _sin = Math.sin(theta);
 
-  //let _vv = fxrand()*5 + 0.25;
-  let _vv = _clamp( 3*Math.pow(fxrand(), 2), 0.25, 5);
-  let _v_vec = { "x" : _vv*Math.cos(theta), "y": _vv*Math.sin(theta) };
+  let _vv = _rnd_velocity();
+  //let _v_vec = { "x" : _vv*Math.cos(theta), "y": _vv*Math.sin(theta) };
 
-
-
-  //let _w = gen_h*fxrand()/2 + 4;
-  //let _h = gen_h*fxrand()/4 + 4;
-
-  //let _w = _clamp(gen_h*Math.pow(fxrand(), gamma), 4, gen_h/2);
   let _w = _clamp(200*Math.pow(fxrand(), gamma), 4, gen_h/2);
-  //let _h = _clamp(gen_h*Math.pow(fxrand(), gamma), 4, gen_h/4);
   let _h = (0.75 + 0.5*(fxrand()-0.5))*_w;
 
   _h = _clamp( Math.pow(fxrand(), 10)*_w, 1, _w );
@@ -289,23 +288,7 @@ function update_package(_sq, sx, sy, distx, disty, gen_w, gen_h, gamma) {
 
   let _ttl = len / _vv;
 
-
-
-
-  //let _b = _clamp( Math.floor(fxrand()*255), 32, 255-32);
-  //let _color = "rgb(" + _b + "," + _b  + "," + _b + ")";
-
-  //let _rgb = chroma.hcl( fxrand()*360, 50, 50 ).rgb();
-  //let _color = "rgba(" + _rgb.join(",") + ",0.95)";
-
   let _color = _rnd_color();
-
-
-  //let _color = "rgba(32,32,32,0.9)";
-  //if (fxrand() < 0.5) {
-  //  _color = "rgba(200,200,200,0.9)";
-  //}
-
 
   _sq.c = _color;
   update_sq( _sq, sx + _dx, sy + _dy, _w, _h, theta);
@@ -328,18 +311,10 @@ function create_package(sx, sy, distx, disty, gen_w, gen_h, gamma) {
   let _cos = Math.cos(theta);
   let _sin = Math.sin(theta);
 
-  //let _vv = fxrand()*5 + 3;
-  let _vv = _clamp( 3*Math.pow(fxrand(), 2), 0.25, 5);
+  let _vv = _rnd_velocity();
   let _v_vec = { "x" : _vv*Math.cos(theta), "y": _vv*Math.sin(theta) };
 
-
-
-  //let _w = gen_h*fxrand()/2 + 4;
-  //let _h = gen_h*fxrand()/4 + 4;
-
-  //let _w = _clamp(gen_h*Math.pow(fxrand(), gamma), 4, gen_h/2);
   let _w = _clamp(200*Math.pow(fxrand(), gamma), 4, gen_h/2);
-  //let _h = _clamp(gen_h*Math.pow(fxrand(), gamma), 4, gen_h/4);
   let _h = (0.75 + 0.5*(fxrand()-0.5))*_w;
 
   _h = _clamp( Math.pow(fxrand(), 10)*_w, 1, _w );
@@ -355,9 +330,6 @@ function create_package(sx, sy, distx, disty, gen_w, gen_h, gamma) {
 
   let _ttl = len / _vv;
 
-  //let _b = _clamp( Math.floor(fxrand()*255), 32, 255-32);
-  //let _color = "rgb(" + _b + "," + _b  + "," + _b + ")";
-
   let _color = _rnd_color();
 
   let _xpos = fxrand()*1.25*distx - (distx/4);
@@ -371,7 +343,6 @@ function create_package(sx, sy, distx, disty, gen_w, gen_h, gamma) {
     "theta":theta,
     "w":_w,
     "h":_h,
-    //"x": sx + _dx,
     "x": _xpos,
     "y": sy + _dy
   };
@@ -380,7 +351,6 @@ function create_package(sx, sy, distx, disty, gen_w, gen_h, gamma) {
 }
 
 function create_pair(p0x,p0y,distx,disty,w,h,N) {
-  //let N=30000;
   N = ((typeof N === "undefined") ? 30000 : N);
 
   let len = Math.sqrt( (distx*distx) + (disty*disty) );
@@ -409,32 +379,8 @@ function create_pair(p0x,p0y,distx,disty,w,h,N) {
     _pair.sq.push( create_package(p0x,p0y, distx,disty, w,h) );
   }
 
-  //_pair.sq.sort( function(a,b) { return a.w*a.h - b.w*b.h; } );
-  _pair.sq.sort( function(a,b) { return b.w*b.h - a.w*a.h; } );
-
   return _pair;
 }
-
-function draw_sq(ctx, _sq, c) {
-
-  if (typeof c !== "undefined") { ctx.fillStyle = c; }
-
-  ctx.fillRect( _sq.x, _sq.y, _sq.w, _sq.h );
-}
-
-
-function __draw_sq(ctx, _pnt, c) {
-  if (typeof c !== "undefined") { ctx.fillStyle = c; }
-  ctx.beginPath();
-
-  ctx.moveTo(_pnt[0].x, _pnt[0].y);
-  for (let i=1; i<=_pnt.length; i++) {
-    let idx = i%_pnt.length;
-    ctx.lineTo(_pnt[idx].x, _pnt[idx].y);
-  }
-  ctx.fill();
-
- }
 
 function anim() {
 
@@ -444,79 +390,17 @@ function anim() {
 
   clear(ctx, _cw, _ch, g_info.bg_color);
 
-  if (g_info.data.length == 0) {
+  ctx.save();
 
-    for (let i=0; i<1; i++) {
-
-      let x = Math.floor(fxrand()*_cw);
-      let y = Math.floor(fxrand()*_ch);
-
-      //x = -_cw;
-      x = -_ch/2;
-      y = _ch/2;
-
-      let x1 = Math.floor(fxrand()*_cw);
-      let y1 = Math.floor(fxrand()*_ch);
-
-      //x1 = _cw + 100;
-      //y1 = _ch + 100;
-
-      x1 = _cw;
-      //y1 = 2*_ch;
-      y1 = _ch/2;
-
-
-
-      //if (fxrand() < 0.5) { x1 = x; }
-      //else { y1 = y; }
-
-      let distx = x1 - x;
-      let disty = y1 - y;
-
-      //let w = fxrand()*50 + 10;
-      //let h = fxrand()*100 + 40;
-
-      w = 1;
-      h = 1.25*_ch;
-
-      //let _sq_density = 50;
-      let _sq_density = fxrand()*(50-10) + 10;
-
-
-
-      let _N = _sq_density * _max(_cw, _ch);
-
-      console.log("_N:", _N);
-
-      g_info.data.push(create_pair(x,y, distx,disty, w,h, _N));
-    }
-    //g_info.data.push( create_pair(300, 300, 500, 0, 10, 100) );
-    //g_info.data.push( create_pair(400, 200, 0, 500, 10, 100) );
-    //g_info.data.push( create_pair(700, 200, -500, 300, 30, 300) );
-
+  ctx.translate( _cw/2, _ch/2);
+  if (g_info.rotating) {
+    let _a = g_info.rotate_sign*(g_info.tick / 1000)*Math.PI*2;
+    ctx.rotate(_a);
   }
-
-  if ((g_info.tick%120)==-1) {
-    let _idx = g_info.hot_idx;
-    g_info.hot_idx = (g_info.hot_idx + 1)%(g_info.data.length);
-
-    let x = Math.floor(fxrand()*_cw);
-    let y = Math.floor(fxrand()*_ch);
-
-    let x1 = Math.floor(fxrand()*_cw);
-    let y1 = Math.floor(fxrand()*_ch);
-
-    if (fxrand() < 0.5) { x1 = x; }
-    else { y1 = y; }
-
-    let distx = x1 - x;
-    let disty = y1 - y;
-
-    let w = fxrand()*50 + 10;
-    let h = fxrand()*100 + 40;
-
-    g_info.data[_idx] = create_pair(x,y, distx,disty, w,h);
+  else {
+    ctx.rotate(g_info.angle);
   }
+  ctx.translate( -_cw/2, -_ch/2);
 
   ctx.beginPath();
   for (let _zidx=0; _zidx<g_info.data.length; _zidx++) {
@@ -524,81 +408,39 @@ function anim() {
 
     for (let i=0; i<z.sq.length ;i++) {
       ctx.fillStyle = z.sq[i].c;
-      ctx.fillRect( Math.floor(z.sq[i].x), Math.floor(z.sq[i].y), Math.floor(z.sq[i].w), Math.floor(z.sq[i].h) );
+      ctx.fillRect( z.sq[i].x, z.sq[i].y, z.sq[i].w, z.sq[i].h );
     }
 
     for (let i=0; i<z.sq.length; i++) {
       if (z.sq[i].ttl<=0) {
         update_package( z.sq[i],z.gen[0].x, z.gen[0].y, z.dist.x, z.dist.y, z.w, z.h );
       }
-      for (let j=0; j<z.sq[i].p.length; j++) {
-        z.sq[i].p[j].x += z.sq[i].v.x;
-        z.sq[i].p[j].y += z.sq[i].v.y;
 
-        z.sq[i].x += z.sq[i].v.x;
-        z.sq[i].y += z.sq[i].v.y;
+      if (!g_info.pause) {
+        for (let j=0; j<z.sq[i].p.length; j++) {
+          z.sq[i].p[j].x += z.sq[i].v.x;
+          z.sq[i].p[j].y += z.sq[i].v.y;
 
+          z.sq[i].x += z.sq[i].v.x;
+          z.sq[i].y += z.sq[i].v.y;
+
+        }
+        z.sq[i].ttl--;
       }
-      z.sq[i].ttl--;
+
     }
 
     z.sq.sort( function(a,b) { return b.w*b.h - a.w*a.h; } );
 
 
   }
+  ctx.restore();
 
-  g_info.tick++;
-  window.requestAnimationFrame(anim);
-
-  return;
-
-  let n = g_info.state.length;
-
-  ctx.fillStyle = "rgba(0,0,0,0.5)";
-  ctx.beginPath();
-  for (let i=0; i<n; i++) {
-    let _v = g_info.state[i];
-
-    ctx.fillRect( _v.x, _v.y, _v.w, _v.h );
-
-    _v.x += _v.v.x;
-    _v.y += _v.v.y;
-
-    _v.ttl --;
+  if (!g_info.pause) {
+    g_info.tick += 1;
   }
-
-  let new_state = [];
-  for (let i=0; i<n; i++) {
-    let _v = g_info.state[i];
-
-    if (_v.ttl <= 0) {
-      let _u = {
-        "x": 300 + fxrand()*50,
-        "y": 300 + fxrand()*100,
-        "w": 10 + fxrand()*30,
-        "h": 10 + fxrand()*30,
-        "v": { "x": 3 + fxrand()*5, "y": 0 },
-        "ttl": 50 + fxrand()*30
-      };
-      new_state.push(_u);
-      continue;
-    }
-    new_state.push(_v);
-  }
-  g_info.state = new_state;
-
 
   window.requestAnimationFrame(anim);
-
-  if (g_info.anim) {
-
-    if (!g_info.pause) {
-      g_info.tick += 1;
-      g_info.tick_val = 16*(1.0 + Math.sin(Math.PI*2.0*g_info.tick/g_info.speed_factor));
-    }
-
-  }
-
 }
 
 function clear(ctx, clear_width, clear_height, bg_color) {
@@ -618,7 +460,7 @@ function screenshot() {
   let imguri = canvas.toDataURL(canvas);
 
   let link = document.createElement("a");
-  link.download = "100shirtrsburning_screenshot.png";
+  link.download = "screenshot_heist.png";
   link.href = imguri;
   document.body.appendChild(link);
   link.click();
@@ -626,73 +468,137 @@ function screenshot() {
   delete link;
 }
 
-function _simple_ok(ctx) {
-
-  ctx.beginPath();
-  ctx.lineWidth = 0;
-  ctx.fillStyle = "rgba(255, 0, 0, 0.8)";
-  ctx.moveTo(50, 50);
-  ctx.arc(50, 50, 20, 0, 2*Math.PI);
-  ctx.fill();
-}
-
 function init() {
-  g_info.state = [];
+  let features = {
+  };
 
-  let p0 = [ 300, 300 ];
-  let p1 = [ 1000, 300 ];
+  // neex to choose color palette before
+  // we start assigning objects
+  //
+  let n = _irnd( g_info.palette.length + 1 );
+  if (n==g_info.palette.length) {
+    g_info.monochrome = true;
+    features["Color Scheme"] = "monochrome";
+  }
+  else {
+    g_info.monochrome = false;
+    g_info.palette_choice = g_info.palette[n];
+    features["Color Scheme"] = g_info.palette_choice.name;
+  }
 
+  //---
 
-  for (i=0; i<20; i++) {
+  let _cw = g_info.canvas.width;
+  let _ch = g_info.canvas.height;
+  let ctx = g_info.ctx;
 
-    let _v = {
-      "x" : p0[0] + fxrand()*30,
-      "y" : p0[0] + fxrand()*30,
-      "v" : { "x": 10, "y": 0 },
-      "ttl" : 50,
-      "w": 20*fxrand() + 3,
-      "h": 20*fxrand() + 3
-    };
-    g_info.state.push(_v);
+  let x = Math.floor(fxrand()*_cw);
+  let y = Math.floor(fxrand()*_ch);
+
+  x = -_ch/2;
+  y =  _ch/2;
+
+  let x1 = Math.floor(fxrand()*_cw);
+  let y1 = Math.floor(fxrand()*_ch);
+
+  x1 = _cw;
+  y1 = _ch/2;
+
+  let distx = x1 - x;
+  let disty = y1 - y;
+
+  w = 1;
+  h = 1.5*_max(_cw,_ch);
+
+  let _sq_density = fxrand()*(50-10) + 10;
+
+  let _N = Math.floor(_sq_density * _max(_cw, _ch));
+
+  g_info.dist = {"x":distx, "y":disty};
+
+  features["Particle Count"] = _N;
+
+  console.log("N:", _N);
+
+  g_info.data.push(create_pair(x,y, distx,disty, w,h, _N));
+
+  //---
+
+  g_info.angle = fxrand()*Math.PI*2;
+
+  if (fxrand() < (1/8)) {
+    g_info.rotating = true;
+    if (fxrand() < 0.5) {
+      g_info.rotate_sign = -1;
+      features["Angle"] = "Rotating Counterclockwise";
+    }
+    else {
+      features["Angle"] = "Rotating Clockwise";
+    }
 
   }
+  else {
+    features["Angle"] = g_info.angle + " radians";
+  }
+
+  window.$fxhashFeatures = features;
 }
 
-(()=>{
+function initCanvas() {
 
-  console.log("fxhash:",fxhash);
-
-  // have some persistent global random numbers for later use
-  //
-  for (let i=0; i<10; i++) { g_info.rnd.push( fxrand() ); }
+  console.log("initCanvas");
 
   let canvas = document.getElementById("canvas");
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
   let ctx = canvas.getContext("2d");
 
+
   let W = canvas.width;
   let H = canvas.height;
+
+  g_info.width = W;
+  g_info.height = H;
 
   let dS = ((W<H) ? W : H);
 
   g_info.canvas = canvas;
   g_info.ctx = ctx;
   g_info.size = Math.floor(dS - dS/3);
+}
+
+
+(()=>{
+
+  console.log("fxhash:",fxhash);
+
+  initCanvas();
+  let ctx = g_info.ctx;
+  let canvas = g_info.canvas;
+  let W = canvas.width;
+  let H = canvas.height;
+
   g_info.tick = 0;
 
   init();
-
-  g_info.speed_factor = fxrand()*511 + 1;
 
   clear(ctx, W, H, g_info.bg_color);
 
   //--
 
-  // setup callback in f_hist.
-  //
-  let ox = Math.floor(dS/6),
-      oy = Math.floor(dS/6);
+  document.addEventListener('keydown', function(ev) {
+    if (ev.key == 'p') {
+      g_info.pause = ((g_info.pause) ? false : true);
+    }
+    else if (ev.key == 's') {
+      screenshot();
+    }
+    return false;
+  });
+
+  window.addEventListener('resize', function(ev) {
+    initCanvas();
+  });
 
   window.requestAnimationFrame(anim);
 
