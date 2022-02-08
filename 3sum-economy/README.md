@@ -3,7 +3,7 @@
 
 [![screenshot](../img/3sum_economy.png)](https://github.com/abetusk/iao/tree/main/3sum-economy)
 
-(not) Available on [fxhash](https://www.fxhash.xyz/generative/slug/PROJECT)
+Available on [fxhash](https://www.fxhash.xyz/generative/slug/3sum-economy)
 
 Quick Start
 ---
