@@ -92,6 +92,8 @@ I Like Em
 * [Secret places of my mind by ge1doot](https://www.fxhash.xyz/generative/slug/secret-places-of-my-mind)
 * [Spaghetti Code by Matthew Burke](https://www.fxhash.xyz/generative/8810)
 * [Genaun by lomz](https://www.fxhash.xyz/generative/slug/genaun)
+* [Medidation by quentinhocde](https://www.fxhash.xyz/generative/slug/medidation)
+* [Far from the Madding Crowd by Marco Aureggi](https://www.fxhash.xyz/generative/slug/far-from-the-madding-crowd)
 
 Artists
 ---
