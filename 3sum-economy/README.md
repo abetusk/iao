@@ -94,7 +94,6 @@ Reference
 ---
 
 * [Chromotome](https://github.com/kgolid/chromotome)
-* [Chroma.js](https://github.com/gka/chroma.js)
 * [Bezier.js](https://github.com/Pomax/bezierjs)
 * [Perlin](https://github.com/josephg/noisejs)
 

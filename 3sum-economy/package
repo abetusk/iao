@@ -11,4 +11,4 @@
 outfn=3sum_economy.zip
 rm -f $outfn
 
-zip $outfn script.js perlin.js bezier.js chromotome.json chroma.js index.html style.css LICENSE README.md
+zip $outfn script.js perlin.js bezier.js chromotome.json index.html style.css LICENSE README.md

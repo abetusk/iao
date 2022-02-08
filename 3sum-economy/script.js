@@ -9,7 +9,7 @@
 
 
 var g_info = {
-  "VERSION" : "0.1.0",
+  "VERSION" : "0.2.0",
   "download_filename": "3sum_economy.png",
 
   "path_debug": false,
@@ -563,6 +563,7 @@ function screenshot() {
 
 
 function initCanvas() {
+
   let canvas = document.getElementById("canvas");
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
@@ -584,8 +585,9 @@ function initCanvas() {
   g_info.ctx = ctx;
   g_info.size = dS;
 
-  init_path();
-  init_shapes();
+  //init_path();
+  //init_shapes();
+  init_fin();
 }
 
 function loading_anim() {
@@ -806,10 +808,18 @@ function init_path() {
 //
 function init() {
   //loadjson("./chromotome.json", init_loadpalette);
+  //init_global_param();
   init_fin();
 }
 
-function init_fin() {
+// global paramters should be stable up to image resize
+// or reload with a different canvas size.
+// The idea is that these 'global' parameters give the
+// overall characteristic of the piece and can be reported
+// back to fxhash through the fxhashFeatures
+//
+function init_global_param() {
+
 
   g_info.path_configuration = _irnd(g_info.path_configuration_n);
   g_info.palette_idx = _irnd(g_info.palette.length+1);
@@ -849,6 +859,10 @@ function init_fin() {
   g_info.particle_density = 4;
 
   console.log(g_info.features);
+
+}
+
+function init_fin() {
 
   init_path();
   init_shapes();
@@ -980,12 +994,12 @@ function init_shapes() {
 
 (()=>{
 
-  g_info.last_t = Date.now();
-
   console.log("fxhash:",fxhash);
 
-  initCanvas();
+  g_info.last_t = Date.now();
 
+  init_global_param();
+  initCanvas();
   init();
 
   document.addEventListener('keydown', function(ev) {
