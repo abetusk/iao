@@ -34,3 +34,11 @@ Works
 | |
 |---|
 | [![Screenshot Heist](img/screenshot_heist.png)](https://github.com/abetusk/iao/tree/main/screenshot-heist) |
+
+---
+
+###### [3SUM Economy](https://github.com/abetusk/iao/tree/main/3sum-economy)
+
+| |
+|---|
+| [![3SUM Economy](img/3sum_economy.png)](https://github.com/abetusk/iao/tree/main/3sum-economy) |
