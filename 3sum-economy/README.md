@@ -1,4 +1,4 @@
-PROJECT
+3SUM Economy
 ===
 
 [![screenshot](../img/3sum_economy.png)](https://github.com/abetusk/iao/tree/main/3sum-economy)
