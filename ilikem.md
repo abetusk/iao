@@ -20,7 +20,7 @@ I Like Em
 * [Nouveau Dillsack by Presstube](https://www.fxhash.xyz/generative/41)
 * [Chromoplams #165 by {protocell:labs}](https://www.fxhash.xyz/generative/slug/chromoplasm)
 * [_ribbon study_ by hailpixel](https://www.fxhash.xyz/generative/6620)
-* [MID-CENTURY MODERN #94 by Aleksandra](https://www.fxhash.xyz/generative/slug/mid-century-modern)
+* [MID-CENTURY MODERN by Aleksandra](https://www.fxhash.xyz/generative/slug/mid-century-modern)
 * [Planet Panels #72 by p4stoboy](https://www.fxhash.xyz/gentk/145145)
 * [OpenBLOCK by @grasser_alex](https://www.fxhash.xyz/generative/slug/openblock-1)
 * [Plottable Mountain Moons by greweb](https://www.fxhash.xyz/generative/slug/plottable-mountain-moons-1)
@@ -91,6 +91,7 @@ I Like Em
 * [dots by Johan Holwerda](https://www.fxhash.xyz/generative/1456)
 * [Secret places of my mind by ge1doot](https://www.fxhash.xyz/generative/slug/secret-places-of-my-mind)
 * [Spaghetti Code by Matthew Burke](https://www.fxhash.xyz/generative/8810)
+* [Genaun by lomz](https://www.fxhash.xyz/generative/slug/genaun)
 
 Artists
 ---
