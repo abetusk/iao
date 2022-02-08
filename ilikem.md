@@ -86,6 +86,11 @@ I Like Em
 * [Hex Grid by Dan Gries](https://www.fxhash.xyz/generative/slug/hex-grid-1)
 * [Recycled Chaos by Vamk](https://www.fxhash.xyz/generative/7756)
 * [Torsion by Estienne](https://www.fxhash.xyz/generative/slug/torsion)
+* [tentacle ball by Johan Holwerda](https://www.fxhash.xyz/generative/slug/tentacle-ball-1)
+* [sway by Johan Holwerda](https://www.fxhash.xyz/generative/2172)
+* [dots by Johan Holwerda](https://www.fxhash.xyz/generative/1456)
+* [Secret places of my mind by ge1doot](https://www.fxhash.xyz/generative/slug/secret-places-of-my-mind)
+* [Spaghetti Code by Matthew Burke](https://www.fxhash.xyz/generative/8810)
 
 Artists
 ---
