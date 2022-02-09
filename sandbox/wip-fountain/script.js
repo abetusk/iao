@@ -28,7 +28,7 @@ var g_info = {
   "tick" : 0,
   "tick_val" : 0,
 
-  "fps_debug":true,
+  "fps_debug":false,
   "fps":0,
   "last_t":0,
 
@@ -99,6 +99,34 @@ function _arnd(a) {
   return a[idx];
 }
 
+
+function _hex2rgb(rgb) {
+  let s = 0;
+  let d = 2;
+  if (rgb[0] == '#') {
+    rgb = rgb.slice(1);
+  }
+  if (rgb.length==3) { d = 1; }
+  let hxr = rgb.slice(s,s+d);
+  if (hxr.length==1) { hxr += hxr; }
+  s += d;
+
+  let hxg = rgb.slice(s,s+d);
+  if (hxg.length==1) { hxg += hxg; }
+  s += d;
+
+  let hxb = rgb.slice(s,s+d);
+  if (hxb.length==1) { hxb += hxb; }
+  s += d;
+
+  let v = { "r": parseInt(hxr,16), "g": parseInt(hxg,16), "b": parseInt(hxb,16) };
+  return v;
+}
+
+function _hex2hsv(rgbhex) {
+  let rgb = _hex2rgb(rgbhex);
+  return RGBtoHSV(rgb.r, rgb.g, rgb.b);
+}
 
 // https://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
 // https://stackoverflow.com/users/96100/tim-down
@@ -806,6 +834,10 @@ function init_fin() {
 
   g_info.state = [];
 
+  if ("background" in g_info.palette_choice) {
+    g_info.bg_color = g_info.palette_choice.background;
+  }
+
   let N = 500;
   for (let i=0; i<N; i++) {
 
@@ -815,9 +847,16 @@ function init_fin() {
     let vy = Math.sin(va);
 
     let b = Math.floor(fxrand()*255);
-    let c = "rgba(" + b + "," + b + "," + b + ",0.85)";
+    let __c = "rgba(" + b + "," + b + "," + b + ",0.85)";
 
-    c = _arnd(g_info.palette_choice.colors);
+    let pal_c = _arnd(g_info.palette_choice.colors);
+
+    let hsv_c = _hex2hsv(pal_c);
+    hsv_c.s = _clamp(hsv_c.s + _rnd(-0.25,0.25), 0, 1);
+    hsv_c.v = _clamp(hsv_c.v + _rnd(-0.125,0), 0, 1);
+    let rgb_c = HSVtoRGB(hsv_c.h, hsv_c.s, hsv_c.v);
+    let c = _rgb2hex(rgb_c.r, rgb_c.g, rgb_c.b);
+
 
     let _w = _max( fxrand()*30, 5);
     let _h = _max( fxrand()*30, 5);
@@ -858,8 +897,10 @@ function init_fin() {
     //ele.cur_t = _irnd(ele.end_t);
     ele.cur_t = _irnd(0,300);
     ele.end_t = 300;
-    ele.x = (ele.cur_t / ele.end_t)*ele.vx + sx - _w/2;
-    ele.y = (ele.cur_t / ele.end_t)*ele.vy + sy - _h/2;
+    //ele.x = (ele.cur_t / ele.end_t)*ele.vx + sx - _w/2;
+    //ele.y = (ele.cur_t / ele.end_t)*ele.vy + sy - _h/2;
+    ele.x = (ele.cur_t)*ele.vx + sx - _w/2;
+    ele.y = (ele.cur_t)*ele.vy + sy - _h/2;
     ele.cur_w = size_f(ele.w, ele.cur_t, ele.end_t);
     ele.cur_h = size_f(ele.h, ele.cur_t, ele.end_t);
 
@@ -873,6 +914,8 @@ function load_palette(txt) {
   let idx = _irnd(g_info.palette.pal.length);
   g_info.palette_choice = g_info.palette.pal[idx];
   g_info.palette_idx = idx;
+
+  console.log(">>", g_info.palette_choice.name);
 
   init_fin();
 }

@@ -10,6 +10,8 @@ General
 * [Generated Space](https://generated.space/)
 * [Tyler Hobbs - Essays](https://tylerxhobbs.com/essays)
 * [Decon Batch](https://www.deconbatch.com/)
+* [How to Make Generative Art Feel Natural](https://www.generativehut.com/post/how-to-make-generative-art-feel-natural)
+
 
 Libraries
 ---
@@ -31,6 +33,11 @@ Concepts
 ---
 
 * [Flow Fields - Tyler Hobbs](https://tylerxhobbs.com/essays/2020/flow-fields)
+* [Chaikin's Algorithm](https://observablehq.com/@pamacha/chaikins-algorithm)
+* [Halton Sequence](https://en.wikipedia.org/wiki/Halton_sequence)
+* [Poisson-Disc Sampling](https://www.jasondavies.com/poisson-disc/)
+  - [Poisson Disk](https://www.cs.ubc.ca/~rbridson/docs/bridson-siggraph07-poissondisk.pdf)
+
 
 Ideas
 ---
