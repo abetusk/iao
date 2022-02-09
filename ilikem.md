@@ -97,6 +97,8 @@ I Like Em
 * [METRO by Generatore](https://www.fxhash.xyz/generative/slug/metro)
 * [Abstract Urbanism by ultravioletto](https://www.fxhash.xyz/generative/slug/abstract-urbanism)
 * [Mind Spa by Hao-Ping Wang](https://www.fxhash.xyz/generative/slug/mind-spa)
+* [teared.locations by markknol](https://www.fxhash.xyz/generative/slug/teared.locations-1)
+
 
 Artists
 ---

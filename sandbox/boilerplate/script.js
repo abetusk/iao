@@ -28,6 +28,10 @@ var g_info = {
   "tick" : 0,
   "tick_val" : 0,
 
+  "fps_debug": false,
+  "fps": 0,
+  "last_t":0,
+
 
   "anim": false,
   "pause": false,
@@ -75,6 +79,25 @@ function _irnd(a,b) {
   }
   return Math.floor(fxrand()*(b-a) + a);
 }
+
+function _rndpow(s) {
+  return Math.pow(fxrand(), s);
+}
+
+
+function loadjson(fn, cb) {
+  var xhr = new XMLHttpRequest();
+  xhr.overrideMimeType("application/json");
+  xhr.open("GET", fn, true);
+  xhr.onreadystatechange = function() {
+    if ((xhr.readyState === 4) && (xhr.status === 200)) {
+      cb(xhr.responseText);
+    }
+  }
+  xhr.send(null);
+}
+
+
 
 // https://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
 // https://stackoverflow.com/users/96100/tim-down
@@ -179,6 +202,22 @@ function HSLtoHSV(h, s, l) {
 //-----
 
 function loading_anim() {
+
+  // fps
+  //
+  let now_t = Date.now();
+  let delta_t = (now_t - g_info.last_t);
+  g_info.last_t = now_t;
+  if (delta_t > 0) { g_info.fps = 1000/(delta_t); }
+  if (g_info.fps_debug) {
+    if ((g_info.tick%30)==0) {
+      console.log(g_info.fps);
+    }
+  }
+  //
+  // fps
+
+
   let ctx = g_info.ctx;
   ctx.lineWidth = 0;
 
@@ -318,6 +357,8 @@ function init() {
 (()=>{
 
   console.log("fxhash:",fxhash);
+
+  g_info.last_t = Date.now();
 
   // have some persistent global random numbers for later use
   //
