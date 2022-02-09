@@ -1,6 +1,8 @@
 PROJECT
 ===
 
+**THIS IS A BOILERPLATE PROJECT, ALTER PARTS AS NEEDED**
+
 [![screenshot](../img/PROJECT.png)](https://github.com/abetusk/iao/tree/main/PROJECT)
 
 Available on [fxhash](https://www.fxhash.xyz/generative/slug/PROJECT)
