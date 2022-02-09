@@ -94,6 +94,9 @@ I Like Em
 * [Genaun by lomz](https://www.fxhash.xyz/generative/slug/genaun)
 * [Medidation by quentinhocde](https://www.fxhash.xyz/generative/slug/medidation)
 * [Far from the Madding Crowd by Marco Aureggi](https://www.fxhash.xyz/generative/slug/far-from-the-madding-crowd)
+* [METRO by Generatore](https://www.fxhash.xyz/generative/slug/metro)
+* [Abstract Urbanism by ultravioletto](https://www.fxhash.xyz/generative/slug/abstract-urbanism)
+* [Mind Spa by Hao-Ping Wang](https://www.fxhash.xyz/generative/slug/mind-spa)
 
 Artists
 ---
@@ -104,4 +107,4 @@ Artists
 * [Presstube](https://www.fxhash.xyz/u/Presstube)
 * [__orderandchaos](https://www.fxhash.xyz/u/__orderandchaos)
 * [Lolo Armdz](https://www.fxhash.xyz/u/Lolo%20Armdz)
-
+* [needleundernail](https://www.fxhash.xyz/u/needleundernail)
