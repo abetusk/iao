@@ -102,6 +102,8 @@ I Like Em
 * [Disruptive by Makarov Dima](https://www.fxhash.xyz/generative/slug/disruptive)
 * [Caim ring by 0x4a69726b61](https://www.fxhash.xyz/generative/slug/caim-ring-1)
 * [Postcard CPT by ismahelio](https://www.fxhash.xyz/generative/873)
+* [Queen by elsif](https://www.fxhash.xyz/generative/9154)
+* [Oceans of Anxiety by needleundernail](https://www.fxhash.xyz/gentk/slug/oceans-of-anxiety-159)
 
 Artists
 ---

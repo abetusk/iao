@@ -42,3 +42,11 @@ Works
 | |
 |---|
 | [![3SUM Economy](img/3sum_economy.png)](https://github.com/abetusk/iao/tree/main/3sum-economy) |
+
+---
+
+###### [Beansprout](https://github.com/abetusk/iao/tree/main/beansprout)
+
+| |
+|---|
+| [![beansprout](img/beansprout.png)](https://github.com/abetusk/iao/tree/main/beansprout) |
