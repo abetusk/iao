@@ -3,7 +3,7 @@ Beansprout
 
 [![screenshot](../img/beansprout.png)](https://github.com/abetusk/iao/tree/main/beansprout)
 
-(not) Available on [fxhash](https://www.fxhash.xyz/generative/slug/beansprout)
+Available on [fxhash](https://www.fxhash.xyz/generative/slug/beansprout)
 
 Quick Start
 ---
@@ -41,7 +41,7 @@ This work hopes to add to the conversation about examining the reality of the ec
 Tags
 ---
 
-minimal, generative
+minimal, generative, shapes, motion
 
 Statement
 ---
