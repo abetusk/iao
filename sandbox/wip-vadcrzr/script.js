@@ -28,9 +28,11 @@ var g_info = {
   "tick" : 0,
   "tick_val" : 0,
 
-  "fps_debug": true,
+  "fps_debug": false,
   "fps": 0,
+  "cur_t": 0,
   "last_t":0,
+  "delta_t":0,
 
   "alphabet": {
     "a": [ "xxx" + "x.x" + "xxx" + "x.x" + "x.x" ],
@@ -580,19 +582,121 @@ function draw_effect() {
   let _ch = g_info.canvas.height;
   let ctx = g_info.ctx;
 
-  let _test_frame = (Math.floor(g_info.tick/2)%16);
-  let _s_x = 100;
-  let _s_y = 100;
-  let _s_ds_bg = 30;
-  let _s_ds = 20;
+
+  for (let i=0; i<g_info.state.effect.length; i++) {
+
+    let _s_x = _cw/2;
+    let _s_y = _ch/2;
+    let _s_ds_bg = 30;
+    let _s_ds = 20;
+
+    let ele = g_info.state.effect[i];
+
+    if (ele.type == "squiggly") {
+      if (ele.init) {
+        ele.next_frame_t = g_info.cur_t + ele.frame_delta_t;
+        ele.init=false;
+      }
+
+      if (g_info.cur_t >= ele.next_frame_t) {
+        ele.frame_idx = (ele.frame_idx+1)%ele.n_frame;
+        ele.next_frame_t += ele.frame_delta_t;
+      }
+
+      ctx.save();
+
+      ctx.translate(_cw/2, _ch/2);
+      ctx.rotate(ele.a);
+      ctx.translate(-_cw/2,-_ch/2);
+
+
+      if (ele.frame_idx < 8) {
+
+        let _xb = _s_x - _s_ds_bg/2 + ele.x;
+        let _yb = _s_y - _s_ds_bg/2 + _s_ds + ele.y;
+
+        let _x = _s_x - _s_ds/2 + ele.x;
+        let _y = _s_y - _s_ds/2 + _s_ds + ele.y;
+
+
+        //draw_squiggle(ctx, _s_x - _s_ds_bg/2 , _s_y - _s_ds_bg/2 + _s_ds, _s_ds, 1, ele.frame_idx, "rgba(255, 128, 0, 0.5)", _s_ds_bg);
+        draw_squiggle(ctx, _xb , _yb, _s_ds, 1, ele.frame_idx, "rgba(255, 128, 0, 0.5)", _s_ds_bg);
+        draw_squiggle(ctx,  _x,   _y, _s_ds, 1, ele.frame_idx, "rgba(255, 0, 0, 0.5)");
+
+      }
+      else {
+        let _xb = _s_x - _s_ds_bg/2 + ele.x;
+        let _yb = _s_y + (ele.frame_idx-8)*_s_ds - _s_ds_bg/2 + _s_ds + ele.y;
+
+        let _x = _s_x - _s_ds/2 + ele.x;
+        let _y = _s_y + (ele.frame_idx-8)*_s_ds - _s_ds/2 + _s_ds + ele.y;
+
+        //draw_squiggle(ctx, _s_x - _s_ds_bg/2, _s_y + (ele.frame_idx-8)*_s_ds - _s_ds_bg/2 + _s_ds, _s_ds, ele.frame_idx+1, 8, "rgba(255, 128, 0, 0.5)", _s_ds_bg);
+        draw_squiggle(ctx, _xb, _yb, _s_ds, ele.frame_idx+1, 8, "rgba(255, 128, 0, 0.5)", _s_ds_bg);
+        draw_squiggle(ctx,  _x,  _y, _s_ds, ele.frame_idx+1, 8, "rgba(255, 0, 0, 0.5)");
+      }
+
+      ctx.restore();
+    }
+
+  }
+
+  return;
+
+  let _f_fac = 2;
+  let _test_frame = (Math.floor(g_info.tick/_f_fac)%16);
   //draw_squiggle(ctx, _s_x - _s_ds_bg/2, _s_y - _s_ds_bg/2 + _s_ds*_test_frame, _s_ds, _test_frame, 8, "rgba(255, 128, 0, 0.5)", _s_ds_bg);
   //draw_squiggle(ctx, _s_x - _s_ds/2   , _s_y - _s_ds/2    + _s_ds*_test_frame, _s_ds, _test_frame, 8, "rgba(255, 0, 0, 0.5)");
-  draw_squiggle(ctx, _s_x - _s_ds_bg/2, _s_y - _s_ds_bg/2 + _s_ds, _s_ds, 1, _test_frame, "rgba(255, 128, 0, 0.5)", _s_ds_bg);
-  draw_squiggle(ctx, _s_x - _s_ds/2   , _s_y - _s_ds/2    + _s_ds, _s_ds, 1, _test_frame, "rgba(255, 0, 0, 0.5)");
+
+  if (g_info.state.effect[0].state == "start") {
+    let _test_frame = (Math.floor(g_info.tick/_f_fac)%16);
+    let _s_x = 100;
+    let _s_y = 100;
+    let _s_ds_bg = 30;
+    let _s_ds = 20;
+    draw_squiggle(ctx, _s_x - _s_ds_bg/2, _s_y - _s_ds_bg/2 + _s_ds, _s_ds, 1, _test_frame, "rgba(255, 128, 0, 0.5)", _s_ds_bg);
+    draw_squiggle(ctx, _s_x - _s_ds/2   , _s_y - _s_ds/2    + _s_ds, _s_ds, 1, _test_frame, "rgba(255, 0, 0, 0.5)");
+
+    if (_test_frame == 8) {
+      g_info.state.effect[0].state = "middle";
+    }
+  }
+  else if (g_info.state.effect[0].state == "middle") {
+    let _test_frame = (Math.floor(g_info.tick/_f_fac)%16);
+    let _s_ds = 20;
+    let _s_x = 100;
+    let _s_y = 100 + (_test_frame-8)*_s_ds ;
+    let _s_ds_bg = 30;
+    draw_squiggle(ctx, _s_x - _s_ds_bg/2, _s_y - _s_ds_bg/2 + _s_ds, _s_ds, _test_frame, 8, "rgba(255, 128, 0, 0.5)", _s_ds_bg);
+    draw_squiggle(ctx, _s_x - _s_ds/2   , _s_y - _s_ds/2    + _s_ds, _s_ds, _test_frame, 8, "rgba(255, 0, 0, 0.5)");
+
+    if (_test_frame == 0) {
+      g_info.state.effect[0].state = "start";
+    }
+  }
+  else if (g_info.state.effect[0].state == "end") {
+  }
 
 }
 
 function anim() {
+
+  // fps
+  //
+  let now_t = Date.now();
+  let delta_t = (now_t - g_info.last_t);
+  g_info.cur_t = now_t;
+  g_info.last_t = now_t;
+  g_info.delta_t = delta_t;
+  if (delta_t > 0) { g_info.fps = 1000/(delta_t); }
+  if (g_info.fps_debug) {
+    if ((g_info.tick%30)==0) {
+      console.log(g_info.fps);
+    }
+  }
+  //
+  // fps
+
 
   let _cw = g_info.canvas.width;
   let _ch = g_info.canvas.height;
@@ -837,22 +941,37 @@ function init_effect() {
   let _cw = g_info.width;
   let _ch = g_info.width;
 
-  for (let i=0; i<16; i++) {
+  let M = 8;
+  for (let i=0; i<M; i++) {
     let r = 50;
     let cx = _cw/2;
     let cy = _ch/2;
-    let a =0;
+    let a = (i/M)*Math.PI*2;
     let x = r*Math.cos(a) + cx;
     let y = r*Math.sin(a) + cy;
     let ele = {
-      "orig_x":x,
-      "orig_y":y,
-      "x": x,
-      "y": y,
+      "type": "squiggly",
+      "init":true,
+      //"orig_x":x,
+      //"orig_y":y,
+      "orig_x": 100,
+      "orig_y":0,
+      "a": a,
+      "da": 0,
+      //"x": x,
+      //"y": y,
+      "x": 0,
+      "y": 250,
       "dx": 0,
       "dy": 0,
+      "state":"start",
+      "frame_idx": 0,
+      "next_frame_t": 0,
+      "frame_delta_t" : 70,
+      "n_frame" : 64,
       "frame": []
     };
+
     g_info.state.effect.push(ele);
   }
 
@@ -869,6 +988,11 @@ function init_effect() {
   for (let i=0; i<10; i++) { g_info.rnd.push( fxrand() ); }
 
   g_info.palette_choice = _arnd( g_info.palette );
+
+  g_info.cur_t = Date.now();
+  g_info.last_t = g_info.cur_t;
+  g_info.delta_t = 0;
+
 
   initCanvas();
 

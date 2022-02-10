@@ -104,6 +104,11 @@ I Like Em
 * [Postcard CPT by ismahelio](https://www.fxhash.xyz/generative/873)
 * [Queen by elsif](https://www.fxhash.xyz/generative/9154)
 * [Oceans of Anxiety by needleundernail](https://www.fxhash.xyz/gentk/slug/oceans-of-anxiety-159)
+* [99 recorridos by andrusenn](https://www.fxhash.xyz/generative/slug/99-recorridos)
+* [...-generative Kaleidoscope by KOPYTOV619](https://www.fxhash.xyz/generative/slug/de-generative-kaleidoscope-1)
+* [Urban Flora by marcinignac](https://www.fxhash.xyz/generative/slug/urban-flora)
+* [anaverse - Solid state by anaglyphic](https://www.fxhash.xyz/generative/slug/anaverse-solid-state)
+
 
 Artists
 ---
@@ -115,3 +120,5 @@ Artists
 * [__orderandchaos](https://www.fxhash.xyz/u/__orderandchaos)
 * [Lolo Armdz](https://www.fxhash.xyz/u/Lolo%20Armdz)
 * [needleundernail](https://www.fxhash.xyz/u/needleundernail)
+* [andrusenn](https://www.fxhash.xyz/u/andrusenn)
+
