@@ -101,6 +101,7 @@ I Like Em
 * [Jojo Roulette by Jojo Sunshine](https://www.fxhash.xyz/generative/slug/jojo-roulette)
 * [Disruptive by Makarov Dima](https://www.fxhash.xyz/generative/slug/disruptive)
 * [Caim ring by 0x4a69726b61](https://www.fxhash.xyz/generative/slug/caim-ring-1)
+* [Postcard CPT by ismahelio](https://www.fxhash.xyz/generative/873)
 
 Artists
 ---

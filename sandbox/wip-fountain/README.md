@@ -41,6 +41,10 @@ To the extent possible, the source code is dedicated to the public domain (CC0) 
 
 This work hopes to add to the conversation about examining the reality of the ecosystem that we've developed around digital goods and intellectual property.
 
+"PROJECT" is inspired by artists `Johan Holwerda` and `01000010`.
+
+
+
 Tags
 ---
 
@@ -68,6 +72,8 @@ around digital goods and intellectual property.
 
 Reference
 ---
+
+* [dots by Johan Holwerda](https://www.fxhash.xyz/generative/slug/dots-2)
 
 License
 ---

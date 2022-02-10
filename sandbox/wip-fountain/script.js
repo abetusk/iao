@@ -174,8 +174,8 @@ var g_info = {
   //"ele_min_ttl": 120,
   //"ele_max_ttl": 300,
 
-  "ele_min_ttl": 180,
-  "ele_max_ttl": 450,
+  "ele_min_ttl": 230,
+  "ele_max_ttl": 550,
 
   "geom_mem": {},
 
@@ -185,6 +185,8 @@ var g_info = {
 
   "state": [],
   "bg_color" : "#222",
+
+  "enable_flashing": false,
 
   "param": {
   }
@@ -205,6 +207,11 @@ function _clamp(x,a,b) {
 
 function _max(a,b) {
   if (a>b) { return a; }
+  return b;
+}
+
+function _min(a,b) {
+  if (a<b) { return a; }
   return b;
 }
 
@@ -759,22 +766,24 @@ function square_band(ctx, x, y, width, height, band_x, band_y, color) {
 
 
 function size_f(w,t,t_end) {
-  /*
-  if ((t/t_end) < 0.5) {
-    let _sin = Math.sin( Math.PI*(t_end - t)/t_end );
-    return w*_sin*_sin;
-  }
-*/
-
   let p = 2*((t/t_end) - 0.5);
-  //return w*(1-(p*p));
   if (p<0) {
     return w*(1-Math.pow(p, 6));
   }
   return w*(1-Math.pow(p, 1.25));
+}
 
+function burst_f(w,t,t_end, _f) {
+  _f = ((typeof _f === "undefined") ? 2.7 : _f);
+  let p = 2*((t/t_end) - 0.5);
+  if (p<0) {
+    //return w*(1-Math.pow(p, 6));
+    //return w*(1-Math.pow(p, 6)) * (Math.cos(-2.0*Math.PI*p*2.7) + 1.0)/2.0;
+    return w*(Math.cos(-2.0*Math.PI*p*_f) + 1.0)/2.0;
+  }
+  //return w*(1-Math.pow(p, 1.25))*(Math.cos(2.0*Math.PI*p*3.7) + 1.0)/2.0;
+  return w*(Math.cos(2.0*Math.PI*p*_f) + 1.0)/2.0;
 
-  //return w*Math.sin( Math.PI*(t_end - t)/t_end );
 }
 
 function anim() {
@@ -834,6 +843,8 @@ function anim() {
   let _z = g_info.state;
   for (let i=0; i<_z.length; i++) {
     let _ele = _z[i];
+
+
 
     if (_ele.visible) {
       let _x = _ele.x ;
@@ -944,8 +955,17 @@ function anim() {
     for (let i=0; i<_z.length; i++) {
       let _ele = _z[i];
 
-      //_ele.x += _ele.vx;
-      //_ele.y += _ele.vy;
+      if (g_info.enable_flashing) {
+        let hsv_c = _hex2hsv(_ele.c_orig);
+        let _ff0 = 1.7;
+        let _ff1 = 1.4;
+
+        hsv_c.s = burst_f(hsv_c.s, _ele.cur_t, _ele.end_t, _ele.c_freq);
+        hsv_c.v = burst_f(hsv_c.v, _ele.cur_t, _ele.end_t, _ele.c_freq);
+
+        let rgb_c = HSVtoRGB(hsv_c.h, hsv_c.s, hsv_c.v);
+        _ele.c = _rgb2hex(rgb_c.r, rgb_c.g, rgb_c.b);
+      }
 
       _ele.x += _ele.vx*t_fac;
       _ele.y += _ele.vy*t_fac;
@@ -1036,6 +1056,9 @@ function screenshot() {
 
 
 function initCanvas() {
+
+  console.log("initCanvas");
+
   let canvas = document.getElementById("canvas");
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
@@ -1057,6 +1080,12 @@ function initCanvas() {
   g_info.ctx = ctx;
   g_info.size = dS;
 
+  // ...
+
+  //g_info.ele_min_ttl = 200;
+  //g_info.ele_max_ttl = 500;
+
+
   if (g_info.ready) { init_fin(); }
 }
 
@@ -1071,19 +1100,7 @@ function _shuffle(a) {
 }
 
 function init_fin() {
-
-  /*
-  let _shapes = [ "square_square", "square", "square_band", "stripe", "square_plus"  ];
-  let _shape_n_choice = _irnd( _shapes.length );
-
-  if (_shape_n_choice == 0) {
-    _shapes = [ "square_square", "square", "square_band", "stripe", "square_plus"  ];
-  }
-  else {
-    _shuffle(_shapes);
-    _shapes = _shapes.slice(0,_shape_n_choice);
-  }
-  */
+  console.log("init_fin");
 
   let _shapes = g_info.param.shape_list;
 
@@ -1092,25 +1109,33 @@ function init_fin() {
   let _w2 = g_info.width/2;
   let _h2 = g_info.height/2;
 
-  console.log("init_fin");
-
   g_info.state = [];
 
   if ("background" in g_info.palette_choice) {
     g_info.bg_color = g_info.palette_choice.background;
   }
 
-  let N = 800;
+  let _SZ = _min( g_info.width, g_info.height );
+
+  //let N = 800;
+  //let N = 600;
+  let N = 1;
   for (let i=0; i<N; i++) {
 
     let va = fxrand()*Math.PI*2;
     va = Math.PI*2*i/N;
-    let vx = Math.cos(va)/1.5;
-    let vy = Math.sin(va)/1.5;
+
+    let _vfac = (2/3)*(_SZ/700);
+    let vx = Math.cos(va)*_vfac;
+    let vy = Math.sin(va)*_vfac;
 
     let b = Math.floor(fxrand()*255);
     let __c = "rgba(" + b + "," + b + "," + b + ",0.85)";
 
+    // give just a little variation in the color
+    // to try and help with the texture and add
+    // a subtle-ish effect
+    //
     let pal_c = _arnd(g_info.palette_choice.colors);
 
     let hsv_c = _hex2hsv(pal_c);
@@ -1119,11 +1144,12 @@ function init_fin() {
     let rgb_c = HSVtoRGB(hsv_c.h, hsv_c.s, hsv_c.v);
     let c = _rgb2hex(rgb_c.r, rgb_c.g, rgb_c.b);
 
-
     let _w = _max( fxrand()*30, 5);
     let _h = _max( fxrand()*30, 5);
 
-    _w = _max( 100*_rndpow(1.5), 5);
+    // hard coded fudge 7 to give good output
+    //
+    _w = _max( (_SZ/7)*_rndpow(1.5), 5);
     _h = _w;
 
     let sx = _rnd(-100,100) + _w2;
@@ -1134,12 +1160,12 @@ function init_fin() {
     let _shape = _arnd(_shapes);
 
     let ele = {
-      //"x": _rnd(-1,1)*100 + _w2 - _w/2,
-      //"y": _rnd(-1,1)*100 + _h2 - _h/2,
       "shape": _shape,
       "x": sx,
       "y": sy,
       "c": c,
+      "c_orig": c,
+      "c_freq": _rnd(0,3.0),
       "cur_w": 0,
       "cur_h": 0,
       "w": _w,
@@ -1153,7 +1179,8 @@ function init_fin() {
       "cur_t" : 0,
       //"end_t" : Math.floor(_rnd(120,400)),
       //"end_t" : 300,
-      "end_t" : g_info.ele_max_ttl,
+      //"end_t" : g_info.ele_max_ttl,
+      "end_t" : _irnd(g_info.ele_min_ttl, g_info.ele_max_ttl),
       "visible": true
     };
 
