@@ -31,6 +31,8 @@ var g_info = {
   "fps_debug":false,
   "fps":0,
   "last_t":0,
+  "delta_t":0,
+  "ideal_delta_t": (1000/16),
 
   "anim": false,
   "pause": false,
@@ -40,17 +42,152 @@ var g_info = {
 
   "rnd":[],
 
-  "palette" : [],
+  "palette" : [
+  {
+    "name": "miradors",
+    "colors": ["#ff6936", "#fddc3f", "#0075ca", "#00bb70"],
+    "stroke": "#ffffff",
+    "background": "#020202"
+  },
+  {
+    "name": "bloomberg",
+    "colors": ["#ff5500", "#f4c145", "#144714", "#2f04fc", "#e276af"],
+    "stroke": "#000",
+    "background": "#fff3dd"
+  },
+  {
+    "name": "kaffeprat",
+    "colors": ["#BCAA8C", "#D8CDBE", "#484A42", "#746B58", "#9A8C73"],
+    "stroke": "#000",
+    "background": "#fff"
+  },
+  {
+    "name": "tundra2",
+    "colors": ["#5f9e93", "#3d3638", "#733632", "#b66239", "#b0a1a4", "#e3dad2"]
+  },
+  {
+    "name": "hilda03",
+    "colors": ["#e95145", "#f8b917", "#b8bdc1", "#ffb2a2"],
+    "stroke": "#010101",
+    "background": "#6b7752"
+  },
+  {
+    "name": "mably",
+    "colors": [
+      "#13477b",
+      "#2f1b10",
+      "#d18529",
+      "#d72a25",
+      "#e42184",
+      "#138898",
+      "#9d2787",
+      "#7f311b"
+    ],
+    "stroke": "#2a1f1d",
+    "background": "#dfc792"
+  },
+  {
+    "name": "rohlfs_3",
+    "colors": ["#abdfdf", "#fde500", "#58bdbc", "#eff0dd"],
+    "stroke": "#211029",
+    "background": "#f76975"
+  },
+  {
+    "name": "dale_night",
+    "colors": ["#ae5d9d", "#f1e8bc", "#ef8fa3", "#f7c047", "#58c9ed", "#f77150"],
+    "stroke": "#000000",
+    "background": "#00ae83"
+  },
+  {  
+    "name": "cc234",
+    "colors": ["#ffce49", "#ede8dc", "#ff5736", "#ff99b4"],
+    "background": "#f7f4ed"
+  },
+  {
+    "name": "delphi",
+    "colors": ["#475b62", "#7a999c", "#2a1f1d", "#fbaf3c", "#df4a33", "#f0e0c6", "#af592c"],
+    "stroke": "#2a1f1d",
+    "background": "#f0e0c6"
+  },
+  {
+    "name": "riff",
+    "colors": ["#e24724", "#c7c7c7", "#1f3e7c", "#d29294", "#010203"],
+    "stroke": "#010203",
+    "background": "#f2f2f2"
+  },
+  {
+    "name": "ducci_g",
+    "colors": ["#c75669", "#000000", "#11706a"],
+    "stroke": "#11706a",
+    "background": "#ecddc5"
+  },
+  {
+    "name": "rohlfs_2",
+    "colors": ["#4d3d9a", "#f76975", "#ffffff", "#eff0dd"],
+    "stroke": "#211029",
+    "background": "#58bdbc"
+  },
+  {
+    "name": "ducci_q",
+    "colors": ["#4bae8c", "#d0c1a0", "#2d3538"],
+    "stroke": "#2d3538",
+    "background": "#d06440"
+  },
+  {
+    "name": "exposito_sub2",
+    "colors": ["#8bc9c3", "#ffae43", "#ea432c", "#524e9c", "#f0a1a1", "#228345"],
+    "stroke": "#fff",
+    "background": "#000000"
+  },
+  {
+    "name": "sneaker",
+    "colors": ["#e8165b", "#401e38", "#66c3b4", "#ee7724", "#584098"],
+    "stroke": "#401e38",
+    "background": "#ffffff"
+  },
+  {
+    "name": "cako2_sub1",
+    "colors": ["#dbdac9", "#d55a3a", "#2a5c8a"],
+    "stroke": "#000000",
+    "background": "#000000"
+  },
+  {
+    "name": "cc238",
+    "colors": ["#553c60", "#ffb0a0", "#ff6749", "#fbe090"],
+    "background": "#f5e9de"
+  },
+  {
+    "name": "juxtapoz",
+    "colors": ["#20357e", "#f44242", "#ffffff"],
+    "stroke": "#000000",
+    "background": "#cfc398"
+  }
+  ],
+
+
+
 
   "monochome": true,
   "palette_choice": {},
   "palette_idx": -1,
 
+  //"ele_min_ttl": 120,
+  //"ele_max_ttl": 300,
+
+  "ele_min_ttl": 180,
+  "ele_max_ttl": 450,
+
+  "geom_mem": {},
+
+  "particle": [],
 
   "features":[],
 
   "state": [],
-  "bg_color" : "#222"
+  "bg_color" : "#222",
+
+  "param": {
+  }
 
 };
 
@@ -386,7 +523,11 @@ function stripe_45_square(ctx, x, y, width, phase, empty_width, stripe_width, co
   let rop = [];
   _clip_difference(rop, opgn, epgn);
 
-  polygons(ctx, x, y, rop, color);
+  if (typeof ctx !== "undefined") {
+    polygons(ctx, x, y, rop, color);
+  }
+
+  return rop;
 }
 
 function stripe_m45_square(ctx, x, y, width, phase, empty_width, stripe_width, color) {
@@ -412,7 +553,11 @@ function stripe_m45_square(ctx, x, y, width, phase, empty_width, stripe_width, c
   let rop = [];
   _clip_difference(rop, opgn, epgn);
 
-  polygons(ctx, x, y, rop, color);
+  if (typeof ctx !== "undefined") {
+    polygons(ctx, x, y, rop, color);
+  }
+
+  return rop;
 }
 
 function square_square(ctx, x, y, owidth, iwidth, color) {
@@ -490,6 +635,8 @@ function hatching_grid(ctx, x, y, ndiag, tot_width, small_square_width, color, p
   _clip_difference(rop, opgn, epgn);
 
   polygon_with_holes(ctx, x, y, rop, color);
+
+  return rop;
 
 }
 
@@ -603,7 +750,11 @@ function square_band(ctx, x, y, width, height, band_x, band_y, color) {
   let rop = [];
   _clip_difference(rop, outer_pgn, inner_pgn);
 
-  polygons(ctx, x, y, rop, color);
+  if (typeof ctx !== "undefined") {
+    polygons(ctx, x, y, rop, color);
+  }
+
+  return rop;
 }
 
 
@@ -633,6 +784,7 @@ function anim() {
   let now_t = Date.now();
   let delta_t = (now_t - g_info.last_t);
   g_info.last_t = now_t;
+  g_info.delta_t = delta_t;
   if (delta_t > 0) { g_info.fps = 1000/(delta_t); }
   if (g_info.fps_debug) {
     if ((g_info.tick%30)==0) {
@@ -663,6 +815,19 @@ function anim() {
   // PER FRAME CODE
   //
 
+  //ctx.fillStyle = g_info.c_particle;
+  ctx.beginPath();
+  for (let i=0; i<g_info.particle.length; i++) {
+
+    //if ((i%100)==0) { ctx.beginPath(); }
+
+    let _ele = g_info.particle[i];
+    let _x = _ele.x ;
+    let _y = _ele.y ;
+    ctx.fillStyle = _ele.c;
+    ctx.fillRect( _x, _y, 2, 2 );
+  }
+
   //g_info.state.sort( function(a,b) { return b.cur_t - a.cur_t; } );
   g_info.state.sort( function(a,b) { return a.w- b.w; } );
 
@@ -671,8 +836,8 @@ function anim() {
     let _ele = _z[i];
 
     if (_ele.visible) {
-      let _x = _ele.x ; //- _ele.w/2;
-      let _y = _ele.y ;// - _ele.h/2;
+      let _x = _ele.x ;
+      let _y = _ele.y ;
 
       let _xx = _x - _ele.cur_w/2;
       let _yy = _y - _ele.cur_h/2;
@@ -680,7 +845,6 @@ function anim() {
       ctx.fillStyle = _ele.c;
       ctx.save();
       ctx.beginPath();
-      //ctx.fillRect(_ele.x, _ele.y, _ele.w, _ele.h);
 
       ctx.translate(_x, _y);
       ctx.rotate(_ele.cur_a);
@@ -696,24 +860,74 @@ function anim() {
         ctx.fillRect(_xx, _yy, _ele.cur_w, _ele.cur_h);
       }
       else if (_ele.shape == "square_band") {
-        square_band(ctx, _xx, _yy, _ele.cur_w, _ele.cur_h, _ele.cur_w/3, 0, _ele.c);
+
+        if (!(i in g_info.geom_mem)) {
+          g_info.geom_mem[i] = square_band(ctx, _xx, _yy, _ele.w, _ele.h, _ele.w/3, 0, _ele.c);
+        }
+        ctx.translate(_x,_y);
+        ctx.scale(_ele.cur_w / _ele.w, _ele.cur_w / _ele.w);
+        ctx.translate(-_x,-_y);
+
+        polygons(ctx, _xx, _yy, g_info.geom_mem[i], _ele.c);
+
       }
       else if (_ele.shape == "square_plus") {
-        square_band(ctx, _xx, _yy, _ele.cur_w, _ele.cur_h, _ele.cur_w/3, _ele.cur_w/3, _ele.c);
+
+        if (!(i in g_info.geom_mem)) {
+          g_info.geom_mem[i] = square_band(ctx, _xx, _yy, _ele.w, _ele.h, _ele.w/3, _ele.w/3, _ele.c);
+        }
+        ctx.translate(_x,_y);
+        ctx.scale(_ele.cur_w / _ele.w, _ele.cur_w / _ele.w);
+        ctx.translate(-_x,-_y);
+
+        polygons(ctx, _xx, _yy, g_info.geom_mem[i], _ele.c);
+
       }
       else if (_ele.shape == "stripe") {
-        stripe_45_square(ctx, _xx, _yy, _ele.cur_w, 0, _ele.cur_w/5, _ele.cur_w/5, _ele.c);
+
+        if (!(i in g_info.geom_mem)) {
+          g_info.geom_mem[i] = stripe_45_square(ctx, _xx, _yy, _ele.w, 0, _ele.w/5, _ele.w/5, _ele.c);
+        }
+
+        ctx.translate(_x,_y);
+        ctx.scale(_ele.cur_w / _ele.w, _ele.cur_w / _ele.w);
+        ctx.translate(-_x,-_y);
+
+        polygons(ctx, _xx, _yy, g_info.geom_mem[i], _ele.c);
       }
 
       else if (_ele.shape == "mstripe") {
-        stripe_m45_square(ctx, _xx, _yy, _ele.cur_w, 0, _ele.cur_w/5, _ele.cur_w/5, _ele.c);
+
+        if (!(i in g_info.geom_mem)) {
+          g_info.geom_mem[i] = stripe_m45_square(undefined, _xx, _yy, _ele.w, 0, _ele.w/5, _ele.w/5, _ele.c);
+        }
+
+
+        ctx.translate(_x,_y);
+        ctx.scale(_ele.cur_w / _ele.w, _ele.cur_w / _ele.w);
+        ctx.translate(-_x,-_y);
+
+        polygons(ctx, _xx, _yy, g_info.geom_mem[i], _ele.c);
+
+      }
+
+      else if (_ele.shape == "hatching") {
+        if (i in g_info.geom_mem) {
+          ctx.translate(_x,_y);
+          ctx.scale(_ele.cur_w / _ele.w, _ele.cur_w / _ele.w);
+          ctx.translate(-_x,-_y);
+
+          polygon_with_holes(ctx, _xx, _yy, g_info.geom_mem[i], _ele.c);
+        }
+        else {
+          g_info.geom_mem[i] = hatching_grid(ctx, _xx, _yy, 4, _ele.cur_w, _ele.cur_w/6.25, _ele.c);
+        }
       }
 
       //ctx.fillRect(_ele.x - _ele.w/2, _ele.y - _ele.h/2, _ele.cur_w, _ele.cur_h);
 
       //circle_band(ctx, _xx, _yy, _ele.cur_w, _ele.cur_w/3, 0, _ele.c);
 
-      //hatching_grid(ctx, _xx, _yy, 4, _ele.cur_w, _ele.cur_w/6.25, _ele.c);
 
       ctx.restore();
 
@@ -721,18 +935,27 @@ function anim() {
 
   }
 
+  // update state
+  //
+
   if (!g_info.pause) {
+
+    let t_fac = g_info.ideal_delta_t / g_info.delta_t;
     for (let i=0; i<_z.length; i++) {
       let _ele = _z[i];
 
-      _ele.x += _ele.vx;
-      _ele.y += _ele.vy;
+      //_ele.x += _ele.vx;
+      //_ele.y += _ele.vy;
+
+      _ele.x += _ele.vx*t_fac;
+      _ele.y += _ele.vy*t_fac;
 
       if (_ele.cur_t > 0) {
         _ele.cur_w = size_f(_ele.w, _ele.cur_t, _ele.end_t);
         _ele.cur_h = size_f(_ele.h, _ele.cur_t, _ele.end_t);
 
-        _ele.cur_a += _ele.da;
+        //_ele.cur_a += _ele.da;
+        _ele.cur_a += _ele.da*t_fac;
         if (_ele.cur_a > (Math.PI*2)) {
           _ele.cur_a -= Math.PI*2;
         }
@@ -749,12 +972,14 @@ function anim() {
         _ele.x = _cw/2;
         _ele.y = _ch/2;
 
-        _ele.end_t = _rnd(120,300);
+        //_ele.end_t = _rnd(120,300);
+        _ele.end_t = _rnd(g_info.ele_min_ttl,g_info.ele_max_ttl);
 
         //_ele.da = _rnd(-2*Math.PI, 2*Math.PI)/1024;
       }
 
-      _ele.cur_t++;
+      //_ele.cur_t++;
+      _ele.cur_t += t_fac;
 
       if (_ele.cur_t >= _ele.end_t) {
         _ele.x = _cw/2;
@@ -764,6 +989,20 @@ function anim() {
 
       }
 
+
+    }
+
+    for (let i=0; i<g_info.particle.length; i++) {
+      let _ele = g_info.particle[i];
+      _ele.x += _ele.vx*t_fac;
+      _ele.y += _ele.vy*t_fac;
+
+      _ele.cur_t += t_fac;
+      if (_ele.cur_t >= _ele.end_t) {
+        _ele.cur_t = 0; //_irnd(20);
+        _ele.x = _cw/2;
+        _ele.y = _ch/2;
+      }
 
     }
   }
@@ -821,9 +1060,32 @@ function initCanvas() {
   if (g_info.ready) { init_fin(); }
 }
 
+
+function _shuffle(a) {
+  for (let i=0; i<a.length; i++) {
+    let v_idx = _irnd(a.length-i);
+    let u = a[i];
+    a[i] = a[v_idx];
+    a[v_idx] = u;
+  }
+}
+
 function init_fin() {
 
-  let _shapes = [ "square_square", "square", "ret", "square_band", "stripe", "square_plus" ];
+  /*
+  let _shapes = [ "square_square", "square", "square_band", "stripe", "square_plus"  ];
+  let _shape_n_choice = _irnd( _shapes.length );
+
+  if (_shape_n_choice == 0) {
+    _shapes = [ "square_square", "square", "square_band", "stripe", "square_plus"  ];
+  }
+  else {
+    _shuffle(_shapes);
+    _shapes = _shapes.slice(0,_shape_n_choice);
+  }
+  */
+
+  let _shapes = g_info.param.shape_list;
 
   g_info.ready = true;
 
@@ -838,13 +1100,13 @@ function init_fin() {
     g_info.bg_color = g_info.palette_choice.background;
   }
 
-  let N = 500;
+  let N = 800;
   for (let i=0; i<N; i++) {
 
     let va = fxrand()*Math.PI*2;
     va = Math.PI*2*i/N;
-    let vx = Math.cos(va);
-    let vy = Math.sin(va);
+    let vx = Math.cos(va)/1.5;
+    let vy = Math.sin(va)/1.5;
 
     let b = Math.floor(fxrand()*255);
     let __c = "rgba(" + b + "," + b + "," + b + ",0.85)";
@@ -884,19 +1146,22 @@ function init_fin() {
       "h": _h,
       "a": fxrand()*Math.PI*2,
       "cur_a": fxrand()*Math.PI*2,
-      "da": fxrand()*Math.PI*2/100,
+      //"da": fxrand()*Math.PI*2/100,
+      "da": 3/200,
       "vx": vx,
       "vy": vy,
       "cur_t" : 0,
-      "end_t" : Math.floor(_rnd(120,400)),
+      //"end_t" : Math.floor(_rnd(120,400)),
+      //"end_t" : 300,
+      "end_t" : g_info.ele_max_ttl,
       "visible": true
     };
 
-    ele.da = 3/100;
+    //ele.da = 3/200;
 
     //ele.cur_t = _irnd(ele.end_t);
-    ele.cur_t = _irnd(0,300);
-    ele.end_t = 300;
+    //ele.end_t = 300;
+    ele.cur_t = _irnd(0,ele.end_t);
     //ele.x = (ele.cur_t / ele.end_t)*ele.vx + sx - _w/2;
     //ele.y = (ele.cur_t / ele.end_t)*ele.vy + sy - _h/2;
     ele.x = (ele.cur_t)*ele.vx + sx - _w/2;
@@ -905,6 +1170,43 @@ function init_fin() {
     ele.cur_h = size_f(ele.h, ele.cur_t, ele.end_t);
 
     g_info.state.push(ele);
+  }
+
+  let M = 0;
+  for (let i=0; i<M; i++) {
+    let va = fxrand()*Math.PI*2;
+    va = Math.PI*2*i/N;
+    let _vf = _rnd(0.6,1);
+    let vx = Math.cos(va)*_vf;
+    let vy = Math.sin(va)*_vf;
+    let sx = _w2 ;
+    let sy = _h2 ;
+
+    let pal_c = _arnd(g_info.palette_choice.colors);
+
+    let hsv_c = _hex2hsv(pal_c);
+    hsv_c.s = _clamp(hsv_c.s + _rnd(-0.25,0.25), 0, 1);
+    hsv_c.v = _clamp(hsv_c.v + _rnd(-0.125,0), 0, 1);
+    let rgb_c = HSVtoRGB(hsv_c.h, hsv_c.s, hsv_c.v);
+    //let c = _rgb2hex(rgb_c.r, rgb_c.g, rgb_c.b);
+    let c = "rgba(" + rgb_c.r +","+ rgb_c.g +","+ rgb_c.b +",0.2)";
+
+
+    let ele = {
+      "c": c,
+      "x": sx,
+      "y": sy,
+      "vx": vx,
+      "vy": vy,
+      "cur_t" : 0,
+      "end_t" : 1000
+    };
+
+    ele.cur_t = _irnd(ele.end_t);
+    ele.x = (ele.cur_t / ele.end_t) * ele.vx + sx;
+    ele.y = (ele.cur_t / ele.end_t) * ele.vy + sy;
+
+    g_info.particle.push(ele);
   }
 }
 
@@ -936,18 +1238,47 @@ function loadjson(fn, cb) {
 
 function init() {
 
-  // EXAMPLE INIT
+  // kept for reference.
+  // chromotome.json should be available in the project
+  // and palettes are takenf rom this file.
+  // See the file for license and project information.
   //
+  //loadjson("./chromotome.json", load_palette)
 
-  loadjson("./chromotome.json", load_palette)
-  //setTimeout(function() { init_fin(); }, 500);
-
-  //
-  // EXAMPLE INIT
+  init_fin();
 
 }
 
 function init_global_param() {
+
+  let _shapes = [ "square_square", "square", "square_band", "stripe", "square_plus"  ];
+  let _shape_n_choice = _irnd( _shapes.length );
+
+  if (_shape_n_choice == 0) {
+    _shapes = [ "square_square", "square", "square_band", "stripe", "square_plus"  ];
+  }
+  else {
+    _shuffle(_shapes);
+    _shapes = _shapes.slice(0,_shape_n_choice);
+  }
+
+  g_info.param["shape_list"] = _shapes;
+
+  g_info.param["palette_idx"] = _irnd( g_info.palette.length );
+
+  g_info.palette_choice = g_info.palette[ g_info.param.palette_idx ];
+
+  _shapes.sort();
+
+  g_info.features = {
+    "Color Scheme": g_info.palette_choice.name,
+    "Shape List": _shapes.join(", ")
+  };
+
+  window.$fxhashFeatures = g_info.features;
+
+  console.log(">>features:", g_info.features);
+
 }
 
 (()=>{

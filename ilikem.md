@@ -98,7 +98,9 @@ I Like Em
 * [Abstract Urbanism by ultravioletto](https://www.fxhash.xyz/generative/slug/abstract-urbanism)
 * [Mind Spa by Hao-Ping Wang](https://www.fxhash.xyz/generative/slug/mind-spa)
 * [teared.locations by markknol](https://www.fxhash.xyz/generative/slug/teared.locations-1)
-
+* [Jojo Roulette by Jojo Sunshine](https://www.fxhash.xyz/generative/slug/jojo-roulette)
+* [Disruptive by Makarov Dima](https://www.fxhash.xyz/generative/slug/disruptive)
+* [Caim ring by 0x4a69726b61](https://www.fxhash.xyz/generative/slug/caim-ring-1)
 
 Artists
 ---

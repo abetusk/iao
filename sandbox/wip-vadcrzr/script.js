@@ -183,7 +183,9 @@ var g_info = {
   "state": {
     "blink_open": false,
     "blink_cur_t":0,
-    "blink_end_t":0
+    "blink_end_t":0,
+
+    "effect": []
   },
 
   "fg_amp_x": 0,
@@ -205,7 +207,10 @@ var g_info = {
 
   "rnd":[],
 
-  "bg_color" : "#333"
+  "bg_color" : "#333",
+
+  "param": {},
+  "features":{}
 
 };
 
@@ -547,6 +552,45 @@ function disp_r(cx,cy,w,h,g,c,no_eyes,no_shadow,no_overlap) {
 
 }
 
+function draw_squiggle(ctx, x, y, ds, start_frame, n_frame, c, sz) {
+  ds = ((typeof ds === "undefined") ? 15: ds);
+  start_frame = ((typeof start_frame === "undefined") ? 0 : start_frame);
+  n_frame = ((typeof n_frame === "undefined") ? 8 : n_frame);
+  c = ((typeof c === "undefined") ? "rgba(255,0,0,0.5)" : c);
+  sz = ((typeof sz === "undefined") ? ds : sz);
+
+  let xstep = [0,1,2,1];
+  let _o = 0;
+
+  for (let i=0; i<n_frame; i++) {
+    let _y = i*ds;
+    let _x = ds*xstep[(i+start_frame)%xstep.length];
+
+    ctx.fillStyle = c;
+    ctx.beginPath();
+    //ctx.fillRect(x + _x, y + _y, ds + _o, ds + _o);
+    ctx.fillRect(x + _x, y + _y, sz + _o, sz + _o);
+
+    //console.log(x+_x, y+_y);
+  }
+}
+
+function draw_effect() {
+  let _cw = g_info.canvas.width;
+  let _ch = g_info.canvas.height;
+  let ctx = g_info.ctx;
+
+  let _test_frame = (Math.floor(g_info.tick/2)%16);
+  let _s_x = 100;
+  let _s_y = 100;
+  let _s_ds_bg = 30;
+  let _s_ds = 20;
+  //draw_squiggle(ctx, _s_x - _s_ds_bg/2, _s_y - _s_ds_bg/2 + _s_ds*_test_frame, _s_ds, _test_frame, 8, "rgba(255, 128, 0, 0.5)", _s_ds_bg);
+  //draw_squiggle(ctx, _s_x - _s_ds/2   , _s_y - _s_ds/2    + _s_ds*_test_frame, _s_ds, _test_frame, 8, "rgba(255, 0, 0, 0.5)");
+  draw_squiggle(ctx, _s_x - _s_ds_bg/2, _s_y - _s_ds_bg/2 + _s_ds, _s_ds, 1, _test_frame, "rgba(255, 128, 0, 0.5)", _s_ds_bg);
+  draw_squiggle(ctx, _s_x - _s_ds/2   , _s_y - _s_ds/2    + _s_ds, _s_ds, 1, _test_frame, "rgba(255, 0, 0, 0.5)");
+
+}
 
 function anim() {
 
@@ -566,8 +610,7 @@ function anim() {
   let _base_block_w = g_info.grid[0].length;
   let _base_block_h = g_info.grid.length;
 
-  // PER FRAME CODE
-  //
+  //---
 
   let ds = _min(_cw/(_base_block_w+5),_ch/(_base_block_h+5));
 
@@ -577,6 +620,7 @@ function anim() {
   let cy = _ch/2 - g_info.grid.length*ds/2;
 
   let shadow_offset = 10;
+
 
   // background
   //
@@ -613,6 +657,10 @@ function anim() {
       disp_r(x+dx, y+dy, bg_ds-bgo, bg_ds-bgo, _bg_grid.grid, c, true, true, true);
     }
   }
+
+  // effects above background but behind monster
+  //
+  draw_effect();
 
 
   // Monster
@@ -770,6 +818,7 @@ function init_fin() {
   }
 
   g_info.bg_grid = gen_vadcrzr(base_idx)+1;
+  init_effect();
 
   for (let key in g_info.grid_mem) {
     let ikey = parseInt(key);
@@ -781,15 +830,31 @@ function init_fin() {
 }
 
 function init() {
-
-  // EXAMPLE INIT
-  //
-
-
   setTimeout(function() { init_fin(); }, 50);
+}
 
-  //
-  // EXAMPLE INIT
+function init_effect() {
+  let _cw = g_info.width;
+  let _ch = g_info.width;
+
+  for (let i=0; i<16; i++) {
+    let r = 50;
+    let cx = _cw/2;
+    let cy = _ch/2;
+    let a =0;
+    let x = r*Math.cos(a) + cx;
+    let y = r*Math.sin(a) + cy;
+    let ele = {
+      "orig_x":x,
+      "orig_y":y,
+      "x": x,
+      "y": y,
+      "dx": 0,
+      "dy": 0,
+      "frame": []
+    };
+    g_info.state.effect.push(ele);
+  }
 
 }
 
@@ -838,6 +903,7 @@ function gen_vadcrzr(base_idx) {
   let H = [ { "v":6, "p":0.1 }, { "v":7, "p":0.1 }, {"v":8, "p":0.8} ];
   let W = [ { "v":7, "p":0.05 }, { "v":8, "p":0.3 }, {"v":9, "p":0.3}, {"v":10, "p":0.3}, {"v":11, "p":.05}, {"v":15, "p":1/64.0}];
 
+  let eye_choice = _irnd(3);
 
   let fill_corner = ((_rnd() < 0.5) ? true : false);
 
@@ -846,6 +912,12 @@ function gen_vadcrzr(base_idx) {
 
   let h = _arnd(H).v;
   let w = _arnd(W).v;
+
+
+  g_info.param["orig_height"] = h;
+  g_info.param["orig_width"] = w;
+  g_info.param["eye_choice"] = eye_choice;
+
 
   for (let iy=0; iy<h; iy++) {
     grid.push([]);
@@ -868,7 +940,6 @@ function gen_vadcrzr(base_idx) {
   let dw_eye = 1;
 
   let eye_h, eye_w;
-  let eye_choice = _irnd(3);
 
   grid[dh_eye][le] = -base_idx;
   grid[dh_eye][re] = -base_idx;
@@ -952,10 +1023,6 @@ function gen_vadcrzr(base_idx) {
       }
     }
   }
-
-
-  //console.log("w:", w, "h:", h,"dh_eye:", dh_eye, "dw_eye:", dw_eye, "le:", le, "re:", re, "eye_choice:", eye_choice);
-
 
   for (let i=0; i<h; i++) {
     let s = '';
