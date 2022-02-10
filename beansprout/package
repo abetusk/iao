@@ -8,7 +8,7 @@
 # work.  If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 #
 
-outfn=BOILDERPLATE.zip
+outfn=beansprout.zip
 rm -f $outfn
 
-zip $outfn script.js perlin.js chromotome.json clipper.js index.html style.css LICENSE README.md
+zip $outfn script.js chromotome.json clipper.js index.html style.css LICENSE README.md

@@ -4,7 +4,7 @@
 // to this code.
 // 
 // You should have received a copy of the CC0 legalcode along with this
-// work.  If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
+// work. If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 //
 
 // This is a basic "boilerplate" project that uses only the simple canvas
@@ -59,6 +59,11 @@ function _clamp(x,a,b) {
 
 function _max(a,b) {
   if (a>b) { return a; }
+  return b;
+}
+
+function _min(a,b) {
+  if (a<b) { return a; }
   return b;
 }
 
@@ -338,7 +343,7 @@ function initCanvas() {
   g_info.size = Math.floor(dS - dS/3);
 }
 
-function init_done() {
+function init_fin() {
   g_info.ready = true;
 }
 
@@ -347,11 +352,14 @@ function init() {
   // EXAMPLE INIT
   //
 
-  setTimeout(function() { init_done(); }, 2000);
+  setTimeout(function() { init_fin(); }, 2000);
 
   //
   // EXAMPLE INIT
 
+}
+
+function init_global_param() {
 }
 
 (()=>{
@@ -359,6 +367,8 @@ function init() {
   console.log("fxhash:",fxhash);
 
   g_info.last_t = Date.now();
+
+  init_global_param();
 
   // have some persistent global random numbers for later use
   //

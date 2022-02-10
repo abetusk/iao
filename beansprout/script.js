@@ -4,7 +4,7 @@
 // to this code.
 // 
 // You should have received a copy of the CC0 legalcode along with this
-// work.  If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
+// work. If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 //
 
 // This is a basic "boilerplate" project that uses only the simple canvas
@@ -21,7 +21,7 @@
 
 var g_info = {
   "VERSION" : "0.1.0",
-  "download_filename": "BOILERPLATE.png",
+  "download_filename": "beansprout.png",
   "canvas": {},
   "ctx" : {},
   "ready": false,
@@ -187,6 +187,9 @@ var g_info = {
   "bg_color" : "#222",
 
   "enable_flashing": false,
+
+  "n_ele": 600,
+  "angle_d" : 3/200,
 
   "param": {
   }
@@ -764,6 +767,81 @@ function square_band(ctx, x, y, width, height, band_x, band_y, color) {
   return rop;
 }
 
+function square_plus(ctx, x, y, width, height, band_x, band_y, color) {
+
+  let _dx0 = (width - band_x)/2;
+  let _dx1 = (band_x + _dx0);
+  let _dy0 = (height - band_y)/2;
+  let _dy1 = (band_y + _dy0);
+
+  let v = [[]];
+  v[0].push( {"X": _dx0, "Y":0 });
+  v[0].push( {"X": _dx1, "Y":0 });
+
+  v[0].push( {"X": _dx1, "Y":_dy0 });
+  v[0].push( {"X": width, "Y":_dy0 });
+
+  v[0].push( {"X": width, "Y":_dy1 });
+  v[0].push( {"X": _dx1, "Y":_dy1 });
+
+  v[0].push( {"X": _dx1, "Y":height});
+  v[0].push( {"X": _dx0, "Y":height});
+
+  v[0].push( {"X": _dx0, "Y":_dy1});
+  v[0].push( {"X": 0, "Y":_dy1});
+
+  v[0].push( {"X": 0, "Y":_dy0});
+  v[0].push( {"X": _dx0, "Y":_dy0});
+
+  return v;
+
+
+
+  let outer_pgn = [[]];
+  let inner_pgn = [];
+
+
+  outer_pgn[0].push({"X":0, "Y":0});
+  outer_pgn[0].push({"X":width, "Y":0});
+  outer_pgn[0].push({"X":width, "Y":height});
+  outer_pgn[0].push({"X":0, "Y":height});
+
+  if (band_x > 0) {
+    let _x = width/2-band_x/2,
+        _y = 0,
+        _w = band_x,
+        _h = width;
+    inner_pgn.push( [
+      {"X": _x      , "Y": _y},
+      {"X": _x + _w , "Y": _y},
+      {"X": _x + _w , "Y": _y + _h},
+      {"X": _x      , "Y": _y + _h},
+    ]);
+  }
+
+  if (band_y > 0) {
+    let _x = 0,
+        _y = width/2-band_y/2,
+        _w = width,
+        _h = band_y;
+    inner_pgn.push( [
+      {"X": _x      , "Y": _y},
+      {"X": _x + _w , "Y": _y},
+      {"X": _x + _w , "Y": _y + _h},
+      {"X": _x      , "Y": _y + _h},
+    ]);
+  }
+
+  let rop = [];
+  _clip_difference(rop, outer_pgn, inner_pgn);
+
+  if (typeof ctx !== "undefined") {
+    polygons(ctx, x, y, rop, color);
+  }
+
+  return rop;
+}
+
 
 function size_f(w,t,t_end) {
   let p = 2*((t/t_end) - 0.5);
@@ -872,73 +950,105 @@ function anim() {
       }
       else if (_ele.shape == "square_band") {
 
-        if (!(i in g_info.geom_mem)) {
+        if (_ele.init) {
+        //if (!(i in g_info.geom_mem)) {
           g_info.geom_mem[i] = square_band(ctx, _xx, _yy, _ele.w, _ele.h, _ele.w/3, 0, _ele.c);
+          _ele.init = false;
         }
-        ctx.translate(_x,_y);
+        //ctx.translate(_x,_y);
+        ctx.translate(_xx,_yy);
         ctx.scale(_ele.cur_w / _ele.w, _ele.cur_w / _ele.w);
-        ctx.translate(-_x,-_y);
+        //ctx.translate(-_x,-_y);
+        ctx.translate(-_xx,-_yy);
 
         polygons(ctx, _xx, _yy, g_info.geom_mem[i], _ele.c);
 
       }
+
+      else if (_ele.shape == "square_nplus") {
+
+        if (_ele.init) {
+        //if (!(i in g_info.geom_mem)) {
+          g_info.geom_mem[i] = square_band(ctx, _xx, _yy, _ele.w, _ele.h, _ele.w/3, _ele.w/3, _ele.c);
+          _ele.init = false;
+        }
+        //ctx.translate(_x,_y);
+        ctx.translate(_xx,_yy);
+        ctx.scale(_ele.cur_w / _ele.w, _ele.cur_w / _ele.w);
+        //ctx.translate(-_x,-_y);
+        ctx.translate(-_xx,-_yy);
+
+        polygons(ctx, _xx, _yy, g_info.geom_mem[i], _ele.c);
+
+      }
+
       else if (_ele.shape == "square_plus") {
 
-        if (!(i in g_info.geom_mem)) {
-          g_info.geom_mem[i] = square_band(ctx, _xx, _yy, _ele.w, _ele.h, _ele.w/3, _ele.w/3, _ele.c);
+        if (_ele.init) {
+        //if (!(i in g_info.geom_mem)) {
+          g_info.geom_mem[i] = square_plus(ctx, _xx, _yy, _ele.w, _ele.h, _ele.w/3, _ele.w/3, _ele.c);
+          _ele.init = false;
         }
-        ctx.translate(_x,_y);
+        //ctx.translate(_x,_y);
+        ctx.translate(_xx,_yy);
         ctx.scale(_ele.cur_w / _ele.w, _ele.cur_w / _ele.w);
-        ctx.translate(-_x,-_y);
+        //ctx.translate(-_x,-_y);
+        ctx.translate(-_xx,-_yy);
 
         polygons(ctx, _xx, _yy, g_info.geom_mem[i], _ele.c);
 
       }
+
       else if (_ele.shape == "stripe") {
 
-        if (!(i in g_info.geom_mem)) {
+        if (_ele.init) {
+        //if (!(i in g_info.geom_mem)) {
           g_info.geom_mem[i] = stripe_45_square(ctx, _xx, _yy, _ele.w, 0, _ele.w/5, _ele.w/5, _ele.c);
+          _ele.init = false;
         }
 
-        ctx.translate(_x,_y);
+        //ctx.translate(_x,_y);
+        ctx.translate(_xx,_yy);
         ctx.scale(_ele.cur_w / _ele.w, _ele.cur_w / _ele.w);
-        ctx.translate(-_x,-_y);
+        //ctx.translate(-_x,-_y);
+        ctx.translate(-_xx,-_yy);
 
         polygons(ctx, _xx, _yy, g_info.geom_mem[i], _ele.c);
       }
 
       else if (_ele.shape == "mstripe") {
 
-        if (!(i in g_info.geom_mem)) {
+        if (_ele.init) {
+        //if (!(i in g_info.geom_mem)) {
           g_info.geom_mem[i] = stripe_m45_square(undefined, _xx, _yy, _ele.w, 0, _ele.w/5, _ele.w/5, _ele.c);
+          _ele.init = false;
         }
 
 
-        ctx.translate(_x,_y);
+        //ctx.translate(_x,_y);
+        ctx.translate(_xx,_yy);
         ctx.scale(_ele.cur_w / _ele.w, _ele.cur_w / _ele.w);
-        ctx.translate(-_x,-_y);
+        //ctx.translate(-_x,-_y);
+        ctx.translate(-_xx,-_yy);
 
         polygons(ctx, _xx, _yy, g_info.geom_mem[i], _ele.c);
 
       }
 
       else if (_ele.shape == "hatching") {
-        if (i in g_info.geom_mem) {
-          ctx.translate(_x,_y);
-          ctx.scale(_ele.cur_w / _ele.w, _ele.cur_w / _ele.w);
-          ctx.translate(-_x,-_y);
 
-          polygon_with_holes(ctx, _xx, _yy, g_info.geom_mem[i], _ele.c);
-        }
-        else {
+        if (_ele.init) {
           g_info.geom_mem[i] = hatching_grid(ctx, _xx, _yy, 4, _ele.cur_w, _ele.cur_w/6.25, _ele.c);
+          _ele.init=false;
         }
+
+        //ctx.translate(_x,_y);
+        ctx.translate(_xx,_yy);
+        ctx.scale(_ele.cur_w / _ele.w, _ele.cur_w / _ele.w);
+        //ctx.translate(-_x,-_y);
+        ctx.translate(-_xx,-_yy);
+
       }
-
-      //ctx.fillRect(_ele.x - _ele.w/2, _ele.y - _ele.h/2, _ele.cur_w, _ele.cur_h);
-
-      //circle_band(ctx, _xx, _yy, _ele.cur_w, _ele.cur_w/3, 0, _ele.c);
-
 
       ctx.restore();
 
@@ -1057,8 +1167,6 @@ function screenshot() {
 
 function initCanvas() {
 
-  console.log("initCanvas");
-
   let canvas = document.getElementById("canvas");
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
@@ -1100,8 +1208,6 @@ function _shuffle(a) {
 }
 
 function init_fin() {
-  console.log("init_fin");
-
   let _shapes = g_info.param.shape_list;
 
   g_info.ready = true;
@@ -1118,8 +1224,7 @@ function init_fin() {
   let _SZ = _min( g_info.width, g_info.height );
 
   //let N = 800;
-  //let N = 600;
-  let N = 1;
+  let N = g_info.n_ele;
   for (let i=0; i<N; i++) {
 
     let va = fxrand()*Math.PI*2;
@@ -1160,6 +1265,7 @@ function init_fin() {
     let _shape = _arnd(_shapes);
 
     let ele = {
+      "init": true,
       "shape": _shape,
       "x": sx,
       "y": sy,
@@ -1170,10 +1276,14 @@ function init_fin() {
       "cur_h": 0,
       "w": _w,
       "h": _h,
+      "orig_w": _w,
+      "orig_h": _h,
+
       "a": fxrand()*Math.PI*2,
       "cur_a": fxrand()*Math.PI*2,
       //"da": fxrand()*Math.PI*2/100,
-      "da": 3/200,
+      //"da": 3/200,
+      "da": g_info.angle_d,
       "vx": vx,
       "vy": vy,
       "cur_t" : 0,
@@ -1278,16 +1388,19 @@ function init() {
 
 function init_global_param() {
 
-  let _shapes = [ "square_square", "square", "square_band", "stripe", "square_plus"  ];
+  //let _shapes = [ "square_square", "square", "square_band", "stripe", "square_plus", "square_nplus"  ];
+  let _shapes = [ "square_square", "square", "square_band", "stripe", "square_plus", "square_nplus" ];
   let _shape_n_choice = _irnd( _shapes.length );
 
-  if (_shape_n_choice == 0) {
-    _shapes = [ "square_square", "square", "square_band", "stripe", "square_plus"  ];
-  }
-  else {
+  if (_shape_n_choice > 0) {
     _shuffle(_shapes);
     _shapes = _shapes.slice(0,_shape_n_choice);
   }
+
+  //g_info.n_ele = 600;
+  g_info.n_ele = _irnd(300,600);
+
+  g_info.angle_d = _rnd(3/200, 1/1000);
 
   g_info.param["shape_list"] = _shapes;
 
@@ -1299,7 +1412,9 @@ function init_global_param() {
 
   g_info.features = {
     "Color Scheme": g_info.palette_choice.name,
-    "Shape List": _shapes.join(", ")
+    "Shape List": _shapes.join(", "),
+    "Shape Count": g_info.n_ele,
+    "Angle Velocity": g_info.angle_d
   };
 
   window.$fxhashFeatures = g_info.features;
