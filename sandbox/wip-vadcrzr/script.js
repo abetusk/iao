@@ -255,7 +255,10 @@ var g_info = {
     "blink_cur_t":0,
     "blink_end_t":0,
 
-    "effect": []
+    "effect": [],
+
+    "msg_cur_t":0,
+    "msg_end_t":0
   },
 
   "fg_amp_x": 0,
@@ -611,6 +614,7 @@ function disp_r(cx,cy,w,h,g,c,no_eyes,no_shadow,no_overlap) {
         else {
 
           ctx.fillStyle = "rgba(240,240,240,0.3)";
+          //ctx.fillStyle = "rgba(240,240,240,0.9)";
         }
 
         ctx.beginPath();
@@ -892,6 +896,76 @@ function draw_effect() {
 
 }
 
+
+
+function draw_message() {
+
+  let _cw = g_info.canvas.width;
+  let _ch = g_info.canvas.height;
+  let ctx = g_info.ctx;
+
+  let msgs = g_info.param.message.split("\n");
+  //let msg_x = _cw/2;
+  let msg_y = 50;
+  let _mso = 10;
+  let msg_c_shadow = "rgba(90,90,90, 1.0)";
+  let msg_c = "rgba(100, 100, 100, 1.0)";
+
+  let msg_char_dx = 30*4;
+  let msg_ox = 30/2;
+
+  let msg_x = _cw/2 - (msgs[0].length*msg_char_dx/2)
+
+  if (msgs.length == 3) {
+
+    msg_x = _cw/2 - (msgs[0].length*msg_char_dx/2)
+    msg_y = _ch/6;
+
+    draw_text(ctx, msg_x+_mso , msg_y+_mso , msgs[0] , msg_c_shadow);
+    draw_text(ctx, msg_x      , msg_y      , msgs[0] , msg_c);
+
+    //msg_y += 200;
+    //msg_x += 50;
+
+    msg_x = _cw/2 - (msgs[1].length*msg_char_dx/2)
+    msg_y = 3*_ch/6;
+
+    draw_text(ctx, msg_x+_mso , msg_y+_mso , msgs[1], msg_c_shadow);
+    draw_text(ctx, msg_x      ,msg_y       , msgs[1], msg_c );
+
+    //msg_x -= 50;
+    //msg_y += 200;
+
+    msg_x = _cw/2 - (msgs[2].length*msg_char_dx/2)
+    msg_y = 5*_ch/6;
+
+    draw_text(ctx, msg_x+_mso , msg_y+_mso , msgs[2], msg_c_shadow );
+    draw_text(ctx, msg_x      , msg_y      , msgs[2], msg_c);
+  }
+  else {
+    if (msgs.length >= 1) {
+
+      msg_x = _cw/2 - (msgs[0].length*msg_char_dx/2) + msg_ox;
+      msg_y = 1*_ch/12;
+
+      draw_text(ctx, msg_x+_mso , msg_y+_mso , msgs[0], msg_c_shadow );
+      draw_text(ctx, msg_x      , msg_y      , msgs[0], msg_c);
+    }
+    if (msgs.length >= 2) {
+      msg_x = 150;
+      msg_y = 500;
+
+      msg_x = _cw/2 - (msgs[1].length*msg_char_dx/2) + msg_ox;
+      msg_y = 4*_ch/6;
+
+      draw_text(ctx, msg_x+_mso , msg_y+_mso , msgs[1], msg_c_shadow );
+      draw_text(ctx, msg_x      , msg_y      , msgs[1], msg_c);
+    }
+  }
+
+}
+
+
 function anim() {
 
   // fps
@@ -978,57 +1052,11 @@ function anim() {
 
   // draw text under monster but over backgroudn texture
   //
-  let msgs = g_info.param.message.split("\n");
-  let msg_x = 100;
-  let msg_y = 50;
-  let _mso = 10;
-  let msg_c_shadow = "rgba(90,90,90, 1.0)";
-  let msg_c = "rgba(100, 100, 100, 1.0)";
 
-  if (msgs.length == 3) {
-
-    draw_text(ctx, msg_x+_mso , msg_y+_mso , msgs[0] , msg_c_shadow);
-    draw_text(ctx, msg_x      , msg_y      , msgs[0] , msg_c);
-
-    msg_y += 200;
-    msg_x += 50;
-    draw_text(ctx, msg_x+_mso , msg_y+_mso , msgs[1], msg_c_shadow);
-    draw_text(ctx, msg_x      ,msg_y       , msgs[1], msg_c );
-
-    msg_x -= 50;
-    msg_y += 200;
-    draw_text(ctx, msg_x+_mso , msg_y+_mso , msgs[2], msg_c_shadow );
-    draw_text(ctx, msg_x      , msg_y      , msgs[2], msg_c);
-  }
-  else {
-    if (msgs.length >= 1) {
-      //draw_text(ctx, msg_x,msg_y, msgs[0]);
-      draw_text(ctx, msg_x+_mso , msg_y+_mso , msgs[0], msg_c_shadow );
-      draw_text(ctx, msg_x      , msg_y      , msgs[0], msg_c);
-    }
-    if (msgs.length >= 2) {
-      msg_x = 150;
-      msg_y = 500;
-      //draw_text(ctx, msg_x,msg_y, msgs[1]);
-      draw_text(ctx, msg_x+_mso , msg_y+_mso , msgs[1], msg_c_shadow );
-      draw_text(ctx, msg_x      , msg_y      , msgs[1], msg_c);
-    }
-  }
-
-  //for (let msg_idx=0; msg_idx<msgs.length; msg_idx++) {
-  //  draw_text(ctx, 100,100, g_info.param.message);
-  //}
-  //draw_text(ctx, 100,100, "game over");
-  //draw_text(ctx, 100,100, "ready");
-  //draw_text(ctx, 100,100, "1up");
-  //draw_text(ctx, 100,100, "high score");
-
-
-
+  draw_message();
 
   // Monster
   //
-
   let dx = g_info.fg_amp_x*Math.cos( g_info.fg_freq_x*g_info.tick + g_info.fg_phase_x );
   let dy = g_info.fg_amp_y*Math.cos( g_info.fg_freq_y*g_info.tick + g_info.fg_phase_y );
 
@@ -1073,21 +1101,49 @@ function anim() {
 
           if (g_info.state.blink_cur_t >= g_info.state.blink_end_t) {
             g_info.state.blink_cur_t = 0;
-            g_info.state.blink_end_t = _irnd(10, 50);
+            if (!g_info.state.blink_open) {
+              g_info.state.blink_end_t = _irnd(8, 15);
+            }
+            else {
+              g_info.state.blink_end_t = _irnd(50, 1000);
+            }
             g_info.state.blink_open = !g_info.state.blink_open;
           }
           g_info.state.blink_cur_t++;
 
           if (g_info.state.blink_open) {
-            ctx.fillStyle = "rgba(240,40,40,0.3)";
+            //ctx.fillStyle = "rgba(240,40,40,0.3)";
+            ctx.fillStyle = "rgba(40,40,40,0.9)";
           }
           else {
-            ctx.fillStyle = "rgba(240,240,240,0.13)";
+            ctx.fillStyle = "rgba(220,220,220,0.9)";
             //ctx.fillStyle = "rgba(240,240,240,0.5)";
           }
-            ctx.fillStyle = "rgba(240,240,240,0.13)";
+          //ctx.fillStyle = "rgba(240,240,240,0.13)";
+
+          //ctx.fillStyle = "rgba(240,240,240,0.9)";
+          //ctx.fillStyle = '#333';
+          //ctx.fillStyle = '#aaa';
+          //ctx.fillStyle = '#e33';
+          ctx.fillStyle =  'rgba(40,40,40,0.6)';
           ctx.beginPath();
-          ctx.fillRect(x,y, ds , ds );
+          ctx.fillRect(x,y, ds + 0.5, ds + 0.5);
+
+          if (!g_info.state.blink_open) {
+
+            if (g_info.param.eye_choice == 0) {
+              //ctx.fillStyle = "rgba(20,20,20,0.9)";
+              //ctx.beginPath();
+              //ctx.fillRect(x + ds/4, y + 3*ds/4, ds/4, ds/4 );
+            }
+          }
+
+
+          /*
+          ctx.fillStyle = "rgba(40,40,40,0.9)";
+          ctx.beginPath();
+          ctx.fillRect(x , y + ds/2, ds + 0.5, ds/2 + 0.5);
+          */
 
         }
 
@@ -1167,6 +1223,7 @@ function init_fin() {
 
   let msg_choice = [ "", "game\nover", "1up", "ready"]; //, "waiting\nto be\nsigned"];
   g_info.param["message"] = _arnd(msg_choice);
+
   //g_info.param["message"] = "insert\ntoken";
   //g_info.param["message"] = "waiting\nto be\nsigned";
 
