@@ -35,35 +35,103 @@ var g_info = {
   "delta_t":0,
 
   "alphabet": {
-    "a": [ "xxx" + "x.x" + "xxx" + "x.x" + "x.x" ],
-    "b": [ "xxx" + "x.x" + "xxx" + "x.x" + "xxx" ],
-    "c": [ "xxx" + "x.." + "x.." + "x.." + "xxx" ],
-    "d": [ "xx." + "x.x" + "x.x" + "x.x" + "xx." ],
-    "e": [ "xxx" + "x.." + "xx." + "x.." + "xxx" ],
-    "f": [ "xxx" + "x.." + "xx." + "x.." + "x.." ],
-    "g": [ "xxx" + "x.." + "x.." + "x.x" + "xxx" ],
-    "h": [ "x.x" + "x.x" + "xxx" + "x.x" + "x.x" ],
-    "i": [ "xxx" + ".x." + ".x." + ".x." + "xxx" ],
-    "j": [ "xxx" + "..x" + "..x" + "x.x" + "xxx" ],
-    "k": [ "x.x" + "xx." + "x.." + "xx." + "x.x" ],
-    "l": [ "x.." + "x.." + "x.." + "x.." + "xxx" ],
-    "m": [ "x.x" + "xxx" + "x.x" + "x.x" + "x.x" ],
-    "n": [ "xxx" + "x.x" + "x.x" + "x.x" + "x.x" ],
-    "o": [ "xxx" + "x.x" + "x.x" + "x.x" + "xxx" ],
-    "p": [ "xxx" + "x.x" + "xxx" + "x.." + "x.." ],
-    "q": [ "xxx" + "x.x" + "x.x" + "x.x" + "xx." ],
-    "r": [ "xxx" + "x.x" + "xx." + "xx." + "x.x" ],
-    "s": [ "xxx" + "x.." + "xxx" + "..x" + "xxx" ],
-    "t": [ "xxx" + ".x." + ".x." + ".x." + ".x." ],
-    "u": [ "x.x" + "x.x" + "x.x" + "x.x" + "xxx" ],
-    "v": [ "x.x" + "x.x" + "x.x" + "x.x" + ".x." ],
-    "w": [ "x.x" + "x.x" + "x.x" + "xxx" + "x.x" ],
-    "x": [ "x.x" + "x.x" + ".x." + "x.x" + "x.x" ],
-    "y": [ "x.x" + "x.x" + "xxx" + ".x." + ".x." ],
-    "z": [ "xxx" + "..x" + ".x." + "x.." + "xxx" ]
+    "1":  ".x." + "xx." + ".x." + ".x." + "xxx" ,
+    "a":  "xxx" + "x.x" + "xxx" + "x.x" + "x.x" ,
+    "b":  "xxx" + "x.x" + "xxx" + "x.x" + "xxx" ,
+    "c":  "xxx" + "x.." + "x.." + "x.." + "xxx" ,
+    "d":  "xx." + "x.x" + "x.x" + "x.x" + "xx." ,
+    "e":  "xxx" + "x.." + "xx." + "x.." + "xxx" ,
+    "f":  "xxx" + "x.." + "xx." + "x.." + "x.." ,
+    "g":  "xxx" + "x.." + "x.." + "x.x" + "xxx" ,
+    "h":  "x.x" + "x.x" + "xxx" + "x.x" + "x.x" ,
+    "i":  "xxx" + ".x." + ".x." + ".x." + "xxx" ,
+    "j":  "xxx" + "..x" + "..x" + "x.x" + "xxx" ,
+    "k":  "x.x" + "xx." + "xx." + "x.x" + "x.x" ,
+    "l":  "x.." + "x.." + "x.." + "x.." + "xxx" ,
+    "m":  "x.x" + "xxx" + "x.x" + "x.x" + "x.x" ,
+    "n":  "xx." + "x.x" + "x.x" + "x.x" + "x.x" ,
+
+    "o":  "xxx" + "x.x" + "x.x" + "x.x" + "xxx" ,
+
+    "p":  "xxx" + "x.x" + "xxx" + "x.." + "x.." ,
+    "q":  "xxx" + "x.x" + "x.x" + "x.x" + "xx." ,
+
+    "r":  "xxx" + "x.x" + "xx." + "x.x" + "x.x" ,
+
+    "s":  "xxx" + "x.." + "xxx" + "..x" + "xxx" ,
+    "t":  "xxx" + ".x." + ".x." + ".x." + ".x." ,
+    "u":  "x.x" + "x.x" + "x.x" + "x.x" + "xxx" ,
+    "v":  "x.x" + "x.x" + "x.x" + "x.x" + ".x." ,
+    "w":  "x.x" + "x.x" + "x.x" + "xxx" + "x.x" ,
+    "x":  "x.x" + "x.x" + ".x." + "x.x" + "x.x" ,
+    "y":  "x.x" + "x.x" + "xxx" + ".x." + ".x." ,
+    "z":  "xxx" + "..x" + ".x." + "x.." + "xxx" 
   },
 
   "palette": [
+  {  
+    "name": "mably",
+    "colors": [
+      "#13477b",
+      "#2f1b10",
+      "#d18529",
+      "#d72a25",
+      "#e42184",
+      "#138898",
+      "#9d2787",
+      "#7f311b"
+    ],
+    "stroke": "#2a1f1d",
+    "background": "#dfc792"
+  },
+  {  
+    "name": "miradors",
+    "colors": ["#ff6936", "#fddc3f", "#0075ca", "#00bb70"],
+    "stroke": "#ffffff",
+    "background": "#020202"
+  },
+  {  
+    "name": "bloomberg",
+    "colors": ["#ff5500", "#f4c145", "#144714", "#2f04fc", "#e276af"],
+    "stroke": "#000",
+    "background": "#fff3dd"
+  },
+  {  
+    "name": "kaffeprat",
+    "colors": ["#BCAA8C", "#D8CDBE", "#484A42", "#746B58", "#9A8C73"],
+    "stroke": "#000",
+    "background": "#fff"
+  },
+  {  
+    "name": "hilda03",
+    "colors": ["#e95145", "#f8b917", "#b8bdc1", "#ffb2a2"],
+    "stroke": "#010101",
+    "background": "#6b7752"
+  },
+  {
+    "name": "rohlfs_3",
+    "colors": ["#abdfdf", "#fde500", "#58bdbc", "#eff0dd"],
+    "stroke": "#211029",
+    "background": "#f76975"
+  },
+  {
+    "name": "dale_night",
+    "colors": ["#ae5d9d", "#f1e8bc", "#ef8fa3", "#f7c047", "#58c9ed", "#f77150"],
+    "stroke": "#000000",
+    "background": "#00ae83"
+  },
+  {
+    "name": "cc234",
+    "colors": ["#ffce49", "#ede8dc", "#ff5736", "#ff99b4"],
+    "background": "#f7f4ed"
+  },
+  {
+    "name": "sneaker",
+    "colors": ["#e8165b", "#401e38", "#66c3b4", "#ee7724", "#584098"],
+    "stroke": "#401e38",
+    "background": "#ffffff"
+  },
+
   {
     "name": "nowak",
     "colors": ["#e85b30", "#ef9e28", "#c6ac71", "#e0c191", "#3f6279", "#ee854e", "#180305"],
@@ -570,11 +638,59 @@ function draw_squiggle(ctx, x, y, ds, start_frame, n_frame, c, sz) {
 
     ctx.fillStyle = c;
     ctx.beginPath();
-    //ctx.fillRect(x + _x, y + _y, ds + _o, ds + _o);
     ctx.fillRect(x + _x, y + _y, sz + _o, sz + _o);
-
-    //console.log(x+_x, y+_y);
   }
+}
+
+function draw_text(ctx, base_x, base_y, txt, c) {
+  c = ((typeof c === "undefined") ?  "rgba(200,200,200,0.4)" : c);
+  let ab = g_info.alphabet;
+
+  ctx.fillStyle = c;
+
+  let _ds = 30;
+  let cy = 0;
+  let cur_line_idx = 0;
+  let ch_width = 4;
+  let ch_height = 6;
+
+  for (let ch_idx=0; ch_idx<txt.length; ch_idx++) {
+    let ch = txt[ch_idx];
+
+    if (ch == '\n') {
+      cy += ch_height*_ds;
+      cur_line_idx=0;
+      continue;
+    }
+
+    let cx = cur_line_idx*ch_width*_ds;
+    cur_line_idx++;
+
+    if (!(ch in ab)) { continue; }
+
+    let gr = ab[ch];
+
+
+    for (let i=0; i<5; i++) {
+      for (let j=0; j<3; j++) {
+
+        let _x = j*_ds + cx + base_x;
+        let _y = i*_ds + cy + base_y;
+
+        if (ch == 'o') {
+          //console.log( ch, i*3 + j, gr[i*3 + j] );
+        }
+
+        if (gr[i*3 + j] == 'x') {
+          ctx.beginPath();
+          ctx.fillRect(_x, _y, _ds, _ds);
+        }
+      }
+    }
+
+
+  }
+
 }
 
 function draw_effect() {
@@ -592,7 +708,7 @@ function draw_effect() {
 
     let ele = g_info.state.effect[i];
 
-    if (ele.type == "squiggly") {
+    if (ele.type == "squiggle") {
       if (ele.init) {
         ele.next_frame_t = g_info.cur_t + ele.frame_delta_t;
         ele.init=false;
@@ -639,42 +755,139 @@ function draw_effect() {
       ctx.restore();
     }
 
-  }
+    else if (ele.type == "ball") {
+      if (ele.init) {
+        ele.next_frame_t = g_info.cur_t + ele.frame_delta_t;
+        ele.init=false;
+      }
 
-  return;
+      if (g_info.cur_t >= ele.next_frame_t) {
+        ele.frame_idx = (ele.frame_idx+1)%ele.n_frame;
+        ele.next_frame_t += ele.frame_delta_t;
+      }
 
-  let _f_fac = 2;
-  let _test_frame = (Math.floor(g_info.tick/_f_fac)%16);
-  //draw_squiggle(ctx, _s_x - _s_ds_bg/2, _s_y - _s_ds_bg/2 + _s_ds*_test_frame, _s_ds, _test_frame, 8, "rgba(255, 128, 0, 0.5)", _s_ds_bg);
-  //draw_squiggle(ctx, _s_x - _s_ds/2   , _s_y - _s_ds/2    + _s_ds*_test_frame, _s_ds, _test_frame, 8, "rgba(255, 0, 0, 0.5)");
+      let _x = _s_x - _s_ds/2 + ele.x;
+      //let _y = _s_y + ele.frame_idx*_s_ds - _s_ds/2 + _s_ds + ele.y;
+      let _y = _s_y + ele.frame_idx*ele.vy - _s_ds/2 + _s_ds + ele.y;
 
-  if (g_info.state.effect[0].state == "start") {
-    let _test_frame = (Math.floor(g_info.tick/_f_fac)%16);
-    let _s_x = 100;
-    let _s_y = 100;
-    let _s_ds_bg = 30;
-    let _s_ds = 20;
-    draw_squiggle(ctx, _s_x - _s_ds_bg/2, _s_y - _s_ds_bg/2 + _s_ds, _s_ds, 1, _test_frame, "rgba(255, 128, 0, 0.5)", _s_ds_bg);
-    draw_squiggle(ctx, _s_x - _s_ds/2   , _s_y - _s_ds/2    + _s_ds, _s_ds, 1, _test_frame, "rgba(255, 0, 0, 0.5)");
+      ctx.save();
 
-    if (_test_frame == 8) {
-      g_info.state.effect[0].state = "middle";
+      ctx.translate(_cw/2, _ch/2);
+      ctx.rotate(ele.a);
+      ctx.translate(-_cw/2,-_ch/2);
+
+      ctx.beginPath();
+      if (ele.frame_idx%2) {
+        ctx.fillStyle = "rgba(255,30,0,0.9)";
+      }
+      else {
+        ctx.fillStyle = "rgba(255,255,255,0.9)";
+      }
+      ctx.arc(_x, _y, ele.or, 0, Math.PI*2);
+      ctx.fill();
+
+      ctx.beginPath();
+      if (ele.frame_idx%2) {
+        ctx.fillStyle = "rgba(255,200,0,0.9)";
+      }
+      else {
+        ctx.fillStyle = "rgba(200,200,0,0.9)";
+      }
+      ctx.arc(_x, _y, ele.ir, 0, Math.PI*2);
+      ctx.fill();
+
+      //ctx.fillRect(_x, _y, _s_ds, _s_ds);
+
+      ctx.restore();
+
     }
-  }
-  else if (g_info.state.effect[0].state == "middle") {
-    let _test_frame = (Math.floor(g_info.tick/_f_fac)%16);
-    let _s_ds = 20;
-    let _s_x = 100;
-    let _s_y = 100 + (_test_frame-8)*_s_ds ;
-    let _s_ds_bg = 30;
-    draw_squiggle(ctx, _s_x - _s_ds_bg/2, _s_y - _s_ds_bg/2 + _s_ds, _s_ds, _test_frame, 8, "rgba(255, 128, 0, 0.5)", _s_ds_bg);
-    draw_squiggle(ctx, _s_x - _s_ds/2   , _s_y - _s_ds/2    + _s_ds, _s_ds, _test_frame, 8, "rgba(255, 0, 0, 0.5)");
 
-    if (_test_frame == 0) {
-      g_info.state.effect[0].state = "start";
+    else if (ele.type == "bullet") {
+      if (ele.init) {
+        ele.next_frame_t = g_info.cur_t + ele.frame_delta_t;
+        ele.init=false;
+      }
+
+      if (g_info.cur_t >= ele.next_frame_t) {
+        ele.frame_idx = (ele.frame_idx+1)%ele.n_frame;
+        ele.next_frame_t += ele.frame_delta_t;
+      }
+
+      let _x = _s_x - _s_ds/2 + ele.x;
+      let _y = _s_y + ele.frame_idx*ele.vy - _s_ds/2 + _s_ds + ele.y;
+
+      ctx.save();
+
+      ctx.translate(_cw/2, _ch/2);
+      ctx.rotate(ele.a);
+      ctx.translate(-_cw/2,-_ch/2);
+
+      ctx.beginPath();
+      if (ele.frame_idx%2) {
+        ctx.fillStyle = "rgba(255,30,0,0.9)";
+      }
+      else {
+        ctx.fillStyle = "rgba(255,255,255,0.9)";
+      }
+      ctx.fillRect(_x,_y, ele.or, ele.or);
+
+      for (let ii=0; ii<3; ii++) {
+        ctx.beginPath();
+        ctx.fillRect(_x,_y - (4*ele.or/4) + (1*ele.or/6) - (5*ii*ele.or/6), ele.or, ele.or/2);
+      }
+
+      ctx.restore();
+
     }
-  }
-  else if (g_info.state.effect[0].state == "end") {
+
+    else if (ele.type == "cluster") {
+
+      if (ele.init) {
+        ele.next_frame_t = g_info.cur_t + ele.frame_delta_t;
+        ele.init=false;
+      }
+
+      if (g_info.cur_t >= ele.next_frame_t) {
+        ele.frame_idx = (ele.frame_idx+1)%ele.n_frame;
+        ele.next_frame_t += ele.frame_delta_t;
+
+        if ((ele.frame_idx%2)==0) {
+          ele.x = _rnd(_cw/4, 3*_cw/4);
+          ele.y = _rnd(_ch/4, 3*_ch/4);
+
+          ele.or = 50;
+          ele.ir = 40;
+        }
+      }
+
+      if (ele.frame_idx < (ele.n_frame/2)) {
+
+        ctx.beginPath();
+        if (ele.frame_idx%2) {
+          ctx.fillStyle = "rgba(255,30,0,0.9)";
+        }
+        else {
+          ctx.fillStyle = "rgba(255,255,255,0.9)";
+        }
+        ctx.moveTo(ele.x, ele.y);
+        ctx.arc(ele.x, ele.y, ele.or, 0, Math.PI*2);
+        ctx.fill();
+
+        ctx.beginPath();
+        if (ele.frame_idx%2) {
+          ctx.fillStyle = "rgba(255,200,0,0.9)";
+        }
+        else {
+          ctx.fillStyle = "rgba(200,200,0,0.9)";
+        }
+        ctx.moveTo(ele.x, ele.y);
+        ctx.arc(ele.x, ele.y, ele.ir, 0, Math.PI*2);
+        ctx.fill();
+
+      }
+
+    }
+
   }
 
 }
@@ -710,6 +923,7 @@ function anim() {
     loading_anim();
     return;
   }
+
 
   let _base_block_w = g_info.grid[0].length;
   let _base_block_h = g_info.grid.length;
@@ -762,9 +976,54 @@ function anim() {
     }
   }
 
-  // effects above background but behind monster
+  // draw text under monster but over backgroudn texture
   //
-  draw_effect();
+  let msgs = g_info.param.message.split("\n");
+  let msg_x = 100;
+  let msg_y = 50;
+  let _mso = 10;
+  let msg_c_shadow = "rgba(90,90,90, 1.0)";
+  let msg_c = "rgba(100, 100, 100, 1.0)";
+
+  if (msgs.length == 3) {
+
+    draw_text(ctx, msg_x+_mso , msg_y+_mso , msgs[0] , msg_c_shadow);
+    draw_text(ctx, msg_x      , msg_y      , msgs[0] , msg_c);
+
+    msg_y += 200;
+    msg_x += 50;
+    draw_text(ctx, msg_x+_mso , msg_y+_mso , msgs[1], msg_c_shadow);
+    draw_text(ctx, msg_x      ,msg_y       , msgs[1], msg_c );
+
+    msg_x -= 50;
+    msg_y += 200;
+    draw_text(ctx, msg_x+_mso , msg_y+_mso , msgs[2], msg_c_shadow );
+    draw_text(ctx, msg_x      , msg_y      , msgs[2], msg_c);
+  }
+  else {
+    if (msgs.length >= 1) {
+      //draw_text(ctx, msg_x,msg_y, msgs[0]);
+      draw_text(ctx, msg_x+_mso , msg_y+_mso , msgs[0], msg_c_shadow );
+      draw_text(ctx, msg_x      , msg_y      , msgs[0], msg_c);
+    }
+    if (msgs.length >= 2) {
+      msg_x = 150;
+      msg_y = 500;
+      //draw_text(ctx, msg_x,msg_y, msgs[1]);
+      draw_text(ctx, msg_x+_mso , msg_y+_mso , msgs[1], msg_c_shadow );
+      draw_text(ctx, msg_x      , msg_y      , msgs[1], msg_c);
+    }
+  }
+
+  //for (let msg_idx=0; msg_idx<msgs.length; msg_idx++) {
+  //  draw_text(ctx, 100,100, g_info.param.message);
+  //}
+  //draw_text(ctx, 100,100, "game over");
+  //draw_text(ctx, 100,100, "ready");
+  //draw_text(ctx, 100,100, "1up");
+  //draw_text(ctx, 100,100, "high score");
+
+
 
 
   // Monster
@@ -836,9 +1095,9 @@ function anim() {
     }
   }
 
+  // effects above background but behind monster
   //
-  // PER FRAME CODE
-
+  draw_effect();
 
 }
 
@@ -906,6 +1165,11 @@ function init_fin() {
   g_info.ready = true;
   g_info.grid = gen_vadcrzr();
 
+  let msg_choice = [ "", "game\nover", "1up", "ready"]; //, "waiting\nto be\nsigned"];
+  g_info.param["message"] = _arnd(msg_choice);
+  //g_info.param["message"] = "insert\ntoken";
+  //g_info.param["message"] = "waiting\nto be\nsigned";
+
   let g = g_info.grid;
   let base_idx = _get_max_idx(g) + 1;
 
@@ -941,6 +1205,10 @@ function init_effect() {
   let _cw = g_info.width;
   let _ch = g_info.width;
 
+  let effect_list = ["ball", "squiggle", "bullet", "cluster", "none" ];
+
+  let effect_type = _arnd(effect_list);
+
   let M = 8;
   for (let i=0; i<M; i++) {
     let r = 50;
@@ -950,27 +1218,40 @@ function init_effect() {
     let x = r*Math.cos(a) + cx;
     let y = r*Math.sin(a) + cy;
     let ele = {
-      "type": "squiggly",
+      "type": effect_type, //"squiggle",
       "init":true,
-      //"orig_x":x,
-      //"orig_y":y,
       "orig_x": 100,
       "orig_y":0,
       "a": a,
       "da": 0,
-      //"x": x,
-      //"y": y,
       "x": 0,
       "y": 250,
       "dx": 0,
       "dy": 0,
+      "vx": 0,
+      "vy": 0,
       "state":"start",
       "frame_idx": 0,
       "next_frame_t": 0,
-      "frame_delta_t" : 70,
+      "frame_delta_t" : 40,
       "n_frame" : 64,
       "frame": []
     };
+
+    // ball testing
+    //
+    if (effect_type == "ball") {
+      ele.y = 250;
+      ele.vy = 10;
+      ele.or = 35;
+      ele.ir = 25;
+    }
+    else if (effect_type == "bullet") {
+      ele.y = 250;
+      ele.vy = 10;
+      ele.or = 35;
+      ele.ir = 25;
+    }
 
     g_info.state.effect.push(ele);
   }
@@ -988,6 +1269,8 @@ function init_effect() {
   for (let i=0; i<10; i++) { g_info.rnd.push( fxrand() ); }
 
   g_info.palette_choice = _arnd( g_info.palette );
+
+  console.log(g_info.palette_choice.name);
 
   g_info.cur_t = Date.now();
   g_info.last_t = g_info.cur_t;
@@ -1027,6 +1310,12 @@ function gen_vadcrzr(base_idx) {
   let H = [ { "v":6, "p":0.1 }, { "v":7, "p":0.1 }, {"v":8, "p":0.8} ];
   let W = [ { "v":7, "p":0.05 }, { "v":8, "p":0.3 }, {"v":9, "p":0.3}, {"v":10, "p":0.3}, {"v":11, "p":.05}, {"v":15, "p":1/64.0}];
 
+  // eye_choice:
+  //
+  // 0 - horizontal (2 pixel wide, 1 high) 
+  // 1 - vertical (1 pixel wide , 2 hight)
+  // 2 - single (1x1 pixel each)
+  //
   let eye_choice = _irnd(3);
 
   let fill_corner = ((_rnd() < 0.5) ? true : false);
@@ -1092,6 +1381,7 @@ function gen_vadcrzr(base_idx) {
 
       grid[dh_eye-1][le-2+i] = idx;
       grid[dh_eye-1][re+2-i] = idx;
+      idx++;
     }
 
   }

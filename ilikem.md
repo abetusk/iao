@@ -108,7 +108,9 @@ I Like Em
 * [...-generative Kaleidoscope by KOPYTOV619](https://www.fxhash.xyz/generative/slug/de-generative-kaleidoscope-1)
 * [Urban Flora by marcinignac](https://www.fxhash.xyz/generative/slug/urban-flora)
 * [anaverse - Solid state by anaglyphic](https://www.fxhash.xyz/generative/slug/anaverse-solid-state)
-
+* [Mushroom Atlas by ferluht](https://www.fxhash.xyz/generative/slug/mushroom-atlas)
+* [r a d ar 1 by punevyr](https://www.fxhash.xyz/generative/slug/r-a-d-a-r-1)
+* [Flores del Mal by Patricio Isaias](https://www.fxhash.xyz/generative/slug/flores-del-mal-1)
 
 Artists
 ---
