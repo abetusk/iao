@@ -898,7 +898,7 @@ function draw_effect() {
 
     else if (ele.type == "cluster") {
 
-      if ((g_info.tick%120)< 50) {
+      if ( ((g_info.tick%120) >=  (120-55)) && ((g_info.tick%120) < (120-5))) {
 
         if ((g_info.tick%120)==0) { ele.init = true; }
 
@@ -920,15 +920,35 @@ function draw_effect() {
           ele.next_frame_t = ele.cur_start_t + ele.frame_delta_t;
           ele.frame_idx = 0;
 
-          ele.x = ele.orig_x;
-          ele.y = ele.orig_y;
+          ele.s = _rnd(10,50);
+
+          if ((i%8) == 0) {
+            ele.x = _rnd(2*g_info.width/8, 6*g_info.width/8);
+            ele.y = _rnd(2*g_info.height/8, 6*g_info.height/8);
+          }
+          else {
+            let _p = Math.floor(i/8)*8;
+            ele.x = g_info.state.effect[_p].x + _rnd(-10, 10);
+            ele.y = g_info.state.effect[_p].y + _rnd(-10, 10);
+          }
+
+          ele.s = _rnd(10,50);
+
+          ele.orig_x = ele.x;
+          ele.orig_y = ele.y;
+          ele.vx = _rnd(2.0);
+          ele.vy = _rnd(2.0);
+          ele.vc = _rnd(1.0);
+          ele.start_t = _rnd(32);
+          ele.orig_ttl = _rnd(16);
+          ele.ttl = ele.orig_ttl;
 
           ele.c = 0.7;
           ele.dc = _irnd(-1,1)/8;
-          //ele.s = _rnd(10,200);
-          ele.s = _clamp( 200*_rndpow(2.0), 10, 200);
-          ele.ds = 2*_rnd(-1,1);
 
+          let _S = g_info.size/4;
+          ele.s = _clamp( _S*_rndpow(2.0), 10, _S);
+          ele.ds = 2*_rnd(-1,1);
 
           ele.vx = _rnd(-5,5);
           ele.vy = _rnd(-5,5);
@@ -968,44 +988,6 @@ function draw_effect() {
           }
           ctx.beginPath();
           ctx.fillRect(ele.x - ele.s/2, ele.y - ele.s/2, ele.s, ele.s);
-
-          /*
-
-            if ((ele.frame_idx%2)==0) {
-              ele.x = _rnd(_cw/4, 3*_cw/4);
-              ele.y = _rnd(_ch/4, 3*_ch/4);
-
-              ele.or = 50;
-              ele.ir = 40;
-            }
-          }
-
-          if (ele.frame_idx < (ele.n_frame/2)) {
-
-            ctx.beginPath();
-            if (ele.frame_idx%2) {
-              ctx.fillStyle = "rgba(255,30,0,0.9)";
-            }
-            else {
-              ctx.fillStyle = "rgba(255,255,255,0.9)";
-            }
-            ctx.moveTo(ele.x, ele.y);
-            ctx.arc(ele.x, ele.y, ele.or, 0, Math.PI*2);
-            ctx.fill();
-
-            ctx.beginPath();
-            if (ele.frame_idx%2) {
-              ctx.fillStyle = "rgba(255,200,0,0.9)";
-            }
-            else {
-              ctx.fillStyle = "rgba(200,200,0,0.9)";
-            }
-            ctx.moveTo(ele.x, ele.y);
-            ctx.arc(ele.x, ele.y, ele.ir, 0, Math.PI*2);
-            ctx.fill();
-
-          }
-          */
         }
 
       }
@@ -1172,19 +1154,16 @@ function anim() {
   if (!g_info.pause) {
     g_info.tick++;
   }
-  //window.requestAnimationFrame(anim);
 
   if (!g_info.ready) {
     loading_anim();
-
-    //g_info.ctx_real.drawImage(g_info.canvas, 0, 0);
     window.requestAnimationFrame(anim);
     return;
   }
 
 
   if (g_info.param.effect_type == "cluster") {
-    if ((g_info.tick%120)< 50) {
+    if ((g_info.tick%120) > (120-55)) {
       g_info.screenshake = true;
     }
     else {
@@ -1195,7 +1174,10 @@ function anim() {
 
   if (g_info.screenshake) {
     ctx.save();
-    ctx.translate( _irnd(-10,10), _irnd(-10,10) );
+
+    if (!g_info.pause) {
+      ctx.translate( _irnd(-10,10), _irnd(-10,10) );
+    }
   }
 
   let _base_block_w = g_info.grid[0].length;
@@ -1218,6 +1200,7 @@ function anim() {
   let pal_n = g_info.palette_choice.colors.length;
   let walk_idx = 0;
   let walk_d = Math.floor(g_info.rnd[0]*65537);
+  walk_d = 1;
   //let bg_ds = 2*ds/3;
   //let bgo = ds/8;
   let bg_seg = 16;
@@ -1396,6 +1379,54 @@ function screenshot() {
 }
 
 
+function update_cluster() {
+
+  for (let i=0; i<g_info.state.effect.length; i++) {
+    let ele = g_info.state.effect[i];
+
+    ele.c_p = _irnd(4);
+
+    ele.s = _rnd(10,50);
+
+    if ((i%8) == 0) {
+      ele.x = _rnd(2*g_info.width/8, 6*g_info.width/8);
+      ele.y = _rnd(2*g_info.height/8, 6*g_info.height/8);
+    }
+    else {
+      let _p = Math.floor(i/8)*8;
+      ele.x = g_info.state.effect[_p].x + _rnd(-10, 10);
+      ele.y = g_info.state.effect[_p].y + _rnd(-10, 10);
+    }
+
+    ele.orig_x = ele.x;
+    ele.orig_y = ele.y;
+    ele.vx = _rnd(2.0);
+    ele.vy = _rnd(2.0);
+    ele.vc = _rnd(1.0);
+    ele.start_t = _rnd(32);
+    ele.orig_ttl = _rnd(16);
+    ele.ttl = ele.orig_ttl;
+
+
+    //ele.x = ele.orig_x;
+    //ele.y = ele.orig_y;
+
+    ele.c = 0.7;
+    ele.dc = _irnd(-1,1)/8;
+
+    let _S = g_info.size/4;
+    ele.s = _clamp( _S*_rndpow(2.0), 10, _S);
+    ele.ds = 2*_rnd(-1,1);
+
+
+    ele.vx = _rnd(-5,5);
+    ele.vy = _rnd(-5,5);
+
+  }
+
+
+}
+
 function initCanvas() {
   let canvas = document.getElementById("canvas");
   canvas.width = window.innerWidth;
@@ -1434,6 +1465,11 @@ function initCanvas() {
 
 
   g_info.text_square_size = g_info.size*0.025;
+
+  if (g_info.param.effect_type == "cluster") {
+    update_cluster();
+  }
+
   console.log("initCanvas");
 
 }
@@ -1456,8 +1492,7 @@ function init_fin() {
   let msg_choice = [
     "", "game\nover", "1up", "ready",
     "insert\ncoin", "high\nscore",
-    "credits\n0", "score\n0000",
-    "sorry\nnot sorry"
+    "credits\n0", "score\n0000"
   ];
   g_info.param["message"] = _arnd(msg_choice);
 
@@ -1499,20 +1534,17 @@ function init_effect() {
   let _cw = g_info.width;
   let _ch = g_info.width;
 
-  //let effect_list = ["ball", "squiggle", "bullet", "cluster", "none", "explode" ];
   let effect_list = ["ball", "squiggle", "bullet", "cluster", "none" ];
 
-
   let effect_type = _arnd(effect_list);
-  //effect_type = "cluster";
 
-  //DEBU250G
-  //DEBU250G
-  //DEBU250G
-  //effect_type = "bullet";
-  //DEBU250G
-  //DEBU250G
-  //DEBU250G
+  // DEBUG
+  // DEBUG
+  // DEBUG
+  //effect_type = "cluster";
+  // DEBUG
+  // DEBUG
+  // DEBUG
 
   let M = 8;
   if (effect_type == "cluster") {
