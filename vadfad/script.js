@@ -10,7 +10,7 @@
 
 var g_info = {
   "VERSION" : "0.1.0",
-  "download_filename": "vadcrzr.png",
+  "download_filename": "vadfad.png",
   "canvas": {},
   "ctx" : {},
 
@@ -280,8 +280,17 @@ var g_info = {
 
   "rnd":[],
 
+  "message_choice" : [ "", "game\nover", "1up", "ready",
+    "insert\ncoin", "high\nscore",
+    "credits\n0", "score\n0000"
+  ],
+
+  "effect_choice": ["ball", "squiggle", "bullet", "cluster", "" ],
+
   "text_square_size" : 10,
   "bg_color" : "#333",
+
+  "background_type": 0,
 
   "param": {},
   "features":{}
@@ -722,8 +731,9 @@ function draw_effect() {
 
     let _s_x = _cw/2;
     let _s_y = _ch/2;
-    let _s_ds_bg = 30;
-    let _s_ds = 20;
+
+    let _s_ds_bg = g_info.size*0.045;
+    let _s_ds = g_info.size*0.035;
 
     let ele = g_info.state.effect[i];
 
@@ -744,7 +754,6 @@ function draw_effect() {
       ctx.rotate(ele.a);
       ctx.translate(-_cw/2,-_ch/2);
 
-
       if (ele.frame_idx < 8) {
 
         let _xb = _s_x - _s_ds_bg/2 + ele.x;
@@ -752,11 +761,6 @@ function draw_effect() {
 
         let _x = _s_x - _s_ds/2 + ele.x;
         let _y = _s_y - _s_ds/2 + _s_ds + ele.y;
-
-
-        //draw_squiggle(ctx, _s_x - _s_ds_bg/2 , _s_y - _s_ds_bg/2 + _s_ds, _s_ds, 1, ele.frame_idx, "rgba(255, 128, 0, 0.5)", _s_ds_bg);
-        //draw_squiggle(ctx, _xb , _yb, _s_ds, 1, ele.frame_idx, "rgba(255, 128, 0, 0.5)", _s_ds_bg);
-        //draw_squiggle(ctx,  _x,   _y, _s_ds, 1, ele.frame_idx, "rgba(255, 0, 0, 0.5)");
 
         draw_squiggle(ctx, _xb , _yb, _s_ds, 1, ele.frame_idx, "rgba(255, 128, 0, 0.95)", _s_ds_bg);
         draw_squiggle(ctx,  _x,   _y, _s_ds, 1, ele.frame_idx, "rgba(255, 0, 0, 0.95)");
@@ -769,9 +773,6 @@ function draw_effect() {
         let _x = _s_x - _s_ds/2 + ele.x;
         let _y = _s_y + (ele.frame_idx-8)*_s_ds - _s_ds/2 + _s_ds + ele.y;
 
-        //draw_squiggle(ctx, _s_x - _s_ds_bg/2, _s_y + (ele.frame_idx-8)*_s_ds - _s_ds_bg/2 + _s_ds, _s_ds, ele.frame_idx+1, 8, "rgba(255, 128, 0, 0.5)", _s_ds_bg);
-        //draw_squiggle(ctx, _xb, _yb, _s_ds, ele.frame_idx+1, 8, "rgba(255, 128, 0, 0.5)", _s_ds_bg);
-        //draw_squiggle(ctx,  _x,  _y, _s_ds, ele.frame_idx+1, 8, "rgba(255, 0, 0, 0.5)");
         draw_squiggle(ctx, _xb, _yb, _s_ds, ele.frame_idx+1, 8, "rgba(255, 128, 0, 0.95)", _s_ds_bg);
         draw_squiggle(ctx,  _x,  _y, _s_ds, ele.frame_idx+1, 8, "rgba(255, 0, 0, 0.95)");
       }
@@ -791,7 +792,6 @@ function draw_effect() {
       }
 
       let _x = _s_x - _s_ds/2 + ele.x;
-      //let _y = _s_y + ele.frame_idx*_s_ds - _s_ds/2 + _s_ds + ele.y;
       let _y = _s_y + ele.frame_idx*ele.vy - _s_ds/2 + _s_ds + ele.y;
 
       ctx.save();
@@ -809,8 +809,6 @@ function draw_effect() {
       }
 
       ctx.fillRect(_x - ele.or/2, _y - ele.or/2, ele.or, ele.or);
-      //ctx.arc(_x, _y, ele.or, 0, Math.PI*2);
-      //ctx.fill();
 
       ctx.beginPath();
       if (ele.frame_idx%2) {
@@ -821,13 +819,8 @@ function draw_effect() {
       }
 
       ctx.fillRect(_x - ele.ir/2, _y - ele.ir/2, ele.ir, ele.ir);
-      //ctx.arc(_x, _y, ele.ir, 0, Math.PI*2);
-      //ctx.fill();
-
-      //ctx.fillRect(_x, _y, _s_ds, _s_ds);
 
       ctx.restore();
-
     }
 
     else if (ele.type == "explode") {
@@ -858,7 +851,6 @@ function draw_effect() {
       let c0 = "255,30,0";
       let c1 = "255,255,255";
       if (ele.frame_idx%2) {
-        //ctx.fillStyle = "rgba(255,30,0,0.9)";
         c_cur = c0;
         ctx.fillStyle = "rgba(" + c0 + ",0.9)";
       }
@@ -873,8 +865,6 @@ function draw_effect() {
       m = _clamp( Math.floor(ele.frame_idx/3), 0, 3);
       for (let ii=0; ii<m; ii++) {
         let _alpha = 0.9;
-        //let _alpha = _clamp( ele.frame_idx/4, 0, 0.9);
-        //let _alpha = _clamp( ele.frame_idx/32 +  (1.0 - ii/3)/6, 0, 0.9);
         _alpha = _clamp( (1.0 - ii/3)*0.8, 0, 0.9);
         ctx.fillStyle = "rgba(" + c_cur + "," + _alpha.toString() + ")";
         ctx.beginPath();
@@ -958,7 +948,6 @@ function draw_effect() {
             ele.s = _clamp( ele.s + ele.ds, 1, 1000);
           }
 
-
           let _r = Math.floor(ele.c*255);
           let _ff = (g_info.tick + ele.c_p)%4;
           if ((_ff==0) || (_ff==1)) {
@@ -968,11 +957,9 @@ function draw_effect() {
             ctx.fillStyle = "rgba(" + _r + "," + _r + ",0,0.9)";
           }
           else if ((_ff==4) || (_ff==5)) {
-            //ctx.fillStyle = "rgba(" + _r + "," + _r + ",0,0.9)";
             ctx.fillStyle = "#333";
           }
           else if ((_ff==5) || (_ff==7))  {
-            //ctx.fillStyle = "rgba(" + _r + "," + _r + ",0,0.9)";
             ctx.fillStyle = "#eee";
           }
           ctx.beginPath();
@@ -1010,8 +997,6 @@ function draw_message() {
     msg_c = "rgba(240,40,0,0.9)";
   }
 
-  //EXPERIMENT
-
   let _gpx0 = (Math.sin(g_info.state.msg_grad_freq*g_info.tick*Math.PI*2)+1.0)/2.0;
   let _gpx1 = (Math.sin(g_info.state.msg_grad_freq*g_info.tick*Math.PI*2 + Math.PI/4)+1.0)/2.0;
   let _gpx2 = (Math.sin(g_info.state.msg_grad_freq*g_info.tick*Math.PI*2 + Math.PI/2)+1.0)/2.0;
@@ -1038,23 +1023,8 @@ function draw_message() {
   msg_c.addColorStop(0.5, _c1);
   msg_c.addColorStop(1.0, _c2);
 
-  //msg_c.addColorStop(0, "#f00");
-  //msg_c.addColorStop(0.5, "#700");
-  //msg_c.addColorStop(1.0, "#300");
-
-  /*
-  msg_c_shadow = ctx.createLinearGradient(0,0,1000,1000);
-  msg_c_shadow.addColorStop(0, "#000");
-  msg_c_shadow.addColorStop(0.5, "#222");
-  msg_c_shadow.addColorStop(1.0, "#444");
-  */
-
   msg_c_shadow = "#333";
 
-  //EXPERIMENT
-
-  //let msg_char_dx = 30*4;
-  //let msg_char_dx = g_info.msg_ds*4;
   let msg_char_dx = g_info.text_square_size*4;
   let msg_ox = 30/2;
 
@@ -1068,21 +1038,14 @@ function draw_message() {
     draw_text(ctx, msg_x+_mso , msg_y+_mso , msgs[0] , msg_c_shadow);
     draw_text(ctx, msg_x      , msg_y      , msgs[0] , msg_c);
 
-    //msg_y += 200;
-    //msg_x += 50;
-
     msg_x = _cw/2 - (msgs[1].length*msg_char_dx/2)
     msg_y = 3*_ch/6;
 
     draw_text(ctx, msg_x+_mso , msg_y+_mso , msgs[1], msg_c_shadow);
     draw_text(ctx, msg_x      ,msg_y       , msgs[1], msg_c );
 
-    //msg_x -= 50;
-    //msg_y += 200;
-
     msg_x = _cw/2 - (msgs[2].length*msg_char_dx/2)
     msg_y = 5*_ch/6;
-    //msg_y = 7*_ch/8;
 
     draw_text(ctx, msg_x+_mso , msg_y+_mso , msgs[2], msg_c_shadow );
     draw_text(ctx, msg_x      , msg_y      , msgs[2], msg_c);
@@ -1190,11 +1153,27 @@ function anim() {
   let walk_idx = 0;
   let walk_d = Math.floor(g_info.rnd[0]*65537);
   walk_d = 1;
-  //let bg_ds = 2*ds/3;
-  //let bgo = ds/8;
   let bg_seg = 16;
   let bg_ds = _max(_cw, _ch)/bg_seg;
   let bgo = 0;
+
+  let seq_del = 0;
+  let _ft = Math.floor(g_info.tick/16)%4;
+  if (_ft == 0) {
+  }
+  else if (_ft==1) {
+    seq_del = (bg_seg+5);
+    seq_del = 1;
+  }
+  else if (_ft==2) {
+    seq_del = 2*(bg_seg+5);
+    seq_del = g_info.bg_key.length-1;
+  }
+  else if (_ft==3) {
+    seq_del = 3*(bg_seg+5);
+    seq_del = 0;
+  }
+
   for (let i=-3; i<(bg_seg+3); i++) {
     for (let j=-3; j<(bg_seg+3); j++) {
       let x = j*bg_ds + bgo/2;
@@ -1203,27 +1182,33 @@ function anim() {
         x += bg_ds/2;
       }
 
-      let _bg_key = g_info.bg_key[ walk_idx ];
-      let pal_c = g_info.palette_choice.colors[ walk_idx % g_info.palette_choice.colors.length ];
-      walk_idx = (walk_idx+walk_d)%g_info.bg_key.length;
+      //let _bg_key = g_info.bg_key[ (walk_idx  + seq_del) % g_info.bg_key.length ];
 
-      let _bg_grid = g_info.grid_mem[_bg_key];
+      if (g_info.background_type == 0) {
+        let _bg_key = g_info.bg_key[ walk_idx  ];
 
-      let dx = g_info.bg_amp*Math.cos( g_info.bg_freq*g_info.tick + g_info.bg_phase_x );
-      let dy = g_info.bg_amp*Math.sin( g_info.bg_freq*g_info.tick + g_info.bg_phase_y );
+        let pal_c = g_info.palette_choice.colors[ walk_idx % g_info.palette_choice.colors.length ];
+        walk_idx = (walk_idx+walk_d)%g_info.bg_key.length;
 
-      //let c = _hex_dhsv(pal_c, 0, -0.65, -0.65);
-      let rgb = _hex2rgb(pal_c);
-      let c = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",0.075)";
+        let _bg_grid = g_info.grid_mem[_bg_key];
 
-      //let c = "rgba(100,80,80,0.15)";
-      disp_r(x+dx, y+dy, bg_ds-bgo, bg_ds-bgo, _bg_grid.grid, c, true, true, true);
+        let dx = g_info.bg_amp*Math.cos( g_info.bg_freq*g_info.tick + g_info.bg_phase_x );
+        let dy = g_info.bg_amp*Math.sin( g_info.bg_freq*g_info.tick + g_info.bg_phase_y );
+
+        let rgb = _hex2rgb(pal_c);
+        let c = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",0.075)";
+
+        disp_r(x+dx, y+dy, bg_ds-bgo, bg_ds-bgo, _bg_grid.grid, c, true, true, true);
+      }
+
+      else if (g_info.background_type == 1) {
+      }
+
     }
   }
 
   // draw text under monster but over backgroudn texture
   //
-
   draw_message();
 
   // Monster
@@ -1257,7 +1242,6 @@ function anim() {
       let y = cy + i*ds + dy;
 
       if (grid[i][j] != 0) {
-        //ctx.fillStyle = "rgba(32,32,32,0.2)";
         if (grid[i][j] > 0) {
           ctx.fillStyle = g_info.palette_choice.colors[0];
           ctx.beginPath();
@@ -1270,56 +1254,9 @@ function anim() {
         }
         else {
 
-          if (g_info.state.blink_cur_t >= g_info.state.blink_end_t) {
-            g_info.state.blink_cur_t = 0;
-            if (!g_info.state.blink_open) {
-              g_info.state.blink_end_t = _irnd(8, 15);
-            }
-            else {
-              g_info.state.blink_end_t = _irnd(50, 1000);
-            }
-            g_info.state.blink_open = !g_info.state.blink_open;
-          }
-          g_info.state.blink_cur_t++;
-
-          if (g_info.state.blink_open) {
-            //ctx.fillStyle = "rgba(240,40,40,0.3)";
-            ctx.fillStyle = "rgba(40,40,40,0.9)";
-          }
-          else {
-            ctx.fillStyle = "rgba(220,220,220,0.9)";
-            //ctx.fillStyle = "rgba(240,240,240,0.5)";
-          }
-          //ctx.fillStyle = "rgba(240,240,240,0.13)";
-
-          //ctx.fillStyle = "rgba(240,240,240,0.9)";
-          //ctx.fillStyle = '#333';
-          //ctx.fillStyle = '#aaa';
-          //ctx.fillStyle = '#e33';
           ctx.beginPath();
-
-          ctx.fillStyle =  'rgba(240,240,240,0.6)';
-          ctx.fillStyle =  'rgba(40,40,40,0.6)';
-
           ctx.fillStyle =  g_info.state.eye_color;
-
           ctx.fillRect(x,y, ds + 0.125, ds + 0.125);
-
-          if (!g_info.state.blink_open) {
-
-            if (g_info.param.eye_choice == 0) {
-              //ctx.fillStyle = "rgba(20,20,20,0.9)";
-              //ctx.beginPath();
-              //ctx.fillRect(x + ds/4, y + 3*ds/4, ds/4, ds/4 );
-            }
-          }
-
-
-          /*
-          ctx.fillStyle = "rgba(40,40,40,0.9)";
-          ctx.beginPath();
-          ctx.fillRect(x , y + ds/2, ds + 0.5, ds/2 + 0.5);
-          */
 
         }
 
@@ -1335,11 +1272,7 @@ function anim() {
     ctx.restore();
   }
 
-
-
-  //g_info.ctx_real.drawImage(g_info.canvas, 0, 0);
   window.requestAnimationFrame(anim);
-
 }
 
 function clear(ctx, clear_width, clear_height, bg_color) {
@@ -1422,13 +1355,6 @@ function initCanvas() {
   canvas.height = window.innerHeight;
   let ctx = canvas.getContext("2d");
 
-  /*
-  let canvas_bb = document.createElement("canvas");
-  canvas_bb.width = canvas.width;
-  canvas_bb.height = canvas.height;
-  let ctx_bb = canvas_bb.getContext('2d');
-  */
-
   let W = canvas.width;
   let H = canvas.height;
 
@@ -1444,22 +1370,13 @@ function initCanvas() {
   g_info.canvas = canvas;
   g_info.ctx = ctx;
 
-  //g_info.canvas = canvas_bb;
-  //g_info.ctx = ctx_bb;
-  //g_info.size = Math.floor(dS - dS/3);
   g_info.size = Math.floor(dS);
-
-  //g_info.canvas_real = canvas;
-  //g_info.ctx_real = ctx;
-
 
   g_info.text_square_size = g_info.size*0.025;
 
   if (g_info.param.effect_type == "cluster") {
     update_cluster();
   }
-
-  console.log("initCanvas");
 
 }
 
@@ -1475,18 +1392,12 @@ function _get_max_idx(g) {
 }
 
 function init_fin() {
+}
+
+function init() {
+
   g_info.ready = true;
-  g_info.grid = gen_vadcrzr();
-
-  let msg_choice = [
-    "", "game\nover", "1up", "ready",
-    "insert\ncoin", "high\nscore",
-    "credits\n0", "score\n0000"
-  ];
-  g_info.param["message"] = _arnd(msg_choice);
-
-  //g_info.param["message"] = "insert\ntoken";
-  //g_info.param["message"] = "waiting\nto be\nsigned";
+  g_info.grid = gen_vadfad();
 
   let g = g_info.grid;
   let base_idx = _get_max_idx(g) + 1;
@@ -1496,15 +1407,14 @@ function init_fin() {
       let idx = g[i][j];
       if (idx == 0) { continue; }
       if (idx in g_info.grid_mem) { continue; }
-      let _rg = gen_vadcrzr(base_idx);
-      //g_info.grid_mem[idx] = {"grid":_rg, "c": _arnd(g_info.palette_choice.colors) };
+      let _rg = gen_vadfad(base_idx);
       g_info.grid_mem[idx] = {"grid":_rg, "c": _arnd(g_info.palette_choice.colors.slice(1)) };
       base_idx= _get_max_idx(_rg)+1;
     }
   }
 
-  g_info.bg_grid = gen_vadcrzr(base_idx)+1;
-  init_effect();
+  g_info.bg_grid = gen_vadfad(base_idx)+1;
+  update_effect();
 
   for (let key in g_info.grid_mem) {
     let ikey = parseInt(key);
@@ -1513,27 +1423,21 @@ function init_fin() {
     }
   }
 
+
+  //setTimeout(function() { init_fin(); }, 50);
 }
 
-function init() {
-  setTimeout(function() { init_fin(); }, 50);
+function init_param() {
+  g_info.param["effect_type"] = _arnd(g_info.effect_choice);
+  g_info.param["message"] = _arnd(g_info.message_choice);
 }
 
-function init_effect() {
+
+function update_effect() {
   let _cw = g_info.width;
   let _ch = g_info.width;
 
-  let effect_list = ["ball", "squiggle", "bullet", "cluster", "none" ];
-
-  let effect_type = _arnd(effect_list);
-
-  // DEBUG
-  // DEBUG
-  // DEBUG
-  //effect_type = "cluster";
-  // DEBUG
-  // DEBUG
-  // DEBUG
+  let effect_type = g_info.param.effect_type;
 
   let M = 8;
   if (effect_type == "cluster") {
@@ -1644,6 +1548,8 @@ function init_effect() {
   //
   for (let i=0; i<10; i++) { g_info.rnd.push( fxrand() ); }
 
+  init_param();
+
   g_info.palette_choice = _arnd( g_info.palette );
 
   console.log(g_info.palette_choice.name);
@@ -1654,9 +1560,11 @@ function init_effect() {
 
   if (_irnd(2) == 0) {
     g_info.state.eye_color = "rgba(240,240,240,0.6)";
+    g_info.param["eye_color"] = "white";
   }
   else {
     g_info.state.eye_color = "rgba(40,40,40,0.6)";
+    g_info.param["eye_color"] = "black";
   }
   g_info.state.msg_color = ["red", "white"][_irnd(2)];
 
@@ -1682,12 +1590,28 @@ function init_effect() {
   });
 
 
+  window.$fxhashFeatures = {
+    "Color Scheme": g_info.palette_choice.name,
+    "Eye Type" : g_info.param.eye_choice,
+    "Eye Color" : g_info.param.eye_color,
+    "Pixel Height": g_info.param.orig_height,
+    "Pixel Width": g_info.param.orig_width
+  };
+
+  if (g_info.param.message.length > 0) {
+    window.$fxhashFeatures["Message"] = g_info.param.message.split("\n").join(" ");
+  }
+  if (g_info.param.effect_type.length > 0) {
+    window.$fxhashFeatures["Effect"] = g_info.param.effect_type;
+  }
+
+  console.log(">>", window.$fxhashFeatures );
 
   window.requestAnimationFrame(anim);
 
 })();
 
-function gen_vadcrzr(base_idx) {
+function gen_vadfad(base_idx) {
   base_idx = ((typeof base_idx === "undefined") ? 1 : base_idx);
   let grid = [
   ];
@@ -1711,11 +1635,11 @@ function gen_vadcrzr(base_idx) {
   let h = _arnd(H).v;
   let w = _arnd(W).v;
 
-
-  g_info.param["orig_height"] = h;
-  g_info.param["orig_width"] = w;
-  g_info.param["eye_choice"] = eye_choice;
-
+  if (base_idx == 1) {
+    g_info.param["orig_height"] = h;
+    g_info.param["orig_width"] = w;
+    g_info.param["eye_choice"] = eye_choice;
+  }
 
   for (let iy=0; iy<h; iy++) {
     grid.push([]);

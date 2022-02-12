@@ -27,12 +27,16 @@ s - screenshot
 
 To the extent possible, the source code is dedicated to the public domain (CC0) and can be used for any purpose, even commercial, by anyone. All third party libraries used are libre/free. Please check individual files for their respective licenses.
 
+The price of this NFT tailored to be approximately $0.25 United States dollars (USD).  For the price of playing a typical 1980s video game arcade, anyone can mint this NFT.
+
+The video game arcade industry helped create video game empires, drive the adoption of home video consoles and the use of personal computers.  NFTs have the potential to drive innovation in other markets that aren't well understood or explored yet.  
+
 This work hopes to add to the conversation about examining the reality of the ecosystem that we've developed around digital goods and intellectual property.
 
 Tags
 ---
 
-minimal, generative, 8-bit, coin-op, arcade, 80s, retro, nostalgia, game, pfp
+minimal, generative, 8-bit, coin-op, arcade, 1980s, retro, video game, nostalgia, pfp
 
 Statement
 ---
@@ -46,6 +50,33 @@ and the potential of remuneration for artists.
 To the extent possible, the source code is dedicated to the public
 domain (CC0) and can be used for any purpose, even commercial, by anyone.
 All third party libraries used are libre/free. Please check individual files for their respective licenses.
+
+"VADFAD" attempts to address critiques against NFTs by highlighting their similarity
+with cultural phenomena of the past.
+
+In the United States, arcade video cabinets became popular and were popular for a younger audience.
+The arcade games of the 1980s typically would cost $0.25 to play and offered anywhere from minutes
+to hours of play, depending on the skill level of the player.
+Many players spent hours feeding quarters into arcade games, attempting to increase their skill level
+and get a high score that would be displayed to other, future players.
+
+Though there is still a thriving arcade industry in other parts of the world, in the United States,
+the arcade industry as it existed in the 1980s and 1990s was largely a fad, mostly disappearing with
+the introduction of affordable home game systems and personal computers.
+
+The price of this NFT tailored to be approximately $0.25 United States dollars (USD).
+For the price of playing a typical 1980s video game arcade, anyone can mint this NFT.
+
+Since all code for this NFT is released under a libre/free license, anyone who wants
+to create their own NFT using this project as a template can do so.
+If others have the desire to improve or experiment with other ideas, they can then
+release their own NFT creating the potential for bragging rights, much like
+getting a high score on a classic 1980s video game.
+
+The video game arcade industry helped create video game empires, drive the adoption of home video
+consoles and the use of personal computers.
+NFTs have the potential to drive innovation in other markets that aren't well understood
+or explored yet.
 
 I don't know if "VADFAD"
 is worth anything nor do I know if NFTs are
