@@ -24,17 +24,22 @@ var g_info = {
   "download_filename": "vadcrzr.png",
   "canvas": {},
   "ctx" : {},
+
+  //"canvas_disp":{},
+  //"ctx_disp": {},
+
   "ready": false,
   "tick" : 0,
   "tick_val" : 0,
 
-  "fps_debug": false,
+  "fps_debug": true,
   "fps": 0,
   "cur_t": 0,
   "last_t":0,
   "delta_t":0,
 
   "alphabet": {
+    "0":  ".x." + "x.x" + "x.x" + "x.x" + ".x." ,
     "1":  ".x." + "xx." + ".x." + ".x." + "xxx" ,
     "a":  "xxx" + "x.x" + "xxx" + "x.x" + "x.x" ,
     "b":  "xxx" + "x.x" + "xxx" + "x.x" + "xxx" ,
@@ -257,9 +262,15 @@ var g_info = {
 
     "effect": [],
 
+    "eye_color": "rgba(240,240,240,0.6)",
+
+    "msg_color" : "red",
+    "msg_grad_freq": 1/80,
     "msg_cur_t":0,
     "msg_end_t":0
   },
+
+  "screnshake": false,
 
   "fg_amp_x": 0,
   "fg_amp_y": 5,
@@ -280,6 +291,7 @@ var g_info = {
 
   "rnd":[],
 
+  "text_square_size" : 10,
   "bg_color" : "#333",
 
   "param": {},
@@ -613,8 +625,19 @@ function disp_r(cx,cy,w,h,g,c,no_eyes,no_shadow,no_overlap) {
         }
         else {
 
-          ctx.fillStyle = "rgba(240,240,240,0.3)";
+          //ctx.fillStyle = "rgba(240,240,240,0.3)";
           //ctx.fillStyle = "rgba(240,240,240,0.9)";
+
+          /*
+          if (Math.floor(g_info.tick/2)%2) {
+            ctx.fillStyle = "rgba(255,255,255,0.9)";
+          }
+          else {
+            ctx.fillStyle = "rgba(30,30,30,0.9)";
+          }
+          */
+          ctx.fillStyle = "rgba(230,230,230,0.9)";
+
         }
 
         ctx.beginPath();
@@ -646,13 +669,16 @@ function draw_squiggle(ctx, x, y, ds, start_frame, n_frame, c, sz) {
   }
 }
 
-function draw_text(ctx, base_x, base_y, txt, c) {
+function draw_text(ctx, base_x, base_y, txt, c, ds) {
+  let _ds = ((typeof ds === "undefined") ? g_info.text_square_size : ds);
   c = ((typeof c === "undefined") ?  "rgba(200,200,200,0.4)" : c);
   let ab = g_info.alphabet;
 
   ctx.fillStyle = c;
 
-  let _ds = 30;
+  //let _ds = 30;
+  //let _ds = g_info.size * 0.035;
+
   let cy = 0;
   let cur_line_idx = 0;
   let ch_width = 4;
@@ -687,7 +713,7 @@ function draw_text(ctx, base_x, base_y, txt, c) {
 
         if (gr[i*3 + j] == 'x') {
           ctx.beginPath();
-          ctx.fillRect(_x, _y, _ds, _ds);
+          ctx.fillRect(_x, _y, _ds + 0.5, _ds + 0.5);
         }
       }
     }
@@ -740,8 +766,11 @@ function draw_effect() {
 
 
         //draw_squiggle(ctx, _s_x - _s_ds_bg/2 , _s_y - _s_ds_bg/2 + _s_ds, _s_ds, 1, ele.frame_idx, "rgba(255, 128, 0, 0.5)", _s_ds_bg);
-        draw_squiggle(ctx, _xb , _yb, _s_ds, 1, ele.frame_idx, "rgba(255, 128, 0, 0.5)", _s_ds_bg);
-        draw_squiggle(ctx,  _x,   _y, _s_ds, 1, ele.frame_idx, "rgba(255, 0, 0, 0.5)");
+        //draw_squiggle(ctx, _xb , _yb, _s_ds, 1, ele.frame_idx, "rgba(255, 128, 0, 0.5)", _s_ds_bg);
+        //draw_squiggle(ctx,  _x,   _y, _s_ds, 1, ele.frame_idx, "rgba(255, 0, 0, 0.5)");
+
+        draw_squiggle(ctx, _xb , _yb, _s_ds, 1, ele.frame_idx, "rgba(255, 128, 0, 0.95)", _s_ds_bg);
+        draw_squiggle(ctx,  _x,   _y, _s_ds, 1, ele.frame_idx, "rgba(255, 0, 0, 0.95)");
 
       }
       else {
@@ -752,8 +781,10 @@ function draw_effect() {
         let _y = _s_y + (ele.frame_idx-8)*_s_ds - _s_ds/2 + _s_ds + ele.y;
 
         //draw_squiggle(ctx, _s_x - _s_ds_bg/2, _s_y + (ele.frame_idx-8)*_s_ds - _s_ds_bg/2 + _s_ds, _s_ds, ele.frame_idx+1, 8, "rgba(255, 128, 0, 0.5)", _s_ds_bg);
-        draw_squiggle(ctx, _xb, _yb, _s_ds, ele.frame_idx+1, 8, "rgba(255, 128, 0, 0.5)", _s_ds_bg);
-        draw_squiggle(ctx,  _x,  _y, _s_ds, ele.frame_idx+1, 8, "rgba(255, 0, 0, 0.5)");
+        //draw_squiggle(ctx, _xb, _yb, _s_ds, ele.frame_idx+1, 8, "rgba(255, 128, 0, 0.5)", _s_ds_bg);
+        //draw_squiggle(ctx,  _x,  _y, _s_ds, ele.frame_idx+1, 8, "rgba(255, 0, 0, 0.5)");
+        draw_squiggle(ctx, _xb, _yb, _s_ds, ele.frame_idx+1, 8, "rgba(255, 128, 0, 0.95)", _s_ds_bg);
+        draw_squiggle(ctx,  _x,  _y, _s_ds, ele.frame_idx+1, 8, "rgba(255, 0, 0, 0.95)");
       }
 
       ctx.restore();
@@ -787,8 +818,10 @@ function draw_effect() {
       else {
         ctx.fillStyle = "rgba(255,255,255,0.9)";
       }
-      ctx.arc(_x, _y, ele.or, 0, Math.PI*2);
-      ctx.fill();
+
+      ctx.fillRect(_x - ele.or/2, _y - ele.or/2, ele.or, ele.or);
+      //ctx.arc(_x, _y, ele.or, 0, Math.PI*2);
+      //ctx.fill();
 
       ctx.beginPath();
       if (ele.frame_idx%2) {
@@ -797,13 +830,18 @@ function draw_effect() {
       else {
         ctx.fillStyle = "rgba(200,200,0,0.9)";
       }
-      ctx.arc(_x, _y, ele.ir, 0, Math.PI*2);
-      ctx.fill();
+
+      ctx.fillRect(_x - ele.ir/2, _y - ele.ir/2, ele.ir, ele.ir);
+      //ctx.arc(_x, _y, ele.ir, 0, Math.PI*2);
+      //ctx.fill();
 
       //ctx.fillRect(_x, _y, _s_ds, _s_ds);
 
       ctx.restore();
 
+    }
+
+    else if (ele.type == "explode") {
     }
 
     else if (ele.type == "bullet") {
@@ -827,15 +865,29 @@ function draw_effect() {
       ctx.translate(-_cw/2,-_ch/2);
 
       ctx.beginPath();
+      let c_cur = "";
+      let c0 = "255,30,0";
+      let c1 = "255,255,255";
       if (ele.frame_idx%2) {
-        ctx.fillStyle = "rgba(255,30,0,0.9)";
+        //ctx.fillStyle = "rgba(255,30,0,0.9)";
+        c_cur = c0;
+        ctx.fillStyle = "rgba(" + c0 + ",0.9)";
       }
       else {
-        ctx.fillStyle = "rgba(255,255,255,0.9)";
+        c_cur = c1;
+        ctx.fillStyle = "rgba(" + c1 + ",0.9)";
       }
       ctx.fillRect(_x,_y, ele.or, ele.or);
 
-      for (let ii=0; ii<3; ii++) {
+
+      let m = 3;
+      m = _clamp( Math.floor(ele.frame_idx/3), 0, 3);
+      for (let ii=0; ii<m; ii++) {
+        let _alpha = 0.9;
+        //let _alpha = _clamp( ele.frame_idx/4, 0, 0.9);
+        //let _alpha = _clamp( ele.frame_idx/32 +  (1.0 - ii/3)/6, 0, 0.9);
+        _alpha = _clamp( (1.0 - ii/3)*0.8, 0, 0.9);
+        ctx.fillStyle = "rgba(" + c_cur + "," + _alpha.toString() + ")";
         ctx.beginPath();
         ctx.fillRect(_x,_y - (4*ele.or/4) + (1*ele.or/6) - (5*ii*ele.or/6), ele.or, ele.or/2);
       }
@@ -846,47 +898,115 @@ function draw_effect() {
 
     else if (ele.type == "cluster") {
 
-      if (ele.init) {
-        ele.next_frame_t = g_info.cur_t + ele.frame_delta_t;
-        ele.init=false;
-      }
+      if ((g_info.tick%120)< 50) {
 
-      if (g_info.cur_t >= ele.next_frame_t) {
-        ele.frame_idx = (ele.frame_idx+1)%ele.n_frame;
-        ele.next_frame_t += ele.frame_delta_t;
+        if ((g_info.tick%120)==0) { ele.init = true; }
 
-        if ((ele.frame_idx%2)==0) {
-          ele.x = _rnd(_cw/4, 3*_cw/4);
-          ele.y = _rnd(_ch/4, 3*_ch/4);
+        if (ele.init) {
+          ele.next_frame_t = g_info.cur_t + ele.frame_delta_t;
 
-          ele.or = 50;
-          ele.ir = 40;
+          ele.cur_start_t = g_info.cur_t + ele.start_t;
+          ele.cur_end_t = ele.cur_start_t + ele.ttl;
+          ele.init=false;
+
+          ele.c_p = _irnd(4);
         }
-      }
 
-      if (ele.frame_idx < (ele.n_frame/2)) {
+        if (g_info.cur_t >= ele.cur_end_t) {
+          ele.cur_start_t = g_info.cur_t + _rnd(10000);
+          ele.cur_end_t = ele.cur_start_t + _rnd(300);
+          ele.next_frame_t = g_info.cur_t + ele.frame_delta_t;
+          ele.cur_t = g_info.cur_t;
+          ele.next_frame_t = ele.cur_start_t + ele.frame_delta_t;
+          ele.frame_idx = 0;
 
-        ctx.beginPath();
-        if (ele.frame_idx%2) {
-          ctx.fillStyle = "rgba(255,30,0,0.9)";
-        }
-        else {
-          ctx.fillStyle = "rgba(255,255,255,0.9)";
-        }
-        ctx.moveTo(ele.x, ele.y);
-        ctx.arc(ele.x, ele.y, ele.or, 0, Math.PI*2);
-        ctx.fill();
+          ele.x = ele.orig_x;
+          ele.y = ele.orig_y;
 
-        ctx.beginPath();
-        if (ele.frame_idx%2) {
-          ctx.fillStyle = "rgba(255,200,0,0.9)";
+          ele.c = 0.7;
+          ele.dc = _irnd(-1,1)/8;
+          //ele.s = _rnd(10,200);
+          ele.s = _clamp( 200*_rndpow(2.0), 10, 200);
+          ele.ds = 2*_rnd(-1,1);
+
+
+          ele.vx = _rnd(-5,5);
+          ele.vy = _rnd(-5,5);
         }
-        else {
-          ctx.fillStyle = "rgba(200,200,0,0.9)";
+
+        if (g_info.cur_t >= ele.cur_start_t) {
+
+          if (g_info.cur_t >= ele.next_frame_t) {
+            ele.frame_idx = (ele.frame_idx+1)%ele.n_frame;
+            ele.next_frame_t += ele.frame_delta_t;
+          }
+
+          if (!g_info.pause) {
+            ele.x += ele.vx;
+            ele.y += ele.vy;
+
+            ele.c = _clamp( ele.c + ele.dc, 0, 1); 
+            ele.s = _clamp( ele.s + ele.ds, 1, 1000);
+          }
+
+
+          let _r = Math.floor(ele.c*255);
+          let _ff = (g_info.tick + ele.c_p)%4;
+          if ((_ff==0) || (_ff==1)) {
+            ctx.fillStyle = "rgba(" + _r + ",0,0,0.9)";
+          }
+          else if ((_ff==2) || (_ff==3)) {
+            ctx.fillStyle = "rgba(" + _r + "," + _r + ",0,0.9)";
+          }
+          else if ((_ff==4) || (_ff==5)) {
+            //ctx.fillStyle = "rgba(" + _r + "," + _r + ",0,0.9)";
+            ctx.fillStyle = "#333";
+          }
+          else if ((_ff==5) || (_ff==7))  {
+            //ctx.fillStyle = "rgba(" + _r + "," + _r + ",0,0.9)";
+            ctx.fillStyle = "#eee";
+          }
+          ctx.beginPath();
+          ctx.fillRect(ele.x - ele.s/2, ele.y - ele.s/2, ele.s, ele.s);
+
+          /*
+
+            if ((ele.frame_idx%2)==0) {
+              ele.x = _rnd(_cw/4, 3*_cw/4);
+              ele.y = _rnd(_ch/4, 3*_ch/4);
+
+              ele.or = 50;
+              ele.ir = 40;
+            }
+          }
+
+          if (ele.frame_idx < (ele.n_frame/2)) {
+
+            ctx.beginPath();
+            if (ele.frame_idx%2) {
+              ctx.fillStyle = "rgba(255,30,0,0.9)";
+            }
+            else {
+              ctx.fillStyle = "rgba(255,255,255,0.9)";
+            }
+            ctx.moveTo(ele.x, ele.y);
+            ctx.arc(ele.x, ele.y, ele.or, 0, Math.PI*2);
+            ctx.fill();
+
+            ctx.beginPath();
+            if (ele.frame_idx%2) {
+              ctx.fillStyle = "rgba(255,200,0,0.9)";
+            }
+            else {
+              ctx.fillStyle = "rgba(200,200,0,0.9)";
+            }
+            ctx.moveTo(ele.x, ele.y);
+            ctx.arc(ele.x, ele.y, ele.ir, 0, Math.PI*2);
+            ctx.fill();
+
+          }
+          */
         }
-        ctx.moveTo(ele.x, ele.y);
-        ctx.arc(ele.x, ele.y, ele.ir, 0, Math.PI*2);
-        ctx.fill();
 
       }
 
@@ -906,12 +1026,65 @@ function draw_message() {
 
   let msgs = g_info.param.message.split("\n");
   //let msg_x = _cw/2;
-  let msg_y = 50;
+  //let msg_y = 50;
+  let msg_y = g_info.text_square_size*5;
   let _mso = 10;
   let msg_c_shadow = "rgba(90,90,90, 1.0)";
   let msg_c = "rgba(100, 100, 100, 1.0)";
 
-  let msg_char_dx = 30*4;
+  if (Math.floor(g_info.tick/4)%2) {
+    msg_c = "rgba(240,240,240,0.9)";
+  }
+  else {
+    msg_c = "rgba(240,40,0,0.9)";
+  }
+
+  //EXPERIMENT
+
+  let _gpx0 = (Math.sin(g_info.state.msg_grad_freq*g_info.tick*Math.PI*2)+1.0)/2.0;
+  let _gpx1 = (Math.sin(g_info.state.msg_grad_freq*g_info.tick*Math.PI*2 + Math.PI/4)+1.0)/2.0;
+  let _gpx2 = (Math.sin(g_info.state.msg_grad_freq*g_info.tick*Math.PI*2 + Math.PI/2)+1.0)/2.0;
+
+  _gpx0 = _clamp(Math.floor(_gpx0*255), 40, 255);
+  _gpx1 = _clamp(Math.floor(_gpx1*255), 40, 255);
+  _gpx2 = _clamp(Math.floor(_gpx2*255), 40, 255);
+
+  let _c0, _c1, _c2;
+
+  if (g_info.state.msg_color == "red") {
+    _c0 = "rgb(" + _gpx0 + ",0,0)";
+    _c1 = "rgb(" + _gpx1 + ",0,0)";
+    _c2 = "rgb(" + _gpx2 + ",0,0)";
+  }
+  else if (g_info.state.msg_color == "white") {
+    _c0 = "rgb(" + _gpx0 + "," + _gpx0 + "," + _gpx0 + ")";
+    _c1 = "rgb(" + _gpx1 + "," + _gpx1 + "," + _gpx1 + ")";
+    _c2 = "rgb(" + _gpx2 + "," + _gpx2 + "," + _gpx2 + ")";
+  }
+
+  msg_c = ctx.createLinearGradient(0,0,1000,1000);
+  msg_c.addColorStop(0, _c0);
+  msg_c.addColorStop(0.5, _c1);
+  msg_c.addColorStop(1.0, _c2);
+
+  //msg_c.addColorStop(0, "#f00");
+  //msg_c.addColorStop(0.5, "#700");
+  //msg_c.addColorStop(1.0, "#300");
+
+  /*
+  msg_c_shadow = ctx.createLinearGradient(0,0,1000,1000);
+  msg_c_shadow.addColorStop(0, "#000");
+  msg_c_shadow.addColorStop(0.5, "#222");
+  msg_c_shadow.addColorStop(1.0, "#444");
+  */
+
+  msg_c_shadow = "#333";
+
+  //EXPERIMENT
+
+  //let msg_char_dx = 30*4;
+  //let msg_char_dx = g_info.msg_ds*4;
+  let msg_char_dx = g_info.text_square_size*4;
   let msg_ox = 30/2;
 
   let msg_x = _cw/2 - (msgs[0].length*msg_char_dx/2)
@@ -938,6 +1111,7 @@ function draw_message() {
 
     msg_x = _cw/2 - (msgs[2].length*msg_char_dx/2)
     msg_y = 5*_ch/6;
+    //msg_y = 7*_ch/8;
 
     draw_text(ctx, msg_x+_mso , msg_y+_mso , msgs[2], msg_c_shadow );
     draw_text(ctx, msg_x      , msg_y      , msgs[2], msg_c);
@@ -956,7 +1130,7 @@ function draw_message() {
       msg_y = 500;
 
       msg_x = _cw/2 - (msgs[1].length*msg_char_dx/2) + msg_ox;
-      msg_y = 4*_ch/6;
+      msg_y = 5*_ch/6;
 
       draw_text(ctx, msg_x+_mso , msg_y+_mso , msgs[1], msg_c_shadow );
       draw_text(ctx, msg_x      , msg_y      , msgs[1], msg_c);
@@ -970,15 +1144,19 @@ function anim() {
 
   // fps
   //
-  let now_t = Date.now();
-  let delta_t = (now_t - g_info.last_t);
-  g_info.cur_t = now_t;
-  g_info.last_t = now_t;
-  g_info.delta_t = delta_t;
-  if (delta_t > 0) { g_info.fps = 1000/(delta_t); }
-  if (g_info.fps_debug) {
-    if ((g_info.tick%30)==0) {
-      console.log(g_info.fps);
+  let now_t, delta_t;
+
+  if (!g_info.pause) {
+    now_t = Date.now();
+    delta_t = (now_t - g_info.last_t);
+    g_info.cur_t = now_t;
+    g_info.last_t = now_t;
+    g_info.delta_t = delta_t;
+    if (delta_t > 0) { g_info.fps = 1000/(delta_t); }
+    if (g_info.fps_debug) {
+      if ((g_info.tick%30)==0) {
+        console.log(g_info.fps);
+      }
     }
   }
   //
@@ -990,14 +1168,35 @@ function anim() {
   let ctx = g_info.ctx;
 
   clear(ctx, _cw, _ch, g_info.bg_color);
-  g_info.tick++;
-  window.requestAnimationFrame(anim);
+
+  if (!g_info.pause) {
+    g_info.tick++;
+  }
+  //window.requestAnimationFrame(anim);
 
   if (!g_info.ready) {
     loading_anim();
+
+    //g_info.ctx_real.drawImage(g_info.canvas, 0, 0);
+    window.requestAnimationFrame(anim);
     return;
   }
 
+
+  if (g_info.param.effect_type == "cluster") {
+    if ((g_info.tick%120)< 50) {
+      g_info.screenshake = true;
+    }
+    else {
+      g_info.screenshake = false;
+    }
+
+  }
+
+  if (g_info.screenshake) {
+    ctx.save();
+    ctx.translate( _irnd(-10,10), _irnd(-10,10) );
+  }
 
   let _base_block_w = g_info.grid[0].length;
   let _base_block_h = g_info.grid.length;
@@ -1125,9 +1324,14 @@ function anim() {
           //ctx.fillStyle = '#333';
           //ctx.fillStyle = '#aaa';
           //ctx.fillStyle = '#e33';
-          ctx.fillStyle =  'rgba(40,40,40,0.6)';
           ctx.beginPath();
-          ctx.fillRect(x,y, ds + 0.5, ds + 0.5);
+
+          ctx.fillStyle =  'rgba(240,240,240,0.6)';
+          ctx.fillStyle =  'rgba(40,40,40,0.6)';
+
+          ctx.fillStyle =  g_info.state.eye_color;
+
+          ctx.fillRect(x,y, ds + 0.125, ds + 0.125);
 
           if (!g_info.state.blink_open) {
 
@@ -1154,6 +1358,15 @@ function anim() {
   // effects above background but behind monster
   //
   draw_effect();
+
+  if (g_info.screenshake) {
+    ctx.restore();
+  }
+
+
+
+  //g_info.ctx_real.drawImage(g_info.canvas, 0, 0);
+  window.requestAnimationFrame(anim);
 
 }
 
@@ -1189,6 +1402,13 @@ function initCanvas() {
   canvas.height = window.innerHeight;
   let ctx = canvas.getContext("2d");
 
+  /*
+  let canvas_bb = document.createElement("canvas");
+  canvas_bb.width = canvas.width;
+  canvas_bb.height = canvas.height;
+  let ctx_bb = canvas_bb.getContext('2d');
+  */
+
   let W = canvas.width;
   let H = canvas.height;
 
@@ -1203,7 +1423,19 @@ function initCanvas() {
 
   g_info.canvas = canvas;
   g_info.ctx = ctx;
-  g_info.size = Math.floor(dS - dS/3);
+
+  //g_info.canvas = canvas_bb;
+  //g_info.ctx = ctx_bb;
+  //g_info.size = Math.floor(dS - dS/3);
+  g_info.size = Math.floor(dS);
+
+  //g_info.canvas_real = canvas;
+  //g_info.ctx_real = ctx;
+
+
+  g_info.text_square_size = g_info.size*0.025;
+  console.log("initCanvas");
+
 }
 
 function _get_max_idx(g) {
@@ -1221,7 +1453,12 @@ function init_fin() {
   g_info.ready = true;
   g_info.grid = gen_vadcrzr();
 
-  let msg_choice = [ "", "game\nover", "1up", "ready"]; //, "waiting\nto be\nsigned"];
+  let msg_choice = [
+    "", "game\nover", "1up", "ready",
+    "insert\ncoin", "high\nscore",
+    "credits\n0", "score\n0000",
+    "sorry\nnot sorry"
+  ];
   g_info.param["message"] = _arnd(msg_choice);
 
   //g_info.param["message"] = "insert\ntoken";
@@ -1262,11 +1499,28 @@ function init_effect() {
   let _cw = g_info.width;
   let _ch = g_info.width;
 
+  //let effect_list = ["ball", "squiggle", "bullet", "cluster", "none", "explode" ];
   let effect_list = ["ball", "squiggle", "bullet", "cluster", "none" ];
 
+
   let effect_type = _arnd(effect_list);
+  //effect_type = "cluster";
+
+  //DEBU250G
+  //DEBU250G
+  //DEBU250G
+  //effect_type = "bullet";
+  //DEBU250G
+  //DEBU250G
+  //DEBU250G
 
   let M = 8;
+  if (effect_type == "cluster") {
+    M = 1024;
+  }
+
+  g_info.param["effect_type"] = effect_type;
+
   for (let i=0; i<M; i++) {
     let r = 50;
     let cx = _cw/2;
@@ -1285,6 +1539,12 @@ function init_effect() {
       "y": 250,
       "dx": 0,
       "dy": 0,
+
+      "ds": -0.1,
+      "s": 30,
+      "c": 1.0,
+      "dc": -0.1,
+
       "vx": 0,
       "vy": 0,
       "state":"start",
@@ -1295,19 +1555,55 @@ function init_effect() {
       "frame": []
     };
 
+    ele.y = g_info.size/3;
+
     // ball testing
     //
     if (effect_type == "ball") {
-      ele.y = 250;
+
+      //ele.x = 30*Math.cos(a) + cx;
+      //ele.y = 30*Math.sin(a) + cy;
+
+      //ele.x = 0;
+      //ele.y = 250;
+      //ele.y = g_info.size/3;
       ele.vy = 10;
-      ele.or = 35;
-      ele.ir = 25;
+      //ele.or = 35;
+      //ele.ir = 25;
+      ele.or = 45;
+      ele.ir = 35;
+      ele.n_frame = 100;
     }
     else if (effect_type == "bullet") {
-      ele.y = 250;
+      //ele.y = 250;
+      //ele.y = g_info.size/3;
       ele.vy = 10;
       ele.or = 35;
       ele.ir = 25;
+      ele.n_frame = 100;
+    }
+    else if (effect_type == "cluster") {
+
+      if ((i%8) == 0) {
+        ele.x = _rnd(2*g_info.width/8, 6*g_info.width/8);
+        ele.y = _rnd(2*g_info.height/8, 6*g_info.height/8);
+      }
+      else {
+        let _p = Math.floor(i/8)*8;
+        ele.x = g_info.state.effect[_p].x + _rnd(-10, 10);
+        ele.y = g_info.state.effect[_p].y + _rnd(-10, 10);
+      }
+
+      ele.s = _rnd(10,50);
+
+      ele.orig_x = ele.x;
+      ele.orig_y = ele.y;
+      ele.vx = _rnd(2.0);
+      ele.vy = _rnd(2.0);
+      ele.vc = _rnd(1.0);
+      ele.start_t = _rnd(32);
+      ele.orig_ttl = _rnd(16);
+      ele.ttl = ele.orig_ttl;
     }
 
     g_info.state.effect.push(ele);
@@ -1315,6 +1611,8 @@ function init_effect() {
 
 }
 
+// MAIN
+//
 (()=>{
 
   console.log("fxhash:",fxhash);
@@ -1333,6 +1631,13 @@ function init_effect() {
   g_info.last_t = g_info.cur_t;
   g_info.delta_t = 0;
 
+  if (_irnd(2) == 0) {
+    g_info.state.eye_color = "rgba(240,240,240,0.6)";
+  }
+  else {
+    g_info.state.eye_color = "rgba(40,40,40,0.6)";
+  }
+  g_info.state.msg_color = ["red", "white"][_irnd(2)];
 
   initCanvas();
 
@@ -1354,6 +1659,8 @@ function init_effect() {
   window.addEventListener('resize', function(ev) {
     initCanvas();
   });
+
+
 
   window.requestAnimationFrame(anim);
 
