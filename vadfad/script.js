@@ -278,6 +278,8 @@ var g_info = {
   "bg_phase_x": 0.3,
   "bg_phase_y": 0.1,
 
+  "bg_counter":0,
+
   "rnd":[],
 
   "message_choice" : [ "", "game\nover", "1up", "ready",
@@ -290,7 +292,7 @@ var g_info = {
   "text_square_size" : 10,
   "bg_color" : "#333",
 
-  "background_type": 0,
+  "background_type": 1,
 
   "param": {},
   "features":{}
@@ -1157,22 +1159,15 @@ function anim() {
   let bg_ds = _max(_cw, _ch)/bg_seg;
   let bgo = 0;
 
+  /*
   let seq_del = 0;
-  let _ft = Math.floor(g_info.tick/16)%4;
-  if (_ft == 0) {
-  }
-  else if (_ft==1) {
-    seq_del = (bg_seg+5);
-    seq_del = 1;
-  }
-  else if (_ft==2) {
-    seq_del = 2*(bg_seg+5);
-    seq_del = g_info.bg_key.length-1;
-  }
-  else if (_ft==3) {
-    seq_del = 3*(bg_seg+5);
-    seq_del = 0;
-  }
+  let _ft = Math.floor(g_info.tick/16)%8;
+  if (_ft == 0) { seq_del = 0; }
+  else if (_ft==1) { seq_del = 1; }
+  else if (_ft==2) { seq_del = 2; }
+  else if (_ft==3) { seq_del = 1; }
+  */
+  //if ((Math.floor(g_info.tick/16)%12)==0) { g_info.bg_counter++; }
 
   for (let i=-3; i<(bg_seg+3); i++) {
     for (let j=-3; j<(bg_seg+3); j++) {
@@ -1202,6 +1197,34 @@ function anim() {
       }
 
       else if (g_info.background_type == 1) {
+
+        let __n = 12;
+        let seq_del = 0;
+        let _ft = Math.floor(g_info.tick/16)%__n;
+        if (i%2) {
+          if (_ft < (__n/2)) { seq_del = _ft; }
+          else { seq_del = __n-_ft; }
+        }
+        else {
+          if (_ft >= (__n/2)) { seq_del = _ft; }
+          else { seq_del = __n-_ft; }
+        }
+
+        let col_idx = (j + i + 10 + seq_del )%g_info.palette_choice.colors.length;
+
+
+        let m_key_idx = (j + 5 + seq_del ) % (g_info.bg_key.length);
+        let m_idx = g_info.bg_key[m_key_idx];
+
+        let _bg_grid = g_info.grid_mem[m_idx];
+
+        let pal_c = g_info.palette_choice.colors[ col_idx ];
+        let rgb = _hex2rgb(pal_c);
+        let c = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",0.075)";
+        let dx = g_info.bg_amp*Math.cos( g_info.bg_freq*g_info.tick + g_info.bg_phase_x );
+        let dy = g_info.bg_amp*Math.sin( g_info.bg_freq*g_info.tick + g_info.bg_phase_y );
+        disp_r(x+dx, y+dy, bg_ds-bgo, bg_ds-bgo, _bg_grid.grid, c, true, true, true);
+
       }
 
     }
@@ -1430,6 +1453,10 @@ function init() {
 function init_param() {
   g_info.param["effect_type"] = _arnd(g_info.effect_choice);
   g_info.param["message"] = _arnd(g_info.message_choice);
+
+  g_info.param["background_type"] = _irnd(2);
+
+  g_info.background_type = g_info.param.background_type;
 }
 
 
@@ -1595,7 +1622,8 @@ function update_effect() {
     "Eye Type" : g_info.param.eye_choice,
     "Eye Color" : g_info.param.eye_color,
     "Pixel Height": g_info.param.orig_height,
-    "Pixel Width": g_info.param.orig_width
+    "Pixel Width": g_info.param.orig_width,
+    "Background Type": g_info.param.background_type
   };
 
   if (g_info.param.message.length > 0) {
