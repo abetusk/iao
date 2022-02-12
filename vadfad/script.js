@@ -7,17 +7,6 @@
 // work.  If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 //
 
-// This is a basic "boilerplate" project that uses only the simple canvas
-// to draw.
-// This boilerplate provides:
-//
-// - resize functionality
-// - init functions and callbacks so that the display can happen
-//   after resource load
-// - examples of drawing to a canvas
-// - keyboard input for screenshot and stopping animations
-//
-
 
 var g_info = {
   "VERSION" : "0.1.0",
@@ -32,7 +21,7 @@ var g_info = {
   "tick" : 0,
   "tick_val" : 0,
 
-  "fps_debug": true,
+  "fps_debug": false,
   "fps": 0,
   "cur_t": 0,
   "last_t":0,

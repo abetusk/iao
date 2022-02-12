@@ -11,4 +11,4 @@
 outfn=vadfad.zip
 rm -f $outfn
 
-zip $outfn script.js index.html style.css LICENSE README.md
+zip $outfn script.js chromotome.json cc0_legalcode.txt index.html style.css LICENSE README.md

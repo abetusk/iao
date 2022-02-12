@@ -1,7 +1,7 @@
 VADFAD
 ===
 
-[![screenshot](../img/PROJECT.png)](https://github.com/abetusk/iao/tree/main/vadfad)
+[![screenshot](../img/vadfad.png)](https://github.com/abetusk/iao/tree/main/vadfad)
 
 (not) Available on [fxhash](https://www.fxhash.xyz/generative/slug/vadfad)
 
