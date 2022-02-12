@@ -112,6 +112,8 @@ I Like Em
 * [r a d ar 1 by punevyr](https://www.fxhash.xyz/generative/slug/r-a-d-a-r-1)
 * [Flores del Mal by Patricio Isaias](https://www.fxhash.xyz/generative/slug/flores-del-mal-1)
 * [deserto.9 by w i w](https://twitter.com/LorenBednar/status/1492335784078323718)
+* [Shooting Stars by Generative Pen](https://www.fxhash.xyz/generative/7238)
+* [Gardens by Waxhead](https://www.fxhash.xyz/generative/slug/gardens)
 
 Artists
 ---
