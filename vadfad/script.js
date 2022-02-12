@@ -745,9 +745,11 @@ function draw_effect() {
         ele.init=false;
       }
 
-      if (g_info.cur_t >= ele.next_frame_t) {
-        ele.frame_idx = (ele.frame_idx+1)%ele.n_frame;
-        ele.next_frame_t += ele.frame_delta_t;
+      if (!g_info.pause) {
+        if (g_info.cur_t >= ele.next_frame_t) {
+          ele.frame_idx = (ele.frame_idx+1)%ele.n_frame;
+          ele.next_frame_t += ele.frame_delta_t;
+        }
       }
 
       ctx.save();
