@@ -14,9 +14,6 @@ var g_info = {
   "canvas": {},
   "ctx" : {},
 
-  //"canvas_disp":{},
-  //"ctx_disp": {},
-
   "ready": false,
   "tick" : 0,
   "tick_val" : 0,
@@ -555,22 +552,6 @@ function loading_anim() {
     ctx.translate(0,0);
     ctx.restore();
   }
-
-}
-
-function disp_txt(txt,cx,cy,w,h,c) {
-  let _cw = g_info.canvas.width;
-  let _ch = g_info.canvas.height;
-  let ctx = g_info.ctx;
-
-  for (let i =0; i<txt.length; i++) {
-    if (!(txt[i] in g_info.alphabet)) { continue; }
-
-
-
-
-  }
-
 
 }
 

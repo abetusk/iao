@@ -114,6 +114,10 @@ I Like Em
 * [deserto.9 by w i w](https://twitter.com/LorenBednar/status/1492335784078323718)
 * [Shooting Stars by Generative Pen](https://www.fxhash.xyz/generative/7238)
 * [Gardens by Waxhead](https://www.fxhash.xyz/generative/slug/gardens)
+* [antimateria.10 by w i w](https://www.fxhash.xyz/generative/slug/antimateria.10-1)
+* [My essence, My connectible by m5alien](https://www.fxhash.xyz/generative/slug/my-essence-my-connectible)
+* [Fluids by jambonbill](https://www.fxhash.xyz/generative/slug/fluids)
+
 
 Artists
 ---
