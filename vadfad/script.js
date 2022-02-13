@@ -578,12 +578,9 @@ function disp_r(cx,cy,w,h,g,c,no_eyes,no_shadow,no_overlap) {
         let _y = cy + i*ds + ds/2;
 
         if (g[i][j] > 0) {
-          //ctx.fillStyle = "rgba(32,32,32,0.2)";
-
           ctx.fillStyle = '#777';
           ctx.beginPath();
           ctx.fillRect(_x + _so,_y + _so, ds + _o, ds + _o);
-
         }
        
       }
@@ -599,26 +596,12 @@ function disp_r(cx,cy,w,h,g,c,no_eyes,no_shadow,no_overlap) {
       if ((g[i][j] < 0) && (no_eyes)) { continue; }
 
       if (g[i][j] != 0) {
-        //ctx.fillStyle = "rgba(32,32,32,0.2)";
 
         if (g[i][j] > 0) {
           ctx.fillStyle = c;
         }
         else {
-
-          //ctx.fillStyle = "rgba(240,240,240,0.3)";
-          //ctx.fillStyle = "rgba(240,240,240,0.9)";
-
-          /*
-          if (Math.floor(g_info.tick/2)%2) {
-            ctx.fillStyle = "rgba(255,255,255,0.9)";
-          }
-          else {
-            ctx.fillStyle = "rgba(30,30,30,0.9)";
-          }
-          */
           ctx.fillStyle = "rgba(230,230,230,0.9)";
-
         }
 
         ctx.beginPath();
@@ -657,9 +640,6 @@ function draw_text(ctx, base_x, base_y, txt, c, ds) {
 
   ctx.fillStyle = c;
 
-  //let _ds = 30;
-  //let _ds = g_info.size * 0.035;
-
   let cy = 0;
   let cur_line_idx = 0;
   let ch_width = 4;
@@ -687,10 +667,6 @@ function draw_text(ctx, base_x, base_y, txt, c, ds) {
 
         let _x = j*_ds + cx + base_x;
         let _y = i*_ds + cy + base_y;
-
-        if (ch == 'o') {
-          //console.log( ch, i*3 + j, gr[i*3 + j] );
-        }
 
         if (gr[i*3 + j] == 'x') {
           ctx.beginPath();
@@ -959,8 +935,6 @@ function draw_effect() {
 
 }
 
-
-
 function draw_message() {
 
   let _cw = g_info.canvas.width;
@@ -968,8 +942,6 @@ function draw_message() {
   let ctx = g_info.ctx;
 
   let msgs = g_info.param.message.split("\n");
-  //let msg_x = _cw/2;
-  //let msg_y = 50;
   let msg_y = g_info.text_square_size*5;
   let _mso = 10;
   let msg_c_shadow = "rgba(90,90,90, 1.0)";
@@ -1058,7 +1030,6 @@ function draw_message() {
 
 }
 
-
 function anim() {
 
   // fps
@@ -1081,7 +1052,6 @@ function anim() {
   //
   // fps
 
-
   let _cw = g_info.canvas.width;
   let _ch = g_info.canvas.height;
   let ctx = g_info.ctx;
@@ -1097,7 +1067,6 @@ function anim() {
     window.requestAnimationFrame(anim);
     return;
   }
-
 
   if (g_info.param.effect_type == "cluster") {
     if ((g_info.tick%120) > (120-55)) {
@@ -1131,7 +1100,6 @@ function anim() {
 
   let shadow_offset = 10;
 
-
   // background
   //
   let pal_n = g_info.palette_choice.colors.length;
@@ -1142,16 +1110,6 @@ function anim() {
   let bg_ds = _max(_cw, _ch)/bg_seg;
   let bgo = 0;
 
-  /*
-  let seq_del = 0;
-  let _ft = Math.floor(g_info.tick/16)%8;
-  if (_ft == 0) { seq_del = 0; }
-  else if (_ft==1) { seq_del = 1; }
-  else if (_ft==2) { seq_del = 2; }
-  else if (_ft==3) { seq_del = 1; }
-  */
-  //if ((Math.floor(g_info.tick/16)%12)==0) { g_info.bg_counter++; }
-
   for (let i=-3; i<(bg_seg+3); i++) {
     for (let j=-3; j<(bg_seg+3); j++) {
       let x = j*bg_ds + bgo/2;
@@ -1159,8 +1117,6 @@ function anim() {
       if ((i%2)==1) {
         x += bg_ds/2;
       }
-
-      //let _bg_key = g_info.bg_key[ (walk_idx  + seq_del) % g_info.bg_key.length ];
 
       if (g_info.background_type == 0) {
         let _bg_key = g_info.bg_key[ walk_idx  ];
@@ -1306,7 +1262,6 @@ function screenshot() {
   delete link;
 }
 
-
 function update_cluster() {
 
   for (let i=0; i<g_info.state.effect.length; i++) {
@@ -1335,10 +1290,6 @@ function update_cluster() {
     ele.orig_ttl = _rnd(16);
     ele.ttl = ele.orig_ttl;
 
-
-    //ele.x = ele.orig_x;
-    //ele.y = ele.orig_y;
-
     ele.c = 0.7;
     ele.dc = _irnd(-1,1)/8;
 
@@ -1346,12 +1297,10 @@ function update_cluster() {
     ele.s = _clamp( _S*_rndpow(2.0), 10, _S);
     ele.ds = 2*_rnd(-1,1);
 
-
     ele.vx = _rnd(-5,5);
     ele.vy = _rnd(-5,5);
 
   }
-
 
 }
 
@@ -1429,8 +1378,6 @@ function init() {
     }
   }
 
-
-  //setTimeout(function() { init_fin(); }, 50);
 }
 
 function init_param() {
@@ -1496,22 +1443,12 @@ function update_effect() {
     //
     if (effect_type == "ball") {
 
-      //ele.x = 30*Math.cos(a) + cx;
-      //ele.y = 30*Math.sin(a) + cy;
-
-      //ele.x = 0;
-      //ele.y = 250;
-      //ele.y = g_info.size/3;
       ele.vy = 10;
-      //ele.or = 35;
-      //ele.ir = 25;
       ele.or = 45;
       ele.ir = 35;
       ele.n_frame = 100;
     }
     else if (effect_type == "bullet") {
-      //ele.y = 250;
-      //ele.y = g_info.size/3;
       ele.vy = 10;
       ele.or = 35;
       ele.ir = 25;
@@ -1639,9 +1576,6 @@ function gen_vadfad(base_idx) {
   let eye_choice = _irnd(3);
 
   let fill_corner = ((_rnd() < 0.5) ? true : false);
-
-  //let h = H[_irnd(3)].v;
-  //let w = W[_irnd(4)].v;
 
   let h = _arnd(H).v;
   let w = _arnd(W).v;
