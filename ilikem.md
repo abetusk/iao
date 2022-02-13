@@ -117,7 +117,8 @@ I Like Em
 * [antimateria.10 by w i w](https://www.fxhash.xyz/generative/slug/antimateria.10-1)
 * [My essence, My connectible by m5alien](https://www.fxhash.xyz/generative/slug/my-essence-my-connectible)
 * [Fluids by jambonbill](https://www.fxhash.xyz/generative/slug/fluids)
-
+* [First Fifty Farfotsels by Farfotsel](https://www.fxhash.xyz/generative/9265)
+* [Artifacts by ParseError](https://www.fxhash.xyz/generative/34)
 
 Artists
 ---
