@@ -119,6 +119,7 @@ I Like Em
 * [Fluids by jambonbill](https://www.fxhash.xyz/generative/slug/fluids)
 * [First Fifty Farfotsels by Farfotsel](https://www.fxhash.xyz/generative/9265)
 * [Artifacts by ParseError](https://www.fxhash.xyz/generative/34)
+* [Lego Tower by dadiguz](https://www.fxhash.xyz/generative/slug/lego-tower)
 
 Artists
 ---

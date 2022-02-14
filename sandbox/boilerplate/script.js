@@ -85,6 +85,12 @@ function _irnd(a,b) {
   return Math.floor(fxrand()*(b-a) + a);
 }
 
+function _arnd(a) {
+  let idx = _irnd(a.length);
+  return a[idx];
+}
+
+
 function _rndpow(s) {
   return Math.pow(fxrand(), s);
 }
@@ -117,6 +123,43 @@ function _rgb2hex(r, g, b) {
     return "#" + _tohex(r.r) + _tohex(r.g) + _tohex(r.b);
   }
   return "#" + _tohex(r) + _tohex(g) + _tohex(b);
+}
+
+function _hex2rgb(rgb) {
+  let s = 0;
+  let d = 2;
+  if (rgb[0] == '#') {
+    rgb = rgb.slice(1);
+  }
+  if (rgb.length==3) { d = 1; }
+  let hxr = rgb.slice(s,s+d);
+  if (hxr.length==1) { hxr += hxr; }
+  s += d;
+
+  let hxg = rgb.slice(s,s+d);
+  if (hxg.length==1) { hxg += hxg; }
+  s += d;
+
+  let hxb = rgb.slice(s,s+d);
+  if (hxb.length==1) { hxb += hxb; }
+  s += d;
+
+  let v = { "r": parseInt(hxr,16), "g": parseInt(hxg,16), "b": parseInt(hxb,16) };
+  return v;
+}
+
+function _hex2hsv(rgbhex) {
+  let rgb = _hex2rgb(rgbhex);
+  return RGBtoHSV(rgb.r, rgb.g, rgb.b);
+}
+
+function _hex_dhsv(hexstr, dh, ds, dv) {
+  let hsv_c = _hex2hsv(hexstr);
+  hsv_c.h = _clamp(hsv_c.h + dh, 0, 1);
+  hsv_c.s = _clamp(hsv_c.s + ds, 0, 1);
+  hsv_c.v = _clamp(hsv_c.v + dv, 0, 1);
+  let rgb_c = HSVtoRGB(hsv_c.h, hsv_c.s, hsv_c.v);
+  return _rgb2hex(rgb_c.r, rgb_c.g, rgb_c.b);
 }
 
 // https://stackoverflow.com/a/596243 CC-BY-SA
