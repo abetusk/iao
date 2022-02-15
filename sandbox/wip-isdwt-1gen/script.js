@@ -26,8 +26,12 @@ var g_info = {
   "bg_color" : "#111",
 
   "f_list": [
-    { "v": "stripe_45_square", "w":1 },
-    { "v": "stripe_m45_square", "w":1 },
+    { "v": "stripe_45_square", "w":0.5 },
+    { "v": "stripe_m45_square", "w":0.5 },
+
+    { "v": "stripe_gate:0", "w":0.5 },
+    { "v": "stripe_gate:1", "w":0.5 },
+
 
     { "v": "square_grid", "w":1 },
     { "v": "hatching_grid", "w":1 },
@@ -61,40 +65,6 @@ var g_info = {
     { "v": "square_band:2", "w": 0.333 }
 
   ],
-
-  /*
-  "f_list": [
-    "stripe_45_square",
-    "stripe_m45_square",
-    "square_grid",
-    "hatching_grid",
-    "square_square",
-    "square_circle",
-    "circle_circle",
-    "circle_square",
-    "circle_band",
-    "circle_band:1",
-    "circle_half",
-
-    "circle_quarter:0",
-    "circle_quarter:1",
-    "circle_quarter:2",
-    "circle_quarter:3",
-
-    "circle_invquarter:0",
-    "circle_invquarter:1",
-    "circle_invquarter:2",
-    "circle_invquarter:3",
-
-    "circle_drop:0",
-    "circle_drop:1",
-
-    "square_plus",
-    "square_band",
-    "square_band:1",
-    "square_band:2"
-  ],
-  */
 
   "rnd_hist_active": false,
   "rnd_hist": [],
@@ -510,6 +480,56 @@ function polygons(ctx, x, y, pgn, color) {
   }
   ctx.fill();
 
+}
+
+function stripe_gate(ctx, x, y, width, phase, empty_width, stripe_width, color) {
+  phase = ((typeof phase === "undefined") ? 0 : phase);
+
+  let opgn = [ [ {"X":0,"Y":0}, {"X":width,"Y":0}, {"X":width,"Y":width}, {"X":0,"Y":width} ] ];
+  let epgn = [];
+
+  let _s = empty_width + stripe_width;
+  let n = Math.ceil( width / _s );
+
+  for (i=-(n+3); i<(n+3); i++) {
+    let _x = i*_s + phase*_s*2;
+    epgn.push([
+      { "X": _x, "Y":0 },
+      { "X": _x + empty_width, "Y":0 },
+      { "X": _x + empty_width, "Y":width },
+      { "X": _x , "Y":width }
+    ]);
+  }
+
+  let rop = [];
+  _clip_difference(rop, opgn, epgn);
+
+  polygons(ctx, x, y, rop, color);
+}
+
+function stripe_gate_v(ctx, x, y, width, phase, empty_width, stripe_width, color) {
+  phase = ((typeof phase === "undefined") ? 0 : phase);
+
+  let opgn = [ [ {"X":0,"Y":0}, {"X":width,"Y":0}, {"X":width,"Y":width}, {"X":0,"Y":width} ] ];
+  let epgn = [];
+
+  let _s = empty_width + stripe_width;
+  let n = Math.ceil( width / _s );
+
+  for (i=-(n+3); i<(n+3); i++) {
+    let _y = i*_s + phase*_s*2;
+    epgn.push([
+      { "X": 0, "Y": _y },
+      { "X": width, "Y": _y },
+      { "X": width, "Y": _y + empty_width },
+      { "X": 0, "Y": _y + empty_width }
+    ]);
+  }
+
+  let rop = [];
+  _clip_difference(rop, opgn, epgn);
+
+  polygons(ctx, x, y, rop, color);
 }
 
 function stripe_45_square(ctx, x, y, width, phase, empty_width, stripe_width, color) {
@@ -1270,11 +1290,21 @@ function disp(ctx, fname, x, y, w, c, phase) {
     //stripe_45_square(ctx, x+v, y+v, w-2*v, 0, w/10, w/5, c);
     stripe_45_square(ctx, x+v, y+v, w-2*v, phase, w/10, w/5, c);
   }
-
   else if (fname == "stripe_m45_square") {
     //                    x  y  w  p   e   f    c
     stripe_m45_square(ctx, x+v, y+v, w-2*v, phase, w/10, w/5, c);
   }
+
+  else if (fname == "stripe_gate:0") {
+    //               x     y    w      p       e    f    c
+    stripe_gate(ctx, x+v, y+v, w-2*v, phase, w/12, w/12, c);
+  }
+  else if (fname == "stripe_gate:1") {
+    //               x     y    w      p       e    f    c
+    stripe_gate_v(ctx, x+v, y+v, w-2*v, phase, w/12, w/12, c);
+  }
+
+
 
   else if (fname == "square_grid") {
     //               x   y n  w   sw   c
