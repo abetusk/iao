@@ -1740,8 +1740,7 @@ function init_param() {
 
   g_info.palette_choice = _arnd( g_info.palette );
 
-
-  g_info.features["Shape Library"] = f_name.join(",");
+  g_info.features["Shape Library"] = f_name.join(", ");
   g_info.features["Initial Subdivision"] = isubdiv;
   g_info.features["Color Palette"] = g_info.palette_choice.name;
 
