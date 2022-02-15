@@ -35,7 +35,7 @@ Many times stock image sites that make available pictures similar to ones genera
 
 Why are stock image sites valuable but receiving payments from NFTs not?
 
-"I Stockpile Dreams With Tragedies : 1Gen" is a continuation of "I Stockpile Dreams With Tragedies" with aesthetic differences that include additional color and shapes.
+"I Stockpile Dreams With Tragedies : 1Gen" is a continuation of "I Stockpile Dreams With Tragedies" with additional features relating to adding additional basic shapes, shape selection and color.
 
 This work hopes to add to the conversation about examining the reality of the ecosystem that we've developed around digital goods and intellectual property.
 
