@@ -24,6 +24,45 @@ var g_info = {
   "anim": true,
 
   "bg_color" : "#111",
+
+  "f_list": [
+    { "v": "stripe_45_square", "w":1 },
+    { "v": "stripe_m45_square", "w":1 },
+
+    { "v": "square_grid", "w":1 },
+    { "v": "hatching_grid", "w":1 },
+    { "v": "square_square", "w":1 },
+    { "v": "square_circle", "w":1 },
+    { "v": "circle_circle", "w":1 },
+    { "v": "circle_square", "w":1 },
+
+    { "v": "circle_band", "w":1 },
+    { "v": "circle_band:1", "w":1 },
+
+    { "v": "circle_half", "w":1 },
+
+    { "v": "circle_quarter:0", "w":0.25 },
+    { "v": "circle_quarter:1", "w":0.25 },
+    { "v": "circle_quarter:2", "w":0.25 },
+    { "v": "circle_quarter:3", "w":0.25 },
+
+    { "v": "circle_invquarter:0", "w":0.25 },
+    { "v": "circle_invquarter:1", "w":0.25 },
+    { "v": "circle_invquarter:2", "w":0.25 },
+    { "v": "circle_invquarter:3", "w":0.25 },
+
+    { "v": "circle_drop:0", "w":0.5 },
+    { "v": "circle_drop:1", "w":0.5 },
+
+    { "v": "square_plus", "w":1 },
+
+    { "v": "square_band", "w": 0.333 },
+    { "v": "square_band:1", "w": 0.333 },
+    { "v": "square_band:2", "w": 0.333 }
+
+  ],
+
+  /*
   "f_list": [
     "stripe_45_square",
     "stripe_m45_square",
@@ -55,7 +94,9 @@ var g_info = {
     "square_band:1",
     "square_band:2"
   ],
+  */
 
+  "rnd_hist_active": false,
   "rnd_hist": [],
   "rnd_hist_idx":0,
 
@@ -66,6 +107,74 @@ var g_info = {
   "f_hist":[]
 
 };
+
+// choose from a 'probability distribution'
+// array.
+// array should have entries:
+//
+// v - value
+// s - cumulative distribution
+//
+// inefficient but simple
+//
+function _pdrnd(a, _rnf) {
+  _rnf = ((typeof _rnf === "undefined") ? _mrnd : _rnf);
+
+  let _x = _mrnd();
+
+  for (let i=0; i<a.length; i++) {
+    if (_x > a[i].s) { continue; }
+    return a[i].v;
+  }
+
+
+  return undefined;
+}
+
+// choose from a 'probability distribution'
+// array.
+// array should have entries:
+//
+// v - value
+// w - weight
+//
+function _pwrnd(a, _rnf) {
+
+  let _N = 0;
+  let _pd = [];
+  for (let i=0; i<a.length; i++) {
+    if (!("v" in a[i])) { continue; }
+    let _w = 1;
+    if ("w" in a[i]) { _w = a[i].w; }
+
+    _N += _w;
+
+    _pd.push( { "v": a[i].v, "s": _N } );
+  }
+
+  for (let i=0; i<_pd.length; i++) {
+    _pd[i].s /= _N;
+  }
+
+  return _pdrnd(_pd, _rnf);
+}
+
+function _mrnd() {
+  let _rn;
+  if (g_info.rnd_hist_active) {
+    if (g_info.rnd_hist.length <= g_info.rnd_hist_idx)  {
+      g_info.rnd_hist.push( fxrand() );
+    }
+    _rn = g_info.rnd_hist[ g_info.rnd_hist_idx ];
+    g_info.rnd_hist_idx++;
+  }
+  else {
+    _rn = fxrand();
+  }
+  return _rn;
+}
+
+
 
 // some common helper functions
 //
@@ -1296,6 +1405,7 @@ function gen_hist_r(ctx, x, y, w, sub_n, recur_level, max_recur, use_rnd_hist) {
   //
   else if (p < 0.75) {
 
+    /*
     let _rn0, _rn1, _rn2, _rn3, _rn4;
 
     if (use_rnd_hist) {
@@ -1337,15 +1447,23 @@ function gen_hist_r(ctx, x, y, w, sub_n, recur_level, max_recur, use_rnd_hist) {
       _rn3 = fxrand();
       _rn4 = fxrand();
     }
+    */
 
-    let _f = g_info.f_list[ Math.floor(g_info.f_list.length * _rn0) ],
-        _a = (1.0 - _rn1*0.125) ;
+    //let _f = g_info.f_list[ Math.floor(g_info.f_list.length * _rn0) ],
+    //    _a = (1.0 - _rn1*0.125) ;
+    //let _f = g_info.f_list[ Math.floor(g_info.f_list.length * _mrnd()) ],
+    let _f = _pwrnd( g_info.f_list ),
+        _a = (1.0 - _mrnd()*0.125) ;
 
-    let rgb = _hex2rgb( g_info.palette_choice.colors[Math.floor(_rn2*g_info.palette_choice.colors.length)] );
+    //let rgb = _hex2rgb( g_info.palette_choice.colors[Math.floor(_rn2*g_info.palette_choice.colors.length)] );
+    let rgb = _hex2rgb( g_info.palette_choice.colors[Math.floor(_mrnd()*g_info.palette_choice.colors.length)] );
     let _c = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + "," + _a + ")"
 
-    let _freq = 1.0 - _rn3*0.5;
-    let _init_phase =  _rn4;
+    //let _freq = 1.0 - _rn3*0.5;
+    //let _init_phase =  _rn4;
+
+    let _freq = 1.0 - _mrnd()*0.5;
+    let _init_phase =  _mrnd();
 
     if (!g_info.anim) {
       _freq = 0;
@@ -1369,6 +1487,7 @@ function gen_hist_r(ctx, x, y, w, sub_n, recur_level, max_recur, use_rnd_hist) {
   //
   else {
 
+    /*
     let _rn0, _rn1, _rn2, _rn3, _rn4;
 
     if (use_rnd_hist) {
@@ -1410,23 +1529,24 @@ function gen_hist_r(ctx, x, y, w, sub_n, recur_level, max_recur, use_rnd_hist) {
       _rn3 = fxrand();
       _rn4 = fxrand();
     }
+    */
 
-    //let _f = g_info.f_list[ Math.floor(g_info.f_list.length * fxrand()) ],
-    //    _a = (0.6 - fxrand()*0.25) ;
+    //let _f = g_info.f_list[ Math.floor(g_info.f_list.length * _rn0) ],
+    //    _a = (0.6 - _rn1*0.25) ;
 
-    let _f = g_info.f_list[ Math.floor(g_info.f_list.length * _rn0) ],
-        _a = (0.6 - _rn1*0.25) ;
+    //let _f = g_info.f_list[ Math.floor(g_info.f_list.length * _mrnd()) ],
+    let _f = _pwrnd( g_info.f_list ),
+        _a = (0.6 - _mrnd()*0.25) ;
 
-    //let rgb = _hex2rgb( _arnd(g_info.palette_choice.colors) );
-
-    let rgb = _hex2rgb( g_info.palette_choice.colors[Math.floor(_rn2*g_info.palette_choice.colors.length)] );
+    //let rgb = _hex2rgb( g_info.palette_choice.colors[Math.floor(_rn2*g_info.palette_choice.colors.length)] );
+    let rgb = _hex2rgb( g_info.palette_choice.colors[Math.floor(_mrnd()*g_info.palette_choice.colors.length)] );
     let _c = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + "," + _a + ")"
 
-    //let _freq = 1.0 - fxrand()*0.5;
-    //let _init_phase =  fxrand();
+    //let _freq = 1.0 - _rn3*0.5;
+    //let _init_phase =  _rn4;
 
-    let _freq = 1.0 - _rn3*0.5;
-    let _init_phase =  _rn4;
+    let _freq = 1.0 - _mrnd()*0.5;
+    let _init_phase =  _mrnd();
 
     if (!g_info.anim) {
       _freq = 0;
@@ -1447,8 +1567,9 @@ function gen_hist_r(ctx, x, y, w, sub_n, recur_level, max_recur, use_rnd_hist) {
 
   if (do_recur) {
 
-    let _rn0;
 
+    /*
+    let _rn0 ; //= _mrnd();;
     if (use_rnd_hist) {
       if (g_info.rnd_hist.length <= g_info.rnd_hist_idx)  {
         g_info.rnd_hist.push( fxrand() );
@@ -1459,11 +1580,12 @@ function gen_hist_r(ctx, x, y, w, sub_n, recur_level, max_recur, use_rnd_hist) {
     else {
       _rn0 = fxrand();
     }
+    */
 
 
     let sub_choice = [2,3];
-    //let nxt_sub_n = sub_choice[ Math.floor(fxrand()*sub_choice.length) ];
-    let nxt_sub_n = sub_choice[ Math.floor(_rn0*sub_choice.length) ];
+    //let nxt_sub_n = sub_choice[ Math.floor(_rn0*sub_choice.length) ];
+    let nxt_sub_n = sub_choice[ Math.floor(_mrnd()*sub_choice.length) ];
 
     for (let i=0; i<sub_n; i++) {
       for (let j=0; j<sub_n; j++) {
@@ -1600,6 +1722,7 @@ function init_fin() {
 
   g_info.f_hist = [];
 
+  g_info.rnd_hist_active = true;
   g_info.rnd_hist_idx =0;
 
   for (let i=0; i<isubdiv; i++) {

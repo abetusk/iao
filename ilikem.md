@@ -121,6 +121,8 @@ I Like Em
 * [Artifacts by ParseError](https://www.fxhash.xyz/generative/34)
 * [Lego Tower by dadiguz](https://www.fxhash.xyz/generative/slug/lego-tower)
 * ["Test Print" by 3DManatee](https://www.fxhash.xyz/generative/slug/%22test-print%22)
+* [Animated Zurich Subdivision Grid by meodai](https://www.fxhash.xyz/generative/1697)
+* [Hypnotic Hovering Grid by meodai](https://www.fxhash.xyz/generative/847)
 
 Artists
 ---
