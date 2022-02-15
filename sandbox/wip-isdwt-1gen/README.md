@@ -19,11 +19,19 @@ chromium 'http://localhost:8000'
 Short Statement
 ---
 
-"I Stockpile Dreams With Tragedies" is an experimental generative art piece that is an attempt to highlight some of the inherent contradictions surrounding the discussion of non-fungible tokens (NFTs) and its place as a vehicle for artistic creation, artistic expression and the potential of remuneration for artists.
+"I Stockpile Dreams With Tragedies : 1Gen" is an experimental generative art piece that is an attempt to highlight some of the inherent contradictions surrounding the discussion of non-fungible tokens (NFTs) and its place as a vehicle for artistic creation, artistic expression and the potential of remuneration for artists.
+
+p - pause
+
+s - screenshot
+
+a - (advanced) record animation (5s)
 
 To the extent possible, the source code is dedicated to the public domain (CC0) and can be used for any purpose, even commercial, by anyone. Third party libraries are used that are not CC0 licensed but have libre/free licensing terms that allow for commercial reuse (please see the LICENSE section for more details).
 
-This work is heavily based on stock art that is available from pay-to-download sites and other artists that copy the style but don't release the art, or the code to generate it, to the community at large.
+This work is influenced by stock art that is available from pay-to-download sites and other artists that copy the style but don't release the art, or the code to generate it, to the community at large.
+
+"I Stockpile Dreams With Tragedies : 1Gen" is a continuation of "I Stockpile Dreams With Tragedies" with aesthetic differences that include additional color and shapes.
 
 This work hopes to add to the conversation about examining the reality of the ecosystem that we've developed around digital goods and intellectual property.
 
@@ -35,7 +43,7 @@ minimal, geometric, concept, cover, cover art, futuristic, background, texture, 
 Statement
 ---
 
-"I Stockpile Dreams With Tragedies"
+"I Stockpile Dreams With Tragedies : 1Gen"
 is an experimental generative art piece
 that is an attempt to highlight
 some of the inherent contradictions
@@ -46,7 +54,7 @@ and the potential of remuneration for artists.
 
 To the extent possible,
 the source code for
-"I Stockpile Dreams With Tragedies"
+"I Stockpile Dreams With Tragedies : 1Gen"
 is dedicated to the public domain (CC0)
 and can be used for any purpose, even commercial,
 by anyone.
@@ -87,8 +95,8 @@ when it's being funded by NFTs, there is vitriol
 directed at artists and participants in the NFT
 space.
 
-"I Stockpile Dreams With Tragedies" is heavily
-based on stock art that is available from
+"I Stockpile Dreams With Tragedies : 1Gen" is heavily
+influenced by stock art that is available from
 pay-to-download sites and other artists
 that copy the style but don't release the
 art, or the code to generate it, to the community
@@ -107,7 +115,7 @@ income streams is berated.
 Why are stock image sites valuable but receiving payments
 from NFTs not?
 
-I don't know if "I Stockpile Dreams With Tragedies"
+I don't know if "I Stockpile Dreams With Tragedies : 1Gen"
 is worth anything nor do I know if NFTs are
 a worthwhile idea but perhaps we can start
 to have a conversation that isn't a continuous

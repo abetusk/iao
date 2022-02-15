@@ -32,6 +32,7 @@ var g_info = {
 
   "bg_color" : "#111",
 
+  "f_list_cur": [],
   "f_list": [
     { "v": "stripe_45_square", "w":0.5 },
     { "v": "stripe_m45_square", "w":0.5 },
@@ -77,9 +78,97 @@ var g_info = {
   "rnd_hist": [],
   "rnd_hist_idx":0,
 
-  "palette": [],
+  "palette": [
+  {  
+    "name": "kov_02",
+    "colors": ["#e8dccc", "#e94641", "#eeaeae"],
+    "stroke": "#e8dccc",
+    "background": "#6c96be"
+  },
+  {
+    "name": "cc239",
+    "colors": ["#e3dd34", "#78496b", "#f0527f", "#a7e0e2"],
+    "background": "#e0eff0"
+  },
+  {
+    "name": "cc234",
+    "colors": ["#ffce49", "#ede8dc", "#ff5736", "#ff99b4"],
+    "background": "#f7f4ed"
+  },
+  {
+    "name": "cc238",
+    "colors": ["#553c60", "#ffb0a0", "#ff6749", "#fbe090"],
+    "background": "#f5e9de"
+  },
+  {
+    "name": "ducci_q",
+    "colors": ["#4bae8c", "#d0c1a0", "#2d3538"],
+    "stroke": "#2d3538",
+    "background": "#d06440"
+  },
+  {
+    "name": "ducci_h",
+    "colors": ["#6b5c6e", "#4a2839", "#d9574a"],
+    "stroke": "#d9574a",
+    "background": "#ffc34b"
+  },
+  {
+    "name": "ducci_x",
+    "colors": ["#dd614a", "#f5cedb", "#1a1e4f"],
+    "stroke": "#1a1e4f",
+    "background": "#fbb900"
+  },
+
+  {
+    "name": "dt04",
+    "colors": ["#50978e", "#f7f0df"],
+    "stroke": "#000000",
+    "background": "#f7f0df"
+  },
+  {
+    "name": "dt05",
+    "colors": ["#ee5d65", "#f0e5cb"],
+    "stroke": "#080708",
+    "background": "#f0e5cb"
+  },
+
+  {
+    "name": "yuma_punk",
+    "colors": ["#f05e3b", "#ebdec4", "#ffdb00"],
+    "stroke": "#ebdec4",
+    "background": "#161616"
+  },
+  {
+    "name": "yuma_punk2",
+    "colors": ["#f2d002", "#f7f5e1", "#ec643b"],
+    "stroke": "#19080e",
+    "background": "#f7f5e1"
+  },
+
+  {
+    "name": "spatial02",
+    "colors": ["#ff5937", "#f6f6f4", "#f6f6f4"],
+    "stroke": "#ff5937",
+    "background": "#f6f6f4"
+  },
+
+  {
+    "name": "spatial03i",
+    "colors": ["#f6f6f4", "#4169ff", "#4169ff"],
+    "stroke": "#f6f6f4",
+    "background": "#4169ff"
+  },
+
+  {
+    "name": "monochrom",
+    "colors": ["#ffffff", "#eeeeee"]
+  }
+
+  ],
   "palette_choice": {},
   "isubdiv": -1,
+
+  "features": {},
 
   "f_hist":[]
 
@@ -1328,7 +1417,7 @@ function disp(ctx, fname, x, y, w, c, phase) {
   }
 
   else if (fname == "square_plus") {
-		square_plus(ctx, x+v, y+v, w, w, w/3, w/3, c);
+    square_plus(ctx, x+v, y+v, w, w, w/3, w/3, c);
   }
 
   else if (fname == "square_circle") {
@@ -1441,7 +1530,7 @@ function gen_hist_r(ctx, x, y, w, sub_n, recur_level, max_recur, use_rnd_hist) {
   //
   else if (p < 0.75) {
 
-    let _f = _pwrnd( g_info.f_list ),
+    let _f = _pwrnd( g_info.f_list_cur ),
         _a = (1.0 - _mrnd()*0.125) ;
 
     let rgb = _hex2rgb( g_info.palette_choice.colors[Math.floor(_mrnd()*g_info.palette_choice.colors.length)] );
@@ -1472,7 +1561,7 @@ function gen_hist_r(ctx, x, y, w, sub_n, recur_level, max_recur, use_rnd_hist) {
   //
   else {
 
-    let _f = _pwrnd( g_info.f_list ),
+    let _f = _pwrnd( g_info.f_list_cur ),
         _a = (0.6 - _mrnd()*0.25) ;
 
     let rgb = _hex2rgb( g_info.palette_choice.colors[Math.floor(_mrnd()*g_info.palette_choice.colors.length)] );
@@ -1603,6 +1692,7 @@ function initCanvas() {
   if (g_info.ready) { init_fin(); }
 }
 
+/*
 function load_palette(txt) {
   g_info.palette = JSON.parse(txt);
 
@@ -1614,6 +1704,7 @@ function load_palette(txt) {
 
   init_fin();
 }
+*/
 
 function loadjson(fn, cb) {
   var xhr = new XMLHttpRequest();
@@ -1632,6 +1723,31 @@ function init_param() {
   let isubdiv = sub_choice[ Math.floor(fxrand()*sub_choice.length) ];
 
   g_info.isubdiv = isubdiv;
+
+  let f_name = [];
+
+  for (let i=0; i<g_info.f_list.length; i++) {
+
+    if ( fxrand() < 0.5 ) {
+      g_info.f_list_cur.push(g_info.f_list[i]);
+
+      f_name.push(g_info.f_list[i].v);
+    }
+
+  }
+
+  f_name.sort();
+
+  g_info.palette_choice = _arnd( g_info.palette );
+
+
+  g_info.features["Shape Library"] = f_name.join(",");
+  g_info.features["Initial Subdivision"] = isubdiv;
+  g_info.features["Color Palette"] = g_info.palette_choice.name;
+
+  window.$fxhashFeatures = g_info.features;
+
+  console.log(JSON.stringify( g_info.features, undefined, 2));
 }
 
 function init_fin() {
@@ -1684,7 +1800,7 @@ function __init() {
 
   console.log(base_l, base_c, base_hue);
 
-  g_info.palette_choice["color"] = [];
+  g_info.palette_choice = _arnd( g_info.palette );
 
   for (let i=(-n/2); i<(n/2); i++ ) {
     let xhue = _mod1( base_hue  + (i/n) ) * 360;
@@ -1700,7 +1816,9 @@ function __init() {
 
 
 function init() {
-  loadjson("./chromotome.json", load_palette)
+  //loadjson("./chromotome.json", load_palette)
+
+  init_fin();
 }
 
 
