@@ -68,18 +68,18 @@ that allow for commercial reuse (please see
 the LICENSE section for more details).
 
 Many people dismiss NFTs as having no intrinsic
-value, or as absurd because of its
+value, or as absurd because of their ease of
 replicability, while at the same overlooking the
 ecosystem of stock images on websites that
-charge for digital assets or artists that retain
-copyright on their images, presumably with the
-expectation of charging license fees for their
-use.
+charge for digital assets.
+In addition, payment streams for artists that retain
+copyright on their images with the
+expectation of charging license fees are
+normalized.
 
-Often times, art on stock image sites can
-incur many of the same criticisms levied
-against NFTs as being too simple or not
-professional enough.
+Often times, art on stock image sites
+can have much of the same quality of art
+available in the NFT ecosystem.
 The criticisms against the quality of NFT
 art is used to diminish works in the NFT space while
 the quality of stock image art goes largely
