@@ -35,6 +35,21 @@ var g_info = {
     "circle_square",
     "circle_band",
     "circle_band:1",
+    "circle_half",
+
+    "circle_quarter:0",
+    "circle_quarter:1",
+    "circle_quarter:2",
+    "circle_quarter:3",
+
+    "circle_invquarter:0",
+    "circle_invquarter:1",
+    "circle_invquarter:2",
+    "circle_invquarter:3",
+
+    "circle_drop:0",
+    "circle_drop:1",
+
     "square_plus",
     "square_band",
     "square_band:1",
@@ -783,6 +798,178 @@ function circle_square(ctx, x, y, r, width, color, phase) {
   ctx.fill();
 }
 
+function circle_invquarter(ctx, x, y, _r, ang, color) {
+  phase = ((typeof phase === "undefined") ? 0 : phase);
+  let sq_pgn = [[]];
+  let circle_pgn = [[]];
+
+  let r = _r/2;
+
+  let _ds = 5;
+  let _dn = Math.ceil(Math.PI*r/(_ds*2.0));
+
+  let cx = -r;
+  let cy = -r;
+
+  sq_pgn[0].push( {"X":-r, "Y":-r} );
+  sq_pgn[0].push( {"X": r, "Y":-r} );
+  sq_pgn[0].push( {"X": r, "Y": r} );
+  sq_pgn[0].push( {"X":-r, "Y": r} );
+
+  let _cosa = Math.cos(ang);
+  let _sina = Math.sin(ang);
+
+  let _cx =  _cosa*cx + _sina*cy;
+  let _cy = -_sina*cx + _cosa*cy;
+  circle_pgn[0].push( {"X": _cx, "Y": _cy });
+  for (let i=0; i<=_dn; i++) {
+    let theta = Math.PI*i/(_dn*2);
+
+    let p = [ Math.cos(theta)*r*2 + cx,  Math.sin(theta)*r*2 + cy ];
+
+    circle_pgn[0].push({
+      "X":  _cosa*p[0] + _sina*p[1],
+      "Y": -_sina*p[0] + _cosa*p[1]
+    });
+
+  }
+
+  let rop = [];
+  _clip_difference(rop, sq_pgn, circle_pgn);
+
+  polygons(ctx, x, y, rop, color);
+}
+
+function circle_drop(ctx, x, y, _r, ang, color) {
+  phase = ((typeof phase === "undefined") ? 0 : phase);
+  let circle_pgn = [[]];
+  let circle_pgn1 = [[]];
+
+  let r = _r/2;
+
+  let _ds = 5;
+  let _dn = Math.ceil(Math.PI*r/(_ds*2.0));
+
+  let cx = -r;
+  let cy = -r;
+
+  let _cosa = Math.cos(ang);
+  let _sina = Math.sin(ang);
+
+  let _cx =  _cosa*cx + _sina*cy;
+  let _cy = -_sina*cx + _cosa*cy;
+  circle_pgn[0].push( {"X": _cx, "Y": _cy });
+  for (let i=0; i<=_dn; i++) {
+    let theta = Math.PI*i/(_dn*2);
+
+    let p = [ Math.cos(theta)*r*2 + cx,  Math.sin(theta)*r*2 + cy ];
+
+    circle_pgn[0].push({
+      "X":  _cosa*p[0] + _sina*p[1],
+      "Y": -_sina*p[0] + _cosa*p[1]
+    });
+
+  }
+
+  _cosa = Math.cos(ang + Math.PI);
+  _sina = Math.sin(ang + Math.PI);
+
+  _cx =  _cosa*cx + _sina*cy;
+  _cy = -_sina*cx + _cosa*cy;
+  circle_pgn1[0].push( {"X": _cx, "Y": _cy });
+  for (let i=0; i<=_dn; i++) {
+    let theta = Math.PI*i/(_dn*2);
+
+    let p = [ Math.cos(theta)*r*2 + cx,  Math.sin(theta)*r*2 + cy ];
+
+    circle_pgn1[0].push({
+      "X":  _cosa*p[0] + _sina*p[1],
+      "Y": -_sina*p[0] + _cosa*p[1]
+    });
+
+  }
+
+  let rop = [];
+  _clip_intersect(rop, circle_pgn, circle_pgn1);
+
+  polygons(ctx, x, y, rop, color);
+}
+
+function circle_quarter(ctx, x, y, _r, ang, color) {
+  phase = ((typeof phase === "undefined") ? 0 : phase);
+  let circle_pgn = [[]];
+  let band_pgn = [];
+
+  let r = _r/2;
+
+  let _ds = 5;
+  let _dn = Math.ceil(Math.PI*r/(_ds*2.0));
+
+  let cx = -r;
+  let cy = -r;
+
+  let _cosa = Math.cos(ang);
+  let _sina = Math.sin(ang);
+
+  let _cx =  _cosa*cx + _sina*cy;
+  let _cy = -_sina*cx + _cosa*cy;
+  circle_pgn[0].push( {"X": _cx, "Y": _cy });
+  for (let i=0; i<=_dn; i++) {
+    let theta = Math.PI*i/(_dn*2);
+
+    let p = [ Math.cos(theta)*r*2 + cx,  Math.sin(theta)*r*2 + cy ];
+
+    circle_pgn[0].push({
+      "X":  _cosa*p[0] + _sina*p[1],
+      "Y": -_sina*p[0] + _cosa*p[1]
+    });
+
+  }
+
+  polygons(ctx, x, y, circle_pgn, color);
+}
+
+function circle_half(ctx, x, y, r, color, phase) {
+  phase = ((typeof phase === "undefined") ? 0 : phase);
+  let circle_pgn = [[]];
+  let band_pgn = [];
+
+  let _ds = 5;
+  let _dn = Math.ceil(Math.PI*2*r/_ds);
+
+  for (let i=0; i<_dn; i++) {
+    let theta = Math.PI*2.0*i/_dn;
+    circle_pgn[0].push({"X": Math.cos(theta)*r, "Y": Math.sin(theta)*r});
+  }
+
+  let pnts = [
+    [ -r-1, -r-1 ],
+    [  0, -r-1 ],
+    [  0, r+1 ],
+    [ -r-1, r+1 ]
+  ];
+  let _c = Math.cos(phase);
+  let _s = Math.sin(phase);
+  for (let i=0; i<4; i++) {
+    let _a = pnts[i][0], _b = pnts[i][1];
+    pnts[i][0] =  _c*_a + _s*_b;
+    pnts[i][1] = -_s*_a + _c*_b;
+  }
+
+  band_pgn.push( [
+    {"X": pnts[0][0] , "Y": pnts[0][1] },
+    {"X": pnts[1][0] , "Y": pnts[1][1] },
+    {"X": pnts[2][0] , "Y": pnts[2][1] },
+    {"X": pnts[3][0] , "Y": pnts[3][1] },
+  ]);
+
+  let rop = [];
+  _clip_difference(rop, circle_pgn, band_pgn);
+
+  polygons(ctx, x, y, rop, color);
+}
+
+
 function circle_band(ctx, x, y, r, band_x, band_y, color, phase) {
   phase = ((typeof phase === "undefined") ? 0 : phase);
   let circle_pgn = [[]];
@@ -820,18 +1007,6 @@ function circle_band(ctx, x, y, r, band_x, band_y, color, phase) {
       {"X": pnts[3][0] , "Y": pnts[3][1] },
     ]);
 
-    /*
-    let _x = -band_x/2,
-        _y = -r,
-        _w = band_x,
-        _h = 2*r;
-    band_pgn.push( [
-      {"X": _x      , "Y": _y},
-      {"X": _x + _w , "Y": _y},
-      {"X": _x + _w , "Y": _y + _h},
-      {"X": _x      , "Y": _y + _h},
-    ]);
-    */
   }
 
   if (band_y > 0) {
@@ -857,27 +1032,12 @@ function circle_band(ctx, x, y, r, band_x, band_y, color, phase) {
       {"X": pnts[3][0] , "Y": pnts[3][1] },
     ]);
 
-
-    /*
-    let _x = -r,
-        _y = -band_y/2,
-        _w = 2*r,
-        _h = band_y;
-    band_pgn.push( [
-      {"X": _x      , "Y": _y},
-      {"X": _x + _w , "Y": _y},
-      {"X": _x + _w , "Y": _y + _h},
-      {"X": _x      , "Y": _y + _h},
-    ]);
-    */
   }
 
   let rop = [];
   _clip_difference(rop, circle_pgn, band_pgn);
 
-  //polygon_with_holes(ctx, x, y, rop, color);
   polygons(ctx, x, y, rop, color);
-
 }
 
 function square_band(ctx, x, y, width, height, band_x, band_y, color) {
@@ -1046,6 +1206,43 @@ function disp(ctx, fname, x, y, w, c, phase) {
     circle_band(ctx, x+w/2, y+w/2, w/2 - v, w/3, w/3, c, phase);
   }
 
+  else if (fname == "circle_half") {
+    circle_half(ctx, x+w/2, y+w/2, w/2 - v, c, phase);
+  }
+
+  else if (fname == "circle_quarter:0") {
+    circle_quarter(ctx, x+w/2, y+w/2, w - v, 0, c, phase);
+  }
+  else if (fname == "circle_quarter:1") {
+    circle_quarter(ctx, x+w/2, y+w/2, w - v, Math.PI/2, c, phase);
+  }
+  else if (fname == "circle_quarter:2") {
+    circle_quarter(ctx, x+w/2, y+w/2, w - v, Math.PI, c, phase);
+  }
+  else if (fname == "circle_quarter:3") {
+    circle_quarter(ctx, x+w/2, y+w/2, w - v, 3*Math.PI/2, c, phase);
+  }
+
+  else if (fname == "circle_invquarter:0") {
+    circle_invquarter(ctx, x+w/2, y+w/2, w - v, 0, c, phase);
+  }
+  else if (fname == "circle_invquarter:1") {
+    circle_invquarter(ctx, x+w/2, y+w/2, w - v, Math.PI/2, c, phase);
+  }
+  else if (fname == "circle_invquarter:2") {
+    circle_invquarter(ctx, x+w/2, y+w/2, w - v, Math.PI, c, phase);
+  }
+  else if (fname == "circle_invquarter:3") {
+    circle_invquarter(ctx, x+w/2, y+w/2, w - v, 3*Math.PI/2, c, phase);
+  }
+
+  else if (fname == "circle_drop:0") {
+    circle_drop(ctx, x+w/2, y+w/2, w - v, 0, c, phase);
+  }
+  else if (fname == "circle_drop:1") {
+    circle_drop(ctx, x+w/2, y+w/2, w - v, Math.PI/2, c, phase);
+  }
+
   else if (fname == "square_band") {
     square_band(ctx, x+v, y+v, w-2*v, w-2*v, w/3, 0, c);
   }
@@ -1141,18 +1338,11 @@ function gen_hist_r(ctx, x, y, w, sub_n, recur_level, max_recur, use_rnd_hist) {
       _rn4 = fxrand();
     }
 
-    //let _f = g_info.f_list[ Math.floor(g_info.f_list.length * fxrand()) ],
-    //    _a = (1.0 - fxrand()*0.125) ;
     let _f = g_info.f_list[ Math.floor(g_info.f_list.length * _rn0) ],
         _a = (1.0 - _rn1*0.125) ;
-        //_c = "rgba(255,255,255," + (1.0 - fxrand()*0.125) + ")";
 
-    //let rgb = _hex2rgb( _arnd(g_info.palette_choice.colors) );
     let rgb = _hex2rgb( g_info.palette_choice.colors[Math.floor(_rn2*g_info.palette_choice.colors.length)] );
     let _c = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + "," + _a + ")"
-
-    //let _freq = 1.0 - fxrand()*0.5;
-    //let _init_phase =  fxrand();
 
     let _freq = 1.0 - _rn3*0.5;
     let _init_phase =  _rn4;

@@ -120,6 +120,7 @@ I Like Em
 * [First Fifty Farfotsels by Farfotsel](https://www.fxhash.xyz/generative/9265)
 * [Artifacts by ParseError](https://www.fxhash.xyz/generative/34)
 * [Lego Tower by dadiguz](https://www.fxhash.xyz/generative/slug/lego-tower)
+* ["Test Print" by 3DManatee](https://www.fxhash.xyz/generative/slug/%22test-print%22)
 
 Artists
 ---

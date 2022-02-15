@@ -121,6 +121,9 @@ Reference
 * [Dreamstime: Gary Killian](https://www.dreamstime.com/stock-illustration-vector-minimal-covers-procedural-design-futuristic-minimalistic-layout-conceptual-generative-background-journal-vector-minimal-image99452072)
 * [iStockPhoto: Gary Killian](https://www.istockphoto.com/vector/vector-minimal-covers-procedural-design-futuristic-minimalistic-layout-conceptual-gm954662046-260653001)
 * [Aleksandar Bradic](https://ello.co/randomwalks) ([instagram](https://www.instagram.com/alek/))
+* [Oleg Frolov](https://dribbble.com/Volorf/projects/1009403-Posters)
+* [Ramas](https://www.vectorstock.com/royalty-free-vector/geometric-minimalistic-color-composition-template-vector-32113178)
+* [Doggygraph](https://www.vectorstock.com/royalty-free-vector/modern-geometric-abstract-background-vector-40198839)
 
 
 License
