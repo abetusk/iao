@@ -22,6 +22,7 @@ var g_info = {
   "capture_start":-1,
   "capture_end":-1,
   "capture_dt":5000,
+  //"capture_dt":1000,
 
 
   "canvas": {},
