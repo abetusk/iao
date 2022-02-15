@@ -116,14 +116,14 @@ broad copyright terms are taken as the norm
 while technology that experiments with ideas
 of uniqueness, value and enabling alternative
 income streams is berated.
+
 Why are stock image sites valuable but receiving payments
 from NFTs not?
 
 I don't know if "I Stockpile Dreams With Tragedies : 1Gen"
 is worth anything nor do I know if NFTs are
 a worthwhile idea but perhaps we can start
-to have a conversation that isn't a continuous
-stream of incredulous dismissals and start to examine
+to have a measured conversation about
 the reality of the ecosystem that we've developed
 around digital goods and intellectual property.
 
