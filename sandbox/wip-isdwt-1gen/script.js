@@ -1,4 +1,4 @@
-//);
+//
 // To the extent possible under law, the person who associated CC0 with
 // this code has waived all copyright and related or neighboring rights
 // to this code.
@@ -16,6 +16,13 @@ var g_info = {
 
   "ready": false,
   "pause": false,
+
+  "capturer": {},
+  "animation_capture": false,
+  "capture_start":-1,
+  "capture_end":-1,
+  "capture_dt":5000,
+
 
   "canvas": {},
   "ctx" : {},
@@ -1287,7 +1294,6 @@ function disp(ctx, fname, x, y, w, c, phase) {
 
   if (fname == "stripe_45_square") {
     //                    x  y  w  p   e   f    c
-    //stripe_45_square(ctx, x+v, y+v, w-2*v, 0, w/10, w/5, c);
     stripe_45_square(ctx, x+v, y+v, w-2*v, phase, w/10, w/5, c);
   }
   else if (fname == "stripe_m45_square") {
@@ -1435,62 +1441,11 @@ function gen_hist_r(ctx, x, y, w, sub_n, recur_level, max_recur, use_rnd_hist) {
   //
   else if (p < 0.75) {
 
-    /*
-    let _rn0, _rn1, _rn2, _rn3, _rn4;
-
-    if (use_rnd_hist) {
-      if (g_info.rnd_hist.length <= g_info.rnd_hist_idx)  {
-        g_info.rnd_hist.push( fxrand() );
-      }
-      _rn0 = g_info.rnd_hist[ g_info.rnd_hist_idx ];
-      g_info.rnd_hist_idx++;
-
-      if (g_info.rnd_hist.length <= g_info.rnd_hist_idx)  {
-        g_info.rnd_hist.push( fxrand() );
-      }
-      _rn1 = g_info.rnd_hist[ g_info.rnd_hist_idx ];
-      g_info.rnd_hist_idx++;
-
-      if (g_info.rnd_hist.length <= g_info.rnd_hist_idx)  {
-        g_info.rnd_hist.push( fxrand() );
-      }
-      _rn2 = g_info.rnd_hist[ g_info.rnd_hist_idx ];
-      g_info.rnd_hist_idx++;
-
-      if (g_info.rnd_hist.length <= g_info.rnd_hist_idx)  {
-        g_info.rnd_hist.push( fxrand() );
-      }
-      _rn3 = g_info.rnd_hist[ g_info.rnd_hist_idx ];
-      g_info.rnd_hist_idx++;
-
-      if (g_info.rnd_hist.length <= g_info.rnd_hist_idx)  {
-        g_info.rnd_hist.push( fxrand() );
-      }
-      _rn4 = g_info.rnd_hist[ g_info.rnd_hist_idx ];
-      g_info.rnd_hist_idx++;
-
-    }
-    else {
-      _rn0 = fxrand();
-      _rn1 = fxrand();
-      _rn2 = fxrand();
-      _rn3 = fxrand();
-      _rn4 = fxrand();
-    }
-    */
-
-    //let _f = g_info.f_list[ Math.floor(g_info.f_list.length * _rn0) ],
-    //    _a = (1.0 - _rn1*0.125) ;
-    //let _f = g_info.f_list[ Math.floor(g_info.f_list.length * _mrnd()) ],
     let _f = _pwrnd( g_info.f_list ),
         _a = (1.0 - _mrnd()*0.125) ;
 
-    //let rgb = _hex2rgb( g_info.palette_choice.colors[Math.floor(_rn2*g_info.palette_choice.colors.length)] );
     let rgb = _hex2rgb( g_info.palette_choice.colors[Math.floor(_mrnd()*g_info.palette_choice.colors.length)] );
     let _c = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + "," + _a + ")"
-
-    //let _freq = 1.0 - _rn3*0.5;
-    //let _init_phase =  _rn4;
 
     let _freq = 1.0 - _mrnd()*0.5;
     let _init_phase =  _mrnd();
@@ -1517,63 +1472,11 @@ function gen_hist_r(ctx, x, y, w, sub_n, recur_level, max_recur, use_rnd_hist) {
   //
   else {
 
-    /*
-    let _rn0, _rn1, _rn2, _rn3, _rn4;
-
-    if (use_rnd_hist) {
-      if (g_info.rnd_hist.length <= g_info.rnd_hist_idx)  {
-        g_info.rnd_hist.push( fxrand() );
-      }
-      _rn0 = g_info.rnd_hist[ g_info.rnd_hist_idx ];
-      g_info.rnd_hist_idx++;
-
-      if (g_info.rnd_hist.length <= g_info.rnd_hist_idx)  {
-        g_info.rnd_hist.push( fxrand() );
-      }
-      _rn1 = g_info.rnd_hist[ g_info.rnd_hist_idx ];
-      g_info.rnd_hist_idx++;
-
-      if (g_info.rnd_hist.length <= g_info.rnd_hist_idx)  {
-        g_info.rnd_hist.push( fxrand() );
-      }
-      _rn2 = g_info.rnd_hist[ g_info.rnd_hist_idx ];
-      g_info.rnd_hist_idx++;
-
-      if (g_info.rnd_hist.length <= g_info.rnd_hist_idx)  {
-        g_info.rnd_hist.push( fxrand() );
-      }
-      _rn3 = g_info.rnd_hist[ g_info.rnd_hist_idx ];
-      g_info.rnd_hist_idx++;
-
-      if (g_info.rnd_hist.length <= g_info.rnd_hist_idx)  {
-        g_info.rnd_hist.push( fxrand() );
-      }
-      _rn4 = g_info.rnd_hist[ g_info.rnd_hist_idx ];
-      g_info.rnd_hist_idx++;
-
-    }
-    else {
-      _rn0 = fxrand();
-      _rn1 = fxrand();
-      _rn2 = fxrand();
-      _rn3 = fxrand();
-      _rn4 = fxrand();
-    }
-    */
-
-    //let _f = g_info.f_list[ Math.floor(g_info.f_list.length * _rn0) ],
-    //    _a = (0.6 - _rn1*0.25) ;
-
-    //let _f = g_info.f_list[ Math.floor(g_info.f_list.length * _mrnd()) ],
     let _f = _pwrnd( g_info.f_list ),
         _a = (0.6 - _mrnd()*0.25) ;
 
-    //let rgb = _hex2rgb( g_info.palette_choice.colors[Math.floor(_rn2*g_info.palette_choice.colors.length)] );
     let rgb = _hex2rgb( g_info.palette_choice.colors[Math.floor(_mrnd()*g_info.palette_choice.colors.length)] );
     let _c = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + "," + _a + ")"
-
-    //let _freq = 1.0 - _rn3*0.5;
-    //let _init_phase =  _rn4;
 
     let _freq = 1.0 - _mrnd()*0.5;
     let _init_phase =  _mrnd();
@@ -1597,24 +1500,7 @@ function gen_hist_r(ctx, x, y, w, sub_n, recur_level, max_recur, use_rnd_hist) {
 
   if (do_recur) {
 
-
-    /*
-    let _rn0 ; //= _mrnd();;
-    if (use_rnd_hist) {
-      if (g_info.rnd_hist.length <= g_info.rnd_hist_idx)  {
-        g_info.rnd_hist.push( fxrand() );
-      }
-      _rn0 = g_info.rnd_hist[ g_info.rnd_hist_idx ];
-      g_info.rnd_hist_idx++;
-    }
-    else {
-      _rn0 = fxrand();
-    }
-    */
-
-
     let sub_choice = [2,3];
-    //let nxt_sub_n = sub_choice[ Math.floor(_rn0*sub_choice.length) ];
     let nxt_sub_n = sub_choice[ Math.floor(_mrnd()*sub_choice.length) ];
 
     for (let i=0; i<sub_n; i++) {
@@ -1634,7 +1520,24 @@ function anim() {
   if (!g_info.pause) {
     g_info.tick++;
   }
+
+
   window.requestAnimationFrame(anim);
+  if (g_info.animation_capture) {
+    g_info.capturer.capture( g_info.canvas );
+
+    let _t = Date.now();
+
+    console.log("!!", g_info.capture_end - _t);
+
+    if (_t >= g_info.capture_end) {
+      g_info.animation_capture = false;
+      g_info.capturer.stop();
+      g_info.capturer.save();
+    }
+
+  }
+
   if (!g_info.ready) {
     return;
   }
@@ -1827,14 +1730,22 @@ function init() {
   window.requestAnimationFrame(anim);
 
   document.addEventListener('keydown', function(ev) {
-    if (ev.key == 'a') {
-      g_info.anim = ((g_info.anim == true) ? false : true);
-    }
-    else if (ev.key == 's') {
+    if (ev.key == 's') {
       screenshot();
     }
     else if (ev.key == 'p') {
       g_info.pause = ((g_info.pause) ? false : true);
+    }
+    else if (ev.key == 'a') {
+      if (g_info.animation_capture) { console.log("already capturing!"); return; }
+      g_info.capturer = new CCapture({"format":"webm"});
+      g_info.capturer.start();
+      g_info.animation_capture = true;
+
+      g_info.capture_start = Date.now();
+      g_info.capture_end = g_info.capture_start + g_info.capture_dt;
+
+      console.log(">>>", g_info.capture_start, g_info.capture_end, g_info.capture_dt);
     }
     return false;
   });
