@@ -123,6 +123,14 @@ I Like Em
 * ["Test Print" by 3DManatee](https://www.fxhash.xyz/generative/slug/%22test-print%22)
 * [Animated Zurich Subdivision Grid by meodai](https://www.fxhash.xyz/generative/1697)
 * [Hypnotic Hovering Grid by meodai](https://www.fxhash.xyz/generative/847)
+* [Geomatrix by VVAXX](https://www.fxhash.xyz/generative/slug/geomatrix)
+* [detalhe.13 by w i w](https://www.fxhash.xyz/generative/slug/detalhe.13)
+* [Ghrian by Eric Andwer](https://www.fxhash.xyz/generative/slug/ghrian-1)
+* [Collision by Kashcodes](https://www.fxhash.xyz/generative/slug/collision)
+* [The Doode by manytapes](https://www.fxhash.xyz/generative/slug/the-doode)
+* [Highrise of Homes by kira0](https://www.fxhash.xyz/generative/slug/highrise-of-homes)
+* [Art For Walls In Public Spaces by Anna Lucia](https://www.fxhash.xyz/generative/slug/art-for-walls-in-public-spaces)
+
 
 Artists
 ---
