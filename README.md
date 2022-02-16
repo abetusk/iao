@@ -13,6 +13,14 @@ Works
 
 ---
 
+###### [I Stockpile Dreams With Tragedies : 1Gen](https://github.com/abetusk/iao/tree/main/i-stockpile-dreams-with-tragedies_1gen)
+
+| |
+|---|
+| [![I Stockpile Dreams With Tragedies : 1gen](img/stockpile-dream-tragedies_1.png)](https://github.com/abetusk/iao/tree/main/i-stockpile-dreams-with-tragedies_1gen) |
+
+---
+
 ###### [100 Shirts, Burning : Iteration 0](https://github.com/abetusk/iao/tree/main/100-shirts-burning_iteration-0)
 
 | |
