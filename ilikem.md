@@ -130,6 +130,8 @@ I Like Em
 * [The Doode by manytapes](https://www.fxhash.xyz/generative/slug/the-doode)
 * [Highrise of Homes by kira0](https://www.fxhash.xyz/generative/slug/highrise-of-homes)
 * [Art For Walls In Public Spaces by Anna Lucia](https://www.fxhash.xyz/generative/slug/art-for-walls-in-public-spaces)
+* [Delaunay Spiral by Johan Karlsson](https://www.fxhash.xyz/generative/slug/delaunay-spiral)
+* [The Island Vol.01 by Rapp Scallion](https://www.fxhash.xyz/generative/slug/the-island-vol.01)
 
 
 Artists
@@ -144,3 +146,8 @@ Artists
 * [needleundernail](https://www.fxhash.xyz/u/needleundernail)
 * [andrusenn](https://www.fxhash.xyz/u/andrusenn)
 
+
+Other Resources
+---
+
+* [fxtender.art](https://fxtender.art/mintables)
