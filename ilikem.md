@@ -132,6 +132,8 @@ I Like Em
 * [Art For Walls In Public Spaces by Anna Lucia](https://www.fxhash.xyz/generative/slug/art-for-walls-in-public-spaces)
 * [Delaunay Spiral by Johan Karlsson](https://www.fxhash.xyz/generative/slug/delaunay-spiral)
 * [The Island Vol.01 by Rapp Scallion](https://www.fxhash.xyz/generative/slug/the-island-vol.01)
+* [Hash Nos by LUKE](https://www.fxhash.xyz/generative/slug/hash-nos)
+* [Chaotic Colord Shapes by vadth](https://www.fxhash.xyz/generative/9539)
 
 
 Artists
