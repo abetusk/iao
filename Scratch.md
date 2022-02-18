@@ -89,7 +89,7 @@ In the main entry point:
 
 The video has to be evenly divisible by 2 or `ffmpeg` will complain when converting.
 
-* `for x in `ls *.webm` ; do echo $x ; ffmpeg -i $x `basename $x .webm`.mp4 ; done`
+* `for x in $( ls *.webm ) ; do echo $x ; ffmpeg -i $x $( basename $x .webm ).mp4 ; done`
 * `ffmpeg -f concat -safe 0 -i <( x=`pwd` ; ls *.mp4  | sed "s;^;file '"$x"/;" | sed "s/$/'/" ) -c copy out.mp4`
 
 
