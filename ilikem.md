@@ -134,6 +134,7 @@ I Like Em
 * [The Island Vol.01 by Rapp Scallion](https://www.fxhash.xyz/generative/slug/the-island-vol.01)
 * [Hash Nos by LUKE](https://www.fxhash.xyz/generative/slug/hash-nos)
 * [Chaotic Colord Shapes by vadth](https://www.fxhash.xyz/generative/9539)
+* [Perpetual Maze by Gen_Doodler](https://www.fxhash.xyz/generative/slug/perpetual-maze-1)
 
 
 Artists
@@ -147,6 +148,7 @@ Artists
 * [Lolo Armdz](https://www.fxhash.xyz/u/Lolo%20Armdz)
 * [needleundernail](https://www.fxhash.xyz/u/needleundernail)
 * [andrusenn](https://www.fxhash.xyz/u/andrusenn)
+* [ge1doot](https://www.fxhash.xyz/u/ge1doot)
 
 
 Other Resources
