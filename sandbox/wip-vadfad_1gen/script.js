@@ -54,6 +54,7 @@ var g_info = {
 
   "hist" : [],
 
+  //"max_level": 5,
   "max_level": 5,
   //"min_size" : 16,
 
@@ -229,6 +230,46 @@ function _clip_union( rop_pgns, _pgns) {
   }
 
   return rop_pgns;
+}
+
+function _clip_union_pt( rop_pgns, _pgns) {
+  let clpr = new ClipperLib.Clipper();
+  let joinType = ClipperLib.JoinType.jtRtound;
+  let fillType = ClipperLib.PolyFillType.pftPositive;
+  let subjPolyType = ClipperLib.PolyType.ptSubject;
+  let clipPolyType = ClipperLib.PolyType.ptClip;
+  let clipType = ClipperLib.ClipType.ctUnion;
+
+  let scale = 16384;
+  let sol_polytree= new ClipperLib.PolyTree();
+
+  let pgns = [];
+  for (let i=0; i<_pgns.length; i++) {
+    let idx = pgns.length;
+    pgns.push([]);
+    for (let j=0; j<_pgns[i].length; j++) {
+      pgns[idx].push( { "X": _pgns[i][j].X, "Y": _pgns[i][j].Y } );
+    }
+  }
+
+  ClipperLib.JS.ScaleUpPaths(pgns, scale);
+
+  clpr.AddPaths( pgns, subjPolyType, true );
+  clpr.Execute( clipType, sol_polytree, fillType, fillType);
+
+  if (typeof rop_pgns !== "undefined") {
+    let sol_paths = ClipperLib.Clipper.PolyTreeToPaths(sol_polytree);
+    for (let i=0; i<sol_paths.length; i++) {
+      let idx = rop_pgns.length;
+      rop_pgns.push([]);
+      for (let j=0; j<sol_paths[i].length; j++) {
+        rop_pgns[idx].push( { "X": sol_paths[i][j].X / scale, "Y": sol_paths[i][j].Y / scale } );
+
+      }
+    }
+  }
+
+  return { "polytree": sol_polytree, "scale": scale };
 }
 
 function _copy_pgns(_pgns) {
@@ -692,34 +733,11 @@ function noise_bg() {
 
 function anim() {
 
-  // animation capture
-  //
-  /*
-  if (g_info.animation_capture) {
-    g_info.capturer.capture( g_info.canvas );
-
-    let _t = Date.now();
-
-    console.log("!!", g_info.capture_end - _t);
-
-    if (_t >= g_info.capture_end) {
-      g_info.animation_capture = false;
-      g_info.capturer.stop();
-      g_info.capturer.save();
-    }
-
-  }
-  */
-  //
-  // animation capture
-
   let _cw = g_info.canvas.width;
   let _ch = g_info.canvas.height;
   let ctx = g_info.ctx;
 
   clear(ctx, _cw, _ch, g_info.bg_color);
-
-  //noise_bg();
 
   g_info.tick++;
   window.requestAnimationFrame(anim);
@@ -734,8 +752,18 @@ function anim() {
   let w2 = _cw / 2;
   let h2 = _ch / 2;
 
+  let opt = { "c": "", "no_eyes": true, "no_shadow": false, "shaodw_offset":1 };
+
   for (let i=0; i<g_info.hist.length; i++) {
-    g_info.hist[i].f();
+    let _d = g_info.hist[i];
+    //g_info.hist[i].f();
+
+    opt.c = _d.c;
+    opt.shadow_offset = g_info.max_level - _d.lvl + 1;
+
+    //return function() { disp_vadfad(_x,_y,_w,_h,_dat,opt); };
+    disp_vadfad( _d.x, _d.y, _d.w, _d.h, _d.dat, opt );
+
   }
 
 
@@ -779,17 +807,47 @@ function effective_size(grid) {
   return { "w": dw, "h": dh };
 }
 
+// create a 'raw' svg path string (without any of the xml bits)
+// from the polytree as returned by clipper lib
+//
+function polytree2svg_raw_path(pnode, scale, lvl, x, y) {
+  lvl = ((typeof lvl === "undefined") ? 0 : lvl);
 
-function trace_it(dat) {
+  let svg_ele = [];
+
+  // polytree child nodes already has order reversed for
+  // intereior holes, so we just need to transfer
+  //
+  let pgn = pnode.m_polygon;
+  for (let j=0; j<pgn.length; j++) {
+    if (j==0) {
+      svg_ele.push("M " + (x + (pgn[j].X/scale)).toString() + " " + (y + (pgn[j].Y/scale)).toString());
+    }
+    else {
+      svg_ele.push("L " + (x + (pgn[j].X/scale)).toString() + " " + (y + (pgn[j].Y/scale)).toString());
+    }
+  }
+
+  for (let i=0; i<pnode.m_Childs.length; i++) {
+    let r = polytree2svg_raw_path(pnode.m_Childs[i], scale, lvl+1, x, y);
+    svg_ele.push(r);
+  }
+
+  let sfx =  ((lvl == 0) ? "Z" : "");
+
+  return svg_ele.join(" ") + sfx;
+}
+
+function vad2svgpath(dat, w, h, cx, cy, c) {
+  cx = ((typeof cx === "undefined") ? 0 : cx);
+  cy = ((typeof cy === "undefined") ? 0 : cy);
+  c = ((typeof c === "undefined") ? "#000" : c);
   let n_row = dat.length;
   let n_col = dat[0].length;
 
-  let _m = {};
-
-  let pgns = [];
-
   let d = 1/128;
 
+  let pgns = [];
   for (let r=0; r<n_row; r++) {
     for (let c=0; c<n_col; c++) {
 
@@ -807,10 +865,14 @@ function trace_it(dat) {
     }
   }
 
-  let rop = [];
-  _clip_union(rop, pgns);
+  let ds = vadfad_blocksize(dat, w, h);
 
-  return rop;
+  let rop = [];
+  let _dat = _clip_union_pt(rop, pgns);
+
+  let _p = polytree2svg_raw_path(_dat.polytree, _dat.scale/ds, 0, cx, cy);
+  let _sp = '<path d="' + _p + '" stroke="none" fill="' + c + '" stroke-width="0" />';
+  return _sp;
 }
 
 
@@ -827,15 +889,12 @@ function gen_vadfad(base_idx) {
   // 1 - vertical (1 pixel wide , 2 hight)
   // 2 - single (1x1 pixel each)
   //
-  let eye_choice = _irnd(3);
+  let eye_choice = Math.floor(_mrnd()*3);
 
-  let fill_corner = ((_rnd() < 0.5) ? true : false);
+  let fill_corner = ((_mrnd() < 0.5) ? true : false);
 
-  //let h = H[_irnd(3)].v;
-  //let w = W[_irnd(4)].v;
-
-  let h = _arnd(H).v;
-  let w = _arnd(W).v;
+  let h = H[ Math.floor(_mrnd()*H.length) ].v;
+  let w = W[ Math.floor(_mrnd()*W.length) ].v;
 
   if (base_idx == 1) {
     g_info.param["orig_height"] = h;
@@ -860,7 +919,7 @@ function gen_vadfad(base_idx) {
     re = Math.floor((w)/2)+1;
   }
 
-  let dh_eye = _irnd(2) + 2;
+  let dh_eye = Math.floor(_mrnd()*2) + 2;
   let dw_eye = 1;
 
   let eye_h, eye_w;
@@ -869,7 +928,6 @@ function gen_vadfad(base_idx) {
   grid[dh_eye][re] = -base_idx;
 
   let idx = base_idx;
-
 
   if (eye_choice == 0) {
     eye_w = 2;
@@ -942,7 +1000,7 @@ function gen_vadfad(base_idx) {
   for (let i=0; i<(h); i++) {
     for (let j=0; j<(w/2); j++) {
       if (grid[i][j] != 0) { continue; }
-      if (_irnd(2) == 0) {
+      if (_mrnd() < 0.5) {
         grid[i][j] = idx;
         grid[i][w-1-j] = idx;
         idx++;
@@ -966,10 +1024,6 @@ function gen_vadfad(base_idx) {
 
   let dw = Mw - mw + 1;
   let dh = Mh - mh + 1;
-
-  //if ((dw != w) || (dh != h)) {
-  //  console.log(">>>", w,h, mw, Mw, mh, Mh);
-  //}
 
   return grid;
 }
@@ -1014,15 +1068,12 @@ function pgn2svgpath(pgn) {
   return '<path d="' + ps.join(" ") + '"/>';
 }
 
-// WIP
-//
 function downloadsvg() {
   let ppi = g_info.ppi;
-  let svg_w = g_info.svg_width;
-  let svg_h = g_info.svg_height;
+  let svg_w = g_info.svg_width_in;
+  let svg_h = g_info.svg_height_in;
 
   let svg_lines = [];
-  let svg_hdr = "data:img/svg+xml;utf8,";
 
 
   let wpx = (ppi*svg_w).toString();
@@ -1032,15 +1083,42 @@ function downloadsvg() {
     ' width="' + wpx + '" height="' + hpx + '" ' +
     ' xmlns="http://www.w3.org/2000/svg">');
 
+  let bg_rect = '<rect width="' + wpx + '" height="' + hpx + '" style="stroke:none;stroke-width:0;fill:' + g_info.bg_color + '" />';
+  svg_lines.push(bg_rect);
 
-  
-  let _test_path = trace_it(gen_vadfad(0));
+  for (let i=0; i<g_info.hist.length; i++) {
 
-  svg_lines.push(pgn2svgpath(_test_path));
+    let _v = g_info.hist[i];
+    let _so = (hpx/1024)*(g_info.max_level - _v.lvl + 1);
+
+    let _cx = wpx * (_v.x / g_info.width);
+    let _cy = hpx * (_v.y / g_info.height);
+
+    let _cw = wpx * (_v.w / g_info.width);
+    let _ch = hpx * (_v.h / g_info.height);
+
+    let _h_w = effective_size(_v.dat);
+    let ds = vadfad_blocksize(_v.dat, _cw, _ch);
+
+    let _aw = (_v.dat[0].length+1)*ds;
+    let _ah = (_v.dat.length+1)*ds;
+
+    let _edx = 0, _edy = 0;
+    if (_cw > _aw) { _edx = (_cw - _aw)/2; }
+    if (_ch > _ah) { _edy = (_ch - _ah)/2; }
+
+    let _svg_path = vad2svgpath(_v.dat, _cw, _ch, _cx+_edx+ds/2,     _cy+_edy+ds/2,     _v.c);
+    let _svg_shad = vad2svgpath(_v.dat, _cw, _ch, _cx+_edx+ds/2+_so, _cy+_edy+ds/2+_so, g_info.shadow_color);
+
+    svg_lines.push(_svg_shad + "\n");
+    svg_lines.push("  " + _svg_path + "\n");
+  }
 
   svg_lines.push("</svg>");
 
-  let svg_txt = svg_hdr + svg_lines.join("");
+  let svg_hdr = "data:img/svg+xml;base64,";
+
+  let svg_txt = svg_hdr + btoa(unescape(encodeURIComponent(svg_lines.join(""))));
 
   let link = document.createElement("a");
   link.download = g_info.download_filename_svg;
@@ -1073,16 +1151,17 @@ function initCanvas() {
   g_info.canvas = canvas;
   g_info.ctx = ctx;
   g_info.size = Math.floor(dS - dS/3);
+
+  if (g_info.ready) {
+    init_fin();
+  }
 }
 
 function init_fin() {
   g_info.ready = true;
 
-  if (fxrand() < 0.5) {
-    //g_info.use_shadow = false;
-  }
-
-  console.log(g_info.width, g_info.height);
+  g_info.rnd_idx = 0;
+  g_info.hist = [];
 
   let border = 10;
 
@@ -1092,15 +1171,6 @@ function init_fin() {
   let w2 = w/2;
   let h2 = h/2;
 
-  //gen_hist_r(0, 0, w, h, 0);
-
-  /*
-  gen_hist_r( 0,  0, w2, h2, 1);
-  gen_hist_r(w2,  0, w2, h2, 1);
-  gen_hist_r(w2, h2, w2, h2, 1);
-  gen_hist_r( 0, h2, w2, h2, 1);
-  */
-
   let state_weight = [
     { "w": 1, "v": [2,2] },
     { "w": 1, "v": [3,3] },
@@ -1109,9 +1179,7 @@ function init_fin() {
     { "w": 0, "v": [1,1] }
   ];
 
-  let _rstate = _pwrnd(state_weight);
-
-  console.log(">>>", _rstate);
+  let _rstate = _pwrnd(state_weight, _mrnd);
 
   let _recur_n = _rstate[0];
   let _recur_m = _rstate[1];
@@ -1128,9 +1196,6 @@ function init_fin() {
       gen_hist_r( x + _rx, y + _ry, w_n, h_m, 1 );
     }
   }
-
-
-
 
 }
 
@@ -1174,6 +1239,10 @@ function palette_load(txt) {
   init_fin();
 }
 
+function vadfad_blocksize( dat, w, h ) {
+  return _min(w/(dat[0].length+1),h/(dat.length+1));
+}
+
 //function disp_vadfad(cx,cy,w,h,dat,c,no_eyes,no_shadow,no_overlap) {
 function disp_vadfad(cx,cy,w,h,dat,opt) {
   let default_opt = {
@@ -1209,7 +1278,8 @@ function disp_vadfad(cx,cy,w,h,dat,opt) {
   let _h_w = effective_size(dat);
 
 
-  ds = _min(w/(dat[0].length+1),h/(dat.length+1));
+  //ds = _min(w/(dat[0].length+1),h/(dat.length+1));
+  ds = vadfad_blocksize(dat, w, h);
   //ds = _min(w/(_h_w.w + 1),h/(_h_w.h + 1));
 
   //let shadow_offset = 4;
@@ -1298,7 +1368,7 @@ function gen_hist_r(x,y,w,h,lvl) {
   let _recur_n = 2;
   let _recur_m = 2;
 
-  let _rstate = _pwrnd(state_weight);
+  let _rstate = _pwrnd(state_weight, _mrnd);
   if (lvl == g_info.max_level) { _rstate = "show"; }
   //if ((w < g_info.min_size) || (h < g_info.min_size)) { _rstate = "show"; }
 
@@ -1312,14 +1382,25 @@ function gen_hist_r(x,y,w,h,lvl) {
 
     let dat = gen_vadfad();
     //let c = g_info.palette_choice.colors[0];
-    let c = _arnd( g_info.palette_choice.colors );
+    //let c = _arnd( g_info.palette_choice.colors );
+    let c = g_info.palette_choice.colors[ Math.floor(_mrnd()*g_info.palette_choice.colors.length) ];
 
-    g_info.hist.push( { "f": (function(_x,_y,_w,_h,_dat,_c,_shad,_lvl) {
-      //return function() { disp_vadfad(_x,_y,_w,_h,_dat,_c, true, _shad); };
-      let _so = g_info.max_level - _lvl+1;
-      let opt = { "c": _c, "no_eyes": true, "no_shadow": _shad, "shadow_offset": _so };
-      return function() { disp_vadfad(_x,_y,_w,_h,_dat,opt); };
-    })(x,y,w,h,dat,c,!g_info.use_shadow,lvl) } );
+    g_info.hist.push({
+      "f": (function(_x,_y,_w,_h,_dat,_c,_shad,_lvl) {
+        //return function() { disp_vadfad(_x,_y,_w,_h,_dat,_c, true, _shad); };
+        let _so = g_info.max_level - _lvl+1;
+        let opt = { "c": _c, "no_eyes": true, "no_shadow": _shad, "shadow_offset": _so };
+        return function() { disp_vadfad(_x,_y,_w,_h,_dat,opt); };
+      })(x,y,w,h,dat,c,!g_info.use_shadow,lvl),
+      "w": w,
+      "h": h,
+      "x": x,
+      "y": y,
+      "dat": dat,
+      "c": c,
+      "use_shadow": g_info.use_shadow,
+      "lvl": lvl
+    } );
   }
 
   else if (_rstate == "recur") {
@@ -1361,18 +1442,27 @@ function gen_hist_r(x,y,w,h,lvl) {
 
     let dat = gen_vadfad();
     //let c = g_info.palette_choice.colors[0];
-    let c = _arnd( g_info.palette_choice.colors );
+    //let c = _arnd( g_info.palette_choice.colors );
+    let c = g_info.palette_choice.colors[ Math.floor(_mrnd()*g_info.palette_choice.colors.length) ];
 
-    g_info.hist.push( { "f": (function(_x,_y,_w,_h,_dat,_c,_shad,_lvl) {
-      //return function() { disp_vadfad(_x,_y,_w,_h,_dat,_c, true,_shad); };
-      let _so = g_info.max_level - _lvl+1;
-      let opt = { "c": _c, "no_eyes": true, "no_shadow": _shad, "shadow_offset": _so };
-      return function() { disp_vadfad(_x,_y,_w,_h,_dat,opt); };
-    })(x,y,w,h,dat,c,!g_info.use_shadow,lvl) } );
+    g_info.hist.push({
+      "f": (function(_x,_y,_w,_h,_dat,_c,_shad,_lvl) {
+        //return function() { disp_vadfad(_x,_y,_w,_h,_dat,_c, true,_shad); };
+        let _so = g_info.max_level - _lvl+1;
+        let opt = { "c": _c, "no_eyes": true, "no_shadow": _shad, "shadow_offset": _so };
+        return function() { disp_vadfad(_x,_y,_w,_h,_dat,opt); };
+      })(x,y,w,h,dat,c,!g_info.use_shadow,lvl),
+      "w": w,
+      "h": h,
+      "x": x,
+      "y": y,
+      "dat": dat,
+      "c": c,
+      "use_shadow": g_info.use_shadow,
+      "lvl": lvl
+    });
   }
 
-  //_recur_n =2;
-  //_recur_m =2;
   if (do_recur) {
     let w_n = w/_recur_n;
     let h_m = h/_recur_m;
@@ -1385,15 +1475,6 @@ function gen_hist_r(x,y,w,h,lvl) {
       }
     }
 
-    /*
-    let w2 = w/2;
-    let h2 = h/2;
-
-    gen_hist_r(x,    y,    w2, h2, lvl+1);
-    gen_hist_r(x+w2, y,    w2, h2, lvl+1);
-    gen_hist_r(x+w2, y+h2, w2, h2, lvl+1);
-    gen_hist_r(x,    y+h2, w2, h2, lvl+1);
-    */
   }
 
 }

@@ -7,7 +7,7 @@ TODO
 * SVG export
   - add color to paths
   - export all shapes and rescale as necessary
-* responsive scaling
+* ~responsive scaling~
 * add subtle changes to hsv to differentiate each character
 * choose palettes
   - add monochrome to palette
