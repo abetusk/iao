@@ -1,6 +1,25 @@
 VADFAD : 1Gen
 ===
 
+TODO
+---
+
+* SVG export
+  - add color to paths
+  - export all shapes and rescale as necessary
+* responsive scaling
+* add subtle changes to hsv to differentiate each character
+* choose palettes
+  - add monochrome to palette
+* screenshot and animation for project and promotion
+* move to root directory (and rename project)
+* update readme with proper verbiage (take out reference to price, update as necessary)
+* provide custom debug messages and tiny help/messages
+
+
+
+---
+
 [![vadfad : 1gen](../img/vadfad_1gen.png)](https://github.com/abetusk/iao/tree/main/vadfad_1gen)
 
 (not) Available on [fxhash](https://www.fxhash.xyz/generative/slug/vadfad_1gen)
