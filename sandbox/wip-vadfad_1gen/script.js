@@ -10,6 +10,7 @@
 
 var g_info = {
   "VERSION" : "1.0.0",
+  "PROJECT" : "VADFAD : 1Gen",
   "download_filename": "vadfad_1gen.png",
   "download_filename_svg": "vadfad_1gen.svg",
   "canvas": {},
@@ -38,7 +39,151 @@ var g_info = {
   "speed_factor":256,
   "color": [ ],
 
-  "palette": {},
+  "palette": [
+
+    {
+      "name": "rohlfs_1R",
+      "colors": ["#004996", "#567bae", "#ff4c48", "#ffbcb3"],
+      "stroke": "#004996",
+      "background": "#fff8e7"
+    },
+
+    {
+      "name": "iiso_zeitung",
+      "colors": ["#ee8067", "#f3df76", "#00a9c0", "#f7ab76"],
+      "stroke": "#111a17",
+      "background": "#f5efcb"
+    },
+
+    {
+      "name": "cc273",
+      "colors": ["#363d4a", "#7b8a56", "#ff9369", "#f4c172"],
+      "background": "#f0efe2"
+    },
+
+    {
+      "name": "jung_horse",
+      "colors": ["#e72e81", "#f0bf36", "#3056a2"],
+      "stroke": "#000000",
+      "background": "#ffffff"
+    },
+
+
+    {
+      "name": "yuma_punk",
+      "colors": ["#f05e3b", "#ebdec4", "#ffdb00"],
+      "stroke": "#ebdec4",
+      "background": "#161616"
+    },
+
+
+    {
+      "name": "dale_paddle",
+      "colors": [
+        "#ff7a5a",
+        "#765aa6",
+        "#fee7bc",
+        "#515e8c",
+        "#ffc64a",
+        "#b460a6",
+        "#ffffff",
+        "#4781c1"
+      ],
+      "stroke": "#000000",
+      "background": "#abe9e8"
+    },
+
+
+    {
+      "name": "system.#08",
+      "colors": ["#f6625a", "#92b29f", "#272c3f"],
+      "stroke": "#000",
+      "background": "#fff"
+    },
+
+
+    {
+      "name": "lemon_citrus",
+      "colors": ["#e2d574", "#f1f4f7", "#69c5ab"],
+      "stroke": "#463231",
+      "background": "#f79eac"
+    },
+
+    {
+      "name": "rohlfs_3",
+      "colors": ["#abdfdf", "#fde500", "#58bdbc", "#eff0dd"],
+      "stroke": "#211029",
+      "background": "#f76975"
+    },
+
+
+    {
+      "name": "ducci_b",
+      "colors": ["#ecddc5", "#79b27b", "#000000", "#ac6548"],
+      "stroke": "#ac6548",
+      "background": "#d5c08e"
+    },
+
+
+    {
+      "name": "juxtapoz",
+      "colors": ["#20357e", "#f44242", "#ffffff"],
+      "stroke": "#000000",
+      "background": "#cfc398"
+    },
+
+
+    {
+      "name": "ducci_i",
+      "colors": ["#e9dcad", "#143331", "#ffc000"],
+      "stroke": "#ffc000",
+      "background": "#a74c02"
+    },
+
+
+    {
+      "name": "ducci_j",
+      "colors": ["#c47c2b", "#5f5726", "#000000", "#7e8a84"],
+      "stroke": "#7e8a84",
+      "background": "#ecddc5"
+    },
+
+    {
+      "name": "dt03",
+      "colors": ["#000000", "#a7a7a7"],
+      "stroke": "#000000",
+      "background": "#0a5e78"
+    },
+
+
+    {
+      "name": "dt07",
+      "colors": ["#6a98a5", "#d24c18"],
+      "stroke": "#efebda",
+      "background": "#efebda"
+    },
+
+    {
+      "name": "dt10",
+      "colors": ["#e5dfcf", "#151513"],
+      "stroke": "#151513",
+      "background": "#e9b500"
+    },
+
+
+    {
+      "name": "dt13",
+      "colors": ["#f5f2d3", "#f5f2d3", "#fbd6b8"],
+      "stroke": "#ec5525",
+      "background": "#ec5525"
+    },
+
+    {
+      "name" : "monochrome",
+      "colors" : [ "#111", "#eee" ],
+      "background": "#777"
+    }
+  ],
   "palette_choice": {},
 
   "rnd_idx" : 0,
@@ -598,6 +743,33 @@ function HSLtoHSV(h, s, l) {
 
 //-----
 //-----
+
+function welcome() {
+  let lines = [
+    "  _           ",
+    " (_)__ _ ___  ",
+    " | / _` / _ \\ ",
+    " |_\\__,_\\___/ ",
+    "              "
+  ];
+
+  console.log(lines.join("\n"));
+  console.log("Welcome, gentle programmer");
+  console.log("");
+  console.log("fxhash:", fxhash);
+  console.log("Project:", g_info.PROJECT);
+  console.log("Version", g_info.VERSION);
+
+
+
+  console.log("");
+  console.log("commands:");
+  console.log("");
+  console.log(" s   - save screenshot (PNG)");
+  console.log(" g   - save SVG");
+  console.log("");
+
+}
 
 function loading_screen() {
 
@@ -1170,10 +1342,14 @@ function init_fin() {
 
 }
 
-function palette_load(txt) {
-
+function palette_load_json(txt) {
   let dat = JSON.parse(txt);
   g_info.palette = dat.pal;
+
+  palette_load();
+}
+
+function palette_load() {
   g_info.palette_choice = _arnd( g_info.palette );
 
   console.log("pal:", g_info.palette_choice.name);
@@ -1293,6 +1469,8 @@ function gen_hist_r(x,y,w,h,lvl) {
   let do_recur = false;
   let p = _mrnd();
 
+  let _dc = 48;
+
   let state_weight = [
     { "w": 0, "v": "stop" },
     { "w": 1, "v": "show" },
@@ -1322,7 +1500,7 @@ function gen_hist_r(x,y,w,h,lvl) {
     let dat = gen_vadfad();
     let c_orig = g_info.palette_choice.colors[ Math.floor(_mrnd()*g_info.palette_choice.colors.length) ];
 
-    let c = c_orig;
+    let c = _hex_dhsv(c_orig, (_mrnd()-0.5)/_dc, (_mrnd()-0.5)/_dc, (_mrnd()-0.5)/_dc);
 
     g_info.hist.push({
       "w": w,
@@ -1376,7 +1554,7 @@ function gen_hist_r(x,y,w,h,lvl) {
     let dat = gen_vadfad();
     let c_orig = g_info.palette_choice.colors[ Math.floor(_mrnd()*g_info.palette_choice.colors.length) ];
 
-    let c = c_orig;
+    let c = _hex_dhsv(c_orig, (_mrnd()-0.5)/_dc, (_mrnd()-0.5)/_dc, (_mrnd()-0.5)/_dc );
 
     g_info.hist.push({
       "w": w,
@@ -1410,7 +1588,9 @@ function init() {
   let w = 400;
   let h = 400;
 
-  loadjson("./chromotome.json", palette_load);
+  //loadjson("./chromotome.json", palette_load);
+
+  palette_load();
 }
 
 function init_global_param() {
@@ -1418,11 +1598,12 @@ function init_global_param() {
 
 (()=>{
 
-  console.log("fxhash:",fxhash);
 
   g_info.last_t = Date.now();
 
   init_global_param();
+
+  welcome();
 
   // have some persistent global random numbers for later use
   //

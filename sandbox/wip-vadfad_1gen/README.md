@@ -8,13 +8,13 @@ TODO
   - ~add color to paths~
   - ~export all shapes and rescale as necessary~
 * ~responsive scaling~
-* add subtle changes to hsv to differentiate each character
-* choose palettes
-  - add monochrome to palette
+* ~add subtle changes to hsv to differentiate each character~
+* ~choose palettes~
+  - ~add monochrome to palette~
 * screenshot and animation for project and promotion
 * move to root directory (and rename project)
 * update readme with proper verbiage (take out reference to price, update as necessary)
-* provide custom debug messages and tiny help/messages
+* ~provide custom debug messages and tiny help/messages~
 
 
 
