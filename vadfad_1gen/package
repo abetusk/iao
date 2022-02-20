@@ -11,4 +11,4 @@
 outfn=vadfad_1gen.zip
 rm -f $outfn
 
-zip $outfn script.js clipper.js chroma.js chromotome.json cc0_legalcode.txt perlin.js index.html style.css LICENSE README-fxhash.md
+zip $outfn script.js clipper.js chroma.js chromotome.json cc0_legalcode.txt index.html style.css LICENSE README-fxhash.md
