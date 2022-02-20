@@ -136,6 +136,9 @@ I Like Em
 * [Chaotic Colord Shapes by vadth](https://www.fxhash.xyz/generative/9539)
 * [Perpetual Maze by Gen_Doodler](https://www.fxhash.xyz/generative/slug/perpetual-maze-1)
 * [The Joy of Geometry by ArjanBytez](https://www.fxhash.xyz/generative/slug/the-joy-of-geometry)
+* [Mindset by Victor Doval](https://www.fxhash.xyz/generative/slug/mindset)
+* [Cages by Marco Aureggi](https://www.fxhash.xyz/generative/slug/cages)
+* [After the shipwreck](https://www.fxhash.xyz/generative/7321)
 
 Artists
 ---
