@@ -39,6 +39,8 @@ var g_info = {
   "speed_factor":256,
   "color": [ ],
 
+  // see chromotome.js for details about the palettes used
+  //
   "palette": [
 
     {
@@ -191,9 +193,7 @@ var g_info = {
 
   "hist" : [],
 
-  //"max_level": 5,
   "max_level": 5,
-  //"min_size" : 16,
 
   "use_shadow": true,
 
@@ -769,6 +769,11 @@ function welcome() {
   console.log(" g   - save SVG");
   console.log("");
 
+  console.log("Features:");
+  for (let key in g_info.features) {
+    console.log(key + ":", g_info.features[key]);
+  }
+
 }
 
 function loading_screen() {
@@ -1320,7 +1325,7 @@ function init_fin() {
   let state_weight = [
     { "w": 1, "v": [2,2] },
     { "w": 1, "v": [3,3] },
-    { "w": 0, "v": [2,3] },
+    { "w": 1, "v": [2,3] },
     { "w": 1, "v": [3,2] },
     { "w": 0, "v": [1,1] }
   ];
@@ -1332,6 +1337,8 @@ function init_fin() {
 
   let w_n = w/_recur_n;
   let h_m = h/_recur_m;
+
+  g_info.initial_grid = _rstate;
 
   let x = border;
   let y = border;
@@ -1594,6 +1601,7 @@ function init_global_param() {
   palette_load();
   init_fin();
 
+  let size_stats = {};
   let stats = [];
   for (let i=0; i<(g_info.max_level+1); i++) {
     stats.push(0);
@@ -1603,6 +1611,13 @@ function init_global_param() {
   for (let i=0; i<g_info.hist.length; i++) {
     let v = g_info.hist[i];
     stats[ v.lvl ]++;
+
+    let wh = effective_size(v.dat);
+    let key = "Creature Size " + (wh.w).toString() + "x" + (wh.h).toString();
+    if (!(key in size_stats)) {
+      size_stats[key] = 0;
+    }
+    size_stats[key]++;
   }
 
   // total creature count is a redundant
@@ -1616,6 +1631,15 @@ function init_global_param() {
   for (let i=1; i<stats.length; i++) {
     features["Creature Count Level " + i] = stats[i];
   }
+
+  features["Base Grid"] = g_info.initial_grid[0] + "x" + g_info.initial_grid[1];
+
+  // this seems like too much irrelevant information
+  // to display for features, so taking it out.
+  //
+  //for (let key in size_stats) {
+  //  features[key] = size_stats[key];
+  //}
 
   g_info.features = features;
   window.$fxhashFeatures = features;
