@@ -140,6 +140,7 @@ I Like Em
 * [Cages by Marco Aureggi](https://www.fxhash.xyz/generative/slug/cages)
 * [After the shipwreck](https://www.fxhash.xyz/generative/7321)
 * [Centree by anven](https://www.fxhash.xyz/generative/slug/centree)
+* [A Difference of Opinion by James Filomar](https://www.fxhash.xyz/generative/slug/a-difference-of-opinion)
 
 Artists
 ---
