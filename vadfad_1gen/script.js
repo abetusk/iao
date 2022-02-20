@@ -1303,7 +1303,10 @@ function initCanvas() {
 function init_fin() {
   g_info.ready = true;
 
+  // reset saved random number sequence
+  //
   g_info.rnd_idx = 0;
+
   g_info.hist = [];
 
   let border = 10;
@@ -1370,8 +1373,6 @@ function palette_load() {
     }
 
   }
-
-  init_fin();
 }
 
 function vadfad_blocksize( dat, w, h ) {
@@ -1585,15 +1586,40 @@ function gen_hist_r(x,y,w,h,lvl) {
 }
 
 function init() {
-  let w = 400;
-  let h = 400;
-
   //loadjson("./chromotome.json", palette_load);
-
-  palette_load();
 }
 
 function init_global_param() {
+
+  palette_load();
+  init_fin();
+
+  let stats = [];
+  for (let i=0; i<(g_info.max_level+1); i++) {
+    stats.push(0);
+  }
+
+  //stats[0] = g_info.hist.length;
+  for (let i=0; i<g_info.hist.length; i++) {
+    let v = g_info.hist[i];
+    stats[ v.lvl ]++;
+  }
+
+  // total creature count is a redundant
+  //
+  let features = {
+    //"Total Creature Count": g_info.hist.length,
+    "Color Palette": g_info.palette_choice.name
+  };
+
+
+  for (let i=1; i<stats.length; i++) {
+    features["Creature Count Level " + i] = stats[i];
+  }
+
+  g_info.features = features;
+  window.$fxhashFeatures = features;
+
 }
 
 (()=>{
