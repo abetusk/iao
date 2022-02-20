@@ -22,6 +22,8 @@ By combing a 1980s "8-bit" aesthetic, "VADFAD : 1Gen" tries to touch on the nost
 
 This work hopes to add to the conversation about examining the reality of the ecosystem that we've developed around digital goods and intellectual property.
 
+This work takes inspiration from the artist `Jared Tarbel`.
+
 Tags
 ---
 
