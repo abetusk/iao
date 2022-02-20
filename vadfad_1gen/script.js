@@ -754,7 +754,8 @@ function welcome() {
   ];
 
   console.log(lines.join("\n"));
-  console.log("Welcome, gentle programmer");
+  console.log("Welcome, gentle programmer.");
+  console.log("All code is libre/free. Please see individual files for license details.");
   console.log("");
   console.log("fxhash:", fxhash);
   console.log("Project:", g_info.PROJECT);
