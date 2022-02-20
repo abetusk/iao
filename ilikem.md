@@ -141,6 +141,13 @@ I Like Em
 * [After the shipwreck](https://www.fxhash.xyz/generative/7321)
 * [Centree by anven](https://www.fxhash.xyz/generative/slug/centree)
 * [A Difference of Opinion by James Filomar](https://www.fxhash.xyz/generative/slug/a-difference-of-opinion)
+* [reef by sherrill](https://www.fxhash.xyz/generative/slug/reef)
+* [_argania[primaria] by nekropunk](https://www.fxhash.xyz/generative/slug/_arganiaprimaria)
+* [Davy's Chest by BetaMixs](https://www.fxhash.xyz/generative/slug/davy's-chest-1)
+* [Tiles by gambonbill](https://www.fxhash.xyz/generative/slug/tiles)
+* [INSTRUCTURES by sizeight](https://www.fxhash.xyz/generative/slug/instructures)
+* [Doors of Delirium](https://www.fxhash.xyz/generative/slug/doors-of-delirium)
+* [zero-player game](https://www.fxhash.xyz/generative/slug/zero-player-game)
 
 Artists
 ---

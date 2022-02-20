@@ -6,7 +6,7 @@ VADFAD : 1Gen
 
 [Live](https://abetusk.github.io/iao/vadfad_1gen/)
 
-(not) Available on [fxhash](https://www.fxhash.xyz/generative/slug/vadfad_1gen)
+Available on [fxhash](https://www.fxhash.xyz/generative/slug/vadfad-:-1gen)
 
 Quick Start
 ---
