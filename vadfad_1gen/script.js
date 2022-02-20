@@ -1362,8 +1362,6 @@ function palette_load_json(txt) {
 function palette_load() {
   g_info.palette_choice = _arnd( g_info.palette );
 
-  console.log("pal:", g_info.palette_choice.name);
-
   if ("background" in g_info.palette_choice) {
     let n = g_info.palette_choice.colors.length;
 
