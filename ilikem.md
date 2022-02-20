@@ -139,6 +139,7 @@ I Like Em
 * [Mindset by Victor Doval](https://www.fxhash.xyz/generative/slug/mindset)
 * [Cages by Marco Aureggi](https://www.fxhash.xyz/generative/slug/cages)
 * [After the shipwreck](https://www.fxhash.xyz/generative/7321)
+* [Centree by anven](https://www.fxhash.xyz/generative/slug/centree)
 
 Artists
 ---
