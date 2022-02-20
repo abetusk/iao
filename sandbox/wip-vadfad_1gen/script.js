@@ -32,14 +32,6 @@ var g_info = {
   "fps": 0,
   "last_t":0,
 
-  /*
-  "capturer": {},
-  "animation_capture": false,
-  "capture_start":-1,
-  "capture_end":-1,
-  "capture_dt":5000,
-  */
-
   "anim": false,
   "pause": false,
 
@@ -705,29 +697,15 @@ function noise_bg() {
         _y = fxrand()*h;
       }
 
-
-
-      //_ctx.fillRect(_x, _y, dw, dh);
-
       g_noise_pnt.push( {"x":_x, "y":_y, "w":dw, "h":dh } );
     }
   }
 
-  //_ctx.fillStyle = "rgba(127,127,127,0.165)";
   _ctx.fillStyle = "rgba(127,127,127,0.065)";
   for (let i=0; i<g_noise_pnt.length; i++) {
     let p = g_noise_pnt[i];
     _ctx.fillRect( p.x, p.y, p.w, p.h );
   }
-
-  /*
-  _ctx.fillStyle = "rgba(0, 0, 0, 0.165)";
-  for (let i=0; i<N; i++) {
-    let _x = fxrand()*w;
-    let _y = fxrand()*h;
-    _ctx.fillRect(_x, _y, 1.125, 1.125);
-  }
-  */
 
 }
 
@@ -756,17 +734,10 @@ function anim() {
 
   for (let i=0; i<g_info.hist.length; i++) {
     let _d = g_info.hist[i];
-    //g_info.hist[i].f();
-
     opt.c = _d.c;
     opt.shadow_offset = g_info.max_level - _d.lvl + 1;
-
-    //return function() { disp_vadfad(_x,_y,_w,_h,_dat,opt); };
     disp_vadfad( _d.x, _d.y, _d.w, _d.h, _d.dat, opt );
-
   }
-
-
 
 }
 
@@ -1205,10 +1176,6 @@ function palette_load(txt) {
   g_info.palette = dat.pal;
   g_info.palette_choice = _arnd( g_info.palette );
 
-  //DEBUG
-  //g_info.palette_choice = { "colors": ["rgba(0,0,0,0.9)", "rgba(255,255,255,0.9)"] };
-  //g_info.bg_color = "#777";
-
   console.log("pal:", g_info.palette_choice.name);
 
   if ("background" in g_info.palette_choice) {
@@ -1217,7 +1184,6 @@ function palette_load(txt) {
     let distinct = true;
     for (let i=0; i<n; i++) {
       if (g_info.palette_choice.colors[i] == g_info.palette_choice.background) {
-      //if (g_info.palette_choice.colors[i] == g_info.palette_choice.stroke) {
         distinct = false;
         break;
       }
@@ -1225,16 +1191,9 @@ function palette_load(txt) {
 
     if (distinct) {
       g_info.bg_color = g_info.palette_choice.background;
-      //g_info.bg_color = g_info.palette_choice.stroke;
     }
 
   }
-
-  if ("stroke" in g_info.palette_choice) {
-    //g_info.shadow_color = g_info.palette_choice.stroke;
-  }
-
-  //g_info.bg_color = "#777";
 
   init_fin();
 }
@@ -1243,7 +1202,6 @@ function vadfad_blocksize( dat, w, h ) {
   return _min(w/(dat[0].length+1),h/(dat.length+1));
 }
 
-//function disp_vadfad(cx,cy,w,h,dat,c,no_eyes,no_shadow,no_overlap) {
 function disp_vadfad(cx,cy,w,h,dat,opt) {
   let default_opt = {
     "no_eyes":false,
@@ -1265,9 +1223,6 @@ function disp_vadfad(cx,cy,w,h,dat,opt) {
   let _ch = g_info.canvas.height;
   let ctx = g_info.ctx;
 
-  //let shadow_color = '#444';
-  //let shadow_color = g_info.shadow_color;
-
   if (g_info.debug) {
     ctx.strokeStyle = "rgba(255,100,100,0.5)";
     ctx.beginPath();
@@ -1277,12 +1232,7 @@ function disp_vadfad(cx,cy,w,h,dat,opt) {
 
   let _h_w = effective_size(dat);
 
-
-  //ds = _min(w/(dat[0].length+1),h/(dat.length+1));
   ds = vadfad_blocksize(dat, w, h);
-  //ds = _min(w/(_h_w.w + 1),h/(_h_w.h + 1));
-
-  //let shadow_offset = 4;
 
   let _aw = (dat[0].length+1)*ds;
   let _ah = (dat.length+1)*ds;
@@ -1303,7 +1253,6 @@ function disp_vadfad(cx,cy,w,h,dat,opt) {
         let _y = cy + i*ds + ds/2 + _edy;
 
         if (dat[i][j] > 0) {
-          //ctx.fillStyle = '#777';
           ctx.fillStyle = shadow_color;
           ctx.beginPath();
           ctx.fillRect(_x + _so,_y + _so, ds + _o, ds + _o);
@@ -1344,15 +1293,6 @@ function gen_hist_r(x,y,w,h,lvl) {
   let do_recur = false;
   let p = _mrnd();
 
-  /*
-  let state_weight = [
-    { "w": 1, "v": "stop" },
-    { "w": 2, "v": "show" },
-    { "w": 2, "v": "recur" },
-    { "w": 2, "v": "show_recur" }
-  ];
-  */
-
   let state_weight = [
     { "w": 0, "v": "stop" },
     { "w": 1, "v": "show" },
@@ -1370,7 +1310,6 @@ function gen_hist_r(x,y,w,h,lvl) {
 
   let _rstate = _pwrnd(state_weight, _mrnd);
   if (lvl == g_info.max_level) { _rstate = "show"; }
-  //if ((w < g_info.min_size) || (h < g_info.min_size)) { _rstate = "show"; }
 
   if (lvl > g_info.max_level) { return; }
 
@@ -1381,17 +1320,11 @@ function gen_hist_r(x,y,w,h,lvl) {
   else if (_rstate == "show") {
 
     let dat = gen_vadfad();
-    //let c = g_info.palette_choice.colors[0];
-    //let c = _arnd( g_info.palette_choice.colors );
-    let c = g_info.palette_choice.colors[ Math.floor(_mrnd()*g_info.palette_choice.colors.length) ];
+    let c_orig = g_info.palette_choice.colors[ Math.floor(_mrnd()*g_info.palette_choice.colors.length) ];
+
+    let c = c_orig;
 
     g_info.hist.push({
-      "f": (function(_x,_y,_w,_h,_dat,_c,_shad,_lvl) {
-        //return function() { disp_vadfad(_x,_y,_w,_h,_dat,_c, true, _shad); };
-        let _so = g_info.max_level - _lvl+1;
-        let opt = { "c": _c, "no_eyes": true, "no_shadow": _shad, "shadow_offset": _so };
-        return function() { disp_vadfad(_x,_y,_w,_h,_dat,opt); };
-      })(x,y,w,h,dat,c,!g_info.use_shadow,lvl),
       "w": w,
       "h": h,
       "x": x,
@@ -1441,17 +1374,11 @@ function gen_hist_r(x,y,w,h,lvl) {
     do_recur = true;
 
     let dat = gen_vadfad();
-    //let c = g_info.palette_choice.colors[0];
-    //let c = _arnd( g_info.palette_choice.colors );
-    let c = g_info.palette_choice.colors[ Math.floor(_mrnd()*g_info.palette_choice.colors.length) ];
+    let c_orig = g_info.palette_choice.colors[ Math.floor(_mrnd()*g_info.palette_choice.colors.length) ];
+
+    let c = c_orig;
 
     g_info.hist.push({
-      "f": (function(_x,_y,_w,_h,_dat,_c,_shad,_lvl) {
-        //return function() { disp_vadfad(_x,_y,_w,_h,_dat,_c, true,_shad); };
-        let _so = g_info.max_level - _lvl+1;
-        let opt = { "c": _c, "no_eyes": true, "no_shadow": _shad, "shadow_offset": _so };
-        return function() { disp_vadfad(_x,_y,_w,_h,_dat,opt); };
-      })(x,y,w,h,dat,c,!g_info.use_shadow,lvl),
       "w": w,
       "h": h,
       "x": x,
@@ -1483,16 +1410,7 @@ function init() {
   let w = 400;
   let h = 400;
 
-  // EXAMPLE INIT
-  //
-
-  //setTimeout(function() { init_fin(); }, 200);
   loadjson("./chromotome.json", palette_load);
-
-
-  //
-  // EXAMPLE INIT
-
 }
 
 function init_global_param() {
@@ -1515,24 +1433,11 @@ function init_global_param() {
   init();
 
   document.addEventListener('keydown', function(ev) {
-    if (ev.key == 'a') {
-      /*
-      if (g_info.animation_capture) { console.log("already capturing!"); return; }
-      g_info.capturer = new CCapture({"format":"webm"});
-      g_info.capturer.start();
-      g_info.animation_capture = true;
-
-      g_info.capture_start = Date.now();
-      g_info.capture_end = g_info.capture_start + g_info.capture_dt;
-
-      console.log(">>>", g_info.capture_start, g_info.capture_end, g_info.capture_dt);
-      */
-    }
-    else if (ev.key == 's') {
+    if (ev.key == 's') {
       screenshot();
     }
-    else if (ev.key == 'p') {
-      g_info.pause = ((g_info.pause) ? false : true);
+    else if (ev.key == 'g') {
+      downloadsvg();
     }
     return false;
   });
@@ -1544,9 +1449,3 @@ function init_global_param() {
   window.requestAnimationFrame(anim);
 
 })();
-
-//----
-//----
-//----
-
-
