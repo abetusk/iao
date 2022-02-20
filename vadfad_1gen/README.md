@@ -2,7 +2,7 @@ VADFAD : 1Gen
 ===
 
 
-[[![vadfad : 1gen](../img/vadfad_1gen.png)](https://github.com/abetusk/iao/tree/main/vadfad_1gen)](https://abetusk.github.io/iao/vadfad_1gen/)
+[![vadfad : 1gen](../img/vadfad_1gen.png)](https://abetusk.github.io/iao/vadfad_1gen)
 
 [Live](https://abetusk.github.io/iao/vadfad_1gen/)
 
