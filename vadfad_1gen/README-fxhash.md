@@ -22,7 +22,7 @@ By combing a 1980s "8-bit" aesthetic, "VADFAD : 1Gen" tries to touch on the nost
 
 This work hopes to add to the conversation about examining the reality of the ecosystem that we've developed around digital goods and intellectual property.
 
-This work takes inspiration from the artist `Jared Tarbel`.
+This work takes inspiration from the artist `Jared Tarbell`.
 
 Tags
 ---
@@ -81,7 +81,7 @@ around digital goods and intellectual property.
 Reference
 ---
 
-* [INVADER FRACTAL by Jared S Tarbel](http://www.complexification.net/gallery/machines/invaderfractal/)
+* [INVADER FRACTAL by Jared S Tarbell](http://www.complexification.net/gallery/machines/invaderfractal/)
 
 License
 ---
