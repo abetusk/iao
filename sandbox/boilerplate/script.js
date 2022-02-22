@@ -21,6 +21,7 @@
 
 var g_info = {
   "VERSION" : "0.1.0",
+  "PROJECT" : "PROJECT",
   "download_filename": "BOILERPLATE.png",
   "canvas": {},
   "ctx" : {},
@@ -45,6 +46,8 @@ var g_info = {
   "color": [ ],
 
   "rnd":[],
+
+  "features" : {},
 
   "bg_color" : "#eee"
 
@@ -113,7 +116,219 @@ function loadjson(fn, cb) {
   xhr.send(null);
 }
 
+//--
 
+function welcome() {
+  let lines = [
+    "  _           ",
+    " (_)__ _ ___  ",
+    " | / _` / _ \\ ",
+    " |_\\__,_\\___/ ",
+    "              "
+  ];
+
+  console.log(lines.join("\n"));
+  console.log("Welcome, gentle programmer.");
+  console.log("All code is libre/free. Please see individual files for license details.");
+  console.log("");
+  console.log("fxhash:", fxhash);
+  console.log("Project:", g_info.PROJECT);
+  console.log("Version", g_info.VERSION);
+
+
+
+  console.log("");
+  console.log("commands:");
+  console.log("");
+  console.log(" s   - save screenshot (PNG)");
+  console.log("");
+
+  console.log("Features:");
+  for (let key in g_info.features) {
+    console.log(key + ":", g_info.features[key]);
+  }
+
+}
+
+//--
+
+function _clip_union( rop_pgns, _pgns) {
+  let clpr = new ClipperLib.Clipper();
+  let joinType = ClipperLib.JoinType.jtRtound;
+  let fillType = ClipperLib.PolyFillType.pftPositive;
+  let subjPolyType = ClipperLib.PolyType.ptSubject;
+  let clipPolyType = ClipperLib.PolyType.ptClip;
+  let clipType = ClipperLib.ClipType.ctUnion;
+
+  let scale = 16384;
+  let sol_polytree= new ClipperLib.PolyTree();
+
+  let pgns = [];
+  for (let i=0; i<_pgns.length; i++) {
+    let idx = pgns.length;
+    pgns.push([]);
+    for (let j=0; j<_pgns[i].length; j++) {
+      pgns[idx].push( { "X": _pgns[i][j].X, "Y": _pgns[i][j].Y } );
+    }
+  }
+
+  ClipperLib.JS.ScaleUpPaths(pgns, scale);
+
+  clpr.AddPaths( pgns, subjPolyType );
+  clpr.Execute( clipType, sol_polytree, fillType, fillType);
+
+  let sol_paths = ClipperLib.Clipper.PolyTreeToPaths(sol_polytree);
+  for (let i=0; i<sol_paths.length; i++) {
+    let idx = rop_pgns.length;
+    rop_pgns.push([]);
+    for (let j=0; j<sol_paths[i].length; j++) {
+      rop_pgns[idx].push( { "X": sol_paths[i][j].X / scale, "Y": sol_paths[i][j].Y / scale } );
+
+    }
+  }
+
+  return rop_pgns;
+}
+
+function _copy_pgns(_pgns) {
+  let pgns = [];
+  for (let i=0; i<_pgns.length; i++) {
+    let idx = pgns.length;
+    pgns.push([]);
+    for (let j=0; j<_pgns[i].length; j++) {
+      pgns[idx].push( { "X": _pgns[i][j].X, "Y": _pgns[i][j].Y } );
+    }
+  }
+
+  return pgns;
+}
+
+function _clip_intersect( rop_pgns, _pgnsA, _pgnsB ) {
+  var clpr = new ClipperLib.Clipper();
+  var joinType = ClipperLib.JoinType.jtRtound;
+  var fillType = ClipperLib.PolyFillType.pftPositive;
+  var subjPolyType = ClipperLib.PolyType.ptSubject;
+  var clipPolyType = ClipperLib.PolyType.ptClip;
+  var clipType = ClipperLib.ClipType.ctIntersection;
+
+  let scale = 16384;
+  let sol_polytree= new ClipperLib.PolyTree();
+
+  let pgnsA = _copy_pgns(_pgnsA);
+  let pgnsB = _copy_pgns(_pgnsB);
+
+  ClipperLib.JS.ScaleUpPaths(pgnsA, scale);
+  ClipperLib.JS.ScaleUpPaths(pgnsB, scale);
+
+  clpr.AddPaths( pgnsA, subjPolyType, true );
+  clpr.AddPaths( pgnsB, clipPolyType, true );
+  clpr.Execute( clipType, sol_polytree, fillType, fillType );
+
+  let sol_paths = ClipperLib.Clipper.PolyTreeToPaths(sol_polytree);
+  for (let i=0; i<sol_paths.length; i++) {
+    let idx = rop_pgns.length;
+    rop_pgns.push([]);
+    for (let j=0; j<sol_paths[i].length; j++) {
+      rop_pgns[idx].push( { "X": sol_paths[i][j].X / scale, "Y": sol_paths[i][j].Y / scale } );
+
+    }
+  }
+
+  return rop_pgns;
+}
+
+function _clip_difference ( rop_pgns, _pgnsA, _pgnsB ) {
+  var clpr = new ClipperLib.Clipper();
+  var joinType = ClipperLib.JoinType.jtRtound;
+  var fillType = ClipperLib.PolyFillType.pftPositive;
+  var subjPolyType = ClipperLib.PolyType.ptSubject;
+  var clipPolyType = ClipperLib.PolyType.ptClip;
+  var clipType = ClipperLib.ClipType.ctDifference;
+
+  let scale = 16384;
+  let sol_polytree= new ClipperLib.PolyTree();
+
+  let pgnsA = _copy_pgns(_pgnsA);
+  let pgnsB = _copy_pgns(_pgnsB);
+
+  ClipperLib.JS.ScaleUpPaths(pgnsA, scale);
+  ClipperLib.JS.ScaleUpPaths(pgnsB, scale);
+
+  clpr.AddPaths( pgnsA, subjPolyType, true );
+  clpr.AddPaths( pgnsB, clipPolyType, true );
+  clpr.Execute( clipType, sol_polytree, fillType, fillType );
+
+  let sol_paths = ClipperLib.Clipper.PolyTreeToPaths(sol_polytree);
+  for (let i=0; i<sol_paths.length; i++) {
+    let idx = rop_pgns.length;
+    rop_pgns.push([]);
+    for (let j=0; j<sol_paths[i].length; j++) {
+      rop_pgns[idx].push( { "X": sol_paths[i][j].X / scale, "Y": sol_paths[i][j].Y / scale } );
+
+    }
+  }
+
+  return rop_pgns;
+}
+
+function _clip_xor( rop_pgns, _pgnsA, _pgnsB ) {
+  var clpr = new ClipperLib.Clipper();
+  var joinType = ClipperLib.JoinType.jtRtound;
+  var fillType = ClipperLib.PolyFillType.pftPositive;
+  var subjPolyType = ClipperLib.PolyType.ptSubject;
+  var clipPolyType = ClipperLib.PolyType.ptClip;
+  var clipType = ClipperLib.ClipType.ctXor;
+
+  let scale = 16384;
+  let sol_polytree= new ClipperLib.PolyTree();
+
+  let pgnsA = _copy_pgns(_pgnsA);
+  let pgnsB = _copy_pgns(_pgnsB);
+
+  ClipperLib.JS.ScaleUpPaths(pgnsA, scale);
+  ClipperLib.JS.ScaleUpPaths(pgnsB, scale);
+
+  clpr.AddPaths( pgnsA, subjPolyType, true );
+  clpr.AddPaths( pgnsB, clipPolyType, true );
+  clpr.Execute( clipType, sol_polytree, fillType, fillType );
+
+  let sol_paths = ClipperLib.Clipper.PolyTreeToPaths(sol_polytree);
+  for (let i=0; i<sol_paths.length; i++) {
+    let idx = rop_pgns.length;
+    rop_pgns.push([]);
+    for (let j=0; j<sol_paths[i].length; j++) {
+      rop_pgns[idx].push( { "X": sol_paths[i][j].X / scale, "Y": sol_paths[i][j].Y / scale } );
+
+    }
+  }
+
+  return rop_pgns;
+
+
+  clpr.AddPolygons( pgnsA, subjPolyType );
+  clpr.AddPolygons( pgnsB, clipPolyType );
+
+  clpr.Execute(clipType, rop_pgns, fillType, fillType );
+
+}
+
+function _clip_offset( ofs_pgns, inp_pgns, ds ) {
+  var joinType = ClipperLib.JoinType.jtRound;
+  var miterLimit = 10;
+  var autoFix = true;
+
+  var clpr = new ClipperLib.Clipper();
+
+  var t_pgns = clpr.OffsetPolygons( inp_pgns, ds, joinType, miterLimit, autoFix );
+
+  for (var ind in t_pgns) {
+    ofs_pgns.push(t_pgns[ind]);
+  }
+
+}
+
+
+//--
 
 // https://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
 // https://stackoverflow.com/users/96100/tim-down
@@ -428,7 +643,7 @@ function init_global_param() {
 
 (()=>{
 
-  console.log("fxhash:",fxhash);
+  welcome();
 
   g_info.last_t = Date.now();
 
