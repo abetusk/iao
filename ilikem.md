@@ -148,6 +148,9 @@ I Like Em
 * [INSTRUCTURES by sizeight](https://www.fxhash.xyz/generative/slug/instructures)
 * [Doors of Delirium](https://www.fxhash.xyz/generative/slug/doors-of-delirium)
 * [zero-player game](https://www.fxhash.xyz/generative/slug/zero-player-game)
+* [DR(G)E(M)AM by Genratore](https://www.fxhash.xyz/generative/slug/dr\(g\)e\(m\)am)
+* [Hacking a sphere by Marco Aureggi](https://www.fxhash.xyz/generative/slug/hacking-a-sphere)
+
 
 Artists
 ---

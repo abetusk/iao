@@ -28,12 +28,17 @@ var g_info = {
   "tick" : 0,
   "tick_val" : 0,
 
+  "capturer": {},
+  "animation_capture": false,
+  "capture_start":-1,
+  "capture_end":-1,
+  "capture_dt":5000,
+
   "fps_debug": false,
   "fps": 0,
   "last_t":0,
 
 
-  "anim": false,
   "pause": false,
 
   "speed_factor":256,
@@ -313,6 +318,22 @@ function anim() {
   g_info.tick++;
   window.requestAnimationFrame(anim);
 
+  if (g_info.animation_capture) {
+    g_info.capturer.capture( g_info.canvas );
+
+    let _t = Date.now();
+
+    console.log("!!", g_info.capture_end - _t);
+
+    if (_t >= g_info.capture_end) {
+      g_info.animation_capture = false;
+      g_info.capturer.stop();
+      g_info.capturer.save();
+    }
+
+  }
+
+
   if (!g_info.ready) {
     loading_anim();
     return;
@@ -423,7 +444,15 @@ function init_global_param() {
 
   document.addEventListener('keydown', function(ev) {
     if (ev.key == 'a') {
-      g_info.anim = ((g_info.anim == true) ? false : true);
+      if (g_info.animation_capture) { console.log("already capturing!"); return; }
+      g_info.capturer = new CCapture({"format":"webm"});
+      g_info.capturer.start();
+      g_info.animation_capture = true;
+
+      g_info.capture_start = Date.now();
+      g_info.capture_end = g_info.capture_start + g_info.capture_dt;
+
+      console.log(">>>", g_info.capture_start, g_info.capture_end, g_info.capture_dt);
     }
     else if (ev.key == 's') {
       screenshot();
