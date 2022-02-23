@@ -150,6 +150,7 @@ I Like Em
 * [zero-player game](https://www.fxhash.xyz/generative/slug/zero-player-game)
 * [DR(G)E(M)AM by Genratore](https://www.fxhash.xyz/generative/slug/dr\(g\)e\(m\)am)
 * [Hacking a sphere by Marco Aureggi](https://www.fxhash.xyz/generative/slug/hacking-a-sphere)
+* [ukiyo-e seascape by ykxotkx](https://www.fxhash.xyz/generative/slug/ukiyo-e-seascape)
 
 
 Artists
