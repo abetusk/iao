@@ -584,12 +584,118 @@ function vec_diff(a,b) {
   return {"x":a.x-b.x, "y":a.y-b.y};
 }
 
-function dollop(ctx, x0, y0, w, h, a, opt) {
+function vec_lerp(p, q, t) {
+  let d = vec_diff(q,p);
+  return vec_add(p, vec_mul(d, t));
+}
+
+function leaf(ctx, opt, lvl) {
+  lvl = ((typeof lvl === "undefined") ? 1 : lvl);
+  if (lvl == 0) { return; }
+
+  let a0 = ((typeof opt.a0 === "undefined") ? (fxrand()*Math.PI/8) : opt.a0);
+  let a1 = ((typeof opt.a1 === "undefined") ? (fxrand()*Math.PI/8) : opt.a1);
+
+  let p0 = opt.p0;
+  let p3 = opt.p3;
+
+  let p1 = vec_add( p0, vec_rot( vec_diff( vec_lerp(p0, p3, 0.5), p0 ), a0 ) );
+  let p2 = vec_add( p3, vec_rot( vec_diff( vec_lerp(p3, p0, 0.5), p3 ), a1 ) );
+
+  let fat_fac = ((typeof opt.fat_fac === "undefined") ? (1/8) : opt.fat_fac);
+  let len_fac = ((typeof opt.len_fac === "undefined") ? (1/3) : opt.len_fac);
+  let sprout_a = ((typeof opt.sprout_a === "undefined") ? (Math.PI/4) : opt.sprout_a);
+  let sprout_n = ((typeof opt.sprout_n === "undefined") ? (4) : opt.sprout_n);
+
+  ctx.strokeStyle = "rgba(30, 230, 30, 0.5)";
+  ctx.beginPath();
+  ctx.moveTo( p0.x, p0.y );
+  ctx.lineTo( p3.x, p3.y );
+  ctx.stroke();
+
+  ctx.fillStyle = "rgba(255, 0, 0, 0.5)";
+  ctx.fillRect(p1.x-2.5, p1.y-2.5, 5, 5);
+  ctx.fillRect(p2.x-2.5, p2.y-2.5, 5, 5);
+
+  let bez_spine = new Bezier([p0, p1, p2, p3]);
+  let bez_spine_lut = bez_spine.getLUT(32);
+
+  ctx.strokeStyle = "rgba(30, 30, 30, 0.5)";
+  ctx.beginPath();
+  ctx.moveTo(bez_spine_lut[0].x, bez_spine_lut[0].y);
+  for (let i=1; i<bez_spine_lut.length; i++) {
+    ctx.lineTo(bez_spine_lut[i].x, bez_spine_lut[i].y);
+  }
+  ctx.stroke();
+
+  let lin_len = vec_len(p0,p3);
+
+  let body_outline = [];
+  let _tmp = [];
+
+  body_outline.push( bez_spine_lut[0] );
+  for (let i=1; i<bez_spine_lut.length; i++) {
+
+    let _m = fat_fac*Math.sin( (i/(bez_spine_lut.length-1)) * Math.PI )*lin_len;
+    let v = vec_add(bez_spine_lut[i], vec_mul(vec_rot(vec_norm(vec_diff( bez_spine_lut[i], bez_spine_lut[i-1] )),  Math.PI/2), _m));
+
+    body_outline.push(v);
+
+    let u = vec_add(bez_spine_lut[i], vec_mul(vec_rot(vec_norm(vec_diff( bez_spine_lut[i], bez_spine_lut[i-1] )), -Math.PI/2), _m));
+
+    _tmp.push(u);
+  }
+
+  for (let i=(_tmp.length-1); i>=0; i--) {
+    body_outline.push(_tmp[i]);
+  }
+
+  ctx.strokeStyle = "rgba(30,30,30,0.5)";
+  ctx.beginPath();
+  ctx.moveTo(body_outline[0].x, body_outline[0].y);
+  for (let i=0; i<body_outline.length; i++) {
+    ctx.lineTo(body_outline[i].x, body_outline[i].y);
+  }
+  ctx.lineTo(body_outline[0].x, body_outline[0].y);
+  ctx.stroke();
+
+  for (let i=0; i<sprout_n; i++) {
+    let _a = sprout_a;
+
+    let idx = Math.floor((i+1)*bez_spine_lut.length/(sprout_n+1));
+    let _t = (i+1)/(sprout_n+1);
+
+    let p0 = bez_spine.get(_t);
+
+    let _l = len_fac*lin_len*Math.sin( _t * Math.PI );
+
+    let p3 = vec_add(p0, vec_mul( vec_rot(bez_spine.normal(_t), Math.PI/2 - _a), _l));
+    let r_opt = {
+      "p0": p0,
+      "p3": p3,
+      "a0": a0,
+      "a1": a1,
+      "fat_fac": (1.5*fat_fac)
+    };
+    leaf(ctx, r_opt, lvl-1);
+
+    p3 = vec_add(p0, vec_mul( vec_rot(bez_spine.normal(_t), -Math.PI/2 +_a), -_l));
+    r_opt = {
+      "p0": p0,
+      "p3": p3,
+      "a0": -a0,
+      "a1": -a1,
+      "fat_fac": (1.5*fat_fac)
+    };
+    leaf(ctx, r_opt, lvl-1);
+
+  }
+
+}
+
+function dollop(ctx, x0, y0, x1, y1, d, a0, a1, opt) {
   let show_path = true;
   let show_cp = true;
-
-  //let show_path = false;
-  //let show_cp = false;
 
   let cseq = [
     "rgba(255,0,0,0.5)",
@@ -601,41 +707,142 @@ function dollop(ctx, x0, y0, w, h, a, opt) {
     "rgba(255,0,255,0.5)",
   ];
 
-  //let tri = [
-  //  { "x": x, "y": y },
-  //  { "x": x + 20, "y": y-50 },
-  //  { "x": x - 10, "y": y-40 }
-  //];
+  let p0 = { "x": x0, "y": y0 };
+  let p1 = { "x": x1, "y": y1 };
 
-  /*
-  let path = [
-    { "x": x, "y": y },
-    { "x": x + 60, "y": y-200 },
-    //{ "x": x + 10, "y": y-170 },
+  let cx = x1;
+  let cy = y1;
 
-    //{ "x": x - 10, "y": y-120 }
-    { "x": x - 5, "y": y-180 }
-  ];
-*/
+  let r = d/2;
 
-  /*
-  let path = [
-    { "x": x, "y": y },
-    { "x": x + 60, "y": y-200 },
-    //{ "x": x + 10, "y": y-170 },
+  let circ_seg = [];
 
-    //{ "x": x - 10, "y": y-120 }
-    { "x": x + 10, "y": y-170 }
-  ];
-*/
+  let end_ang = a0;
 
-  // looks decent...
+  // half circle only
   //
-  //let path = [
-  //  { "x": x, "y": y },
-  //  { "x": x + 50, "y": y-300 },
-  //  { "x": x - 50, "y": y-300 }
-  //];
+  let n = 32;
+  for (let i=0; i<n; i++) {
+    let _ca = (Math.PI*i/n)  + end_ang + (Math.PI/2);
+
+    let _dx = Math.cos(_ca)*r;
+    let _dy = Math.sin(_ca)*r;
+
+    circ_seg.push( {"x": p1.x + _dx, "y": p1.y + _dy } );
+  }
+
+  ctx.strokeStyle = "rgba(30, 30, 30, 0.5)";
+  ctx.beginPath();
+  ctx.moveTo(circ_seg[0].x, circ_seg[0].y);
+  for (let i=1; i<circ_seg.length; i++) {
+    ctx.lineTo(circ_seg[i].x, circ_seg[i].y);
+  }
+  ctx.stroke();
+
+
+  /*
+  ctx.beginPath();
+  ctx.fillStyle = "rgba(50, 50, 50, 0.2)";
+  ctx.arc(cx, cy, r, 0, Math.PI*2);
+  ctx.fill();
+*/
+
+  ctx.beginPath();
+  ctx.fillStyle = "rgba(50, 50, 50, 0.2)";
+  ctx.fillRect(x0, y0, 5, 5);
+  ctx.fill();
+
+  let _a = Math.atan2( y1-y0, x1-x0 );
+  let _aa = _a - a0;
+
+  let _l = vec_len(p0, p1);
+  let c_fac = _l/3;
+
+  let c01 = vec_add( p0, vec_rot( vec_mul( vec_norm( vec_diff( p1, p0 ) ), c_fac ), -a0) );
+
+  ctx.beginPath();
+  ctx.fillStyle = "rgba(250, 50, 50, 0.2)";
+  ctx.fillRect(c01.x, c01.y, 5, 5);
+  ctx.fill();
+
+  let c03 = vec_add(p1, vec_rot( vec_mul( vec_norm(vec_diff(p0, p1)), r ), (Math.PI/2)+a0 ) );
+
+  ctx.beginPath();
+  ctx.fillStyle = "rgba(50, 250, 50, 0.7)";
+  ctx.fillRect(c03.x, c03.y, 5, 5);
+  ctx.fill();
+
+  let c02 = vec_add(c03, vec_rot( vec_mul(vec_norm(vec_diff(c03, p1)), c_fac), -Math.PI/2));
+
+  ctx.beginPath();
+  ctx.fillStyle = "rgba(50, 50, 250, 0.7)";
+  ctx.fillRect(c02.x, c02.y, 5, 5);
+  ctx.fill();
+
+  //--
+
+  let c11 = vec_add( p0, vec_rot( vec_mul( vec_norm( vec_diff( p1, p0 ) ), c_fac ), -a1) );
+
+  ctx.beginPath();
+  ctx.fillStyle = "rgba(50, 250, 250, 0.9)";
+  ctx.fillRect(c11.x, c11.y, 5, 5);
+  ctx.fill();
+
+  let c13 = vec_add(p1, vec_rot( vec_mul( vec_norm(vec_diff(p0, p1)), r ), -(Math.PI/2)+a0 ) );
+
+  ctx.beginPath();
+  ctx.fillStyle = "rgba(250, 250, 50, 0.7)";
+  ctx.fillRect(c13.x, c13.y, 5, 5);
+  ctx.fill();
+
+  let c12 = vec_add(c13, vec_rot( vec_mul(vec_norm(vec_diff(c13, p1)), c_fac), Math.PI/2));
+
+  ctx.beginPath();
+  ctx.fillStyle = "rgba(50, 50, 250, 0.7)";
+  ctx.fillRect(c12.x, c12.y, 5, 5);
+  ctx.fill();
+
+  let bz0 = [ p0, c01, c02, c03 ];
+  let bz1 = [ p0, c11, c12, c13 ];
+
+  let bez0 = new Bezier(bz0);
+  let bez0_lut = bez0.getLUT(32);
+
+  let bez1 = new Bezier(bz1);
+  let bez1_lut = bez1.getLUT(32);
+
+  for (let i=1; i<bez0_lut.length; i++) {
+    ctx.strokeStyle = "rgba(50, 50, 50, 0.3)";
+    ctx.beginPath();
+    ctx.moveTo( bez0_lut[i-1].x, bez0_lut[i-1].y );
+    ctx.lineTo( bez0_lut[i].x, bez0_lut[i].y );
+    ctx.stroke();
+  }
+
+  for (let i=1; i<bez1_lut.length; i++) {
+    ctx.strokeStyle = "rgba(50, 50, 50, 0.3)";
+    ctx.beginPath();
+    ctx.moveTo( bez1_lut[i-1].x, bez1_lut[i-1].y );
+    ctx.lineTo( bez1_lut[i].x, bez1_lut[i].y );
+    ctx.stroke();
+  }
+
+
+}
+
+function _dollop(ctx, x0, y0, w, h, a, opt) {
+  let show_path = true;
+  let show_cp = true;
+
+  let cseq = [
+    "rgba(255,0,0,0.5)",
+    "rgba(0,255,0,0.5)",
+    "rgba(0,0,255,0.5)",
+    "rgba(255,255,0,0.5)",
+    "rgba(0,255,255,0.5)",
+    "rgba(255,0,255,0.5)",
+    "rgba(255,0,255,0.5)",
+  ];
 
   let _c = Math.cos(a);
   let _s = Math.sin(a);
@@ -661,22 +868,16 @@ function dollop(ctx, x0, y0, w, h, a, opt) {
 
   console.log(l01, l02, l12);
 
-  //let dollop_beg = 10;
-  //let dollop_end = 20;
-
   let dollop_beg = l01/2;
-  //let dollop_end = l02/1.8;
   let dollop_end = l02/2;
 
   let base_ang0_f = 2.5;
   let base_ang1_f = 1.85;
 
-  //let dollop_mid_end = l12/2;
   let dollop_mid_end = l12/2;
 
   let bz0 = [
     path[0],
-    //vec_add( path[0], vec_rot( vect(path[0], path[1], path[2], dollop_beg), -vec_ang(path[0], path[1], path[2])*base_ang0_f ) ),
     vec_add( path[0], vec_rot( vec_mul( vec_norm( vec_diff(path[1],path[0]) ), dollop_beg), vec_ang(path[0], path[1], path[2])*base_ang0_f ) ),
     vec_add( path[1], vect_n(path[1], path[2], path[0], dollop_end)),
     path[1]
@@ -684,8 +885,6 @@ function dollop(ctx, x0, y0, w, h, a, opt) {
 
   let bz1 = [
     path[1],
-    //vec_add( path[1], vect_n(path[1], path[2], path[0], -dollop_end)),
-    //vec_add( path[2], vect_n(path[2], path[0], path[1],  dollop_end)),
     vec_add( path[1], vect_n(path[1], path[2], path[0], -dollop_mid_end)),
     vec_add( path[2], vect_n(path[2], path[0], path[1],  dollop_mid_end)),
     path[2]
@@ -693,7 +892,6 @@ function dollop(ctx, x0, y0, w, h, a, opt) {
 
   let bz2 = [
     path[0],
-    //vec_add( path[0], vec_rot( vect(path[0], path[1], path[2], dollop_beg), -vec_ang(path[0], path[1], path[2])*base_ang1_f ) ),
     vec_add( path[0], vec_rot( vec_mul( vec_norm( vec_diff(path[2],path[0]) ), dollop_beg), vec_ang(path[0], path[1], path[2])*base_ang1_f ) ),
     vec_add( path[2], vect_n(path[2], path[0], path[1], -dollop_end)),
     path[2]
@@ -766,6 +964,165 @@ function dollop(ctx, x0, y0, w, h, a, opt) {
 
 }
 
+function dollop_leaf(ctx, x0, y0, w, h, a, opt) {
+  let show_path = false;
+  let show_cp = false;
+
+  let cseq = [
+    "rgba(255,0,0,0.5)",
+    "rgba(0,255,0,0.5)",
+    "rgba(0,0,255,0.5)",
+    "rgba(255,255,0,0.5)",
+    "rgba(0,255,255,0.5)",
+    "rgba(255,0,255,0.5)",
+    "rgba(255,0,255,0.5)",
+  ];
+
+  let _c = Math.cos(a);
+  let _s = Math.sin(a);
+
+  let dx0 = -_c*w/2 + _s*h;
+  let dy0 =  _s*w/2 + _c*h;
+
+  let dx1 = -_c*(w/10) + _s*h*0.985;
+  let dy1 =  _s*(w/10) + _c*h*0.985;
+
+  let dx2 =  _c*w/2 + _s*h;
+  let dy2 = -_s*w/2 + _c*h;
+
+  // looks decent...
+  //
+  let path = [
+    { "x": x0, "y": y0 },
+    { "x": x0+dx0, "y": y0+dy0 },
+    { "x": x0+dx1, "y": y0+dy1 },
+    { "x": x0+dx2, "y": y0+dy2 }
+  ];
+
+  let l01 = vec_len( path[1], path[0] );
+  let l02 = vec_len( path[2], path[0] );
+
+  let l12 = vec_len( path[1], path[2] );
+
+  let dollop_beg = l01/2;
+  let dollop_end = l02/2;
+
+  let base_ang0_f = 2.5;
+  let base_ang1_f = 1.85;
+
+  let dollop_mid_end = l12/2;
+
+  let bz0 = [
+    path[0],
+    vec_add( path[0], vec_rot( vec_mul( vec_norm( vec_diff(path[1],path[0]) ), dollop_beg), vec_ang(path[0], path[1], path[2])*base_ang0_f ) ),
+    vec_add( path[1], vect_n(path[1], path[2], path[0], dollop_end)),
+    path[1]
+  ];
+
+  let bz1 = [
+    path[1],
+    vec_add( path[1], vect_n(path[1], path[2], path[0], -dollop_mid_end)),
+    vec_add( path[2], vect_n(path[2], path[0], path[1],  dollop_mid_end)),
+    path[2]
+  ]
+
+  let bz2 = [
+    path[2],
+    vec_add( path[2], vect_n(path[2], path[3], path[0], -dollop_mid_end)),
+    vec_add( path[3], vect_n(path[3], path[0], path[2],  dollop_mid_end)),
+    path[3]
+  ]
+
+  let bz3 = [
+    path[0],
+    vec_add( path[0], vec_rot( vec_mul( vec_norm( vec_diff(path[3],path[0]) ), dollop_beg), vec_ang(path[0], path[2], path[3])*base_ang1_f ) ),
+    vec_add( path[3], vect_n(path[3], path[0], path[2], -dollop_end)),
+    path[3]
+  ]
+
+  let bez0 = new Bezier(bz0);
+  let bez0_lut = bez0.getLUT(32);
+
+  let bez1 = new Bezier(bz1);
+  let bez1_lut = bez1.getLUT(32);
+
+  let bez2 = new Bezier(bz2);
+  let bez2_lut = bez2.getLUT(32);
+
+  let bez3 = new Bezier(bz3);
+  let bez3_lut = bez3.getLUT(32);
+
+  //---
+
+  if (show_path) {
+    for (let i=0; i<path.length; i++) {
+      let nxt = (i+1)%(path.length);
+      ctx.strokeStyle = "rgba(255, 0, 0, 0.3)";
+      ctx.beginPath();
+      ctx.moveTo( path[i].x, path[i].y );
+      ctx.lineTo( path[nxt].x, path[nxt].y );
+      ctx.stroke();
+    }
+
+  }
+
+
+  if (show_cp) {
+    for (let i=0; i<bz0.length; i++) {
+      ctx.fillStyle = cseq[i % cseq.length];
+      ctx.fillRect( bz0[i].x - 2, bz0[i].y - 2, 4, 4);
+    }
+
+    for (let i=0; i<bz1.length; i++) {
+      ctx.fillStyle = cseq[i % cseq.length];
+      ctx.fillRect( bz1[i].x - 2, bz1[i].y - 2, 4, 4);
+    }
+
+    for (let i=0; i<bz2.length; i++) {
+      ctx.fillStyle = cseq[i % cseq.length];
+      ctx.fillRect( bz2[i].x - 2, bz2[i].y - 2, 4, 4);
+    }
+
+    for (let i=0; i<bz3.length; i++) {
+      ctx.fillStyle = cseq[i % cseq.length];
+      ctx.fillRect( bz3[i].x - 2, bz3[i].y - 2, 4, 4);
+    }
+  }
+
+  for (let i=1; i<bez0_lut.length; i++) {
+    ctx.strokeStyle = "rgba(50, 50, 50, 0.3)";
+    ctx.beginPath();
+    ctx.moveTo( bez0_lut[i-1].x, bez0_lut[i-1].y );
+    ctx.lineTo( bez0_lut[i].x, bez0_lut[i].y );
+    ctx.stroke();
+  }
+
+  for (let i=1; i<bez1_lut.length; i++) {
+    ctx.strokeStyle = "rgba(50, 50, 50, 0.3)";
+    ctx.beginPath();
+    ctx.moveTo( bez1_lut[i-1].x, bez1_lut[i-1].y );
+    ctx.lineTo( bez1_lut[i].x, bez1_lut[i].y );
+    ctx.stroke();
+  }
+
+  for (let i=1; i<bez2_lut.length; i++) {
+    ctx.strokeStyle = "rgba(50, 50, 50, 0.3)";
+    ctx.beginPath();
+    ctx.moveTo( bez2_lut[i-1].x, bez2_lut[i-1].y );
+    ctx.lineTo( bez2_lut[i].x, bez2_lut[i].y );
+    ctx.stroke();
+  }
+
+  for (let i=1; i<bez3_lut.length; i++) {
+    ctx.strokeStyle = "rgba(50, 50, 50, 0.3)";
+    ctx.beginPath();
+    ctx.moveTo( bez3_lut[i-1].x, bez3_lut[i-1].y );
+    ctx.lineTo( bez3_lut[i].x, bez3_lut[i].y );
+    ctx.stroke();
+  }
+
+}
+
 function anim() {
 
   let _cw = g_info.canvas.width;
@@ -777,7 +1134,19 @@ function anim() {
   //ctx.fillStyle = "rgba(2,2,2,0.5)";
   //ctx.fillRect(30, 30, 50, 50);
 
-  dollop(ctx, 100, 100, 50, 100, 0);
+  //dollop(ctx, 300, 300, 200, 200, 50, Math.PI/8, Math.PI/16);
+  //dollop_leaf(ctx, 200, 200, 50, 100, Math.PI);
+  let opt = {
+    "p0" : { "x": 300, "y": 300 },
+    "p3" : { "x": 200, "y": 50 },
+    "a0" : Math.PI/8,
+    "a1" : Math.PI/8,
+    "sprout_n": 3,
+    "sprout_a": Math.PI/5,
+    "len_fac": 0.27,
+    "fat_fac": 0.1
+  };
+  leaf(ctx, opt, 2);
 
   return;
 
