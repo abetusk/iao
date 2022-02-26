@@ -34,11 +34,61 @@ var g_info = {
   "speed_factor":256,
   "color": [ ],
 
+  "current_profile" : {},
+  "profile": [
+    {
+      "base_level": 7,
+      "refine_level": 5,
+      "display_start_level": 3,
+      "display_layer_count": 35,
+      "cx": 300,
+      "cy": 300,
+      "reflect_x": 800,
+      "c": "rgba(0,0,0,0.02)"
+    },
+
+    {
+      "base_level": 8,
+      "refine_level": 5,
+      "display_start_level": 4,
+      "display_layer_count": 20,
+      "cx": 300,
+      "cy": 300,
+      "reflect_x": 900,
+      "c": "rgba(0,0,0,0.05)"
+    },
+
+    // digital rorschach
+    //
+    {
+      "base_level": 7,
+      "refine_level": 3,
+      "display_start_level": 0,
+      "display_layer_count": 15,
+      "cx": 300,
+      "cy": 300,
+      "reflect_x": 800,
+      "c": "rgba(0,0,0,0.035)"
+    },
+    {
+      "base_level": 7,
+      "refine_level": 3,
+      "display_start_level": 0,
+      "display_layer_count": 5,
+      "cx": 300,
+      "cy": 300,
+      "reflect_x": 800,
+      "c": "rgba(0,0,0,0.10)"
+    }
+  ],
+
+
   "rnd":[],
 
   "features" : {},
 
-  "bg_color" : "#eee"
+  //"bg_color" : "#eee"
+  "bg_color" : "rgba(240,240,240,1.0)"
 
 };
 
@@ -510,8 +560,6 @@ function loading_anim() {
     ctx.restore();
   }
 
-  console.log("x");
-
 }
 
 //---
@@ -707,8 +755,7 @@ function experiment0_water_poly_base_r(ctx, pgns, lvl, c, display) {
   water_poly_base_r(ctx, pgns, lvl-1, c, display);
 }
 
-function water_poly_base_r(ctx, pgns, lvl, c, display) {
-  //let display = false;
+function water_poly_base_r(pgns, lvl) {
   c = ((typeof c === "undefined") ? "rgba(0,0,0,0.04)" : c);
   display = ((typeof display === "undefined") ? false : display);
 
@@ -716,19 +763,6 @@ function water_poly_base_r(ctx, pgns, lvl, c, display) {
 
   let n = pgns.length;
   let pgn = pgns[n-1];
-
-  if (display) {
-
-    //ctx.fillStyle = "rgba(0,0,0,0.04)";
-    ctx.fillStyle = c;
-    ctx.beginPath();
-
-    ctx.moveTo(pgn[0].x, pgn[0].y);
-    for (let i=1; i<pgn.length; i++) {
-      ctx.lineTo(pgn[i].x, pgn[i].y);
-    }
-    ctx.fill();
-  }
 
   //let _f = 0.6;
   let _f = 0.5;
@@ -759,22 +793,23 @@ function water_poly_base_r(ctx, pgns, lvl, c, display) {
 
   pgns.push(subdiv_pgn);
 
-  water_poly_base_r(ctx, pgns, lvl-1, c, display);
+  water_poly_base_r(pgns, lvl-1);
 }
 
 function layer_polygon(ctx, pgns, c, start_idx) {
   c = ((typeof c === "undefined") ? "rgba(0,0,0,0.2)" : c);
   start_idx = ((typeof start_idx === "undefined") ? 0 : start_idx);
 
+  ctx.fillStyle = c;
   for (let idx=start_idx; idx<pgns.length; idx++) {
     let p = pgns[idx];
 
-    ctx.fillStyle = c;
     ctx.beginPath();
     ctx.moveTo(p[0].x, p[0].y);
     for (let i=1; i<p.length; i++) {
       ctx.lineTo(p[i].x, p[i].y);
     }
+    ctx.closePath();
     ctx.fill();
 
   }
@@ -788,116 +823,71 @@ function anim() {
   let _ch = g_info.canvas.height;
   let ctx = g_info.ctx;
 
-  let _profile = [
-    {
-      "base_level": 7,
-      "refine_level": 5,
-      "display_start_level": 3,
-      "display_layer_count": 35,
-      "cx": 300,
-      "cy": 300,
-      "reflect_x": 800,
-      "c": "rgba(0,0,0,0.02)"
-    }
-  ];
-
-  let _prof = _profile[0];
-
-  ctx = g_info.ctx;
-
-  clear(ctx, _cw, _ch, g_info.bg_color);
-
-  let pgn = [];
-  for (let i=0; i<8; i++) {
-  //for (let i=0; i<4; i++) {
-
-    let a = (i/8)*Math.PI*2;
-
-    pgn.push({ 
-      "x": 300 + 150*Math.cos(a),
-      "y": 300 + 150*Math.sin(a)
-    });
-
-  }
-
-  //let c = "rgba(0,0,0,0.075)";
-  //let c = "rgba(0,0,0,0.3)";
-  let pgns = [ pgn ];
-
-  let lvl = _prof.base_level;
-  water_poly_base_r(ctx, pgns, lvl); //, c, false);
-
-
-  //c = "rgba(0,0,0,0.02)";
-  //c = "rgba(175,17,28,0.02)";
-  //c = "rgba(170,0,0,0.02)";
-  //c = "rgba(131,3,3,0.02)";
-  //c = "rgba(126,53,23,0.02)";
-  //c = "rgba(74,0,0,0.02)";
-
-  //c = "rgba(0,0,0,0.2)";
-  //c = "rgba(0,0,0,0.02)";
-  //c = "rgba(0,0,0,0.03)";
-  //c = "rgba(0,0,0,0.01)";
-
-  //let c = _prof.c;
-  //for (let idx=0; idx<30; idx++) {
-  //for (let idx=0; idx<10; idx++) {
-  for (let idx=0; idx<_prof.display_layer_count; idx++) {
-    let rpgns = [ pgns[pgns.length-1] ];
-
-    //water_poly_base_r(ctx, rpgns, 5, c, false);
-    water_poly_base_r(ctx, rpgns, _prof.refine_level, _prof.c, false);
-
-    layer_polygon(ctx, rpgns, _prof.c, _prof.display_start_level);
-    //layer_polygon(ctx, rpgns, c, 0);
-
-    ctx.save();
-    ctx.translate(800,0);
-    ctx.scale(-1, 1);
-    layer_polygon(ctx, rpgns, _prof.c, _prof.display_start_level);
-    //layer_polygon(ctx, rpgns, c, 0);
-    ctx.restore();
-  }
-
-  return;
-
-  console.log(">>>", pgns);
-
-  c = "rgba(0,0,0,0.93)";
-  for (let idx=4; idx<pgns.length; idx++) {
-    let p = pgns[idx];
-
-    ctx.fillStyle = c;
-    ctx.beginPath();
-    ctx.moveTo(p[0].x, p[0].y);
-    for (let i=1; i<p.length; i++) {
-      ctx.lineTo(p[i].x, p[i].y);
-    }
-    ctx.fill();
-
-  }
-
-  return;
-
   g_info.tick++;
   window.requestAnimationFrame(anim);
 
+  clear();
   if (!g_info.ready) {
-    clear();
     loading_anim();
     return;
   }
 
-  ctx.lineWidth = 0;
+  let _prof = g_info.current_profile;
 
-  let w2 = _cw / 2;
-  let h2 = _ch / 2;
+  let n = (g_info.tick % _prof.display_layer_count) + 1;
 
-  ctx.fillStyle = '#777';
-  ctx.lineWidth = 0;
-  ctx.beginPath();
-  ctx.fillRect(w2-30,h2-30,60,60);
+  n = (g_info.tick % (2*_prof.display_layer_count));
+  if (n > _prof.display_layer_count) {
+    n = 2*_prof.display_layer_count - n;
+  }
+
+  n = _prof.display_layer_count;
+
+  //for (let idx=0; idx<_prof.display_layer_count; idx++) {
+  for (let idx=0; idx<n; idx++) {
+
+    let rpgns = g_info.disp_pgns[idx];
+    layer_polygon(ctx, rpgns, _prof.c, _prof.display_start_level);
+
+    ctx.save();
+    ctx.translate(_prof.reflect_x,0);
+    ctx.scale(-1, 1);
+    layer_polygon(ctx, rpgns, _prof.c, _prof.display_start_level);
+    ctx.restore();
+  }
+
+
+}
+
+function setup_pgns() {
+
+  let _prof = g_info.current_profile;
+
+  let pgn = [];
+  for (let i=0; i<8; i++) {
+    let a = (i/8)*Math.PI*2;
+
+    pgn.push({ 
+      "x": _prof.cx + 150*Math.cos(a),
+      "y": _prof.cy + 150*Math.sin(a)
+    });
+
+  }
+
+  let pgns = [ pgn ];
+
+  let lvl = _prof.base_level;
+  water_poly_base_r(pgns, lvl);
+
+  g_info.disp_pgns = [];
+
+  for (let idx=0; idx<_prof.display_layer_count; idx++) {
+    let rpgns = [ pgns[pgns.length-1] ];
+
+    water_poly_base_r(rpgns, _prof.refine_level);
+    g_info.disp_pgns.push( rpgns );
+  }
+
 }
 
 function clear(ctx, clear_width, clear_height, bg_color) {
@@ -906,10 +896,16 @@ function clear(ctx, clear_width, clear_height, bg_color) {
   clear_height = ((typeof clear_height === "undefined") ? g_info.canvas.height : clear_height)
   bg_color     = ((typeof bg_color === "undefined") ? g_info.bg_color : bg_color)
 
-  ctx.clearRect(0, 0, clear_width, clear_height);
+
+  //wtf
+  //
+
   ctx.fillStyle = bg_color;
-  ctx.rect(0,0, clear_width, clear_height);
-  ctx.fill();
+  ctx.clearRect(0, 0, clear_width, clear_height);
+  //ctx.fillStyle = bg_color;
+  //ctx.rect(0,0, clear_width, clear_height);
+  //ctx.fill();
+  ctx.fillRect(0,0, clear_width, clear_height);
 }
 
 function screenshot() {
@@ -955,13 +951,12 @@ function init_fin() {
 
 function init() {
 
-  // EXAMPLE INIT
-  //
+  init_fin();
 
-  setTimeout(function() { init_fin(); }, 2000);
+  g_info.current_profile = g_info.profile[1];
 
-  //
-  // EXAMPLE INIT
+  setup_pgns();
+
 
 }
 
