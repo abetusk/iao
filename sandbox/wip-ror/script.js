@@ -784,19 +784,32 @@ function layer_polygon(ctx, pgns, c, start_idx) {
 
 
 function anim() {
-
   let _cw = g_info.canvas.width;
   let _ch = g_info.canvas.height;
   let ctx = g_info.ctx;
+
+  let _profile = [
+    {
+      "base_level": 7,
+      "refine_level": 5,
+      "display_start_level": 3,
+      "display_layer_count": 35,
+      "cx": 300,
+      "cy": 300,
+      "reflect_x": 800,
+      "c": "rgba(0,0,0,0.02)"
+    }
+  ];
+
+  let _prof = _profile[0];
 
   ctx = g_info.ctx;
 
   clear(ctx, _cw, _ch, g_info.bg_color);
 
-  let lvl = 7;
   let pgn = [];
-  //for (let i=0; i<8; i++) {
-  for (let i=0; i<4; i++) {
+  for (let i=0; i<8; i++) {
+  //for (let i=0; i<4; i++) {
 
     let a = (i/8)*Math.PI*2;
 
@@ -808,26 +821,42 @@ function anim() {
   }
 
   //let c = "rgba(0,0,0,0.075)";
-  let c = "rgba(0,0,0,0.3)";
+  //let c = "rgba(0,0,0,0.3)";
   let pgns = [ pgn ];
-  water_poly_base_r(ctx, pgns, lvl, c, false);
+
+  let lvl = _prof.base_level;
+  water_poly_base_r(ctx, pgns, lvl); //, c, false);
+
 
   //c = "rgba(0,0,0,0.02)";
   //c = "rgba(175,17,28,0.02)";
   //c = "rgba(170,0,0,0.02)";
   //c = "rgba(131,3,3,0.02)";
   //c = "rgba(126,53,23,0.02)";
-  c = "rgba(74,0,0,0.02)";
-  for (let idx=0; idx<30; idx++) {
-    let rpgns = [ pgns[pgns.length-1] ];
-    water_poly_base_r(ctx, rpgns, 5, c, false);
+  //c = "rgba(74,0,0,0.02)";
 
-    layer_polygon(ctx, rpgns, c, 3);
+  //c = "rgba(0,0,0,0.2)";
+  //c = "rgba(0,0,0,0.02)";
+  //c = "rgba(0,0,0,0.03)";
+  //c = "rgba(0,0,0,0.01)";
+
+  //let c = _prof.c;
+  //for (let idx=0; idx<30; idx++) {
+  //for (let idx=0; idx<10; idx++) {
+  for (let idx=0; idx<_prof.display_layer_count; idx++) {
+    let rpgns = [ pgns[pgns.length-1] ];
+
+    //water_poly_base_r(ctx, rpgns, 5, c, false);
+    water_poly_base_r(ctx, rpgns, _prof.refine_level, _prof.c, false);
+
+    layer_polygon(ctx, rpgns, _prof.c, _prof.display_start_level);
+    //layer_polygon(ctx, rpgns, c, 0);
 
     ctx.save();
     ctx.translate(800,0);
     ctx.scale(-1, 1);
-    layer_polygon(ctx, rpgns, c, 3);
+    layer_polygon(ctx, rpgns, _prof.c, _prof.display_start_level);
+    //layer_polygon(ctx, rpgns, c, 0);
     ctx.restore();
   }
 
