@@ -55,7 +55,7 @@ var g_info = {
       "display_start_level": 3,
       "display_layer_count": 35,
       "cx": 300,
-      "cy": 300,
+      "cy": 400,
       "reflect_x": 900,
       "c": "rgba(0,0,0,0.02)"
     },
@@ -66,7 +66,7 @@ var g_info = {
       "display_start_level": 4,
       "display_layer_count": 20,
       "cx": 300,
-      "cy": 300,
+      "cy": 400,
       "reflect_x": 900,
       "c": "rgba(0,0,0,0.05)"
     },
@@ -79,7 +79,7 @@ var g_info = {
       "display_start_level": 0,
       "display_layer_count": 15,
       "cx": 300,
-      "cy": 300,
+      "cy": 400,
       "reflect_x": 800,
       "c": "rgba(0,0,0,0.035)"
     },
@@ -89,7 +89,7 @@ var g_info = {
       "display_start_level": 0,
       "display_layer_count": 5,
       "cx": 300,
-      "cy": 300,
+      "cy": 400,
       "reflect_x": 800,
       "c": "rgba(0,0,0,0.10)"
     }
@@ -943,7 +943,7 @@ function setup_pgns() {
 
     pgn.push({ 
       "x": _prof.cx + 150*Math.cos(a) + 300,
-      "y": 50 + 50*Math.sin(a)
+      "y": 150 + 50*Math.sin(a)
     });
 
   }
@@ -1038,7 +1038,7 @@ function init() {
   let idx = Math.floor(fxrand()*g_info.profile.length);
   g_info.current_profile = g_info.profile[idx];
 
-  g_info.current_profile = g_info.profile[3];
+  //g_info.current_profile = g_info.profile[3];
 
   setup_pgns();
 
