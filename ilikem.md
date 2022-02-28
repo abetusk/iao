@@ -151,6 +151,8 @@ I Like Em
 * [DR(G)E(M)AM by Genratore](https://www.fxhash.xyz/generative/slug/dr\(g\)e\(m\)am)
 * [Hacking a sphere by Marco Aureggi](https://www.fxhash.xyz/generative/slug/hacking-a-sphere)
 * [ukiyo-e seascape by ykxotkx](https://www.fxhash.xyz/generative/slug/ukiyo-e-seascape)
+* [Space & Time by Third Vision](https://www.fxhash.xyz/generative/slug/space-and-time)
+* [Industrial Park by erfanhoseini](https://www.fxhash.xyz/generative/slug/industrial-park)
 
 
 Artists

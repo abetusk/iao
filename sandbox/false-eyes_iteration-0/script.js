@@ -1586,10 +1586,10 @@ function anim() {
   ctx.fill();
 
   //DEBUG
-  floop(ctx, _cw, _ch);
-  g_info.tick++;
-  window.requestAnimationFrame(anim);
-  return;
+  //floop(ctx, _cw, _ch);
+  //g_info.tick++;
+  //window.requestAnimationFrame(anim);
+  //return;
   //debug
 
 
@@ -2115,11 +2115,11 @@ function disk_test_canvas(ctx, w, h) {
   //DEBUG
   //DEBUG
   //DEBUG
-  window.requestAnimationFrame(anim);
-  return;
+  //window.requestAnimationFrame(anim);
+  //return;
 
-  floop(ctx, g_info.width, g_info.height);
-  return;
+  //floop(ctx, g_info.width, g_info.height);
+  //return;
   //DEBUG
   //DEBUG
   //DEBUG

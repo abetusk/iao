@@ -36,6 +36,19 @@ var g_info = {
 
   "current_profile" : {},
   "profile": [
+    /*
+    {
+      "base_level": 7,
+      "refine_level": 5,
+      "display_start_level": 5,
+      "display_layer_count": 50,
+      "cx": 300,
+      "cy": 300,
+      "reflect_x": 800,
+      "c": "rgba(0,0,0,0.04)"
+    },
+*/
+
     {
       "base_level": 7,
       "refine_level": 5,
@@ -43,7 +56,7 @@ var g_info = {
       "display_layer_count": 35,
       "cx": 300,
       "cy": 300,
-      "reflect_x": 800,
+      "reflect_x": 900,
       "c": "rgba(0,0,0,0.02)"
     },
 
@@ -82,6 +95,10 @@ var g_info = {
     }
   ],
 
+  "noise" : [],
+
+  "disp_pgns":[],
+  "pgn_set": [],
 
   "rnd":[],
 
@@ -832,39 +849,71 @@ function anim() {
     return;
   }
 
-  let _prof = g_info.current_profile;
 
+  for (i=0; i<g_info.noise.length; i++) {
+    let v = g_info.noise[i];
+    ctx.fillStyle = v.c;
+    ctx.beginPath();
+    ctx.arc( v.x, v.y, v.r, 0, Math.PI*2);
+    ctx.fill();
+  }
+
+  let _prof = g_info.current_profile;
   let n = (g_info.tick % _prof.display_layer_count) + 1;
 
   n = (g_info.tick % (2*_prof.display_layer_count));
   if (n > _prof.display_layer_count) {
-    n = 2*_prof.display_layer_count - n;
+    //n = 2*_prof.display_layer_count - n;
+    n = _prof.display_layer_count - (n%_prof.display_layer_count);
   }
 
   n = _prof.display_layer_count;
 
+
   //for (let idx=0; idx<_prof.display_layer_count; idx++) {
-  for (let idx=0; idx<n; idx++) {
+  //for (let idx=0; idx<n; idx++) {
 
-    let rpgns = g_info.disp_pgns[idx];
-    layer_polygon(ctx, rpgns, _prof.c, _prof.display_start_level);
+  let c_choice = [
+    "rgba(0,0,0,0.02)",
+    "rgba(170,0,0,0.02)",
+  ];
 
-    ctx.save();
-    ctx.translate(_prof.reflect_x,0);
-    ctx.scale(-1, 1);
-    layer_polygon(ctx, rpgns, _prof.c, _prof.display_start_level);
-    ctx.restore();
+  for (let i=0; i<g_info.pgn_set.length; i++) {
+    let disp_pgn = g_info.pgn_set[i];
+    //for (let idx=0; idx<g_info.disp_pgns.length; idx++) {
+    for (let idx=0; idx<disp_pgn.length; idx++) {
+
+      let c = c_choice[i];
+
+      //let rpgns = g_info.disp_pgns[idx];
+      let rpgns = disp_pgn[idx];
+      //layer_polygon(ctx, rpgns, _prof.c, _prof.display_start_level);
+      layer_polygon(ctx, rpgns, c, _prof.display_start_level);
+
+
+      ctx.save();
+      ctx.translate(_prof.reflect_x,0);
+      ctx.scale(-1, 1);
+      //layer_polygon(ctx, rpgns, _prof.c, _prof.display_start_level);
+      layer_polygon(ctx, rpgns, c, _prof.display_start_level);
+      ctx.restore();
+    }
   }
 
 
 }
 
 function setup_pgns() {
+  let ok = true;
 
   let _prof = g_info.current_profile;
 
+
+  let disp_pgn = [];
   let pgn = [];
+
   for (let i=0; i<8; i++) {
+  //for (let i=0; i<3; i++) {
     let a = (i/8)*Math.PI*2;
 
     pgn.push({ 
@@ -878,15 +927,43 @@ function setup_pgns() {
 
   let lvl = _prof.base_level;
   water_poly_base_r(pgns, lvl);
+  for (let idx=0; idx<_prof.display_layer_count; idx++) {
+    let rpgns = [ pgns[pgns.length-1] ];
+    water_poly_base_r(rpgns, _prof.refine_level);
+    disp_pgn.push( rpgns );
+  }
 
-  g_info.disp_pgns = [];
+  g_info.pgn_set.push(disp_pgn);
 
+  // wip
+
+  pgn = [];
+  for (let i=0; i<3; i++) {
+    let a = (i/8)*Math.PI*2;
+
+    pgn.push({ 
+      "x": _prof.cx + 150*Math.cos(a) + 300,
+      "y": 50 + 50*Math.sin(a)
+    });
+
+  }
+
+  pgns = [ pgn ];
+
+  disp_pgn = [];
+
+  lvl = _prof.base_level;
+  water_poly_base_r(pgns, lvl);
   for (let idx=0; idx<_prof.display_layer_count; idx++) {
     let rpgns = [ pgns[pgns.length-1] ];
 
     water_poly_base_r(rpgns, _prof.refine_level);
-    g_info.disp_pgns.push( rpgns );
+
+    disp_pgn.push( rpgns );
   }
+
+  g_info.pgn_set.push(disp_pgn);
+
 
 }
 
@@ -949,15 +1026,37 @@ function init_fin() {
   g_info.ready = true;
 }
 
-function init() {
+function _rnd_weight() {
+  let x = fxrand();
+  if (x< 0.5) { return 4*x*x; }
+  return 1- 4*(x-0.5)*(x-0.5);
+}
 
+function init() {
   init_fin();
 
-  g_info.current_profile = g_info.profile[1];
+  let idx = Math.floor(fxrand()*g_info.profile.length);
+  g_info.current_profile = g_info.profile[idx];
+
+  g_info.current_profile = g_info.profile[3];
 
   setup_pgns();
 
+  console.log(">>>", g_info.width, g_info.height);
 
+  let R = 1.5;
+  let N = 40000;
+  let w = g_info.width, h = g_info.height;
+  for (let i=0; i<N; i++) {
+    let v = {
+      "x": _rnd_weight()*w ,
+      "y": _rnd_weight()*h ,
+      "r": fxrand()*R,
+      "c": "rgba(0,0,0,0.05)" };
+    g_info.noise.push(v);
+  }
+
+  console.log(">>", idx);
 }
 
 function init_global_param() {
