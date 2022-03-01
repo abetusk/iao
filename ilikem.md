@@ -153,6 +153,8 @@ I Like Em
 * [ukiyo-e seascape by ykxotkx](https://www.fxhash.xyz/generative/slug/ukiyo-e-seascape)
 * [Space & Time by Third Vision](https://www.fxhash.xyz/generative/slug/space-and-time)
 * [Industrial Park by erfanhoseini](https://www.fxhash.xyz/generative/slug/industrial-park)
+* [Compact by nanogram](https://www.fxhash.xyz/generative/slug/compact)
+* [Dark roots by Aeynox](https://www.fxhash.xyz/generative/slug/dark-roots)
 
 
 Artists

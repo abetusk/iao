@@ -36,19 +36,6 @@ var g_info = {
 
   "current_profile" : {},
   "profile": [
-    /*
-    {
-      "base_level": 7,
-      "refine_level": 5,
-      "display_start_level": 5,
-      "display_layer_count": 50,
-      "cx": 300,
-      "cy": 300,
-      "reflect_x": 800,
-      "c": "rgba(0,0,0,0.04)"
-    },
-*/
-
     {
       "base_level": 7,
       "refine_level": 5,
@@ -57,6 +44,10 @@ var g_info = {
       "cx": 300,
       "cy": 400,
       "reflect_x": 900,
+      "c_choice": [
+        "rgba(0,0,0,0.02)",
+        "rgba(170,0,0,0.05)"
+      ],
       "c": "rgba(0,0,0,0.02)"
     },
 
@@ -68,6 +59,10 @@ var g_info = {
       "cx": 300,
       "cy": 400,
       "reflect_x": 900,
+      "c_choice": [
+        "rgba(0,0,0,0.02)",
+        "rgba(170,0,0,0.09)"
+      ],
       "c": "rgba(0,0,0,0.05)"
     },
 
@@ -81,7 +76,12 @@ var g_info = {
       "cx": 300,
       "cy": 400,
       "reflect_x": 800,
-      "c": "rgba(0,0,0,0.035)"
+      "c_choice": [
+        "rgba(0,0,0,0.02)",
+        "rgba(170,0,0,0.09)"
+      ],
+      "c": "rgba(0,0,0,0.07)"
+      //"c": "rgba(0,0,0,0.035)"
     },
     {
       "base_level": 7,
@@ -90,8 +90,20 @@ var g_info = {
       "display_layer_count": 5,
       "cx": 300,
       "cy": 400,
-      "reflect_x": 800,
-      "c": "rgba(0,0,0,0.10)"
+      "reflect_x": 900,
+      "c_choice": [
+        "rgba(201,59,106,0.05)",
+        "rgba(0,0,0,0.12)",
+        "rgba(170,0,0,0.1)"
+        //"rgba(243,152,195,0.15)"
+      ],
+      "_c_choice": [
+        "rgba(0,0,0,0.12)",
+        "rgba(170,0,0,0.15)",
+        "rgba(201,59,106,0.1)"
+        //"rgba(243,152,195,0.15)"
+      ],
+      "c": "rgba(0,0,0,0.99)"
     }
   ],
 
@@ -849,7 +861,6 @@ function anim() {
     return;
   }
 
-
   for (i=0; i<g_info.noise.length; i++) {
     let v = g_info.noise[i];
     ctx.fillStyle = v.c;
@@ -873,17 +884,16 @@ function anim() {
   //for (let idx=0; idx<_prof.display_layer_count; idx++) {
   //for (let idx=0; idx<n; idx++) {
 
-  let c_choice = [
-    "rgba(0,0,0,0.02)",
-    "rgba(170,0,0,0.02)",
-  ];
+  //let c_choice = [ "rgba(0,0,0,0.02)", "rgba(170,0,0,0.02)", ];
+
+  let c_choice = _prof.c_choice;
 
   for (let i=0; i<g_info.pgn_set.length; i++) {
     let disp_pgn = g_info.pgn_set[i];
     //for (let idx=0; idx<g_info.disp_pgns.length; idx++) {
     for (let idx=0; idx<disp_pgn.length; idx++) {
 
-      let c = c_choice[i];
+      let c = c_choice[i % c_choice.length];
 
       //let rpgns = g_info.disp_pgns[idx];
       let rpgns = disp_pgn[idx];
@@ -944,6 +954,35 @@ function setup_pgns() {
     pgn.push({ 
       "x": _prof.cx + 150*Math.cos(a) + 300,
       "y": 150 + 50*Math.sin(a)
+    });
+
+  }
+
+  pgns = [ pgn ];
+
+  disp_pgn = [];
+
+  lvl = _prof.base_level;
+  water_poly_base_r(pgns, lvl);
+  for (let idx=0; idx<_prof.display_layer_count; idx++) {
+    let rpgns = [ pgns[pgns.length-1] ];
+
+    water_poly_base_r(rpgns, _prof.refine_level);
+
+    disp_pgn.push( rpgns );
+  }
+
+  g_info.pgn_set.push(disp_pgn);
+
+  // wip
+
+  pgn = [];
+  for (let i=0; i<3; i++) {
+    let a = (i/8)*Math.PI*2;
+
+    pgn.push({ 
+      "x": _prof.cx + 150*Math.cos(a) + 300,
+      "y": 550 + 50*Math.sin(a)
     });
 
   }
@@ -1038,14 +1077,14 @@ function init() {
   let idx = Math.floor(fxrand()*g_info.profile.length);
   g_info.current_profile = g_info.profile[idx];
 
-  //g_info.current_profile = g_info.profile[3];
+  g_info.current_profile = g_info.profile[0];
 
   setup_pgns();
 
   console.log(">>>", g_info.width, g_info.height);
 
-  let R = 1.5;
-  let N = 40000;
+  let R = 2;
+  let N = 20000;
   let w = g_info.width, h = g_info.height;
   for (let i=0; i<N; i++) {
     let v = {
