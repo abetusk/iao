@@ -469,7 +469,7 @@ function HSLtoHSV(h, s, l) {
 //-----
 //-----
 
-function loading_anim() {
+function loading_screen() {
 
   // fps
   //
@@ -550,7 +550,7 @@ function anim() {
 
 
   if (!g_info.ready) {
-    loading_anim();
+    loading_screen();
     return;
   }
 

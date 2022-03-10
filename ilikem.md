@@ -155,7 +155,13 @@ I Like Em
 * [Industrial Park by erfanhoseini](https://www.fxhash.xyz/generative/slug/industrial-park)
 * [Compact by nanogram](https://www.fxhash.xyz/generative/slug/compact)
 * [Dark roots by Aeynox](https://www.fxhash.xyz/generative/slug/dark-roots)
-
+* [Abstraction of Multiverse Rotation by bahtera.rar](https://www.fxhash.xyz/generative/10200)
+* [Waterwhales by Kamenzo.eth](https://www.fxhash.xyz/generative/slug/waterwhales)
+* [Stratus by Matthew Ortega](https://www.fxhash.xyz/generative/10426)
+* [Many worlds by George Savva](https://www.fxhash.xyz/generative/slug/many-worlds-1)
+* [wandering nets by matt ebb](https://www.fxhash.xyz/generative/10446)
+* [CLWBG / #N by eder cruz](https://www.fxhash.xyz/generative/10433)
+* [anaverse - Forbidden cities by anaglyphic](https://www.fxhash.xyz/generative/10059)
 
 Artists
 ---
