@@ -41,6 +41,7 @@ var g_info = {
   "iter": 0,
   "max_iter": 100,
 
+  "crack_type_count": 3,
   "crack_shape": 0,
   "shape_size_factor": 2/3,
   "size":0,
@@ -48,6 +49,7 @@ var g_info = {
   "group": [],
 
   "shimmer_state" : [],
+
 
   "shape_choice": [
 
@@ -256,8 +258,58 @@ var g_info = {
   ]],
   */
 
+  //"shape_color": "rgba(190, 194, 203, 0.9)",
+  //"bg_color" : "#333"
 
-  "bg_color" : "#333"
+  "color_choice": [
+    {
+      "name": "dt01",
+      "shape_color": "rgba(23, 42, 137, 0.9)",
+      "group_color": "rgba(23, 42, 137, 0.3)",
+      "bg_color" : "rgba(247, 247, 243,0.95)"
+    },
+
+    { "name": "dt05",
+      "shape_color": "rgba(238, 93, 100, 0.9)",
+      "group_color": "rgba(238, 93, 100, 0.3)",
+      "bg_color" : "rgba(240, 229, 203, 0.95)"
+    },
+
+    { "name": "hilda02",
+      "shape_color": "rgba(78, 158, 184, 0.9)",
+      "group_color": "rgba(78, 158, 184, 0.3)",
+      "bg_color" : "rgba(247, 245, 208, 0.95)"
+    },
+
+    { "name": "system.#05",
+      "shape_color": "rgba(163, 201, 211, 0.9)",
+      "group_color": "rgba(209, 225, 225, 0.3)",
+      "bg_color" : "rgba(220, 217, 208, 0.95)"
+    },
+
+    { "name": "foxshelter",
+      "shape_color": "rgba(0, 120, 98, 0.9)",
+      "group_color": "rgba(0, 120, 98, 0.3)",
+      "bg_color" : "rgba(221,221,221, 0.95)"
+    },
+
+    { "name": "florida_citrus",
+      "shape_color": "rgba(235, 247, 240, 0.9)",
+      "group_color": "rgba(235, 247, 240, 0.3)",
+      "bg_color" : "rgba(5,1,0, 0.95)"
+    },
+
+    { "name": "verena",
+      "shape_color": "rgba(136, 95, 164, 0.9)",
+      "group_color": "rgba(136, 95, 164, 0.3)",
+      "bg_color" : "rgba(226, 230, 232, 0.95)"
+    }
+  ],
+
+
+  "shape_color": "rgba(136, 95, 164, 0.9)",
+  "group_color": "rgba(136, 95, 164, 0.3)",
+  "bg_color" : "rgba(226, 230, 232, 0.95)"
 
 };
 
@@ -819,7 +871,8 @@ function anim() {
 
     polygon_with_holes(ctx, cx+shadow_dx, cy+shadow_dy, shape, "rgba(5,5,5,0.1)");
     //polygon_with_holes(ctx, cx, cy, shape, "rgba(150, 134, 163, 0.5)");
-    polygon_with_holes(ctx, cx, cy, shape, "rgba(75, 67, 82, 0.25)");
+    //polygon_with_holes(ctx, cx, cy, shape, "rgba(75, 67, 82, 0.25)");
+    polygon_with_holes(ctx, cx, cy, shape, g_info.group_color);
 
     for (let i=0; i<shimmer.length; i++) {
       let _shs = shimmer[i];
@@ -876,8 +929,10 @@ function anim() {
 
     let fvec = [];
     for (let i=0; i<com_list.length ; i++) {
-      let _dx = damp*fxrand()*5;
-      let _dy = damp*fxrand()*5;
+      //let _dx = damp*fxrand()*5;
+      //let _dy = damp*fxrand()*5;
+      let _dx = damp*fxrand()*25;
+      let _dy = damp*fxrand()*25;
       let f = {"X": _dx, "Y": _dy };
       for (let j=0; j<com_list.length; j++) {
         if (i==j) { continue; }
@@ -911,7 +966,7 @@ function anim() {
   polygon_with_holes(ctx, _cw/2+shadow_dx, _ch/2+shadow_dy, g_info.shape, "rgba(5,5,5,0.9)");
   //polygon_with_holes(ctx, _cw/2, _ch/2, g_info.shape, "rgba(100,100,150,0.8)");
   //polygon_with_holes(ctx, _cw/2, _ch/2, g_info.shape, "rgba(192, 192, 192, 0.8)");
-  polygon_with_holes(ctx, _cw/2, _ch/2, g_info.shape, "rgba(190, 194, 203, 0.9)");
+  polygon_with_holes(ctx, _cw/2, _ch/2, g_info.shape, g_info.shape_color);
 
   let com_list = [];
   for (let i=0; i<g_info.shape.length; i++) {
@@ -966,12 +1021,14 @@ function anim() {
   }
 
   let damp = 0.0;
-  let initial_damp  = 0.005;
+  //let initial_damp  = 0.005;
+  let initial_damp  = 0.01;
   if (g_info.crack_type == 1) {
     initial_damp = 0.025;
   }
   else if (g_info.crack_type == 2) {
-    initial_damp = 0.005;
+    //initial_damp = 0.005;
+    initial_damp = 0.01;
   }
 
   if (g_info.iter>g_info.max_iter) {
@@ -984,8 +1041,10 @@ function anim() {
 
   let fvec = [];
   for (let i=0; i<com_list.length ; i++) {
-    let _dx = damp*fxrand()*5;
-    let _dy = damp*fxrand()*5;
+    //let _dx = damp*fxrand()*5;
+    //let _dy = damp*fxrand()*5;
+    let _dx = damp*fxrand()*15;
+    let _dy = damp*fxrand()*15;
     let f = {"X": _dx, "Y": _dy };
     for (let j=0; j<com_list.length; j++) {
       if (i==j) { continue; }
@@ -1064,32 +1123,51 @@ function initCanvas() {
 }
 
 function init_fin() {
+  g_info.ready = true;
+}
+
+function init_shapes() {
   let state_choice = ["on", "off"];
   let cur_t = Date.now();
 
+  let shape_name = [ "Square", "Circle", "Heart", "Wide Oval", "Tall Oval"];
+
   g_info.crack_type = Math.floor(fxrand()*3);
 
-  console.log("crack_type:", g_info.crack_type);
+  let shape_idx = Math.floor(g_info.shape_choice.length*fxrand());
 
-  g_info.initial_shape = _copy_pgns( g_info.shape_choice[ Math.floor(g_info.shape_choice.length*fxrand()) ] );
+  g_info.features["Crack Type"] = g_info.crack_type;
+  g_info.features["Shape Type"] = shape_name[ shape_idx ];
+
+  g_info.initial_shape = _copy_pgns( g_info.shape_choice[ shape_idx ] );
 
   crack_shape();
-  g_info.ready = true;
 
+
+  let color_idx = Math.floor(fxrand()*g_info.color_choice.length);
+  g_info.color_idx = color_idx;
+
+  g_info.shape_color = g_info.color_choice[color_idx].shape_color;
+  g_info.group_color = g_info.color_choice[color_idx].group_color;
+  g_info.bg_color = g_info.color_choice[color_idx].bg_color;
+
+  g_info.features["Color Scheme"] = g_info.color_choice[color_idx].name;
 
   let G = [];
-  //for (let i=0; i<50; i++) {
   for (let i=0; i<1; i++) {
-    let init_shape = _copy_pgns( g_info.initial_shape );
+    let group_idx = Math.floor(fxrand()*g_info.shape_choice.length);
+    let init_shape = _copy_pgns( g_info.shape_choice[group_idx] );
     let _shape = {};
-    //let _scale = 0.125; //fxrand()*0.25 + 0.15;
-    let _scale = 2; //fxrand()*0.25 + 0.15;
+    let _scale = 1;
     let opt = {
       "size": _scale * g_info.width,
       "cut_count": 64
     };
 
-    let crack_type = g_info.crack_type;
+    let crack_type = Math.floor(fxrand()*g_info.crack_type_count);
+
+    g_info.features["Group " + i.toString() + " Crack Type"] = crack_type;
+    g_info.features["Group " + i.toString() + " Shape Type"] = shape_name[group_idx];
 
     if (crack_type == 0) {
       _shape = crack_shape0(init_shape, opt);
@@ -1182,9 +1260,6 @@ function crack_shape() {
       t_nxt = t_off*fxrand() + cur_t;
     }
 
-    //t_on*fxrand() + cur_t;
-
-    //let t_nxt = fxrand()*5;
     g_info.shimmer_state.push({
       "t_on": t_on,
       "t_off": t_off,
@@ -1582,15 +1657,17 @@ function crack_shape0(init_shape, opt) {
 }
 
 function init() {
+
+
   setTimeout(function() { init_fin(); }, 50);
 }
 
 function init_global_param() {
+  init_shapes();
 }
 
 (()=>{
 
-  welcome();
 
   g_info.last_t = Date.now();
 
@@ -1599,6 +1676,8 @@ function init_global_param() {
   console.log(g_info.size);
 
   init_global_param();
+
+  welcome();
 
   // have some persistent global random numbers for later use
   //

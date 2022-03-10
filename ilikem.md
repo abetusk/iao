@@ -162,6 +162,8 @@ I Like Em
 * [wandering nets by matt ebb](https://www.fxhash.xyz/generative/10446)
 * [CLWBG / #N by eder cruz](https://www.fxhash.xyz/generative/10433)
 * [anaverse - Forbidden cities by anaglyphic](https://www.fxhash.xyz/generative/10059)
+* [Tiny Devices #A: Calculator by neelts](https://www.fxhash.xyz/generative/slug/tiny-devices-a:-calculator)
+* [DOPPELGANGER VV by Grey Tekin](https://www.fxhash.xyz/generative/slug/doppelganger-vv)
 
 Artists
 ---

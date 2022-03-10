@@ -15,7 +15,8 @@
     <meta charset="utf-8"><script id="fxhash-snippet">
       //---- do not edit the following code (you can indent as you wish)
       let alphabet = "123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ"
-      var fxhash = "oo" + Array(49).fill(0).map(_=>alphabet[(Math.random()*alphabet.length)|0]).join('')
+      //var fxhash = "oo" + Array(49).fill(0).map(_=>alphabet[(Math.random()*alphabet.length)|0]).join('')
+      var fxhash = 'oo2xacmBSBpZn1eghvT6a3Qo2eAUsim7NvLSrd9jEErBqj4HbSu';
       let b58dec = str=>[...str].reduce((p,c)=>p*alphabet.length+alphabet.indexOf(c)|0, 0)
       let fxhashTrunc = fxhash.slice(2)
       let regex = new RegExp(".{" + ((fxhash.length/4)|0) + "}", 'g')
@@ -46,9 +47,6 @@
   <body style='margin:0;'>
     <canvas id="canvas" width="100" height="100"></canvas>
     <script defer="defer" src="./clipper.js"></script>
-    <script defer="defer" src="./perlin.js"></script>
-    <script defer="defer" src="./chroma.js"></script>
-    <script defer="defer" src="./bezier.js"></script>
 
     <script defer="defer" src="./CCapture.js"></script>
     <script defer="defer" src="./webm-writer-0.2.0.js"></script>
