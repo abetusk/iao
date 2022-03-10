@@ -37,7 +37,7 @@ p - pause animation
 
 s - take screenshot
 
-To the extent possible, the source code is dedicated to the public domain (CC0) and can be used for any purpose, even commercial, by anyone.
+To the extent possible, the source code is dedicated to the public domain (CC0) and can be used for any purpose, even commercial, by anyone. Third party libraries are used that are not under a CC0 license but instead are libre/free licensed, allowing for commercial reuse (please see the LICENSE section for more details).
 
 This work hopes to add to the conversation about examining the reality of the ecosystem that we've developed around digital goods and intellectual property.
 
@@ -57,12 +57,15 @@ and the potential of remuneration for artists.
 
 To the extent possible, the source code is dedicated to the public
 domain (CC0) and can be used for any purpose, even commercial, by anyone.
+Third party libraries are used that are not under a CC0 license but 
+instead are libre/free licensed, allowing for commercial reuse 
+(please see the LICENSE section for more details).
+
 
 I don't know if "PROJECT"
 is worth anything nor do I know if NFTs are
 a worthwhile idea but perhaps we can start
-to have a conversation that isn't a continuous
-stream of incredulous dismissals and start to examine
+to have a reasonable conversation about
 the reality of the ecosystem that we've developed
 around digital goods and intellectual property.
 
@@ -71,6 +74,9 @@ Reference
 
 License
 ---
+
+Third party libraries have individual licenses in their respective source code files.
+Please see individual source files for details.
 
 All other source code and other assets in this directory are, to the extent possible, licensed
 under [CC0](https://creativecommons.org/publicdomain/zero/1.0/).

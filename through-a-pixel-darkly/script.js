@@ -10,8 +10,10 @@
 
 var g_info = {
   "VERSION" : "0.1.0",
-  "PROJECT" : "PROJECT",
-  "download_filename": "BOILERPLATE.png",
+  "PROJECT" : "Through a Pixel, Darkly",
+
+  "EPS" : (1.0/10000000.0),
+  "download_filename": "through_a_pixel_darkly.png",
   "canvas": {},
   "ctx" : {},
   "ready": false,
@@ -22,7 +24,9 @@ var g_info = {
   "animation_capture": false,
   "capture_start":-1,
   "capture_end":-1,
+
   "capture_dt":5000,
+  //"capture_dt":1000,
 
   "fps_debug": false,
   "fps": 0,
@@ -46,10 +50,16 @@ var g_info = {
   "shape_size_factor": 2/3,
   "size":0,
 
+  "reset_info": {
+    "shape": {},
+    "group": []
+  },
+
   "group": [],
 
   "shimmer_state" : [],
 
+  "shape_name": [ "Square", "Circle", "Heart", "Wide Oval", "Tall Oval"],
 
   "shape_choice": [
 
@@ -266,50 +276,52 @@ var g_info = {
       "name": "dt01",
       "shape_color": "rgba(23, 42, 137, 0.9)",
       "group_color": "rgba(23, 42, 137, 0.3)",
-      "bg_color" : "rgba(247, 247, 243,0.95)"
+      "bg_color" : "rgba(247, 247, 243,1.0)"
     },
 
     { "name": "dt05",
       "shape_color": "rgba(238, 93, 100, 0.9)",
       "group_color": "rgba(238, 93, 100, 0.3)",
-      "bg_color" : "rgba(240, 229, 203, 0.95)"
+      "bg_color" : "rgba(240, 229, 203, 1.0)"
     },
 
     { "name": "hilda02",
       "shape_color": "rgba(78, 158, 184, 0.9)",
       "group_color": "rgba(78, 158, 184, 0.3)",
-      "bg_color" : "rgba(247, 245, 208, 0.95)"
+      "bg_color" : "rgba(247, 245, 208, 1.0)"
     },
 
     { "name": "system.#05",
       "shape_color": "rgba(163, 201, 211, 0.9)",
       "group_color": "rgba(209, 225, 225, 0.3)",
-      "bg_color" : "rgba(220, 217, 208, 0.95)"
+      "bg_color" : "rgba(220, 217, 208, 1.0)"
     },
 
     { "name": "foxshelter",
       "shape_color": "rgba(0, 120, 98, 0.9)",
       "group_color": "rgba(0, 120, 98, 0.3)",
-      "bg_color" : "rgba(221,221,221, 0.95)"
+      "bg_color" : "rgba(221,221,221, 1.0)"
     },
 
     { "name": "florida_citrus",
       "shape_color": "rgba(235, 247, 240, 0.9)",
       "group_color": "rgba(235, 247, 240, 0.3)",
-      "bg_color" : "rgba(5,1,0, 0.95)"
+      "bg_color" : "rgba(5,1,0, 1.0)"
     },
 
     { "name": "verena",
       "shape_color": "rgba(136, 95, 164, 0.9)",
       "group_color": "rgba(136, 95, 164, 0.3)",
-      "bg_color" : "rgba(226, 230, 232, 0.95)"
+      "bg_color" : "rgba(226, 230, 232, 1.0)"
     }
   ],
 
 
   "shape_color": "rgba(136, 95, 164, 0.9)",
   "group_color": "rgba(136, 95, 164, 0.3)",
-  "bg_color" : "rgba(226, 230, 232, 0.95)"
+  "bg_color" : "rgba(226, 230, 232, 1.0)",
+
+  "clear_color" : "#000"
 
 };
 
@@ -400,7 +412,9 @@ function welcome() {
   console.log("");
   console.log("commands:");
   console.log("");
+  console.log(" a   - save animation (webm)");
   console.log(" s   - save screenshot (PNG)");
+  console.log(" r   - reset animation");
   console.log("");
 
   console.log("Features:");
@@ -590,7 +604,8 @@ function _clip_offset( ofs_pgns, inp_pgns, ds ) {
 
 //--
 
-function polygon_with_holes(ctx, x, y, pgn, color) {
+function polygon_with_holes(ctx, x, y, pgn, color, _scale) {
+  _scale = ((typeof _scale === "undefined") ? 1.0 : _scale);
   ctx.lineWidth = 0;
   ctx.fillStyle = color;
   ctx.beginPath();
@@ -599,17 +614,18 @@ function polygon_with_holes(ctx, x, y, pgn, color) {
   for (let i=0; i<pgn.length; i++) {
     for (let j=0; j<pgn[i].length; j++) {
       if (j==0) {
-        ctx.moveTo(x + pgn[i][j].X, y + pgn[i][j].Y);
+        ctx.moveTo(x + _scale*pgn[i][j].X, y + _scale*pgn[i][j].Y);
         continue;
       }
-      ctx.lineTo(x + pgn[i][j].X, y + pgn[i][j].Y);
+      ctx.lineTo(x + _scale*pgn[i][j].X, y + _scale*pgn[i][j].Y);
     }
   }
 
   ctx.fill();
 }
 
-function polygons(ctx, x, y, pgn, color) {
+function polygons(ctx, x, y, pgn, color, _scale) {
+  _scale = ((typeof _scale === "undefined") ? 1.0 : _scale);
   ctx.lineWidth = 0;
   ctx.fillStyle = color;
   ctx.beginPath();
@@ -618,10 +634,10 @@ function polygons(ctx, x, y, pgn, color) {
   for (let i=0; i<pgn.length; i++) {
     for (let j=0; j<pgn[i].length; j++) {
       if (j==0) {
-        ctx.moveTo(x + pgn[i][j].X, y + pgn[i][j].Y);
+        ctx.moveTo(x + _scale*pgn[i][j].X, y + _scale*pgn[i][j].Y);
         continue;
       }
-      ctx.lineTo(x + pgn[i][j].X, y + pgn[i][j].Y);
+      ctx.lineTo(x + _scale*pgn[i][j].X, y + _scale*pgn[i][j].Y);
     }
   }
   ctx.fill();
@@ -831,10 +847,13 @@ function anim() {
 
   let cur_t = Date.now();
 
-  clear(ctx, _cw, _ch, g_info.bg_color);
-  g_info.tick++;
-  window.requestAnimationFrame(anim);
+  if (!g_info.ready) {
+    loading_screen();
+    window.requestAnimationFrame(anim);
+    return;
+  }
 
+  window.requestAnimationFrame(anim);
   if (g_info.animation_capture) {
     g_info.capturer.capture( g_info.canvas );
 
@@ -850,13 +869,9 @@ function anim() {
 
   }
 
-
-  if (!g_info.ready) {
-    loading_screen();
-    return;
-  }
-
-  //clear();
+  clear(ctx, _cw, _ch, g_info.bg_color);
+  //clear(ctx, _cw, _ch, g_info.clear_color);
+  g_info.tick++;
 
   let shadow_dx = -4;
   let shadow_dy =  4;
@@ -869,10 +884,11 @@ function anim() {
 
     let shimmer = g_info.group[i].shimmer;
 
-    polygon_with_holes(ctx, cx+shadow_dx, cy+shadow_dy, shape, "rgba(5,5,5,0.1)");
-    //polygon_with_holes(ctx, cx, cy, shape, "rgba(150, 134, 163, 0.5)");
-    //polygon_with_holes(ctx, cx, cy, shape, "rgba(75, 67, 82, 0.25)");
-    polygon_with_holes(ctx, cx, cy, shape, g_info.group_color);
+    cx = g_info.width/2;
+    cy = g_info.height/2;
+
+    polygon_with_holes(ctx, cx+shadow_dx, cy+shadow_dy, shape, "rgba(5,5,5,0.1)", g_info.size);
+    polygon_with_holes(ctx, cx, cy, shape, g_info.group_color, g_info.size);
 
     for (let i=0; i<shimmer.length; i++) {
       let _shs = shimmer[i];
@@ -889,19 +905,18 @@ function anim() {
       }
 
       if (_shs.state == "on") {
-        polygons(ctx, cx, cy, [shape[i]], "rgba(255,255,255,0.125)");
+        polygons(ctx, cx, cy, [shape[i]], "rgba(255,255,255,0.125)", g_info.size);
       }
-
 
     }
 
     let damp = 0.0;
-    let initial_damp  = 0.005;
+    let initial_damp  = (0.005/500);
     if (crack_type == 1) {
-      initial_damp = 0.025;
+      initial_damp = (0.025/500);
     }
     else if (crack_type == 2) {
-      initial_damp = 0.005;
+      initial_damp = (0.005/500);
     }
 
     if (g_info.iter>g_info.max_iter) {
@@ -929,10 +944,8 @@ function anim() {
 
     let fvec = [];
     for (let i=0; i<com_list.length ; i++) {
-      //let _dx = damp*fxrand()*5;
-      //let _dy = damp*fxrand()*5;
-      let _dx = damp*fxrand()*25;
-      let _dy = damp*fxrand()*25;
+      let _dx = damp*fxrand()/100;
+      let _dy = damp*fxrand()/100;
       let f = {"X": _dx, "Y": _dy };
       for (let j=0; j<com_list.length; j++) {
         if (i==j) { continue; }
@@ -940,7 +953,7 @@ function anim() {
         let dy = (com_list[i].Y - com_list[j].Y);
         let len = Math.sqrt( dx*dx + dy*dy );
 
-        if (len > 1) {
+        if (len > g_info.EPS) {
           f.X += damp*dx / len;
           f.Y += damp*dy / len;
         }
@@ -957,16 +970,10 @@ function anim() {
       }
     }
 
-
-
-
   }
 
-
-  polygon_with_holes(ctx, _cw/2+shadow_dx, _ch/2+shadow_dy, g_info.shape, "rgba(5,5,5,0.9)");
-  //polygon_with_holes(ctx, _cw/2, _ch/2, g_info.shape, "rgba(100,100,150,0.8)");
-  //polygon_with_holes(ctx, _cw/2, _ch/2, g_info.shape, "rgba(192, 192, 192, 0.8)");
-  polygon_with_holes(ctx, _cw/2, _ch/2, g_info.shape, g_info.shape_color);
+  polygon_with_holes(ctx, _cw/2+shadow_dx, _ch/2+shadow_dy, g_info.shape, "rgba(5,5,5,0.9)", g_info.size);
+  polygon_with_holes(ctx, _cw/2, _ch/2, g_info.shape, g_info.shape_color, g_info.size);
 
   let com_list = [];
   for (let i=0; i<g_info.shape.length; i++) {
@@ -998,12 +1005,12 @@ function anim() {
     }
 
     if (_shs.state == "on") {
-      polygons(ctx, _cw/2, _ch/2, [g_info.shape[i]], "rgba(255,255,255,1.0)");
+      polygons(ctx, _cw/2, _ch/2, [g_info.shape[i]], "rgba(255,255,255,1.0)", g_info.size);
     }
-
 
   }
 
+  let _ss = g_info.size;
   let _mod = 256;
   let _wins = 100;
   let _winx = 120;
@@ -1012,23 +1019,23 @@ function anim() {
 
     let s = 2*((g_info.iter%_mod)/_wins - 0.5);
     for (let i=0; i<com_list.length; i++) {
-      if ( ((g_info.width*s-_winx) < com_list[i].X) && (com_list[i].X < (g_info.width*s)) ) {
-        polygons(ctx, _cw/2, _ch/2, [g_info.shape[i]], "rgba(255,255,255,1.0)");
+      if ( ((g_info.width*s-_winx) < (_ss*com_list[i].X)) && ((_ss*com_list[i].X) < (g_info.width*s)) ) {
+        polygons(ctx, _cw/2, _ch/2, [g_info.shape[i]], "rgba(255,255,255,1.0)", g_info.size);
         fired++;
       }
     }
 
   }
 
+  // hand picked damps based on how much cracking there is
+  //
   let damp = 0.0;
-  //let initial_damp  = 0.005;
-  let initial_damp  = 0.01;
+  let initial_damp  = (0.01/500);
   if (g_info.crack_type == 1) {
-    initial_damp = 0.025;
+    initial_damp = (0.025/500);
   }
   else if (g_info.crack_type == 2) {
-    //initial_damp = 0.005;
-    initial_damp = 0.01;
+    initial_damp = (0.01/500);
   }
 
   if (g_info.iter>g_info.max_iter) {
@@ -1039,12 +1046,16 @@ function anim() {
   }
   g_info.iter++;
 
+  // gather 'force' vectors
+  //
   let fvec = [];
   for (let i=0; i<com_list.length ; i++) {
-    //let _dx = damp*fxrand()*5;
-    //let _dy = damp*fxrand()*5;
-    let _dx = damp*fxrand()*15;
-    let _dy = damp*fxrand()*15;
+
+    // damp randomness otherwise they walk after they
+    // should be settled
+    //
+    let _dx = damp*fxrand()/100;
+    let _dy = damp*fxrand()/100;
     let f = {"X": _dx, "Y": _dy };
     for (let j=0; j<com_list.length; j++) {
       if (i==j) { continue; }
@@ -1052,7 +1063,7 @@ function anim() {
       let dy = (com_list[i].Y - com_list[j].Y);
       let len = Math.sqrt( dx*dx + dy*dy );
 
-      if (len > 1) {
+      if (len > g_info.EPS) {
         f.X += damp*dx / len;
         f.Y += damp*dy / len;
       }
@@ -1061,13 +1072,16 @@ function anim() {
     fvec.push(f);
   }
 
-
+  // update shape
+  //
   for (let i=0; i<g_info.shape.length; i++) {
     for (let j=0; j<g_info.shape[i].length; j++) {
       g_info.shape[i][j].X += fvec[i].X;
       g_info.shape[i][j].Y += fvec[i].Y;
     }
   }
+
+
 
 }
 
@@ -1122,6 +1136,16 @@ function initCanvas() {
   //g_info.size = Math.floor(dS - dS/3);
 }
 
+function reset_animation() {
+  g_info.shape = _copy_pgns( g_info.reset_info.shape );
+
+  for (let i=0; i<g_info.group.length; i++) {
+    g_info.group[i].shape = _copy_pgns( g_info.reset_info.group[i].shape );
+  }
+
+  g_info.iter=0;
+}
+
 function init_fin() {
   g_info.ready = true;
 }
@@ -1130,7 +1154,7 @@ function init_shapes() {
   let state_choice = ["on", "off"];
   let cur_t = Date.now();
 
-  let shape_name = [ "Square", "Circle", "Heart", "Wide Oval", "Tall Oval"];
+  let shape_name = g_info.shape_name; 
 
   g_info.crack_type = Math.floor(fxrand()*3);
 
@@ -1141,7 +1165,17 @@ function init_shapes() {
 
   g_info.initial_shape = _copy_pgns( g_info.shape_choice[ shape_idx ] );
 
-  crack_shape();
+  let _fg_opt = {
+    "size": g_info.shape_size_factor,
+    "crack_type": g_info.crack_type
+  }
+
+
+  let _ret = crack_shape(g_info.initial_shape, _fg_opt);
+
+  g_info.shape = _ret.shape;
+  g_info.shimmer_state = _ret.shimmer;
+  //g_info.crack_type = _ret.crack_type;
 
 
   let color_idx = Math.floor(fxrand()*g_info.color_choice.length);
@@ -1153,100 +1187,75 @@ function init_shapes() {
 
   g_info.features["Color Scheme"] = g_info.color_choice[color_idx].name;
 
-  let G = [];
-  for (let i=0; i<1; i++) {
-    let group_idx = Math.floor(fxrand()*g_info.shape_choice.length);
-    let init_shape = _copy_pgns( g_info.shape_choice[group_idx] );
-    let _shape = {};
-    let _scale = 1;
-    let opt = {
-      "size": _scale * g_info.width,
-      "cut_count": 64
-    };
 
-    let crack_type = Math.floor(fxrand()*g_info.crack_type_count);
+  // groups
+  //
 
-    g_info.features["Group " + i.toString() + " Crack Type"] = crack_type;
-    g_info.features["Group " + i.toString() + " Shape Type"] = shape_name[group_idx];
+  let bg_scale = 1;
+  let bg_shape_idx = Math.floor(g_info.shape_choice.length*fxrand());
+  let bg_shape = _copy_pgns( g_info.shape_choice[ bg_shape_idx ] );
+  let bg_opt = { "size" : bg_scale };
+  let bg_ret = crack_shape( bg_shape, bg_opt );
 
-    if (crack_type == 0) {
-      _shape = crack_shape0(init_shape, opt);
-    }
-    else if (crack_type == 1) {
-      _shape = crack_shape1(init_shape, opt);
-    }
-    else if (crack_type == 2) {
-      _shape = crack_shape2(init_shape, opt);
-    }
-
-    let _shimmer_state = [];
-    for (let i=0; i<_shape.length; i++) {
-      let cur_state = state_choice[Math.floor(fxrand()*2)];
-      let t_on = fxrand()*350 + 50;
-      let t_off = fxrand()*5000 + 1000;
-
-      let t_nxt = 0;
-
-      if (cur_state == "on") {
-        t_nxt = t_on*fxrand() + cur_t;
-      }
-      else {
-        t_nxt = t_off*fxrand() + cur_t;
-      }
-
-      _shimmer_state.push({
-        "t_on": t_on,
-        "t_off": t_off,
-        "state": cur_state,
-        "t_next": t_nxt
-      });
-    }
-
-    let g = {
-      //"x": fxrand()*g_info.width,
-      //"y": fxrand()*g_info.height,
-      "x": g_info.width/2,
-      "y": g_info.height/2,
-      "type": crack_type,
-      "s": _scale,
-      "shape": _shape,
-      "shimmer": _shimmer_state
-    };
-    G.push(g);
+  g_info.features["Background Crack Type"] = bg_ret.crack_type;
+  g_info.features["Background Shape Type"] = shape_name[bg_shape_idx];
 
 
+  g_info.group.push({
+    "x": 0,
+    "y": 0,
+    "type": bg_ret.crack_type,
+    "s": bg_scale,
+    "shape": bg_ret.shape,
+    "shimmer": bg_ret.shimmer
+  });
 
+  // reset information
+  //
+  g_info.reset_info.shape = _copy_pgns( _ret.shape );
+  for (let i=0; i<g_info.group.length; i++) {
+    g_info.reset_info.group.push( { "shape": _copy_pgns( g_info.group[i].shape ) } );
   }
-
-  g_info.group = G;
 
 }
 
-function crack_shape() {
-  let init_shape = _copy_pgns( g_info.initial_shape );
+function crack_shape(init_shape, opt) {
+  //let init_shape = _copy_pgns( g_info.initial_shape );
+
+  opt = ((typeof opt === "undefined") ? {} : opt);
+  let _size = ((typeof opt.size === "undefined") ? 1 : opt.size);
+  let crack_type = ((typeof opt.crack_type === "undefined") ? 0 : opt.crack_type);
+
   let s = {};
 
-  let opt = {
-    "size": g_info.shape_size_factor*g_info.size
+  let shape_opt = {
+    //"size": g_info.shape_size_factor*g_info.size
+    "size": _size
   };
 
-  if (g_info.crack_type == 0) {
-    s = crack_shape0(init_shape, opt);
+  //if (g_info.crack_type == 0) {
+  if (crack_type == 0) {
+    s = crack_shape0(init_shape, shape_opt);
   }
-  else if (g_info.crack_type == 1) {
-    s = crack_shape1(init_shape, opt);
+  //else if (g_info.crack_type == 1) {
+  else if (crack_type == 1) {
+    s = crack_shape1(init_shape, shape_opt);
   }
-  else if (g_info.crack_type == 2) {
-    s = crack_shape2(init_shape, opt);
+  //else if (g_info.crack_type == 2) {
+  else if (crack_type == 2) {
+    s = crack_shape2(init_shape, shape_opt);
   }
 
-  g_info.shape = s;
+  //g_info.shape = s;
 
   let state_choice = ["on", "off"];
 
   let cur_t = Date.now();
 
-  for (let i=0; i<g_info.shape.length; i++) {
+  let shimmer_state = [];
+
+  //for (let i=0; i<g_info.shape.length; i++) {
+  for (let i=0; i<s.length; i++) {
     let cur_state = state_choice[Math.floor(fxrand()*2)];
     let t_on = fxrand()*350 + 50;
     let t_off = fxrand()*5000 + 1000;
@@ -1260,13 +1269,15 @@ function crack_shape() {
       t_nxt = t_off*fxrand() + cur_t;
     }
 
-    g_info.shimmer_state.push({
+    shimmer_state.push({
       "t_on": t_on,
       "t_off": t_off,
       "state": cur_state,
       "t_next": t_nxt
     });
   }
+
+  return { "shape":s, "shimmer": shimmer_state, "crack_type": crack_type };
 
 }
 
@@ -1336,7 +1347,7 @@ function crack_shape2(init_shape, opt) {
   let _size = ((typeof opt.size === "undefined") ?  (g_info.shape_size_factor*g_info.size) : opt.size);
 
 
-  let _min_r = 10;
+  let _min_r = (10/500)*_size;
 
   //let cur_shape = g_info.initial_shape;
   let cur_shape = init_shape;
@@ -1354,7 +1365,7 @@ function crack_shape2(init_shape, opt) {
 
   let crack_pgn = [];
 
-  let _jiggle_r = fxrand()*5;
+  let _jiggle_r = fxrand()*(5/500)*_size;
 
   //let ncut = 32;
   for (let i=0; i<ncut; i++) {
@@ -1368,7 +1379,8 @@ function crack_shape2(init_shape, opt) {
 
       let slice_choice = Math.floor(fxrand()*4);
 
-      let ds = 5;
+      //let ds = 5;
+      let ds = (5/500)*_size;
 
       if (slice_choice==0) {
 
@@ -1400,7 +1412,8 @@ function crack_shape2(init_shape, opt) {
       }
 
       else if (slice_choice==2) {
-        ds = 3;
+        //ds = 3;
+        ds = (3/500)*_size;
         _x0 =  (fxrand()-0.5)*_size;
         _y0 = -(fxrand()*_size + _size/2);
         _x1 =  (fxrand()-0.5)*_size;
@@ -1415,7 +1428,8 @@ function crack_shape2(init_shape, opt) {
       }
 
       else{
-        ds = 3;
+        //ds = 3;
+        ds = (3/500)*_size;
         _x0 = -(fxrand()*_size + _size/2);
         _y0 =  (fxrand()-0.5)*_size;
         _x1 =  (fxrand()*_size + _size/2);
@@ -1439,7 +1453,8 @@ function crack_shape2(init_shape, opt) {
       let _sin = Math.sin(a);
 
       let _r = 2*_size;
-      let ds = 2;
+      //let ds = 2;
+      let ds = (2/500)*_size;
 
       let dx = fxrand()*_jiggle_r;
       let dy = fxrand()*_jiggle_r;
@@ -1487,9 +1502,7 @@ function crack_shape1(init_shape, opt) {
   let ncut = ((typeof opt.cut_count === "undefined") ? 32 : opt.cut_count);
   let _size = ((typeof opt.size === "undefined") ?  (g_info.shape_size_factor*g_info.size) : opt.size);
 
-
-
-  let _min_r = 10;
+  let _min_r = (10/500)*_size;
 
   //let cur_shape = g_info.initial_shape;
   let cur_shape = init_shape;
@@ -1507,7 +1520,7 @@ function crack_shape1(init_shape, opt) {
 
   let crack_pgn = [];
 
-  let _jiggle_r = fxrand()*5;
+  let _jiggle_r = fxrand()*(5/500)*_size;
 
   //let ncut = 32;
   for (let i=0; i<ncut; i++) {
@@ -1516,7 +1529,7 @@ function crack_shape1(init_shape, opt) {
     let _sin = Math.sin(a);
 
     let _r = 2*_size;
-    let ds = 2;
+    let ds = (2/500)*_size;
 
     let dx = fxrand()*_jiggle_r;
     let dy = fxrand()*_jiggle_r;
@@ -1559,7 +1572,8 @@ function crack_shape0(init_shape, opt) {
   //let _w = g_info.shape_size_factor*g_info.size;
 
   opt = ((typeof opt === "undefined") ? {} : opt);
-  let _size = ((typeof opt.size === "undefined") ?  (g_info.shape_size_factor*g_info.size) : opt.size);
+  //let _size = ((typeof opt.size === "undefined") ?  (g_info.shape_size_factor*g_info.size) : opt.size);
+  let _size = ((typeof opt.size === "undefined") ?  (g_info.shape_size_factor) : opt.size);
 
   //let cur_shape = g_info.initial_shape;
   let cur_shape = init_shape;
@@ -1575,7 +1589,8 @@ function crack_shape0(init_shape, opt) {
 
     let slice_choice = Math.floor(fxrand()*4);
 
-    let ds = 5;
+    //let ds = 5;
+    let ds = (5/500)*_size;
 
     let cut_line = [];
 
@@ -1609,7 +1624,7 @@ function crack_shape0(init_shape, opt) {
     }
 
     else if (slice_choice==2) {
-      ds = 3;
+      ds = (3/500)*_size;
       _x0 =  (fxrand()-0.5)*_size;
       _y0 = -(fxrand()*_size + _size/2);
       _x1 =  (fxrand()-0.5)*_size;
@@ -1624,7 +1639,8 @@ function crack_shape0(init_shape, opt) {
     }
 
     else{
-      ds = 3;
+      //ds = 3;
+      ds = (3/500)*_size;
       _x0 = -(fxrand()*_size + _size/2);
       _y0 =  (fxrand()-0.5)*_size;
       _x1 =  (fxrand()*_size + _size/2);
@@ -1657,13 +1673,13 @@ function crack_shape0(init_shape, opt) {
 }
 
 function init() {
-
-
-  setTimeout(function() { init_fin(); }, 50);
+  init_fin();
 }
 
 function init_global_param() {
   init_shapes();
+
+  window.$fxhashFeatures = g_info.features;
 }
 
 (()=>{
@@ -1689,6 +1705,9 @@ function init_global_param() {
   document.addEventListener('keydown', function(ev) {
     if (ev.key == 'a') {
       if (g_info.animation_capture) { console.log("already capturing!"); return; }
+
+      reset_animation();
+
       g_info.capturer = new CCapture({"format":"webm"});
       g_info.capturer.start();
       g_info.animation_capture = true;
@@ -1700,6 +1719,9 @@ function init_global_param() {
     }
     else if (ev.key == 's') {
       screenshot();
+    }
+    else if (ev.key == 'r') {
+      reset_animation();
     }
     else if (ev.key == 'p') {
       g_info.pause = ((g_info.pause) ? false : true);
