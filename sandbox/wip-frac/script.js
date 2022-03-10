@@ -45,6 +45,10 @@ var g_info = {
   "shape_size_factor": 2/3,
   "size":0,
 
+  "group": [],
+
+  "shimmer_state" : [],
+
   "shape_choice": [
 
     // square 
@@ -773,6 +777,8 @@ function anim() {
   let _ch = g_info.canvas.height;
   let ctx = g_info.ctx;
 
+  let cur_t = Date.now();
+
   clear(ctx, _cw, _ch, g_info.bg_color);
   g_info.tick++;
   window.requestAnimationFrame(anim);
@@ -803,6 +809,105 @@ function anim() {
   let shadow_dx = -4;
   let shadow_dy =  4;
 
+  for (let i=0; i<g_info.group.length; i++) {
+    let cx = g_info.group[i].x;
+    let cy = g_info.group[i].y;
+    let shape = g_info.group[i].shape;
+    let crack_type = g_info.group[i].type;
+
+    let shimmer = g_info.group[i].shimmer;
+
+    polygon_with_holes(ctx, cx+shadow_dx, cy+shadow_dy, shape, "rgba(5,5,5,0.1)");
+    //polygon_with_holes(ctx, cx, cy, shape, "rgba(150, 134, 163, 0.5)");
+    polygon_with_holes(ctx, cx, cy, shape, "rgba(75, 67, 82, 0.25)");
+
+    for (let i=0; i<shimmer.length; i++) {
+      let _shs = shimmer[i];
+
+      if (cur_t > _shs.t_next) {
+        if (_shs.state == "on") {
+          _shs.t_next = cur_t + _shs.t_off;
+          _shs.state = "off";
+        }
+        else {
+          _shs.t_next = cur_t + _shs.t_on;
+          _shs.state = "on";
+        }
+      }
+
+      if (_shs.state == "on") {
+        polygons(ctx, cx, cy, [shape[i]], "rgba(255,255,255,0.125)");
+      }
+
+
+    }
+
+    let damp = 0.0;
+    let initial_damp  = 0.005;
+    if (crack_type == 1) {
+      initial_damp = 0.025;
+    }
+    else if (crack_type == 2) {
+      initial_damp = 0.005;
+    }
+
+    if (g_info.iter>g_info.max_iter) {
+      damp = 0;
+    }
+    else {
+      damp = initial_damp*(g_info.max_iter - g_info.iter) / g_info.max_iter;
+    }
+
+    let com_list = [];
+    for (let i=0; i<shape.length; i++) {
+      let com = { "X":0, "Y": 0};
+      for (let idx=0; idx<shape[i].length; idx++) {
+        com.X += shape[i][idx].X;
+        com.Y += shape[i][idx].Y;
+      }
+      if (shape[i].length > 0) {
+        com.X /= shape[i].length;
+        com.Y /= shape[i].length;
+      }
+
+      com_list.push(com);
+    }
+
+
+    let fvec = [];
+    for (let i=0; i<com_list.length ; i++) {
+      let _dx = damp*fxrand()*5;
+      let _dy = damp*fxrand()*5;
+      let f = {"X": _dx, "Y": _dy };
+      for (let j=0; j<com_list.length; j++) {
+        if (i==j) { continue; }
+        let dx = (com_list[i].X - com_list[j].X);
+        let dy = (com_list[i].Y - com_list[j].Y);
+        let len = Math.sqrt( dx*dx + dy*dy );
+
+        if (len > 1) {
+          f.X += damp*dx / len;
+          f.Y += damp*dy / len;
+        }
+
+      }
+      fvec.push(f);
+    }
+
+
+    for (let i=0; i<shape.length; i++) {
+      for (let j=0; j<shape[i].length; j++) {
+        shape[i][j].X += fvec[i].X;
+        shape[i][j].Y += fvec[i].Y;
+      }
+    }
+
+
+
+
+  }
+
+
   polygon_with_holes(ctx, _cw/2+shadow_dx, _ch/2+shadow_dy, g_info.shape, "rgba(5,5,5,0.9)");
   //polygon_with_holes(ctx, _cw/2, _ch/2, g_info.shape, "rgba(100,100,150,0.8)");
   //polygon_with_holes(ctx, _cw/2, _ch/2, g_info.shape, "rgba(192, 192, 192, 0.8)");
@@ -821,6 +926,27 @@ function anim() {
     }
 
     com_list.push(com);
+  }
+
+  for (let i=0; i<g_info.shimmer_state.length; i++) {
+    let _shs = g_info.shimmer_state[i];
+
+    if (cur_t > _shs.t_next) {
+      if (_shs.state == "on") {
+        _shs.t_next = cur_t + _shs.t_off;
+        _shs.state = "off";
+      }
+      else {
+        _shs.t_next = cur_t + _shs.t_on;
+        _shs.state = "on";
+      }
+    }
+
+    if (_shs.state == "on") {
+      polygons(ctx, _cw/2, _ch/2, [g_info.shape[i]], "rgba(255,255,255,1.0)");
+    }
+
+
   }
 
   let _mod = 256;
@@ -938,50 +1064,158 @@ function initCanvas() {
 }
 
 function init_fin() {
+  let state_choice = ["on", "off"];
+  let cur_t = Date.now();
 
   g_info.crack_type = Math.floor(fxrand()*3);
 
   console.log("crack_type:", g_info.crack_type);
 
-  g_info.initial_shape = g_info.shape_choice[ Math.floor(g_info.shape_choice.length*fxrand()) ];
+  g_info.initial_shape = _copy_pgns( g_info.shape_choice[ Math.floor(g_info.shape_choice.length*fxrand()) ] );
 
   crack_shape();
   g_info.ready = true;
 
+
+  let G = [];
+  //for (let i=0; i<50; i++) {
+  for (let i=0; i<1; i++) {
+    let init_shape = _copy_pgns( g_info.initial_shape );
+    let _shape = {};
+    //let _scale = 0.125; //fxrand()*0.25 + 0.15;
+    let _scale = 2; //fxrand()*0.25 + 0.15;
+    let opt = {
+      "size": _scale * g_info.width,
+      "cut_count": 64
+    };
+
+    let crack_type = g_info.crack_type;
+
+    if (crack_type == 0) {
+      _shape = crack_shape0(init_shape, opt);
+    }
+    else if (crack_type == 1) {
+      _shape = crack_shape1(init_shape, opt);
+    }
+    else if (crack_type == 2) {
+      _shape = crack_shape2(init_shape, opt);
+    }
+
+    let _shimmer_state = [];
+    for (let i=0; i<_shape.length; i++) {
+      let cur_state = state_choice[Math.floor(fxrand()*2)];
+      let t_on = fxrand()*350 + 50;
+      let t_off = fxrand()*5000 + 1000;
+
+      let t_nxt = 0;
+
+      if (cur_state == "on") {
+        t_nxt = t_on*fxrand() + cur_t;
+      }
+      else {
+        t_nxt = t_off*fxrand() + cur_t;
+      }
+
+      _shimmer_state.push({
+        "t_on": t_on,
+        "t_off": t_off,
+        "state": cur_state,
+        "t_next": t_nxt
+      });
+    }
+
+    let g = {
+      //"x": fxrand()*g_info.width,
+      //"y": fxrand()*g_info.height,
+      "x": g_info.width/2,
+      "y": g_info.height/2,
+      "type": crack_type,
+      "s": _scale,
+      "shape": _shape,
+      "shimmer": _shimmer_state
+    };
+    G.push(g);
+
+
+
+  }
+
+  g_info.group = G;
+
 }
 
 function crack_shape() {
+  let init_shape = _copy_pgns( g_info.initial_shape );
+  let s = {};
+
+  let opt = {
+    "size": g_info.shape_size_factor*g_info.size
+  };
+
   if (g_info.crack_type == 0) {
-    crack_shape0();
+    s = crack_shape0(init_shape, opt);
   }
   else if (g_info.crack_type == 1) {
-    crack_shape1();
+    s = crack_shape1(init_shape, opt);
   }
   else if (g_info.crack_type == 2) {
-    crack_shape2();
+    s = crack_shape2(init_shape, opt);
   }
+
+  g_info.shape = s;
+
+  let state_choice = ["on", "off"];
+
+  let cur_t = Date.now();
+
+  for (let i=0; i<g_info.shape.length; i++) {
+    let cur_state = state_choice[Math.floor(fxrand()*2)];
+    let t_on = fxrand()*350 + 50;
+    let t_off = fxrand()*5000 + 1000;
+
+    let t_nxt = 0;
+
+    if (cur_state == "on") {
+      t_nxt = t_on*fxrand() + cur_t;
+    }
+    else {
+      t_nxt = t_off*fxrand() + cur_t;
+    }
+
+    //t_on*fxrand() + cur_t;
+
+    //let t_nxt = fxrand()*5;
+    g_info.shimmer_state.push({
+      "t_on": t_on,
+      "t_off": t_off,
+      "state": cur_state,
+      "t_next": t_nxt
+    });
+  }
+
 }
 
 //wip
 //
-function crack_shape3() {
+function crack_shape3(init_shape, opt) {
   //let _w = 500;
 
-  let _w = g_info.shape_size_factor*g_info.size;
-
+  opt = ((typeof opt === "undefined") ? {} : opt);
+  let _size = ((typeof opt.size === "undefined") ?  (g_info.shape_size_factor*g_info.size) : opt.size);
   let _min_r = 10;
 
-  let cur_shape = g_info.initial_shape;
+  //let cur_shape = g_info.initial_shape;
+  let cur_shape = init_shape;
   for (let i=0; i<cur_shape.length; i++) {
     for (let j=0; j<cur_shape[i].length; j++) {
-      cur_shape[i][j].X *= _w;
-      cur_shape[i][j].Y *= _w;
+      cur_shape[i][j].X *= _size;
+      cur_shape[i][j].Y *= _size;
     }
   }
 
-  let cx = 2*(fxrand()-0.5)*_w;
-  let cy = 2*(fxrand()-0.5)*_w;
-  let r = fxrand()*_w/4 + _min_r;
+  let cx = 2*(fxrand()-0.5)*_size;
+  let cy = 2*(fxrand()-0.5)*_size;
+  let r = fxrand()*_size/4 + _min_r;
 
   let crack_pgn = [];
 
@@ -1013,35 +1247,41 @@ function crack_shape3() {
 
     }
 
-    r += fxrand()*_w/4 + _min_r;
+    r += fxrand()*_size/4 + _min_r;
   }
 
 }
 
-function crack_shape2() {
+function crack_shape2(init_shape, opt) {
   //let _w = 500;
-  let _w = g_info.shape_size_factor*g_info.size;
+  //let _w = g_info.shape_size_factor*g_info.size;
+
+  opt = ((typeof opt === "undefined") ? {} : opt);
+  let ncut = ((typeof opt.cut_count === "undefined") ? 32 : opt.cut_count);
+  let _size = ((typeof opt.size === "undefined") ?  (g_info.shape_size_factor*g_info.size) : opt.size);
+
 
   let _min_r = 10;
 
-  let cur_shape = g_info.initial_shape;
+  //let cur_shape = g_info.initial_shape;
+  let cur_shape = init_shape;
   for (let i=0; i<cur_shape.length; i++) {
     for (let j=0; j<cur_shape[i].length; j++) {
-      cur_shape[i][j].X *= _w;
-      cur_shape[i][j].Y *= _w;
+      cur_shape[i][j].X *= _size;
+      cur_shape[i][j].Y *= _size;
     }
   }
 
 
-  let cx = (fxrand()-0.5)*_w;
-  let cy = (fxrand()-0.5)*_w;
-  let r = fxrand()*_w/4 + _min_r;
+  let cx = (fxrand()-0.5)*_size;
+  let cy = (fxrand()-0.5)*_size;
+  let r = fxrand()*_size/4 + _min_r;
 
   let crack_pgn = [];
 
   let _jiggle_r = fxrand()*5;
 
-  let ncut = 32;
+  //let ncut = 32;
   for (let i=0; i<ncut; i++) {
 
     let cut_line = [];
@@ -1057,10 +1297,10 @@ function crack_shape2() {
 
       if (slice_choice==0) {
 
-        _x0 = -(fxrand()*_w + _w/2);
-        _y0 = -(fxrand()*_w + _w/2);
-        _x1 =  (fxrand()*_w + _w/2);
-        _y1 =  (fxrand()*_w + _w/2);
+        _x0 = -(fxrand()*_size + _size/2);
+        _y0 = -(fxrand()*_size + _size/2);
+        _x1 =  (fxrand()*_size + _size/2);
+        _y1 =  (fxrand()*_size + _size/2);
 
         cut_line.push( [
           { "X": _x0,   "Y": _y0 },
@@ -1071,10 +1311,10 @@ function crack_shape2() {
       }
 
       else if (slice_choice==1) {
-        _x0 =  (fxrand()*_w + _w/2);
-        _y0 = -(fxrand()*_w + _w/2);
-        _x1 = -(fxrand()*_w + _w/2);
-        _y1 =  (fxrand()*_w + _w/2);
+        _x0 =  (fxrand()*_size + _size/2);
+        _y0 = -(fxrand()*_size + _size/2);
+        _x1 = -(fxrand()*_size + _size/2);
+        _y1 =  (fxrand()*_size + _size/2);
 
         cut_line.push( [
           { "X": _x0,   "Y": _y0 },
@@ -1086,10 +1326,10 @@ function crack_shape2() {
 
       else if (slice_choice==2) {
         ds = 3;
-        _x0 =  (fxrand()-0.5)*_w;
-        _y0 = -(fxrand()*_w + _w/2);
-        _x1 =  (fxrand()-0.5)*_w;
-        _y1 =  (fxrand()*_w + _w/2);
+        _x0 =  (fxrand()-0.5)*_size;
+        _y0 = -(fxrand()*_size + _size/2);
+        _x1 =  (fxrand()-0.5)*_size;
+        _y1 =  (fxrand()*_size + _size/2);
 
         cut_line.push( [
           { "X": _x0,   "Y": _y0 },
@@ -1101,10 +1341,10 @@ function crack_shape2() {
 
       else{
         ds = 3;
-        _x0 = -(fxrand()*_w + _w/2);
-        _y0 =  (fxrand()-0.5)*_w;
-        _x1 =  (fxrand()*_w + _w/2);
-        _y1 =  (fxrand()-0.5)*_w;
+        _x0 = -(fxrand()*_size + _size/2);
+        _y0 =  (fxrand()-0.5)*_size;
+        _x1 =  (fxrand()*_size + _size/2);
+        _y1 =  (fxrand()-0.5)*_size;
 
         cut_line.push( [
           { "X": _x0,   "Y": _y0 },
@@ -1123,7 +1363,7 @@ function crack_shape2() {
       let _cos = Math.cos(a);
       let _sin = Math.sin(a);
 
-      let _r = 2*_w;
+      let _r = 2*_size;
       let ds = 2;
 
       let dx = fxrand()*_jiggle_r;
@@ -1159,41 +1399,48 @@ function crack_shape2() {
 
   }
 
-  g_info.shape = cur_shape;
+  //g_info.shape = cur_shape;
 
   return cur_shape;
 }
 
-function crack_shape1() {
+function crack_shape1(init_shape, opt) {
   //let _w = 500;
-  let _w = g_info.shape_size_factor*g_info.size;
+  //let _w = g_info.shape_size_factor*g_info.size;
+
+  opt = ((typeof opt === "undefined") ? {} : opt);
+  let ncut = ((typeof opt.cut_count === "undefined") ? 32 : opt.cut_count);
+  let _size = ((typeof opt.size === "undefined") ?  (g_info.shape_size_factor*g_info.size) : opt.size);
+
+
 
   let _min_r = 10;
 
-  let cur_shape = g_info.initial_shape;
+  //let cur_shape = g_info.initial_shape;
+  let cur_shape = init_shape;
   for (let i=0; i<cur_shape.length; i++) {
     for (let j=0; j<cur_shape[i].length; j++) {
-      cur_shape[i][j].X *= _w;
-      cur_shape[i][j].Y *= _w;
+      cur_shape[i][j].X *= _size;
+      cur_shape[i][j].Y *= _size;
     }
   }
 
 
-  let cx = (fxrand()-0.5)*_w;
-  let cy = (fxrand()-0.5)*_w;
-  let r = fxrand()*_w/4 + _min_r;
+  let cx = (fxrand()-0.5)*_size;
+  let cy = (fxrand()-0.5)*_size;
+  let r = fxrand()*_size/4 + _min_r;
 
   let crack_pgn = [];
 
   let _jiggle_r = fxrand()*5;
 
-  let ncut = 32;
+  //let ncut = 32;
   for (let i=0; i<ncut; i++) {
     let a = fxrand()*Math.PI*2;
     let _cos = Math.cos(a);
     let _sin = Math.sin(a);
 
-    let _r = 2*_w;
+    let _r = 2*_size;
     let ds = 2;
 
     let dx = fxrand()*_jiggle_r;
@@ -1227,20 +1474,24 @@ function crack_shape1() {
 
   }
 
-  g_info.shape = cur_shape;
+  //g_info.shape = cur_shape;
 
   return cur_shape;
 }
 
-function crack_shape0() {
+function crack_shape0(init_shape, opt) {
   //let _w = 500;
-  let _w = g_info.shape_size_factor*g_info.size;
+  //let _w = g_info.shape_size_factor*g_info.size;
 
-  let cur_shape = g_info.initial_shape;
+  opt = ((typeof opt === "undefined") ? {} : opt);
+  let _size = ((typeof opt.size === "undefined") ?  (g_info.shape_size_factor*g_info.size) : opt.size);
+
+  //let cur_shape = g_info.initial_shape;
+  let cur_shape = init_shape;
   for (let i=0; i<cur_shape.length; i++) {
     for (let j=0; j<cur_shape[i].length; j++) {
-      cur_shape[i][j].X *= _w;
-      cur_shape[i][j].Y *= _w;
+      cur_shape[i][j].X *= _size;
+      cur_shape[i][j].Y *= _size;
     }
   }
 
@@ -1255,10 +1506,10 @@ function crack_shape0() {
 
     if (slice_choice==0) {
 
-      _x0 = -(fxrand()*_w + _w/2);
-      _y0 = -(fxrand()*_w + _w/2);
-      _x1 =  (fxrand()*_w + _w/2);
-      _y1 =  (fxrand()*_w + _w/2);
+      _x0 = -(fxrand()*_size + _size/2);
+      _y0 = -(fxrand()*_size + _size/2);
+      _x1 =  (fxrand()*_size + _size/2);
+      _y1 =  (fxrand()*_size + _size/2);
 
       cut_line.push( [
         { "X": _x0,   "Y": _y0 },
@@ -1269,10 +1520,10 @@ function crack_shape0() {
     }
 
     else if (slice_choice==1) {
-      _x0 =  (fxrand()*_w + _w/2);
-      _y0 = -(fxrand()*_w + _w/2);
-      _x1 = -(fxrand()*_w + _w/2);
-      _y1 =  (fxrand()*_w + _w/2);
+      _x0 =  (fxrand()*_size + _size/2);
+      _y0 = -(fxrand()*_size + _size/2);
+      _x1 = -(fxrand()*_size + _size/2);
+      _y1 =  (fxrand()*_size + _size/2);
 
       cut_line.push( [
         { "X": _x0,   "Y": _y0 },
@@ -1284,10 +1535,10 @@ function crack_shape0() {
 
     else if (slice_choice==2) {
       ds = 3;
-      _x0 =  (fxrand()-0.5)*_w;
-      _y0 = -(fxrand()*_w + _w/2);
-      _x1 =  (fxrand()-0.5)*_w;
-      _y1 =  (fxrand()*_w + _w/2);
+      _x0 =  (fxrand()-0.5)*_size;
+      _y0 = -(fxrand()*_size + _size/2);
+      _x1 =  (fxrand()-0.5)*_size;
+      _y1 =  (fxrand()*_size + _size/2);
 
       cut_line.push( [
         { "X": _x0,   "Y": _y0 },
@@ -1299,10 +1550,10 @@ function crack_shape0() {
 
     else{
       ds = 3;
-      _x0 = -(fxrand()*_w + _w/2);
-      _y0 =  (fxrand()-0.5)*_w;
-      _x1 =  (fxrand()*_w + _w/2);
-      _y1 =  (fxrand()-0.5)*_w;
+      _x0 = -(fxrand()*_size + _size/2);
+      _y0 =  (fxrand()-0.5)*_size;
+      _x1 =  (fxrand()*_size + _size/2);
+      _y1 =  (fxrand()-0.5)*_size;
 
       cut_line.push( [
         { "X": _x0,   "Y": _y0 },
@@ -1325,7 +1576,7 @@ function crack_shape0() {
     cur_shape = rop;
   }
 
-  g_info.shape = cur_shape;
+  //g_info.shape = cur_shape;
 
   return cur_shape;
 }
