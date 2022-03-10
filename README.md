@@ -74,3 +74,11 @@ Works
 | |
 |---|
 | [![vadfad](img/vadfad_1gen.png)](https://github.com/abetusk/iao/tree/main/vadfad_1gen) |
+
+---
+
+###### [Through a Pixel, Darkly](https://github.com/abetusk/iao/tree/main/through-a-pixel-darkly)
+
+| |
+|---|
+| [![Through a Pixel, Darkly](img/through_a_pixel_darkly.png)](https://github.com/abetusk/iao/tree/main/through-a-pixel-darkly) |
