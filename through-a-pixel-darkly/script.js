@@ -259,18 +259,6 @@ var g_info = {
 
   "initial_shape": [],
 
-  /*
-  "initial_shape" : [[
-    { "X": -1/2, "Y": -1/2},
-    { "X":  1/2, "Y": -1/2},
-    { "X":  1/2, "Y":  1/2},
-    { "X": -1/2, "Y":  1/2}
-  ]],
-  */
-
-  //"shape_color": "rgba(190, 194, 203, 0.9)",
-  //"bg_color" : "#333"
-
   "color_choice": [
     {
       "name": "dt01",
@@ -1688,8 +1676,6 @@ function init_global_param() {
   g_info.last_t = Date.now();
 
   initCanvas();
-
-  console.log(g_info.size);
 
   init_global_param();
 

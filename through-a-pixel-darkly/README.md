@@ -3,7 +3,7 @@ Through a Pixel, Darkly
 
 [![screenshot](../img/through_a_pixel_darkly.png)](https://github.com/abetusk/iao/tree/main/through-a-pixel-darkly)
 
-(not) Available on [fxhash](https://www.fxhash.xyz/generative/slug/through-a-pixel-darkly)
+Available on [fxhash](https://www.fxhash.xyz/generative/10508)
 
 Quick Start
 ---
