@@ -25,12 +25,17 @@ var g_info = {
   "capture_dt":5000,
   //"capture_dt":1000,
 
+  "ppi" : 300,
+  "svg_width_in" : 36,
+  "svg_height_in" : 36,
 
   "canvas": {},
   "ctx" : {},
   "tick" : 0,
   "tick_val" : 0,
   "anim": true,
+
+  "phase0": false,
 
   "bg_color" : "#151515",
 
@@ -168,7 +173,11 @@ var g_info = {
 
   ],
   "palette_choice": {},
-  "isubdiv": -1,
+  //"isubdiv": -1,
+
+  "n_row": 5,
+  "n_col": 5,
+  "symmetry_type": 0,
 
   "features": {},
 
@@ -1505,7 +1514,6 @@ function disp(ctx, fname, x, y, w, c, phase) {
 // shape_idx - shape  index to use (position in f_list)
 //
 
-//function gen_hist_r(ctx, x, y, w, sub_n, recur_level, max_recur, use_rnd_hist) {
 function gen_hist_r(ctx, opt) {
   let x = opt.x;
   let y = opt.y;
@@ -1524,7 +1532,6 @@ function gen_hist_r(ctx, opt) {
   let my = y + w/sub_n;
   let subw = w/sub_n;
 
-  //let p = fxrand();
   let p;
   if (use_rnd_hist) {
     if (g_info.rnd_hist.length <= g_info.rnd_hist_idx)  {
@@ -1537,28 +1544,25 @@ function gen_hist_r(ctx, opt) {
     p = fxrand();
   }
 
-  //let p_vec = [1/32, 0.55, 0.75, 1];
+  // probability vector
+  //
   let p_vec = [0, 0, 1,1];
 
   let do_recur = false;
 
   // both high and recur...
   //
-  //if (p < (1.0/32.0)) {
   if (p < p_vec[0]) {
     do_recur = true;
   }
 
-  //else if (p < 0.55) {
   else if (p < p_vec[1]) {
     do_recur = true;
   }
 
   // show object without further recurrance
   //
-  //else if (p < 0.75) {
   else if (p < p_vec[2]) {
-    //let _f = _pwrnd( g_info.f_list_cur ),
     let _f = -1;
     let _a = (1.0 - _mrnd()*0.125) ;
 
@@ -1566,7 +1570,6 @@ function gen_hist_r(ctx, opt) {
       _f = _pwrnd( g_info.f_list_cur );
     }
     else {
-      //_f = g_info.f_list_cur[shape_lib_name];
       _f = shape_lib_name;
     }
 
@@ -1577,7 +1580,6 @@ function gen_hist_r(ctx, opt) {
     }
     opt["palette_idx"] = palette_idx;
 
-    //let rgb = _hex2rgb( g_info.palette_choice.colors[Math.floor(_mrnd()*g_info.palette_choice.colors.length)] );
     let rgb = _hex2rgb( g_info.palette_choice.colors[palette_idx] );
     let _c = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + "," + _a + ")"
 
@@ -1592,11 +1594,11 @@ function gen_hist_r(ctx, opt) {
     let _ds = w - R*w;
 
     let _func = (function(_p_ctx, _p_f, _p_x, _p_y, _p_w, _p_c, _p_F, _p_i_p) {
-      return function() {
+      return function(__s) {
         let _phase = (1.0 + Math.sin(Math.PI*2*_p_F*(g_info.tick/512 + _p_i_p)))/2.0;
+        if (typeof __s !== "undefined") { _phase = __s; }
         disp(_p_ctx, _p_f, _p_x, _p_y, _p_w, _p_c, _phase);
       };
-    //})(ctx, _f, x, y, w, _c, _freq, _init_phase);
     })(ctx, _f, x + _ds/2, y + _ds/2, w - _ds, _c, _freq, _init_phase);
 
     g_info.f_hist.push( {"f": _func, "lvl": recur_level });
@@ -1608,9 +1610,6 @@ function gen_hist_r(ctx, opt) {
   //
   else {
 
-    //let _f = _pwrnd( g_info.f_list_cur ),
-    //    _a = (0.6 - _mrnd()*0.25) ;
-
     let _f = -1;
     let _a = (0.6 - _mrnd()*0.25) ;
 
@@ -1618,7 +1617,6 @@ function gen_hist_r(ctx, opt) {
       _f = _pwrnd( g_info.f_list_cur );
     }
     else {
-      //_f = g_info.f_list_cur[shape_lib_idx];
       _f = shape_lib_name;
     }
 
@@ -1629,7 +1627,6 @@ function gen_hist_r(ctx, opt) {
     }
     opt["palette_idx"] = palette_idx;
 
-    //let rgb = _hex2rgb( g_info.palette_choice.colors[Math.floor(_mrnd()*g_info.palette_choice.colors.length)] );
     let rgb = _hex2rgb( g_info.palette_choice.colors[palette_idx] );
     let _c = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + "," + _a + ")"
 
@@ -1644,8 +1641,9 @@ function gen_hist_r(ctx, opt) {
     let ds = w - R*w;
 
     let _func = (function(_p_ctx, _p_f, _p_x, _p_y, _p_w, _p_c, _p_F, _p_i_p) {
-      return function() {
+      return function(__s) {
         let _phase = (1.0 + Math.sin(Math.PI*2*_p_F*(g_info.tick/512 + _p_i_p)))/2.0;
+        if (typeof __s !== "undefined") { _phase = __s; }
         disp(_p_ctx, _p_f, _p_x, _p_y, _p_w, _p_c, _phase);
       };
     })(ctx, _f, x - ds/2, y - ds/2, w - ds, _c, _freq, _init_phase);
@@ -1675,7 +1673,6 @@ function gen_hist_r(ctx, opt) {
           "max_recur": max_recur,
           "use_rnd_hist": use_rnd_hist
         };
-        //gen_hist_r(ctx, _x, _y, subw, nxt_sub_n, recur_level+1+(sub_n-2), max_recur, use_rnd_hist);
         gen_hist_r(ctx, _ropt);
       }
     }
@@ -1718,8 +1715,11 @@ function anim() {
 
   clear(ctx, _cw, _ch);
 
+  let _phase = undefined;
+  if (g_info.phase0) { _phase = 0; }
+
   for (let i=0; i<g_info.f_hist.length; i++) {
-    g_info.f_hist[i].f();
+    g_info.f_hist[i].f(_phase);
   }
 
 }
@@ -1735,6 +1735,72 @@ function clear(ctx, clear_width, clear_height, bg_color) {
   ctx.rect(0,0, clear_width, clear_height);
   ctx.fill();
 }
+
+
+function downloadsvg() {
+  let ppi = g_info.ppi;
+  let svg_w = g_info.svg_width_in;
+  let svg_h = g_info.svg_height_in;
+
+  let svg_lines = [];
+
+  let wpx = (ppi*svg_w).toString();
+  let hpx = (ppi*svg_h).toString();
+
+  svg_lines.push('<svg viewBox="0 0 ' + wpx + ' ' + hpx + '" ' +
+    ' width="' + wpx + '" height="' + hpx + '" ' +
+    ' xmlns="http://www.w3.org/2000/svg">');
+
+  let bg_rect = '<rect width="' + wpx + '" height="' + hpx + '" style="stroke:none;stroke-width:0;fill:' + g_info.bg_color + '" />';
+  svg_lines.push(bg_rect);
+  
+  for (let i=0; i<g_info.hist.length; i++) {
+
+    /*
+    let _v = g_info.hist[i];
+    let _so = (hpx/1024)*(g_info.max_level - _v.lvl + 1);
+
+    let _cx = wpx * (_v.x / g_info.width);
+    let _cy = hpx * (_v.y / g_info.height);
+
+    let _cw = wpx * (_v.w / g_info.width);
+    let _ch = hpx * (_v.h / g_info.height);
+
+    let _h_w = effective_size(_v.dat);
+    let ds = vadfad_blocksize(_v.dat, _cw, _ch);
+
+    let _aw = (_v.dat[0].length+1)*ds;
+    let _ah = (_v.dat.length+1)*ds;
+
+    let _edx = 0, _edy = 0;
+    if (_cw > _aw) { _edx = (_cw - _aw)/2; }
+    if (_ch > _ah) { _edy = (_ch - _ah)/2; }
+
+    let _svg_path = vad2svgpath(_v.dat, _cw, _ch, _cx+_edx+ds/2,     _cy+_edy+ds/2,     _v.c);
+    let _svg_shad = vad2svgpath(_v.dat, _cw, _ch, _cx+_edx+ds/2+_so, _cy+_edy+ds/2+_so, g_info.shadow_color);
+
+    svg_lines.push(_svg_shad + "\n");
+    svg_lines.push("  " + _svg_path + "\n");
+    */
+
+  }
+
+  svg_lines.push("</svg>");
+
+  let svg_hdr = "data:img/svg+xml;base64,";
+
+  let svg_txt = svg_hdr + btoa(unescape(encodeURIComponent(svg_lines.join(""))));
+
+  let link = document.createElement("a");
+  link.download = g_info.download_filename_svg;
+  link.href = svg_txt;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  delete link;
+}
+
+
 
 function screenshot() {
   let canvas = document.getElementById("canvas");
@@ -1797,7 +1863,9 @@ function welcome() {
   console.log("");
   console.log(" a   - save animation (webm)");
   console.log(" s   - save screenshot (PNG)");
+  console.log(" S   - export SVG");
   console.log(" p   - pause");
+  console.log(" P   - set phase to 0 and pause (good for screenshots)");
   console.log("");
 
   console.log("Features:");
@@ -1822,9 +1890,12 @@ function loadjson(fn, cb) {
 
 function init_param() {
   let sub_choice = [2,3];
-  let isubdiv = sub_choice[ Math.floor(fxrand()*sub_choice.length) ];
 
-  g_info.isubdiv = isubdiv;
+  g_info.n_row = Math.floor(_mrnd()*5) + 5;
+  g_info.n_col = Math.floor(_mrnd()*5) + 5;
+  g_info.n_cell = g_info.n_row;
+
+  g_info.symmetry_type = Math.floor(_mrnd()*2);
 
   // choose subset of shapes to use
   //
@@ -1843,8 +1914,11 @@ function init_param() {
   g_info.palette_choice = _arnd( g_info.palette );
 
   g_info.features["Shape Library"] = f_name.join(", ");
-  g_info.features["Initial Subdivision"] = isubdiv;
   g_info.features["Color Palette"] = g_info.palette_choice.name;
+
+  g_info.features["Columns"] = g_info.n_col;
+  g_info.features["Rows"] = g_info.n_row;
+  g_info.features["Symmetry Type"] = g_info.symmetry_type;
 
   window.$fxhashFeatures = g_info.features;
 }
@@ -1910,7 +1984,7 @@ function init_fin() {
   g_info.size = dS - 25;
   g_info.tick = 0;
 
-  let isubdiv = g_info.isubdiv;
+  //let isubdiv = g_info.isubdiv;
 
   g_info.f_hist = [];
 
@@ -1918,25 +1992,29 @@ function init_fin() {
   g_info.rnd_hist_idx =0;
 
 
-  let sym_type = 0;
+  let sym_type = g_info.symmetry_type;
 
-  let nrow = Math.floor(_mrnd()*5) + 5;
-  let ncol = Math.floor(_mrnd()*5) + 5;
+
+  //let nrow = Math.floor(_mrnd()*5) + 5;
+  //let ncol = Math.floor(_mrnd()*5) + 5;
+  let nrow = g_info.n_row;
+  let ncol = g_info.n_col;
   let ncell = ((nrow>ncol) ? nrow : ncol);
 
   ncell = nrow;
 
-  console.log("nrow:", nrow, "ncol:", ncol, "ncell:", ncell);
-
   let _winsz = dS / ncell;
+
+  let _offx = (W - ncol*_winsz)/2;
+  let _offy = (H - nrow*_winsz)/2;
 
   if (sym_type == 0) {
 
     for (let r=0; r<Math.ceil(nrow/2); r++) {
       for (let c=0; c<Math.ceil(ncol/2); c++) {
 
-        let _x = c*_winsz;
-        let _y = r*_winsz;
+        let _x = c*_winsz + _offx;
+        let _y = r*_winsz + _offy;
 
         let opt = {
           "x": _x,
@@ -1956,8 +2034,8 @@ function init_fin() {
         //if ( (c != Math.floor(ncol/2)) &&
         //     (r != Math.floor(nrow/2)) ) {
         if (r != Math.floor(nrow/2))  {
-          opt.x = (c)*_winsz;
-          opt.y = (nrow-r-1)*_winsz;
+          opt.x = (c)*_winsz + _offx;
+          opt.y = (nrow-r-1)*_winsz + _offy;
           opt.shape_lib_name = reflect_h_shape(shape_name);
           gen_hist_r(ctx, opt);
         }
@@ -1965,16 +2043,16 @@ function init_fin() {
         //if ( (c != Math.floor(ncol/2)) &&
         //     (r != Math.floor(nrow/2)) ) {
         if (c != Math.floor(ncol/2)) {
-          opt.x = (ncol-c-1)*_winsz;
-          opt.y = (r)*_winsz;
+          opt.x = (ncol-c-1)*_winsz + _offx;
+          opt.y = (r)*_winsz + _offy;
           opt.shape_lib_name = reflect_v_shape(shape_name);
           gen_hist_r(ctx, opt);
         }
 
         if ( (c != Math.floor(ncol/2)) &&
              (r != Math.floor(nrow/2)) ) {
-          opt.x = (ncol-c-1)*_winsz;
-          opt.y = (nrow-r-1)*_winsz;
+          opt.x = (ncol-c-1)*_winsz + _offx;
+          opt.y = (nrow-r-1)*_winsz + _offy;
           opt.shape_lib_name = reflect_h_shape(reflect_v_shape(shape_name));
           gen_hist_r(ctx, opt);
         }
@@ -1992,8 +2070,8 @@ function init_fin() {
     //
     for (let r=0; r<Math.ceil(nrow/2); r++) {
       let c = 0;
-      let _x = c*_winsz;
-      let _y = r*_winsz;
+      let _x = c*_winsz + _offx;
+      let _y = r*_winsz + _offy;
 
       let opt = {
         "x": _x,
@@ -2011,23 +2089,23 @@ function init_fin() {
       let shape_name = opt.shape_lib_name;;
 
       if ( c != Math.floor(ncol/2) ) {
-        opt.x = (ncol-c-1)*_winsz;
-        opt.y = r*_winsz;
+        opt.x = (ncol-c-1)*_winsz + _offx;
+        opt.y = r*_winsz + _offy;
         opt.shape_lib_name = reflect_v_shape(shape_name);
         gen_hist_r(ctx, opt);
       }
 
       if ( (c != Math.floor(ncol/2)) &&
            (r != Math.floor(nrow/2)) ) {
-        opt.x = (ncol-c-1)*_winsz;
-        opt.y = (nrow-r-1)*_winsz;
+        opt.x = (ncol-c-1)*_winsz + _offx;
+        opt.y = (nrow-r-1)*_winsz + _offy;
         opt.shape_lib_name = reflect_h_shape(reflect_v_shape(shape_name));
         gen_hist_r(ctx, opt);
       }
 
       if (r != Math.floor(nrow/2)) {
-        opt.x = c*_winsz;
-        opt.y = (nrow-r-1)*_winsz;
+        opt.x = c*_winsz + _offx;
+        opt.y = (nrow-r-1)*_winsz + _offy;
         opt.shape_lib_name = reflect_h_shape(shape_name);
         gen_hist_r(ctx, opt);
       }
@@ -2038,8 +2116,8 @@ function init_fin() {
     //
     for (let c=1; c<Math.ceil(ncol/2); c++) {
       let r = 0;
-      let _x = c*_winsz;
-      let _y = r*_winsz;
+      let _x = c*_winsz + _offx;
+      let _y = r*_winsz + _offy;
 
       let opt = {
         "x": _x,
@@ -2057,23 +2135,23 @@ function init_fin() {
       let shape_name = opt.shape_lib_name;;
 
       if ( c != Math.floor(ncol/2) ) {
-        opt.x = (ncol-c-1)*_winsz;
-        opt.y = r*_winsz;
+        opt.x = (ncol-c-1)*_winsz + _offx;
+        opt.y = r*_winsz + _offy;
         opt.shape_lib_name = reflect_v_shape(shape_name);
         gen_hist_r(ctx, opt);
       }
 
       if ( (c != Math.floor(ncol/2)) &&
            (r != Math.floor(nrow/2)) ) {
-        opt.x = (ncol-c-1)*_winsz;
-        opt.y = (nrow-r-1)*_winsz;
+        opt.x = (ncol-c-1)*_winsz + _offx;
+        opt.y = (nrow-r-1)*_winsz + _offy;
         opt.shape_lib_name = reflect_h_shape(reflect_v_shape(shape_name));
         gen_hist_r(ctx, opt);
       }
 
       if (r != Math.floor(nrow/2)) {
-        opt.x = c*_winsz;
-        opt.y = (nrow-r-1)*_winsz;
+        opt.x = c*_winsz + _offx;
+        opt.y = (nrow-r-1)*_winsz + _offy;
         opt.shape_lib_name = reflect_h_shape(shape_name);
         gen_hist_r(ctx, opt);
       }
@@ -2083,8 +2161,8 @@ function init_fin() {
     // inner section
     for (let r=1; r<(nrow-1); r++) {
       for (let c=1; c<(ncol-1); c++) {
-        let _x = c*_winsz;
-        let _y = r*_winsz;
+        let _x = c*_winsz + _offx;
+        let _y = r*_winsz + _offy;
 
         let opt = {
           "x": _x,
@@ -2102,8 +2180,8 @@ function init_fin() {
           let shape_name = opt.shape_lib_name;;
           if ( (c != Math.floor(ncol/2)) &&
                (r != Math.floor(nrow/2)) ) {
-            opt.x = (ncol-c-1)*_winsz;
-            opt.y = (nrow-r-1)*_winsz;
+            opt.x = (ncol-c-1)*_winsz + _offx;
+            opt.y = (nrow-r-1)*_winsz + _offy;
             opt.shape_lib_name = reflect_h_shape(reflect_v_shape(shape_name));
             gen_hist_r(ctx, opt);
           }
@@ -2115,8 +2193,8 @@ function init_fin() {
           gen_hist_r(ctx, opt);
           let shape_name = opt.shape_lib_name;;
           if (r != Math.floor(nrow/2)) {
-            opt.x = (ncol-c-1)*_winsz;
-            opt.y = (nrow-r-1)*_winsz;
+            opt.x = (ncol-c-1)*_winsz + _offx;
+            opt.y = (nrow-r-1)*_winsz + _offy;
             opt.shape_lib_name = reflect_h_shape(reflect_v_shape(shape_name));
             gen_hist_r(ctx, opt);
           }
@@ -2198,8 +2276,14 @@ function init() {
     if (ev.key == 's') {
       screenshot();
     }
+    else if (ev.key == 'S') {
+      downloadsvg();
+    }
     else if (ev.key == 'p') {
       g_info.pause = ((g_info.pause) ? false : true);
+    }
+    else if (ev.key == 'P') {
+      g_info.phase0 = !g_info.phase0;
     }
     else if (ev.key == 'a') {
       if (g_info.animation_capture) { console.log("already capturing!"); return; }
