@@ -164,6 +164,11 @@ I Like Em
 * [anaverse - Forbidden cities by anaglyphic](https://www.fxhash.xyz/generative/10059)
 * [Tiny Devices #A: Calculator by neelts](https://www.fxhash.xyz/generative/slug/tiny-devices-a:-calculator)
 * [DOPPELGANGER VV by Grey Tekin](https://www.fxhash.xyz/generative/slug/doppelganger-vv)
+* [Pebbles by Nuria Mora](https://www.fxhash.xyz/generative/10396)
+* [Mountain Peak by superbialux](https://www.fxhash.xyz/generative/slug/mountain-peak)
+* [Pant & Brush by flashGen](https://www.fxhash.xyz/generative/slug/paint-and-brush)
+* [jngl_tag by bejuco](https://www.fxhash.xyz/generative/slug/jngl_tag)
+* [Incorporeal Spaces by Leanardo Solaas](https://www.fxhash.xyz/generative/slug/incorporeal-spaces)
 
 Artists
 ---

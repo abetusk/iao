@@ -18,6 +18,8 @@ var g_info = {
   "tick" : 0,
   "tick_val" : 0,
 
+  "first":true,
+
   "capturer": {},
   "animation_capture": false,
   "capture_start":-1,
@@ -741,6 +743,102 @@ function fat_leaf(ctx, opt, lvl) {
 
 }
 
+function skinny_leaf1(ctx, opt, lvl) {
+  _debug = false;
+  lvl = ((typeof lvl === "undefined") ? 1 : lvl);
+  if (lvl == 0) { return; }
+
+  let a0 = ((typeof opt.a0 === "undefined") ? (fxrand()*Math.PI/8) : opt.a0);
+  let a1 = ((typeof opt.a1 === "undefined") ? (fxrand()*Math.PI/8) : opt.a1);
+
+  let p0 = opt.p0;
+  let p3 = opt.p3;
+
+  let p1 = vec_add( p0, vec_rot( vec_diff( vec_lerp(p0, p3, 0.5), p0 ), a0 ) );
+  let p2 = vec_add( p3, vec_rot( vec_diff( vec_lerp(p3, p0, 0.5), p3 ), a1 ) );
+
+  let fat_fac = ((typeof opt.fat_fac === "undefined") ? (1/8) : opt.fat_fac);
+  let len_fac = ((typeof opt.len_fac === "undefined") ? (1/3) : opt.len_fac);
+  let sprout_a = ((typeof opt.sprout_a === "undefined") ? (Math.PI/4) : opt.sprout_a);
+  let sprout_n = ((typeof opt.sprout_n === "undefined") ? (4) : opt.sprout_n);
+  let sprout_t_fac = ((typeof opt.sprout_t_fac === "undefined") ? 1.0 : opt.sprout_t_fac);
+  let t_start = ((typeof opt.t_start === "undefined") ? 0.0 : opt.t_start);
+
+  let anch0 = opt.anchor[0];
+  let anch1 = opt.anchor[1];
+
+  let _len = len_fac * vec_len( vec_diff( anch1, anch0 ) );
+  _len *=2;
+
+  // debug
+  //
+  ctx.fillStyle = "rgba(0, 255, 255, 0.25)";
+
+  let p = opt.anchor[0];
+  ctx.fillRect( p.x - 2.5, p.y - 2.5, 5, 5 );
+
+  ctx.fillStyle = "rgba(155, 255, 0, 0.25)";
+
+  p = opt.anchor[1];
+  ctx.fillRect( p.x - 2.5, p.y - 2.5, 5, 5 );
+
+
+  let mp = vec_mul( vec_add( anch0, anch1 ), 0.5);
+  //let ep = vec_add( vec_rot( vec_mul( vec_diff( anch1, anch0 ), 0.5), -Math.PI/2 ), mp);
+  let ep = vec_add( vec_rot( vec_mul( vec_norm( vec_diff( anch1, anch0 ) ), _len), -Math.PI/2 + sprout_a ), mp);
+
+  let cp1 = vec_add( vec_rot( vec_mul( vec_norm( vec_diff( anch1, anch0 ) ), _len), -Math.PI/2 + sprout_a ), anch0);
+  let cp2 = vec_add( vec_rot( vec_mul( vec_norm( vec_diff( anch1, anch0 ) ), _len), Math.PI/2 + sprout_a  ), ep);
+
+  if (g_info.first) {
+    ctx.fillStyle = "rgba(255,50,50,0.8)";
+    ctx.fillRect( ep.x, ep.y, 5, 5);
+
+    ctx.fillStyle = "rgba(100,50,150,0.8)";
+    ctx.fillRect( cp1.x, cp1.y, 5, 5);
+
+    ctx.fillStyle = "rgba(100,50,150,0.8)";
+    ctx.fillRect( cp2.x, cp2.y, 5, 5);
+  }
+  g_info.first = false;
+
+  let bez_o = new Bezier([anch0, cp1, cp2, ep]);
+
+  let n = 32;
+  for (let i=1; i<n-1; i++) {
+    let sp = ((i-1)/n);
+    let sc = (i/n);
+    let a = bez_o.get(sp);
+    let b = bez_o.get(sc);
+
+    ctx.beginPath();
+    ctx.strokeStyle = "rgba(127,127,127,0.9)";
+    ctx.moveTo(a.x, a.y);
+    ctx.lineTo(b.x, b.y);
+    ctx.stroke();
+  }
+
+  cp1 = vec_add( vec_rot( vec_mul( vec_norm( vec_diff( anch1, anch0 ) ), _len), -Math.PI/2 + sprout_a ), anch1);
+  cp2 = vec_add( vec_rot( vec_mul( vec_norm( vec_diff( anch1, anch0 ) ), _len), Math.PI/2 + sprout_a ), ep);
+
+  bez_o = new Bezier([anch1, cp1, cp2, ep]);
+
+  n = 32;
+  for (let i=1; i<n-1; i++) {
+    let sp = ((i-1)/n);
+    let sc = (i/n);
+    let a = bez_o.get(sp);
+    let b = bez_o.get(sc);
+
+    ctx.beginPath();
+    ctx.strokeStyle = "rgba(127,127,127,0.9)";
+    ctx.moveTo(a.x, a.y);
+    ctx.lineTo(b.x, b.y);
+    ctx.stroke();
+  }
+
+
+}
 
 function skinny_leaf(ctx, opt, lvl) {
   _debug = false;
@@ -856,7 +954,8 @@ function skinny_leaf(ctx, opt, lvl) {
   }
   ctx.stroke();
 
-  //debug
+  // debug
+  //
   if ("anchor" in opt) {
     ctx.fillStyle = "rgba(0, 255, 255, 0.5)";
 
@@ -896,7 +995,7 @@ function skinny_leaf(ctx, opt, lvl) {
       "t_start": 0.5,
       "fat_fac": (1.5*fat_fac)
     };
-    skinny_leaf(ctx, r_opt, lvl-1);
+    skinny_leaf1(ctx, r_opt, lvl-1);
 
   }
 
@@ -928,7 +1027,7 @@ function skinny_leaf(ctx, opt, lvl) {
       "t_start": 0.5,
       "fat_fac": (1.5*fat_fac)
     };
-    skinny_leaf(ctx, r_opt, lvl-1);
+    skinny_leaf1(ctx, r_opt, lvl-1);
 
   }
 
