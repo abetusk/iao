@@ -1917,12 +1917,18 @@ function init_fin() {
   g_info.rnd_hist_active = true;
   g_info.rnd_hist_idx =0;
 
-  let _winsz = dS / 7;
 
-  let sym_type = 1;
+  let sym_type = 0;
 
-  let nrow = 7;
-  let ncol = 7;
+  let nrow = Math.floor(_mrnd()*5) + 5;
+  let ncol = Math.floor(_mrnd()*5) + 5;
+  let ncell = ((nrow>ncol) ? nrow : ncol);
+
+  ncell = nrow;
+
+  console.log("nrow:", nrow, "ncol:", ncol, "ncell:", ncell);
+
+  let _winsz = dS / ncell;
 
   if (sym_type == 0) {
 
