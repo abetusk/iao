@@ -2,7 +2,7 @@
 // To the extent possible under law, the person who associated CC0 with
 // this code has waived all copyright and related or neighboring rights
 // to this code.
-// 
+//
 // You should have received a copy of the CC0 legalcode along with this
 // work.  If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 //
@@ -41,43 +41,77 @@ var g_info = {
 
   "f_list_cur": [],
   "f_list": [
-    { "v": "stripe_45_square", "w":0.5 },
-    { "v": "stripe_m45_square", "w":0.5 },
+    { "group_name": "stripe", "p": [
+      { "v": "stripe_45_square", "w":0.5 },
+      { "v": "stripe_m45_square", "w":0.5 }
+    ] },
 
-    { "v": "stripe_gate:0", "w":0.5 },
-    { "v": "stripe_gate:1", "w":0.5 },
+    { "group_name": "stripe_gate", "p": [
+      { "v": "stripe_gate:0", "w":0.5 },
+      { "v": "stripe_gate:1", "w":0.5 }
+    ] },
 
+    { "group_name": "square_grid", "p": [
+      { "v": "square_grid", "w":1 }
+    ] },
 
-    { "v": "square_grid", "w":1 },
-    { "v": "hatching_grid", "w":1 },
-    { "v": "square_square", "w":1 },
-    { "v": "square_circle", "w":1 },
-    { "v": "circle_circle", "w":1 },
-    { "v": "circle_square", "w":1 },
+    { "group_name": "hatching_grid", "p" : [
+      { "v": "hatching_grid", "w":1 }
+    ]},
 
-    { "v": "circle_band", "w":1 },
-    { "v": "circle_band:1", "w":1 },
+    { "group_name": "square_square", "p":[
+      { "v": "square_square", "w":1 }
+    ]},
 
-    { "v": "circle_half", "w":1 },
+    { "group_name": "square_circle", "p":[
+      { "v": "square_circle", "w":1 }
+    ]},
 
-    { "v": "circle_quarter:0", "w":0.25 },
-    { "v": "circle_quarter:1", "w":0.25 },
-    { "v": "circle_quarter:2", "w":0.25 },
-    { "v": "circle_quarter:3", "w":0.25 },
+    { "group_name": "circle_circle", "p":[
+      { "v": "circle_circle", "w":1 }
+    ]},
 
-    { "v": "circle_invquarter:0", "w":0.25 },
-    { "v": "circle_invquarter:1", "w":0.25 },
-    { "v": "circle_invquarter:2", "w":0.25 },
-    { "v": "circle_invquarter:3", "w":0.25 },
+    { "group_name": "circle_square", "p":[
+      { "v": "circle_square", "w":1 }
+    ]},
 
-    { "v": "circle_drop:0", "w":0.5 },
-    { "v": "circle_drop:1", "w":0.5 },
+    { "group_name": "circle_band", "p":[
+      { "v": "circle_band", "w":1 },
+      { "v": "circle_band:1", "w":1 }
+    ]},
 
-    { "v": "square_plus", "w":1 },
+    { "group_name": "circle_half", "p":[
+      { "v": "circle_half", "w":1 }
+    ]},
 
-    { "v": "square_band", "w": 0.333 },
-    { "v": "square_band:1", "w": 0.333 },
-    { "v": "square_band:2", "w": 0.333 }
+    { "group_name": "circle_quarter", "p":[
+      { "v": "circle_quarter:0", "w":0.25 },
+      { "v": "circle_quarter:1", "w":0.25 },
+      { "v": "circle_quarter:2", "w":0.25 },
+      { "v": "circle_quarter:3", "w":0.25 }
+    ]},
+
+    { "group_name": "circle_invquarter", "p": [
+      { "v": "circle_invquarter:0", "w":0.25 },
+      { "v": "circle_invquarter:1", "w":0.25 },
+      { "v": "circle_invquarter:2", "w":0.25 },
+      { "v": "circle_invquarter:3", "w":0.25 }
+    ]},
+
+    { "group_name": "circle_drop", "p": [
+      { "v": "circle_drop:0", "w":0.5 },
+      { "v": "circle_drop:1", "w":0.5 }
+    ]},
+
+    { "group_name": "square_plus", "p": [
+      { "v": "square_plus", "w":1 }
+    ]},
+
+    { "group_name": "square_band", "p": [
+      { "v": "square_band", "w": 0.333 },
+      { "v": "square_band:1", "w": 0.333 },
+      { "v": "square_band:2", "w": 0.333 }
+    ]}
 
   ],
 
@@ -86,7 +120,7 @@ var g_info = {
   "rnd_hist_idx":0,
 
   "palette": [
-  {  
+  {
     "name": "kov_02",
     "colors": ["#e8dccc", "#e94641", "#eeaeae"],
     "stroke": "#e8dccc",
@@ -173,7 +207,6 @@ var g_info = {
 
   ],
   "palette_choice": {},
-  //"isubdiv": -1,
 
   "n_row": 5,
   "n_col": 5,
@@ -368,7 +401,7 @@ function _brightness(r, g, b) {
 //
 
 var example_paths0 = [[{X:10,Y:10},{X:110,Y:10},{X:110,Y:110},{X:10,Y:110}],
-                    [{X:20,Y:20},{X:20,Y:100},{X:100,Y:100},{X:100,Y:20}]]; 
+                    [{X:20,Y:20},{X:20,Y:100},{X:100,Y:100},{X:100,Y:20}]];
 var example_paths1 = [[{X:50,Y:50},{X:150,Y:50},{X:150,Y:150},{X:50,Y:150}],
                     [{X:60,Y:60},{X:60,Y:140},{X:140,Y:140},{X:140,Y:60}]];
 
@@ -525,16 +558,17 @@ function _clip_xor( rop_pgns, _pgnsA, _pgnsB ) {
 
   return rop_pgns;
 
-
+  /*
   clpr.AddPolygons( pgnsA, subjPolyType );
   clpr.AddPolygons( pgnsB, clipPolyType );
 
   clpr.Execute(clipType, rop_pgns, fillType, fillType );
+  */
 
 }
 
 function _clip_offset( ofs_pgns, inp_pgns, ds ) {
-  var joinType = ClipperLib.JoinType.jtRound; 
+  var joinType = ClipperLib.JoinType.jtRound;
   var miterLimit = 10;
   var autoFix = true;
 
@@ -598,8 +632,11 @@ function stripe_gate(ctx, x, y, width, phase, empty_width, stripe_width, color) 
   let _s = empty_width + stripe_width;
   let n = Math.ceil( width / _s );
 
+  // trailing _s/2 term fudged for superpause
+  //
+
   for (i=-(n+3); i<(n+3); i++) {
-    let _x = i*_s + phase*_s*2;
+    let _x = i*_s + phase*_s*2 + _s/2;
     epgn.push([
       { "X": _x, "Y":0 },
       { "X": _x + empty_width, "Y":0 },
@@ -623,8 +660,11 @@ function stripe_gate_v(ctx, x, y, width, phase, empty_width, stripe_width, color
   let _s = empty_width + stripe_width;
   let n = Math.ceil( width / _s );
 
+  // trailing _s/2 term fudged for superpause
+  //
+
   for (i=-(n+3); i<(n+3); i++) {
-    let _y = i*_s + phase*_s*2;
+    let _y = i*_s + phase*_s*2 + _s/2;
     epgn.push([
       { "X": 0, "Y": _y },
       { "X": width, "Y": _y },
@@ -828,10 +868,13 @@ function square_grid(ctx, x, y, n, tot_width, small_square_width, color, phase) 
   let _phase_x = small_square_width*2*(1.0 + Math.cos(Math.PI*2*phase))/2.0;
   let _phase_y = small_square_width*2*(1.0 + Math.sin(Math.PI*2*phase))/2.0;
 
+  // the _sw/4 and _ds/2 + _sw/8 are fudged
+  //
+
   for (let i=-3; i<(n+3); i++) {
     for (let j=-3; j<(n+3); j++) {
-      let _x = i*_ds + _phase_x,
-          _y = j*_ds + _phase_y;
+      let _x = i*_ds + _phase_x + _sw/4,
+          _y = j*_ds + _phase_y - _ds/2 + _sw/8;
 
       epgn.push([
         {"X": _x,       "Y": _y },
@@ -1753,7 +1796,7 @@ function downloadsvg() {
 
   let bg_rect = '<rect width="' + wpx + '" height="' + hpx + '" style="stroke:none;stroke-width:0;fill:' + g_info.bg_color + '" />';
   svg_lines.push(bg_rect);
-  
+
   for (let i=0; i<g_info.hist.length; i++) {
 
     /*
@@ -1897,14 +1940,29 @@ function init_param() {
 
   g_info.symmetry_type = Math.floor(_mrnd()*2);
 
+  let _group_prob = 0.75*_mrnd() + 0.25;
+
+  g_info.group_probability = _group_prob;
+
   // choose subset of shapes to use
   //
   let f_name = [];
   for (let i=0; i<g_info.f_list.length; i++) {
-    //if ( fxrand() < 0.5 ) {
-    if ( fxrand() < 0.65 ) {
-      g_info.f_list_cur.push(g_info.f_list[i]);
-      f_name.push(g_info.f_list[i].v);
+    if ( _mrnd() < _group_prob) {
+      for (let j=0; j<g_info.f_list[i].p.length; j++) {
+        g_info.f_list_cur.push(g_info.f_list[i].p[j]);
+        f_name.push(g_info.f_list[i].p[j].v);
+      }
+    }
+  }
+
+  // force something if we didn't choose anything
+  //
+  if (f_name.length == 0) {
+    let idx = Math.floor(_mrnd()*g_info.f_list.length);
+    for (let j=0; j<g_info.f_list[idx].p.length; j++) {
+      g_info.f_list_cur.push(g_info.f_list[idx].p[j]);
+      f_name.push(g_info.f_list[idx].p[j].v);
     }
   }
   f_name.sort();
@@ -1919,6 +1977,8 @@ function init_param() {
   g_info.features["Columns"] = g_info.n_col;
   g_info.features["Rows"] = g_info.n_row;
   g_info.features["Symmetry Type"] = g_info.symmetry_type;
+
+  g_info.features["Group Probability"] = _group_prob;
 
   window.$fxhashFeatures = g_info.features;
 }
@@ -1984,8 +2044,6 @@ function init_fin() {
   g_info.size = dS - 25;
   g_info.tick = 0;
 
-  //let isubdiv = g_info.isubdiv;
-
   g_info.f_hist = [];
 
   g_info.rnd_hist_active = true;
@@ -1994,16 +2052,19 @@ function init_fin() {
 
   let sym_type = g_info.symmetry_type;
 
-
-  //let nrow = Math.floor(_mrnd()*5) + 5;
-  //let ncol = Math.floor(_mrnd()*5) + 5;
   let nrow = g_info.n_row;
   let ncol = g_info.n_col;
   let ncell = ((nrow>ncol) ? nrow : ncol);
 
-  ncell = nrow;
-
   let _winsz = dS / ncell;
+
+  if ((ncell*_winsz) > dS) {
+    ncell = ((nrow>ncol) ? nrow : ncol);
+  }
+
+
+  //ncell = nrow;
+
 
   let _offx = (W - ncol*_winsz)/2;
   let _offy = (H - nrow*_winsz)/2;
