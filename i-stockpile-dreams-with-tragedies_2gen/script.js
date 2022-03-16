@@ -32,7 +32,7 @@ var g_info = {
   "tick_val" : 0,
   "anim": true,
 
-  "bg_color" : "#111",
+  "bg_color" : "#151515",
 
   "f_list_cur": [],
   "f_list": [
