@@ -14,6 +14,7 @@ var g_info = {
   "PROJECT" : "I Stockpile Dreams With Tragedies",
   "VERSION" : "2.0.0",
   "download_filename": "stockpile_dream_tragedy_2gen.png",
+  "download_filename_svg": "stockpile_dream_tragedy_2gen.svg",
 
   "ready": false,
   "pause": false,
@@ -623,7 +624,7 @@ function polygons(ctx, x, y, pgn, color) {
 
 }
 
-function stripe_gate(ctx, x, y, width, phase, empty_width, stripe_width, color) {
+function stripe_gate(ctx, x, y, width, phase, empty_width, stripe_width, color, ropt) {
   phase = ((typeof phase === "undefined") ? 0 : phase);
 
   let opgn = [ [ {"X":0,"Y":0}, {"X":width,"Y":0}, {"X":width,"Y":width}, {"X":0,"Y":width} ] ];
@@ -649,9 +650,16 @@ function stripe_gate(ctx, x, y, width, phase, empty_width, stripe_width, color) 
   _clip_difference(rop, opgn, epgn);
 
   polygons(ctx, x, y, rop, color);
+
+  if (typeof ropt !== "undefined") {
+    ropt["pgns"] = rop;
+    ropt["x"] = x;
+    ropt["y"] = y;
+  }
+
 }
 
-function stripe_gate_v(ctx, x, y, width, phase, empty_width, stripe_width, color) {
+function stripe_gate_v(ctx, x, y, width, phase, empty_width, stripe_width, color, ropt) {
   phase = ((typeof phase === "undefined") ? 0 : phase);
 
   let opgn = [ [ {"X":0,"Y":0}, {"X":width,"Y":0}, {"X":width,"Y":width}, {"X":0,"Y":width} ] ];
@@ -677,9 +685,15 @@ function stripe_gate_v(ctx, x, y, width, phase, empty_width, stripe_width, color
   _clip_difference(rop, opgn, epgn);
 
   polygons(ctx, x, y, rop, color);
+
+  if (typeof ropt !== "undefined") {
+    ropt["pgns"] = rop;
+    ropt["x"] = x;
+    ropt["y"] = y;
+  }
 }
 
-function stripe_45_square(ctx, x, y, width, phase, empty_width, stripe_width, color) {
+function stripe_45_square(ctx, x, y, width, phase, empty_width, stripe_width, color, ropt) {
   phase = ((typeof phase === "undefined") ? 0 : phase);
 
   let opgn = [ [ {"X":0,"Y":0}, {"X":width,"Y":0}, {"X":width,"Y":width}, {"X":0,"Y":width} ] ];
@@ -702,9 +716,16 @@ function stripe_45_square(ctx, x, y, width, phase, empty_width, stripe_width, co
   _clip_difference(rop, opgn, epgn);
 
   polygons(ctx, x, y, rop, color);
+
+  if (typeof ropt !== "undefined") {
+    ropt["pgns"] = rop;
+    ropt["x"] = x;
+    ropt["y"] = y;
+  }
+
 }
 
-function stripe_m45_square(ctx, x, y, width, phase, empty_width, stripe_width, color) {
+function stripe_m45_square(ctx, x, y, width, phase, empty_width, stripe_width, color, ropt) {
   phase = ((typeof phase === "undefined") ? 0 : phase);
 
   let opgn = [ [ {"X":0,"Y":0}, {"X":width,"Y":0}, {"X":width,"Y":width}, {"X":0,"Y":width} ] ];
@@ -728,134 +749,16 @@ function stripe_m45_square(ctx, x, y, width, phase, empty_width, stripe_width, c
   _clip_difference(rop, opgn, epgn);
 
   polygons(ctx, x, y, rop, color);
-}
 
-function stripe_45_square_old(ctx, x, y, width, phase, empty_width, stripe_width, color) {
-  phase = ((typeof phase === "undefined") ? 0 : phase);
-  let p = [], q = [];
-
-  phase=0;
-
-  let _s = empty_width + stripe_width;
-
-  if (phase < 0) {
-    let q = -Math.floor(phase / _s) ;
-    phase = phase + q*_s;
+  if (typeof ropt !== "undefined") {
+    ropt["pgns"] = rop;
+    ropt["x"] = x;
+    ropt["y"] = y;
   }
-
-  if (phase > _s) {
-    let q = Math.floor(phase / _s) + 1;
-    phase = phase - q*_s;
-  }
-
-  //console.log(phase);
-
-  let z=phase;
-  for ( ; z<width; z+=_s) {
-    let _ze = z+stripe_width;
-    if (_ze > width) { _ze = width; }
-
-    let _zs = z;
-    if (_zs < 0) { _zs = 0; }
-    p.push([_zs, _ze]);
-  }
-
-  for ( z -= width; z<width; z+=_s) {
-    let _ze = z+stripe_width;
-    if (_ze > width) { _ze = width; }
-    q.push([z, _ze]);
-  }
-
-  ctx.lineWidth = 0;
-  ctx.fillStyle = color;
-  ctx.beginPath();
-  for (let i=0; i<p.length; i++) {
-    ctx.moveTo( x + p[i][0], y );
-    ctx.lineTo( x + p[i][1], y );
-    ctx.lineTo( x , y + p[i][1] );
-    ctx.lineTo( x , y + p[i][0] );
-  }
-
-  for (let i=0; i<q.length; i++) {
-    ctx.moveTo( x + width, y + q[i][0] );
-    ctx.lineTo( x + width, y + q[i][1] );
-    ctx.lineTo( x + q[i][1], y + width );
-    ctx.lineTo( x + q[i][0], y + width );
-  }
-
-  let _n = p.length-1;
-  if (_n > 0) {
-    let _e0 = p[ p.length-1 ][0] + stripe_width - width;
-
-    if (_e0 > 0) {
-      ctx.moveTo( x + width, y );
-      ctx.lineTo( x + width, y + _e0 );
-      ctx.lineTo( x + _e0, y + width );
-      ctx.lineTo( x , y + width );
-    }
-  }
-
-  ctx.fill();
 
 }
 
-function stripe_m45_square_old(ctx, x, y, width, phase, empty_width, stripe_width, color) {
-  let p = [], q = [];
-
-  let _s = empty_width + stripe_width;
-
-  let z=phase;
-  for ( ; z<width; z+=_s) {
-    let _ze = z+stripe_width;
-    if (_ze > width) { _ze = width; }
-    p.push([z, _ze]);
-  }
-
-  //for ( z -= width; z<width; z+=_s) {
-  for ( z = empty_width - phase; z<width; z+=_s) {
-    let _zs = z;
-    if (_zs < 0) { _zs = 0; }
-
-    let _ze = z + stripe_width;
-    if (_ze > width) { _ze = width; }
-    q.push([_zs, _ze]);
-  }
-
-  ctx.lineWidth = 0;
-  ctx.fillStyle = color;
-  ctx.beginPath();
-  for (let i=0; i<p.length; i++) {
-    ctx.moveTo( x + p[i][0], y );
-    ctx.lineTo( x + p[i][1], y );
-    ctx.lineTo( x + width , y + width - p[i][1]  );
-    ctx.lineTo( x + width , y + width - p[i][0]  );
-  }
-
-  for (let i=0; i<q.length; i++) {
-    ctx.moveTo( x , y + q[i][0] );
-    ctx.lineTo( x , y + q[i][1] );
-    ctx.lineTo( x + width - q[i][1], y + width );
-    ctx.lineTo( x + width - q[i][0], y + width );
-  }
-
-  let _n = p.length-1;
-
-  if (p.length > 0) {
-    let _e0 = p[0][0] - _s + stripe_width ;
-
-    if (_e0 > 0) {
-      ctx.moveTo( x , y );
-      ctx.lineTo( x + _e0, y );
-      ctx.lineTo( x + width , y + width - _e0);
-      ctx.lineTo( x + width , y + width );
-    }
-  }
-
-  ctx.fill();
-
-}
-
-function square_grid(ctx, x, y, n, tot_width, small_square_width, color, phase) {
+function square_grid(ctx, x, y, n, tot_width, small_square_width, color, phase, ropt) {
   phase = ((typeof phase === "undefined") ? 0 : phase);
 
   let _inset_width = tot_width - small_square_width;
@@ -891,6 +794,12 @@ function square_grid(ctx, x, y, n, tot_width, small_square_width, color, phase) 
 
   polygons(ctx, x, y, rop, color);
 
+  if (typeof ropt !== "undefined") {
+    ropt["pgns"] = rop;
+    ropt["x"] = x;
+    ropt["y"] = y;
+  }
+
 }
 
 // pretty hacky...might need to revisit
@@ -900,7 +809,7 @@ function square_grid(ctx, x, y, n, tot_width, small_square_width, color, phase) 
 //  w = 200
 //  hatching_grid(ctx, 410, 410, 4, w, w/6.25, "rgba(255,255,255,0.95)");
 //
-function hatching_grid(ctx, x, y, ndiag, tot_width, small_square_width, color, phase) {
+function hatching_grid(ctx, x, y, ndiag, tot_width, small_square_width, color, phase, ropt) {
   phase = ((typeof phase === "undefined") ? 0 : phase );
   let opgn = [ [ {"X":0,"Y":0}, {"X":tot_width,"Y":0}, {"X":tot_width,"Y":tot_width}, {"X":0,"Y":tot_width} ] ];
   let epgn = [];
@@ -945,9 +854,15 @@ function hatching_grid(ctx, x, y, ndiag, tot_width, small_square_width, color, p
 
   polygon_with_holes(ctx, x, y, rop, color);
 
+  if (typeof ropt !== "undefined") {
+    ropt["pgns"] = rop;
+    ropt["x"] = x;
+    ropt["y"] = y;
+  }
+
 }
 
-function square_square(ctx, x, y, owidth, iwidth, color) {
+function square_square(ctx, x, y, owidth, iwidth, color, ropt) {
   ctx.lineWidth = 0;
   ctx.fillStyle = color;
   ctx.beginPath();
@@ -966,9 +881,29 @@ function square_square(ctx, x, y, owidth, iwidth, color) {
 
   ctx.fill();
 
+  if (typeof ropt !== "undefined") {
+    let rop = [[
+      { "X": x, "Y": y },
+      { "X": x + owidth, "Y":y },
+      { "X": x + owidth, "Y": y + owidth },
+      { "X": x, "Y": y + owidth }
+    ]];
+
+    rop.push([
+      { "X": x + _ds, "Y": y + _ds },
+      { "X": x + _ds , "Y": y + _ds + iwidth },
+      { "X": x + _ds + iwidth, "Y": y + _ds + iwidth },
+      { "X": x + _ds + iwidth, "Y": y + _ds }
+    ]);
+
+    ropt["pgns"] = rop;
+    ropt["x"] = 0;
+    ropt["y"] = 0;
+  }
+
 }
 
-function square_circle(ctx, x, y, owidth, ir, color) {
+function square_circle(ctx, x, y, owidth, ir, color, ropt) {
   ctx.lineWidth = 0;
   ctx.fillStyle = color;
   ctx.beginPath();
@@ -984,9 +919,32 @@ function square_circle(ctx, x, y, owidth, ir, color) {
   ctx.arc( x + owidth/2, y + owidth/2, ir, 0, 2*Math.PI, true);
 
   ctx.fill();
+
+  if (typeof ropt !== "undefined") {
+    let rop = [[
+      { "X": x, "Y": y },
+      { "X": x + owidth, "Y":y },
+      { "X": x + owidth, "Y": y + owidth },
+      { "X": x, "Y": y + owidth }
+    ]];
+
+    let N = 128;
+    let circ = [];
+    for (let i=0; i<N; i++) {
+      let _px = ir*Math.cos(Math.PI*2*(i/N));
+      let _py = ir*Math.sin(Math.PI*2*(i/N));
+      circ.push( {"X": x + owidth/2 + _px, "Y": y + owidth/2 + _py } );
+    }
+    rop.push(circ);
+
+    ropt["pgns"] = rop;
+    ropt["x"] = 0;
+    ropt["y"] = 0;
+  }
+
 }
 
-function square_plus(ctx, x, y, width, height, band_x, band_y, color) {
+function square_plus(ctx, x, y, width, height, band_x, band_y, color, ropt) {
 
   let _dx0 = (width - band_x)/2;
   let _dx1 = (band_x + _dx0);
@@ -1014,12 +972,18 @@ function square_plus(ctx, x, y, width, height, band_x, band_y, color) {
 
   polygons(ctx, x, y, v, color);
 
-  return v;
+  if (typeof ropt !== "undefined") {
+    ropt["pgns"] = v;
+    ropt["x"] = x;
+    ropt["y"] = y;
+  }
+
+  //return v;
 }
 
 
 
-function circle_circle(ctx, x, y, outer_r, inner_r, color) {
+function circle_circle(ctx, x, y, outer_r, inner_r, color, ropt) {
   ctx.lineWidth = 0;
   ctx.fillStyle = color;
   ctx.beginPath();
@@ -1031,9 +995,37 @@ function circle_circle(ctx, x, y, outer_r, inner_r, color) {
   ctx.arc( x, y, inner_r, 0, 2*Math.PI, true);
 
   ctx.fill();
+
+  if (typeof ropt !== "undefined") {
+    let rop = [];
+
+    let N = 128;
+    let ocirc = [];
+    for (let i=0; i<N; i++) {
+      let _px = outer_r*Math.cos(Math.PI*2*(i/N));
+      let _py = outer_r*Math.sin(Math.PI*2*(i/N));
+      ocirc.push( {"X": x + _px, "Y": y + _py } );
+    }
+    rop.push(ocirc);
+
+    let icirc = [];
+    for (let i=0; i<N; i++) {
+      let _px =  inner_r*Math.cos(Math.PI*2*(i/N));
+      let _py = -inner_r*Math.sin(Math.PI*2*(i/N));
+      icirc.push( {"X": x + _px, "Y": y + _py } );
+    }
+    rop.push(ocirc);
+
+
+    ropt["pgns"] = rop;
+    ropt["x"] = 0;
+    ropt["y"] = 0;
+  }
+
+
 }
 
-function circle_square(ctx, x, y, r, width, color, phase) {
+function circle_square(ctx, x, y, r, width, color, phase, ropt) {
   phase = ((typeof phase === "undefined") ? 0.0 : phase);
   ctx.lineWidth = 0;
   ctx.fillStyle = color;
@@ -1063,21 +1055,36 @@ function circle_square(ctx, x, y, r, width, color, phase) {
   ctx.lineTo( x + pnts[3][0], y + pnts[3][1] );
 
   ctx.fill();
-  return;
 
-  let _x = x - r/2,
-      _y = y - r/2;
+  if (typeof ropt !== "undefined") {
+    let rop = [];
+
+    let N = 128;
+    let ocirc = [];
+    for (let i=0; i<N; i++) {
+      let _px = r*Math.cos(Math.PI*2*(i/N));
+      let _py = r*Math.sin(Math.PI*2*(i/N));
+      ocirc.push( {"X": x + _px, "Y": y + _py } );
+    }
+    rop.push(ocirc);
+
+    let sq = [
+      { "X": x + pnts[0][0], "Y": y + pnts[0][1] },
+      { "X": x + pnts[1][0], "Y": y + pnts[1][1] },
+      { "X": x + pnts[2][0], "Y": y + pnts[2][1] },
+      { "X": x + pnts[3][0], "Y": y + pnts[3][1] }
+    ];
+    rop.push(sq);
+
+    ropt["pgns"] = rop;
+    ropt["x"] = 0;
+    ropt["y"] = 0;
+  }
 
 
-  ctx.moveTo(_x,_y);
-  ctx.lineTo(_x, _y + width);
-  ctx.lineTo(_x + width, _y + width);
-  ctx.lineTo(_x + width, _y);
-
-  ctx.fill();
 }
 
-function circle_invquarter(ctx, x, y, _r, ang, color) {
+function circle_invquarter(ctx, x, y, _r, ang, color, phase, ropt) {
   phase = ((typeof phase === "undefined") ? 0 : phase);
   let sq_pgn = [[]];
   let circle_pgn = [[]];
@@ -1117,9 +1124,17 @@ function circle_invquarter(ctx, x, y, _r, ang, color) {
   _clip_difference(rop, sq_pgn, circle_pgn);
 
   polygons(ctx, x, y, rop, color);
+
+
+  if (typeof ropt !== "undefined") {
+    ropt["pgns"] = rop;
+    ropt["x"] = x;
+    ropt["y"] = y;
+  }
+
 }
 
-function circle_drop(ctx, x, y, _r, ang, color) {
+function circle_drop(ctx, x, y, _r, ang, color, phase, ropt) {
   phase = ((typeof phase === "undefined") ? 0 : phase);
   let circle_pgn = [[]];
   let circle_pgn1 = [[]];
@@ -1172,9 +1187,17 @@ function circle_drop(ctx, x, y, _r, ang, color) {
   _clip_intersect(rop, circle_pgn, circle_pgn1);
 
   polygons(ctx, x, y, rop, color);
+
+  if (typeof ropt !== "undefined") {
+    ropt["pgns"] = rop;
+    ropt["x"] = x;
+    ropt["y"] = y;
+  }
+
+
 }
 
-function circle_quarter(ctx, x, y, _r, ang, color) {
+function circle_quarter(ctx, x, y, _r, ang, color, phase, ropt) {
   phase = ((typeof phase === "undefined") ? 0 : phase);
   let circle_pgn = [[]];
   let band_pgn = [];
@@ -1206,9 +1229,17 @@ function circle_quarter(ctx, x, y, _r, ang, color) {
   }
 
   polygons(ctx, x, y, circle_pgn, color);
+
+  if (typeof ropt !== "undefined") {
+    ropt["pgns"] = circle_pgn;
+    ropt["x"] = x;
+    ropt["y"] = y;
+  }
+
+
 }
 
-function circle_half(ctx, x, y, r, color, phase) {
+function circle_half(ctx, x, y, r, color, phase, ropt) {
   phase = ((typeof phase === "undefined") ? 0 : phase);
   let circle_pgn = [[]];
   let band_pgn = [];
@@ -1246,10 +1277,16 @@ function circle_half(ctx, x, y, r, color, phase) {
   _clip_difference(rop, circle_pgn, band_pgn);
 
   polygons(ctx, x, y, rop, color);
+
+  if (typeof ropt !== "undefined") {
+    ropt["pgns"] = rop;
+    ropt["x"] = x;
+    ropt["y"] = y;
+  }
+
 }
 
-
-function circle_band(ctx, x, y, r, band_x, band_y, color, phase) {
+function circle_band(ctx, x, y, r, band_x, band_y, color, phase, ropt) {
   phase = ((typeof phase === "undefined") ? 0 : phase);
   let circle_pgn = [[]];
   let band_pgn = [];
@@ -1317,9 +1354,16 @@ function circle_band(ctx, x, y, r, band_x, band_y, color, phase) {
   _clip_difference(rop, circle_pgn, band_pgn);
 
   polygons(ctx, x, y, rop, color);
+
+  if (typeof ropt !== "undefined") {
+    ropt["pgns"] = rop;
+    ropt["x"] = x;
+    ropt["y"] = y;
+  }
+
 }
 
-function square_band(ctx, x, y, width, height, band_x, band_y, color) {
+function square_band(ctx, x, y, width, height, band_x, band_y, color, ropt) {
   let outer_pgn = [[]];
   let inner_pgn = [];
 
@@ -1359,6 +1403,13 @@ function square_band(ctx, x, y, width, height, band_x, band_y, color) {
   _clip_difference(rop, outer_pgn, inner_pgn);
 
   polygons(ctx, x, y, rop, color);
+
+  if (typeof ropt !== "undefined") {
+    ropt["pgns"] = rop;
+    ropt["x"] = x;
+    ropt["y"] = y;
+  }
+
 }
 
 //------------
@@ -1431,116 +1482,121 @@ function test_f(ctx) {
   square_band(ctx, 301, 401, 98, 98, 40, 40, color);
 }
 
-function disp(ctx, fname, x, y, w, c, phase) {
+function disp(ctx, fname, x, y, w, c, phase, ropt) {
+
+  if (typeof ropt !== "undefined") {
+    ropt["c"] = c;
+  }
 
   let v=1;
 
   if (fname == "stripe_45_square") {
     //                    x  y  w  p   e   f    c
-    stripe_45_square(ctx, x+v, y+v, w-2*v, phase, w/10, w/5, c);
+    stripe_45_square(ctx, x+v, y+v, w-2*v, phase, w/10, w/5, c, ropt);
   }
   else if (fname == "stripe_m45_square") {
     //                    x  y  w  p   e   f    c
-    stripe_m45_square(ctx, x+v, y+v, w-2*v, phase, w/10, w/5, c);
+    stripe_m45_square(ctx, x+v, y+v, w-2*v, phase, w/10, w/5, c, ropt);
   }
 
   else if (fname == "stripe_gate:0") {
     //               x     y    w      p       e    f    c
-    stripe_gate(ctx, x+v, y+v, w-2*v, phase, w/12, w/12, c);
+    stripe_gate(ctx, x+v, y+v, w-2*v, phase, w/12, w/12, c, ropt);
   }
   else if (fname == "stripe_gate:1") {
     //               x     y    w      p       e    f    c
-    stripe_gate_v(ctx, x+v, y+v, w-2*v, phase, w/12, w/12, c);
+    stripe_gate_v(ctx, x+v, y+v, w-2*v, phase, w/12, w/12, c, ropt);
   }
 
 
 
   else if (fname == "square_grid") {
     //               x   y n  w   sw   c
-    square_grid(ctx, x+v, y+v, 5, w-2*v, w/10, c, phase);
+    square_grid(ctx, x+v, y+v, 5, w-2*v, w/10, c, phase, ropt);
   }
 
   else if (fname == "hatching_grid") {
     //                  x    y   n  w    ew   c
-    hatching_grid(ctx, x+v, y+v, 4, w-2*v, w/6.25, c, phase);
+    hatching_grid(ctx, x+v, y+v, 4, w-2*v, w/6.25, c, phase, ropt);
   }
 
   else if (fname == "square_square") {
     //                  x    y    ow, ow
-    square_square(ctx, x+v, y+v, w-2*v, w/2, c);
+    square_square(ctx, x+v, y+v, w-2*v, w/2, c, ropt, ropt);
   }
 
   else if (fname == "square_plus") {
-    square_plus(ctx, x+v, y+v, w, w, w/3, w/3, c);
+    square_plus(ctx, x+v, y+v, w, w, w/3, w/3, c, ropt);
   }
 
   else if (fname == "square_circle") {
-    square_circle(ctx, x+v, y+v, w-2*v, w/4, c);
+    square_circle(ctx, x+v, y+v, w-2*v, w/4, c, ropt);
   }
 
   else if (fname == "circle_circle") {
-    circle_circle(ctx, x+w/2, y+w/2, w/2 - v, w/4, c);
+    circle_circle(ctx, x+w/2, y+w/2, w/2 - v, w/4, c, ropt);
   }
 
   else if (fname == "circle_square") {
-    circle_square(ctx, x+w/2, y+w/2, w/2 - v, w/2, c, phase);
+    circle_square(ctx, x+w/2, y+w/2, w/2 - v, w/2, c, phase, ropt);
   }
 
   else if (fname == "circle_band") {
-    circle_band(ctx, x+w/2, y+w/2, w/2 - v, w/3, 0, c, phase);
+    circle_band(ctx, x+w/2, y+w/2, w/2 - v, w/3, 0, c, phase, ropt);
   }
 
   else if (fname == "circle_band:1") {
-    circle_band(ctx, x+w/2, y+w/2, w/2 - v, w/3, w/3, c, phase);
+    circle_band(ctx, x+w/2, y+w/2, w/2 - v, w/3, w/3, c, phase, ropt);
   }
 
   else if (fname == "circle_half") {
-    circle_half(ctx, x+w/2, y+w/2, w/2 - v, c, phase);
+    circle_half(ctx, x+w/2, y+w/2, w/2 - v, c, phase, ropt);
   }
 
+
   else if (fname == "circle_quarter:0") {
-    circle_quarter(ctx, x+w/2, y+w/2, w - v, 0, c, phase);
+    circle_quarter(ctx, x+w/2, y+w/2, w - v, 0, c, phase, ropt);
   }
   else if (fname == "circle_quarter:1") {
-    circle_quarter(ctx, x+w/2, y+w/2, w - v, Math.PI/2, c, phase);
+    circle_quarter(ctx, x+w/2, y+w/2, w - v, Math.PI/2, c, phase, ropt);
   }
   else if (fname == "circle_quarter:2") {
-    circle_quarter(ctx, x+w/2, y+w/2, w - v, Math.PI, c, phase);
+    circle_quarter(ctx, x+w/2, y+w/2, w - v, Math.PI, c, phase, ropt);
   }
   else if (fname == "circle_quarter:3") {
-    circle_quarter(ctx, x+w/2, y+w/2, w - v, 3*Math.PI/2, c, phase);
+    circle_quarter(ctx, x+w/2, y+w/2, w - v, 3*Math.PI/2, c, phase, ropt);
   }
 
   else if (fname == "circle_invquarter:0") {
-    circle_invquarter(ctx, x+w/2, y+w/2, w - v, 0, c, phase);
+    circle_invquarter(ctx, x+w/2, y+w/2, w - v, 0, c, phase, ropt);
   }
   else if (fname == "circle_invquarter:1") {
-    circle_invquarter(ctx, x+w/2, y+w/2, w - v, Math.PI/2, c, phase);
+    circle_invquarter(ctx, x+w/2, y+w/2, w - v, Math.PI/2, c, phase, ropt);
   }
   else if (fname == "circle_invquarter:2") {
-    circle_invquarter(ctx, x+w/2, y+w/2, w - v, Math.PI, c, phase);
+    circle_invquarter(ctx, x+w/2, y+w/2, w - v, Math.PI, c, phase, ropt);
   }
   else if (fname == "circle_invquarter:3") {
-    circle_invquarter(ctx, x+w/2, y+w/2, w - v, 3*Math.PI/2, c, phase);
+    circle_invquarter(ctx, x+w/2, y+w/2, w - v, 3*Math.PI/2, c, phase, ropt);
   }
 
   else if (fname == "circle_drop:0") {
-    circle_drop(ctx, x+w/2, y+w/2, w - v, 0, c, phase);
+    circle_drop(ctx, x+w/2, y+w/2, w - v, 0, c, phase, ropt);
   }
   else if (fname == "circle_drop:1") {
-    circle_drop(ctx, x+w/2, y+w/2, w - v, Math.PI/2, c, phase);
+    circle_drop(ctx, x+w/2, y+w/2, w - v, Math.PI/2, c, phase, ropt);
   }
 
   else if (fname == "square_band") {
-    square_band(ctx, x+v, y+v, w-2*v, w-2*v, w/3, 0, c);
+    square_band(ctx, x+v, y+v, w-2*v, w-2*v, w/3, 0, c, ropt);
   }
 
   else if (fname == "square_band:1") {
-    square_band(ctx, x+v, y+v, w-2*v, w-2*v, 0, w/3, c);
+    square_band(ctx, x+v, y+v, w-2*v, w-2*v, 0, w/3, c, ropt);
   }
 
   else if (fname == "square_band:2") {
-    square_band(ctx, x+v, y+v, w-2*v, w-2*v, w/3, w/3, c);
+    square_band(ctx, x+v, y+v, w-2*v, w-2*v, w/3, w/3, c, ropt);
   }
 
 }
@@ -1557,7 +1613,7 @@ function disp(ctx, fname, x, y, w, c, phase) {
 // shape_idx - shape  index to use (position in f_list)
 //
 
-function gen_hist_r(ctx, opt) {
+function gen_hist_r(ctx,opt) {
   let x = opt.x;
   let y = opt.y;
   let w = opt.w;
@@ -1568,6 +1624,10 @@ function gen_hist_r(ctx, opt) {
   let use_rnd_hist = ((typeof opt.use_rnd_hist === "undefined") ? false : opt.use_rnd_hist);
   let shape_lib_name = ((typeof opt.shape_lib_name === "undefined") ? "" : opt.shape_lib_name);
   let palette_idx = ((typeof opt.palette_idx === "undefined") ? -1 : opt.palette_idx);
+
+  if (typeof opt.f_hist  === "undefined") {
+    opt.f_hist = [];
+  }
 
   if (recur_level >= max_recur) { return; }
 
@@ -1637,14 +1697,15 @@ function gen_hist_r(ctx, opt) {
     let _ds = w - R*w;
 
     let _func = (function(_p_ctx, _p_f, _p_x, _p_y, _p_w, _p_c, _p_F, _p_i_p) {
-      return function(__s) {
+      return function(__s, _ropt) {
         let _phase = (1.0 + Math.sin(Math.PI*2*_p_F*(g_info.tick/512 + _p_i_p)))/2.0;
         if (typeof __s !== "undefined") { _phase = __s; }
-        disp(_p_ctx, _p_f, _p_x, _p_y, _p_w, _p_c, _phase);
+        disp(_p_ctx, _p_f, _p_x, _p_y, _p_w, _p_c, _phase, _ropt);
       };
     })(ctx, _f, x + _ds/2, y + _ds/2, w - _ds, _c, _freq, _init_phase);
 
-    g_info.f_hist.push( {"f": _func, "lvl": recur_level });
+    //g_info.f_hist.push( {"f": _func, "lvl": recur_level });
+    opt.f_hist.push( {"f": _func, "lvl": recur_level });
 
   }
 
@@ -1684,14 +1745,15 @@ function gen_hist_r(ctx, opt) {
     let ds = w - R*w;
 
     let _func = (function(_p_ctx, _p_f, _p_x, _p_y, _p_w, _p_c, _p_F, _p_i_p) {
-      return function(__s) {
+      return function(__s, _ropt) {
         let _phase = (1.0 + Math.sin(Math.PI*2*_p_F*(g_info.tick/512 + _p_i_p)))/2.0;
         if (typeof __s !== "undefined") { _phase = __s; }
-        disp(_p_ctx, _p_f, _p_x, _p_y, _p_w, _p_c, _phase);
+        disp(_p_ctx, _p_f, _p_x, _p_y, _p_w, _p_c, _phase, _ropt);
       };
     })(ctx, _f, x - ds/2, y - ds/2, w - ds, _c, _freq, _init_phase);
 
-    g_info.f_hist.push( {"f": _func, "lvl": recur_level });
+    //g_info.f_hist.push( {"f": _func, "lvl": recur_level });
+    opt.f_hist.push( {"f": _func, "lvl": recur_level });
 
     do_recur = true;
   }
@@ -1779,7 +1841,52 @@ function clear(ctx, clear_width, clear_height, bg_color) {
   ctx.fill();
 }
 
+// create a 'raw' svg path string (without any of the xml bits)
+// from the polygons as returned by clipper lib
+//
+function polygons2svg_raw_path(pgns, scale, x, y) {
+  let svg_ele = [];
 
+  for (let i=0; i<pgns.length; i++) {
+    let pgn = pgns[i];
+    for (let j=0; j<pgn.length; j++) {
+      if (j==0) {
+        svg_ele.push("M " + (x + (pgn[j].X*scale)).toString() + " " + (y + (pgn[j].Y*scale)).toString());
+      }
+      else {
+        svg_ele.push("L " + (x + (pgn[j].X*scale)).toString() + " " + (y + (pgn[j].Y*scale)).toString());
+      }
+    }
+  }
+
+  let sfx = "Z";
+
+  return svg_ele.join(" ") + sfx;
+}
+
+function polygons2svgpath(pgns, scale, x, y, c) {
+
+  let _fillc = "#777";
+  let _opac = "1.0";
+
+  if (c.match(/^rgba/)) {
+    let tok = c.replace(/rgba|[\(\)]/g, '').split(",");
+    let r = parseFloat(tok[0]);
+    let g = parseFloat(tok[1]);
+    let b = parseFloat(tok[2]);
+    let alpha = parseFloat(tok[3]);
+    
+    _fillc = _rgb2hex(r,g,b);
+    _opac = tok[3];
+  }
+
+  let _p = polygons2svg_raw_path(pgns, scale, x, y);
+  let _sp = '<path d="' + _p + '" stroke="none" fill="' + _fillc + '" fill-opacity="' + _opac + '" stroke-width="0" />';
+  return _sp;
+}
+
+// wip
+//
 function downloadsvg() {
   let ppi = g_info.ppi;
   let svg_w = g_info.svg_width_in;
@@ -1790,6 +1897,10 @@ function downloadsvg() {
   let wpx = (ppi*svg_w).toString();
   let hpx = (ppi*svg_h).toString();
 
+  let scale = hpx/g_info.height;
+
+  let offsetx = -wpx/2 ;
+
   svg_lines.push('<svg viewBox="0 0 ' + wpx + ' ' + hpx + '" ' +
     ' width="' + wpx + '" height="' + hpx + '" ' +
     ' xmlns="http://www.w3.org/2000/svg">');
@@ -1797,35 +1908,11 @@ function downloadsvg() {
   let bg_rect = '<rect width="' + wpx + '" height="' + hpx + '" style="stroke:none;stroke-width:0;fill:' + g_info.bg_color + '" />';
   svg_lines.push(bg_rect);
 
-  for (let i=0; i<g_info.hist.length; i++) {
-
-    /*
-    let _v = g_info.hist[i];
-    let _so = (hpx/1024)*(g_info.max_level - _v.lvl + 1);
-
-    let _cx = wpx * (_v.x / g_info.width);
-    let _cy = hpx * (_v.y / g_info.height);
-
-    let _cw = wpx * (_v.w / g_info.width);
-    let _ch = hpx * (_v.h / g_info.height);
-
-    let _h_w = effective_size(_v.dat);
-    let ds = vadfad_blocksize(_v.dat, _cw, _ch);
-
-    let _aw = (_v.dat[0].length+1)*ds;
-    let _ah = (_v.dat.length+1)*ds;
-
-    let _edx = 0, _edy = 0;
-    if (_cw > _aw) { _edx = (_cw - _aw)/2; }
-    if (_ch > _ah) { _edy = (_ch - _ah)/2; }
-
-    let _svg_path = vad2svgpath(_v.dat, _cw, _ch, _cx+_edx+ds/2,     _cy+_edy+ds/2,     _v.c);
-    let _svg_shad = vad2svgpath(_v.dat, _cw, _ch, _cx+_edx+ds/2+_so, _cy+_edy+ds/2+_so, g_info.shadow_color);
-
-    svg_lines.push(_svg_shad + "\n");
-    svg_lines.push("  " + _svg_path + "\n");
-    */
-
+  for (let i=0; i<g_info.f_hist.length; i++) {
+    let ropt = {};
+    g_info.f_hist[i].f(0, ropt);
+    let _svg_path = polygons2svgpath(ropt.pgns, scale, scale*ropt.x + offsetx , scale*ropt.y, ropt.c);
+    svg_lines.push( _svg_path + "\n");
   }
 
   svg_lines.push("</svg>");
@@ -2039,6 +2126,10 @@ function init_fin() {
 
   let dS = ((W<H) ? W : H);
 
+  g_info.width = W;
+  g_info.height = H;
+  g_info.dS = dS;
+
   g_info.canvas = canvas;
   g_info.ctx = ctx;
   g_info.size = dS - 25;
@@ -2057,6 +2148,8 @@ function init_fin() {
   let ncell = ((nrow>ncol) ? nrow : ncol);
 
   let _winsz = dS / ncell;
+
+  g_info.win_size = _winsz;
 
   if ((ncell*_winsz) > dS) {
     ncell = ((nrow>ncol) ? nrow : ncol);
@@ -2078,6 +2171,7 @@ function init_fin() {
         let _y = r*_winsz + _offy;
 
         let opt = {
+          "f_hist": g_info.f_hist,
           "x": _x,
           "y": _y,
           "w": _winsz,
@@ -2135,6 +2229,7 @@ function init_fin() {
       let _y = r*_winsz + _offy;
 
       let opt = {
+        "f_hist": g_info.f_hist,
         "x": _x,
         "y": _y,
         "w": _winsz,
@@ -2181,6 +2276,7 @@ function init_fin() {
       let _y = r*_winsz + _offy;
 
       let opt = {
+        "f_hist": g_info.f_hist,
         "x": _x,
         "y": _y,
         "w": _winsz,
@@ -2226,6 +2322,7 @@ function init_fin() {
         let _y = r*_winsz + _offy;
 
         let opt = {
+          "f_hist": g_info.f_hist,
           "x": _x,
           "y": _y,
           "w": _winsz,
@@ -2330,6 +2427,9 @@ function init() {
   g_info.ctx = ctx;
   g_info.size = dS - 25;
   g_info.tick = 0;
+
+  g_info.width = canvas.width;
+  g_info.height = canvas.height;
 
   window.requestAnimationFrame(anim);
 
