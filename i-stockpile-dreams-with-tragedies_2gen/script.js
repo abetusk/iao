@@ -883,22 +883,22 @@ function square_square(ctx, x, y, owidth, iwidth, color, ropt) {
 
   if (typeof ropt !== "undefined") {
     let rop = [[
-      { "X": x, "Y": y },
-      { "X": x + owidth, "Y":y },
-      { "X": x + owidth, "Y": y + owidth },
-      { "X": x, "Y": y + owidth }
+      { "X": 0, "Y": 0 },
+      { "X": 0 + owidth, "Y": 0 },
+      { "X": 0 + owidth, "Y": 0 + owidth },
+      { "X": 0, "Y": owidth }
     ]];
 
     rop.push([
-      { "X": x + _ds, "Y": y + _ds },
-      { "X": x + _ds , "Y": y + _ds + iwidth },
-      { "X": x + _ds + iwidth, "Y": y + _ds + iwidth },
-      { "X": x + _ds + iwidth, "Y": y + _ds }
+      { "X": _ds, "Y": _ds },
+      { "X": _ds, "Y": _ds + iwidth },
+      { "X": _ds + iwidth, "Y": _ds + iwidth },
+      { "X": _ds + iwidth, "Y": _ds }
     ]);
 
     ropt["pgns"] = rop;
-    ropt["x"] = 0;
-    ropt["y"] = 0;
+    ropt["x"] = x;
+    ropt["y"] = y;
   }
 
 }
@@ -922,10 +922,10 @@ function square_circle(ctx, x, y, owidth, ir, color, ropt) {
 
   if (typeof ropt !== "undefined") {
     let rop = [[
-      { "X": x, "Y": y },
-      { "X": x + owidth, "Y":y },
-      { "X": x + owidth, "Y": y + owidth },
-      { "X": x, "Y": y + owidth }
+      { "X": 0, "Y": 0 },
+      { "X": 0 + owidth, "Y": 0 },
+      { "X": 0 + owidth, "Y": 0 + owidth },
+      { "X": 0, "Y": 0 + owidth }
     ]];
 
     let N = 128;
@@ -933,13 +933,13 @@ function square_circle(ctx, x, y, owidth, ir, color, ropt) {
     for (let i=0; i<N; i++) {
       let _px = ir*Math.cos(Math.PI*2*(i/N));
       let _py = ir*Math.sin(Math.PI*2*(i/N));
-      circ.push( {"X": x + owidth/2 + _px, "Y": y + owidth/2 + _py } );
+      circ.push( {"X": owidth/2 + _px, "Y": owidth/2 + _py } );
     }
     rop.push(circ);
 
     ropt["pgns"] = rop;
-    ropt["x"] = 0;
-    ropt["y"] = 0;
+    ropt["x"] = x;
+    ropt["y"] = y;
   }
 
 }
@@ -1004,7 +1004,7 @@ function circle_circle(ctx, x, y, outer_r, inner_r, color, ropt) {
     for (let i=0; i<N; i++) {
       let _px = outer_r*Math.cos(Math.PI*2*(i/N));
       let _py = outer_r*Math.sin(Math.PI*2*(i/N));
-      ocirc.push( {"X": x + _px, "Y": y + _py } );
+      ocirc.push( {"X": _px, "Y": _py } );
     }
     rop.push(ocirc);
 
@@ -1012,14 +1012,14 @@ function circle_circle(ctx, x, y, outer_r, inner_r, color, ropt) {
     for (let i=0; i<N; i++) {
       let _px =  inner_r*Math.cos(Math.PI*2*(i/N));
       let _py = -inner_r*Math.sin(Math.PI*2*(i/N));
-      icirc.push( {"X": x + _px, "Y": y + _py } );
+      icirc.push( {"X": _px, "Y": _py } );
     }
     rop.push(ocirc);
 
 
     ropt["pgns"] = rop;
-    ropt["x"] = 0;
-    ropt["y"] = 0;
+    ropt["x"] = x;
+    ropt["y"] = y;
   }
 
 
@@ -1064,21 +1064,21 @@ function circle_square(ctx, x, y, r, width, color, phase, ropt) {
     for (let i=0; i<N; i++) {
       let _px = r*Math.cos(Math.PI*2*(i/N));
       let _py = r*Math.sin(Math.PI*2*(i/N));
-      ocirc.push( {"X": x + _px, "Y": y + _py } );
+      ocirc.push( {"X": _px, "Y": _py } );
     }
     rop.push(ocirc);
 
     let sq = [
-      { "X": x + pnts[0][0], "Y": y + pnts[0][1] },
-      { "X": x + pnts[1][0], "Y": y + pnts[1][1] },
-      { "X": x + pnts[2][0], "Y": y + pnts[2][1] },
-      { "X": x + pnts[3][0], "Y": y + pnts[3][1] }
+      { "X": pnts[0][0], "Y": pnts[0][1] },
+      { "X": pnts[1][0], "Y": pnts[1][1] },
+      { "X": pnts[2][0], "Y": pnts[2][1] },
+      { "X": pnts[3][0], "Y": pnts[3][1] }
     ];
     rop.push(sq);
 
     ropt["pgns"] = rop;
-    ropt["x"] = 0;
-    ropt["y"] = 0;
+    ropt["x"] = x;
+    ropt["y"] = y;
   }
 
 
@@ -1486,6 +1486,9 @@ function disp(ctx, fname, x, y, w, c, phase, ropt) {
 
   if (typeof ropt !== "undefined") {
     ropt["c"] = c;
+    ropt["x"] = x;
+    ropt["y"] = y;
+    ropt["w"] = w;
   }
 
   let v=1;
@@ -1793,7 +1796,6 @@ function anim() {
     g_info.tick++;
   }
 
-
   window.requestAnimationFrame(anim);
   if (g_info.animation_capture) {
     g_info.capturer.capture( g_info.canvas );
@@ -1810,9 +1812,7 @@ function anim() {
 
   }
 
-  if (!g_info.ready) {
-    return;
-  }
+  if (!g_info.ready) { return; }
 
   let _cw = g_info.canvas.width;
   let _ch = g_info.canvas.height;
@@ -1897,13 +1897,94 @@ function downloadsvg() {
   let wpx = (ppi*svg_w).toString();
   let hpx = (ppi*svg_h).toString();
 
-  let scale = hpx/g_info.height;
+  let scale = 1;
+  //let offsetx = 0;
+  //let offsety = 0;
 
-  let offsetx = -wpx/2 ;
+  /*
+  if (g_info.n_col > g_info.n_row) {
+    scale = hpx / g_info.height;
+  }
+  else {
+    scale = wpx / g_info.width;
+  }
+  */
 
   svg_lines.push('<svg viewBox="0 0 ' + wpx + ' ' + hpx + '" ' +
     ' width="' + wpx + '" height="' + hpx + '" ' +
     ' xmlns="http://www.w3.org/2000/svg">');
+
+  let first = true;
+  let minx = 0, miny = 0, maxx = 0, maxy = 0;
+
+  let winsz = 0;
+
+  for (let i=0; i<g_info.f_hist.length; i++) {
+    let ropt = {};
+    g_info.f_hist[i].f(0, ropt);
+
+    let ds = ropt.w;
+    let tx0 = ropt.x - ds/2;
+    let ty0 = ropt.y - ds/2;
+
+    let tx1 = ropt.x + ds/2;
+    let ty1 = ropt.y + ds/2;
+
+    if (first) {
+      minx = tx0; miny = ty1;
+      maxx = tx0; maxy = ty1;
+      first = false;
+    }
+
+    if (tx0 < minx) { minx = tx0; }
+    if (tx1 > maxx) { maxx = tx1; }
+    if (ty0 < miny) { miny = ty0; }
+    if (ty1 > maxy) { maxy = ty1; }
+
+    winsz = ropt.w;
+  }
+
+  let offsetx = -minx;
+  let offsety = -miny;
+
+  let dx = 0;
+  let dy = 0;
+
+  let winpx = 0;
+
+  // so hacky....
+  //
+  if (g_info.n_row == g_info.n_col) {
+    scale = hpx / (maxy - miny);
+    winpx = hpx*winsz / g_info.height;
+    dx = (1-(g_info.n_col / g_info.n_row))*wpx/2 - winpx/8;
+    dy = -winpx/8;
+  }
+  else if (g_info.n_row > g_info.n_col) {
+    extrapx = hpx*10 / g_info.height;
+    extrapx = 0;
+
+    winpx = hpx*winsz / g_info.height;
+
+    scale = hpx / (maxy - miny);
+
+    dx = (1-(g_info.n_col / g_info.n_row))*wpx/2 - winpx/4 + extrapx;
+    dy = -winpx/4 + extrapx;
+  }
+  else {
+    extrapx = wpx*10 / g_info.width;
+    extrapx = 0;
+
+    winpx = wpx*winsz / g_info.width;
+
+    scale = wpx / (maxx - minx);
+
+    dx = -winpx/4 + extrapx;
+    dy = (1-(g_info.n_row / g_info.n_col))*hpx/2 - winpx/4 + extrapx;
+  }
+
+  let bgpx_w = g_info.n_col * winpx;
+  let bgpx_h = g_info.n_row * winpx;
 
   let bg_rect = '<rect width="' + wpx + '" height="' + hpx + '" style="stroke:none;stroke-width:0;fill:' + g_info.bg_color + '" />';
   svg_lines.push(bg_rect);
@@ -1911,7 +1992,7 @@ function downloadsvg() {
   for (let i=0; i<g_info.f_hist.length; i++) {
     let ropt = {};
     g_info.f_hist[i].f(0, ropt);
-    let _svg_path = polygons2svgpath(ropt.pgns, scale, scale*ropt.x + offsetx , scale*ropt.y, ropt.c);
+    let _svg_path = polygons2svgpath(ropt.pgns, scale, scale*(ropt.x + offsetx) + dx, scale*(ropt.y + offsety) + dy, ropt.c);
     svg_lines.push( _svg_path + "\n");
   }
 
