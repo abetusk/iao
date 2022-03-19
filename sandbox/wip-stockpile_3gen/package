@@ -1,0 +1,15 @@
+#!/bin/bash
+# 
+# To the extent possible under law, the person who associated CC0 with
+# this code has waived all copyright and related or neighboring rights
+# to this code.
+# 
+# You should have received a copy of the CC0 legalcode along with this
+# work.  If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
+#
+
+outfn=stockpile_dream_tragedies_2gen.zip
+rm -f $outfn
+
+zip $outfn clipper.js CCapture.js download.js webm-writer-0.2.0.js script.js index.html style.css LICENSE README.md
+
