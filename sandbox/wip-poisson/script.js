@@ -39,18 +39,26 @@ var g_info = {
   "features" : {},
 
   "pnt": [],
+  "pnt_b": [],
   //"max_pnt": 1000,
   //"max_pnt": (1000*1000)/(Math.PI*2*100),
   //"pnt_r": 10,
-  "max_pnt": (1000*1000)/(Math.PI*2*5*5),
-  "pnt_r": 5,
+  //"max_pnt": (1000*1000)/(Math.PI*2*5*5),
+  //"pnt_r": 5,
+  //"pnt_try_count": 10,
 
-  "pnt_try_count": 10,
+  "max_pnt": (1000*1000)/(Math.PI*2*2*2),
+  "pnt_r": 2,
+  "pnt_try_count": 5,
+
   "pnt_seed_idx": [],
 
   "qtree": {},
 
   "debug": [],
+
+  "poisson_rady": false,
+  "connect_ready": false,
 
   "bg_color" : "#eee"
 
@@ -572,8 +580,61 @@ function fisher_yates_shuffle(a) {
   }
 }
 
+function pulse(strike) {
+  strike = ((typeof strike === "undefined") ? true : strike);
+
+  /*
+  if (g_info.pnt_b.length != g_info.pnt.length) {
+    g_info.pnt_b = [];
+    for (let i=0; i<g_info.pnt.length; i++) {
+      g_info.pnt_b.pusb( Object.assign({}, g_info.pnt[i]) );
+    }
+  }
+  */
+
+  for (let i=0; i<g_info.pnt.length; i++) {
+    g_info.pnt[i].fire_ttl = g_info.pnt[i].fire_ttl-1;
+    g_info.pnt[i].ban_ttl  = g_info.pnt[i].ban_ttl-1;
+
+    if (g_info.pnt[i].fire_ttl < 0) {
+      g_info.pnt[i].fire_ttl = 0;
+    }
+    if (g_info.pnt[i].ban_ttl < 0) {
+      g_info.pnt[i].ban_ttl = 0;
+    }
+
+  }
+
+  for (let i=0; i<g_info.pnt.length; i++) {
+    let pnt = g_info.pnt[i];
+
+    if (pnt.fire_ttl == 0) { continue; }
+
+    for (let nei_key in pnt.nei) {
+      let nei_idx = pnt.nei[nei_key];
+
+      let nei_pnt = g_info.pnt[nei_idx];
+      if (nei_pnt.ban_ttl > 0) { continue; }
+
+      nei_pnt.ban_ttl  = nei_pnt.ban_ttl_max;
+      nei_pnt.fire_ttl = nei_pnt.fire_ttl_max;
+
+    }
+
+  }
+
+  if (strike) {
+    let rnd_idx = Math.floor(fxrand()*g_info.pnt.length);
+    if (g_info.pnt[rnd_idx].ban_ttl == 0) {
+      g_info.pnt[rnd_idx].ban_ttl = g_info.pnt[rnd_idx].ban_ttl_max;
+      g_info.pnt[rnd_idx].fire_ttl = g_info.pnt[rnd_idx].fire_ttl_max;
+    }
+  }
+
+
+}
+
 function connect() {
-  if (!g_info.poisson_ready) { return; }
   if (g_info.connect_ready) { return; }
 
   console.log("bang");
@@ -636,6 +697,10 @@ function poisson_place(step_iter, reset) {
       "width": g_info.pnt_r*2,
       "height": g_info.pnt_r*2,
       "nei":{},
+      "fire_ttl": 0,
+      "fire_ttl_max": 5,
+      "ban_ttl": 0,
+      "ban_ttl_max": 30,
       "k": g_info.pnt_try_count
     };
 
@@ -647,26 +712,26 @@ function poisson_place(step_iter, reset) {
   //
   if (g_info.pnt_seed_idx.length == 0) {
     if (!g_info.poisson_ready) {
-      console.log("!!!!!");
+      console.log("poisson_ready");
     }
     g_info.poisson_ready = true;
     return;
   }
 
+  // reconstruct tree
+  //
+  let qtree = g_info.qtree;
+  qtree.clear();
+  for (let i=0; i<g_info.pnt.length; i++) {
+    let pnt = g_info.pnt[i];
+    qtree.insert(pnt);
+  }
+
+
   for (let it=0; it<step_iter; it++) {
 
     if ((g_info.pnt.length < g_info.max_pnt) &&
         (g_info.pnt_seed_idx.length > 0)) {
-
-      // reconstruct tree
-      //
-      let qtree = g_info.qtree;
-      qtree.clear();
-      for (let i=0; i<g_info.pnt.length; i++) {
-        let pnt = g_info.pnt[i];
-        qtree.insert(pnt);
-      }
-
       let _si = Math.floor(fxrand()*g_info.pnt_seed_idx.length);
       let seed_idx = g_info.pnt_seed_idx[_si];
       let seed_pnt = g_info.pnt[seed_idx];
@@ -682,6 +747,10 @@ function poisson_place(step_iter, reset) {
         "width": 2*g_info.pnt_r,
         "height": 2*g_info.pnt_r,
         "nei":{},
+        "fire_ttl": 0,
+        "fire_ttl_max": 5,
+        "ban_ttl": 0,
+        "ban_ttl_max": 30,
         "k": g_info.pnt_try_count
       };
 
@@ -704,6 +773,8 @@ function poisson_place(step_iter, reset) {
       if (try_idx == ele.length) {
         g_info.pnt.push(new_pnt);
         g_info.pnt_seed_idx.push( new_pnt.i );
+
+        qtree.insert(new_pnt);
       }
       else { }
 
@@ -774,14 +845,30 @@ function anim() {
   poisson_place();
   connect();
 
-  let _sw = 3;
+  let _sw = g_info.pnt_r*(1.75);
 
-  ctx.fillStyle = "rgba(127,127,127,0.9)";
+  ctx.beginPath();
+
   for (let i=0; i<g_info.pnt.length; i++) {
     let p = g_info.pnt[i];
+
+    if (p.fire_ttl > 0) {
+      ctx.fillStyle = "rgba(127,0,0,0.9)";
+    }
+    else {
+      ctx.fillStyle = "rgba(127,127,127,0.9)";
+    }
+
     ctx.fillRect( p.x - _sw/2, p.y - _sw/2, _sw,_sw);
   }
 
+  if (g_info.connect_ready) {
+    let strike = (((g_info.tick%120)==0) ? true : false);
+    pulse();
+  }
+
+
+  /*
   if (g_info.connect_ready) {
     ctx.strokeStyle = "rgba(255,0,0,0.05)";
     for (let i=0; i<g_info.pnt.length; i++) {
@@ -795,6 +882,7 @@ function anim() {
       }
     }
   }
+  */
 
 
 
