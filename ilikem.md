@@ -169,6 +169,8 @@ I Like Em
 * [Pant & Brush by flashGen](https://www.fxhash.xyz/generative/slug/paint-and-brush)
 * [jngl_tag by bejuco](https://www.fxhash.xyz/generative/slug/jngl_tag)
 * [Incorporeal Spaces by Leanardo Solaas](https://www.fxhash.xyz/generative/slug/incorporeal-spaces)
+* [Zee by Lucas S. Reveil](https://www.fxhash.xyz/generative/slug/zee-1)
+
 
 Artists
 ---

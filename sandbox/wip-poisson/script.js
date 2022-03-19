@@ -7,17 +7,6 @@
 // work. If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 //
 
-// This is a basic "boilerplate" project that uses only the simple canvas
-// to draw.
-// This boilerplate provides:
-//
-// - resize functionality
-// - init functions and callbacks so that the display can happen
-//   after resource load
-// - examples of drawing to a canvas
-// - keyboard input for screenshot and stopping animations
-//
-
 
 var g_info = {
   "VERSION" : "0.1.0",
@@ -48,6 +37,20 @@ var g_info = {
   "rnd":[],
 
   "features" : {},
+
+  "pnt": [],
+  //"max_pnt": 1000,
+  //"max_pnt": (1000*1000)/(Math.PI*2*100),
+  //"pnt_r": 10,
+  "max_pnt": (1000*1000)/(Math.PI*2*5*5),
+  "pnt_r": 5,
+
+  "pnt_try_count": 10,
+  "pnt_seed_idx": [],
+
+  "qtree": {},
+
+  "debug": [],
 
   "bg_color" : "#eee"
 
@@ -115,6 +118,42 @@ function loadjson(fn, cb) {
   }
   xhr.send(null);
 }
+
+function vec_len(pa,pb) {
+  if (typeof pb === "undefined") {
+    return Math.sqrt( (pa.x)*(pa.x) + (pa.y)*(pa.y) );
+  }
+  return Math.sqrt( (pb.x - pa.x)*(pb.x - pa.x) + (pb.y - pa.y)*(pb.y - pa.y) );
+}
+
+function vec_add(a,b) {
+  return {"x": a.x + b.x, "y": a.y + b.y };
+}
+
+function vec_mul(v,f) {
+  return {"x": f*v.x, "y": f*v.y };
+}
+
+function vec_rot(a, theta) {
+  let c = Math.cos(theta);
+  let s = Math.sin(theta);
+  return {"x": a.x*c + a.y*s, "y": -a.x*s + a.y*c };
+}
+
+function vec_norm(a) {
+  let l = vec_len(a);
+  return {"x":a.x/l, "y":a.y/l};
+}
+
+function vec_diff(a,b) {
+  return {"x":a.x-b.x, "y":a.y-b.y};
+}
+
+function vec_lerp(p, q, t) {
+  let d = vec_diff(q,p);
+  return vec_add(p, vec_mul(d, t));
+}
+
 
 //--
 
@@ -523,7 +562,182 @@ function loading_screen() {
 
 }
 
+function fisher_yates_shuffle(a) {
+  var t, n = a.length;
+  for (var i=0; i<(n-1); i++) {
+    var idx = i + Math.floor(Math.random()*(n-i));
+    t = a[i];
+    a[i] = a[idx];
+    a[idx] = t;
+  }
+}
+
+function connect() {
+  if (!g_info.poisson_ready) { return; }
+  if (g_info.connect_ready) { return; }
+
+  console.log("bang");
+
+  let sched = [];
+  for (let i=0; i<g_info.pnt.length; i++) {
+    sched.push(i);
+  }
+  fisher_yates_shuffle(sched);
+
+  let qtree = g_info.qtree;
+  qtree.clear();
+  for (let i=0; i<g_info.pnt.length; i++) {
+    qtree.insert(g_info.pnt[i]);
+  }
+
+
+
+  for (let i=0; i<sched.length; i++) {
+    let idx = sched[i];
+    let pnt = g_info.pnt[idx];
+
+    let ele = qtree.retrieve(pnt);
+    for (let j=0; j<ele.length; j++) {
+      if ( ele[j].i == idx) { continue; }
+
+      if (vec_len(vec_diff(pnt, ele[j])) < (4*g_info.pnt_r)) {
+        if (fxrand() < 0.5) {
+          pnt.nei[ ele[j].i ] = ele[j].i;
+          g_info.pnt[ ele[j].i ].nei[ idx ] = idx;
+        }
+      }
+    }
+  }
+
+  g_info.connect_ready = true;
+
+}
+
+function poisson_place(step_iter, reset) {
+  let estimate_n = (g_info.width*g_info.height)/(Math.PI*2*g_info.pnt_r*g_info.pnt_r);
+
+  step_iter = ((typeof step_iter === "undefined") ? (g_info.pnt_try_count*estimate_n) : step_iter);
+  reset = ((typeof reset === "undefined") ? false : reset);
+
+  if (reset) {
+    g_info.pnt = [];
+    g_info.pnt_seed_idx = [];
+  }
+
+
+  // init
+  //
+  if (g_info.pnt.length == 0) {
+    let pnt = {
+      "x": fxrand()*g_info.width,
+      "y": fxrand()*g_info.height,
+      "r": g_info.pnt_r,
+      "i": 0,
+      "width": g_info.pnt_r*2,
+      "height": g_info.pnt_r*2,
+      "nei":{},
+      "k": g_info.pnt_try_count
+    };
+
+    g_info.pnt.push(pnt);
+    g_info.pnt_seed_idx.push(0);
+  }
+
+  // nothing to do
+  //
+  if (g_info.pnt_seed_idx.length == 0) {
+    if (!g_info.poisson_ready) {
+      console.log("!!!!!");
+    }
+    g_info.poisson_ready = true;
+    return;
+  }
+
+  for (let it=0; it<step_iter; it++) {
+
+    if ((g_info.pnt.length < g_info.max_pnt) &&
+        (g_info.pnt_seed_idx.length > 0)) {
+
+      // reconstruct tree
+      //
+      let qtree = g_info.qtree;
+      qtree.clear();
+      for (let i=0; i<g_info.pnt.length; i++) {
+        let pnt = g_info.pnt[i];
+        qtree.insert(pnt);
+      }
+
+      let _si = Math.floor(fxrand()*g_info.pnt_seed_idx.length);
+      let seed_idx = g_info.pnt_seed_idx[_si];
+      let seed_pnt = g_info.pnt[seed_idx];
+
+      let ta = fxrand()*Math.PI*2;
+      let td = 2*(1+fxrand())*g_info.pnt_r;
+
+      let new_pnt = {
+        "x": seed_pnt.x + td*Math.cos(ta),
+        "y": seed_pnt.y + td*Math.sin(ta),
+        "r": g_info.pnt_r,
+        "i": g_info.pnt.length,
+        "width": 2*g_info.pnt_r,
+        "height": 2*g_info.pnt_r,
+        "nei":{},
+        "k": g_info.pnt_try_count
+      };
+
+      let ele = qtree.retrieve(new_pnt);
+      let try_idx = 0;
+      for (try_idx=0; try_idx<ele.length; try_idx++) {
+        let _d = vec_len(vec_diff(new_pnt, ele[try_idx]))
+        if (_d < g_info.pnt_r*2) { break; }
+
+        // bounds of window
+        //
+        if (new_pnt.x < (g_info.pnt_r)) { break; }
+        if (new_pnt.y < (g_info.pnt_r)) { break; }
+        if (new_pnt.x > (g_info.width  - g_info.pnt_r)) { break; }
+        if (new_pnt.y > (g_info.height - g_info.pnt_r)) { break; }
+      }
+
+      // collision...
+      //
+      if (try_idx == ele.length) {
+        g_info.pnt.push(new_pnt);
+        g_info.pnt_seed_idx.push( new_pnt.i );
+      }
+      else { }
+
+      seed_pnt.k--;
+      if (seed_pnt.k == 0) {
+        let _ei  = g_info.pnt_seed_idx.length-1;
+        g_info.pnt_seed_idx[ _si ] = g_info.pnt_seed_idx[_ei];
+        g_info.pnt_seed_idx.pop();
+      }
+
+    }
+
+  }
+
+}
+
 function anim() {
+
+  // fps
+  //
+  let now_t = Date.now();
+  let delta_t = (now_t - g_info.last_t);
+  g_info.last_t = now_t;
+  if (delta_t > 0) { g_info.fps = 1000/(delta_t); }
+  if (g_info.fps_debug) {
+    if ((g_info.tick%30)==0) {
+      console.log(g_info.fps);
+    }
+  }
+  //
+  // fps
+
+
+
 
   let _cw = g_info.canvas.width;
   let _ch = g_info.canvas.height;
@@ -531,9 +745,9 @@ function anim() {
 
   clear(ctx, _cw, _ch, g_info.bg_color);
   g_info.tick++;
-  window.requestAnimationFrame(anim);
 
   if (g_info.animation_capture) {
+
     g_info.capturer.capture( g_info.canvas );
 
     let _t = Date.now();
@@ -550,26 +764,47 @@ function anim() {
 
 
   if (!g_info.ready) {
+    window.requestAnimationFrame(anim);
     loading_screen();
     return;
   }
 
-  // PER FRAME CODE
-  //
 
-  ctx.lineWidth = 0;
+  //poisson_place(1000);
+  poisson_place();
+  connect();
 
-  let w2 = _cw / 2;
-  let h2 = _ch / 2;
+  let _sw = 3;
 
-  ctx.fillStyle = '#777';
-  ctx.lineWidth = 0;
-  ctx.beginPath();
-  ctx.fillRect(w2-30,h2-30,60,60);
+  ctx.fillStyle = "rgba(127,127,127,0.9)";
+  for (let i=0; i<g_info.pnt.length; i++) {
+    let p = g_info.pnt[i];
+    ctx.fillRect( p.x - _sw/2, p.y - _sw/2, _sw,_sw);
+  }
 
-  //
-  // PER FRAME CODE
+  if (g_info.connect_ready) {
+    ctx.strokeStyle = "rgba(255,0,0,0.05)";
+    for (let i=0; i<g_info.pnt.length; i++) {
 
+      ctx.beginPath();
+      for (let nei_idx in g_info.pnt[i].nei) {
+        let _to = g_info.pnt[i].nei[nei_idx];
+        ctx.moveTo( g_info.pnt[i].x, g_info.pnt[i].y );
+        ctx.lineTo( g_info.pnt[_to].x, g_info.pnt[_to].y );
+        ctx.stroke();
+      }
+    }
+  }
+
+
+
+  ctx.fillStyle = "rgba(127,0,0,0.05)";
+  for (let i=0; i<g_info.debug.length; i++) {
+    ctx.fillRect(g_info.debug[i].x, g_info.debug[i].y, 5, 5);
+  }
+
+
+  window.requestAnimationFrame(anim);
 
 }
 
@@ -616,21 +851,29 @@ function initCanvas() {
   g_info.canvas = canvas;
   g_info.ctx = ctx;
   g_info.size = Math.floor(dS - dS/3);
+
+  if (g_info.ready) { init_fin(); }
 }
 
 function init_fin() {
   g_info.ready = true;
+
+  let pointquad = false;
+  let bounds = {
+    "x":0,
+    "y":0,
+    "width": g_info.width,
+    "height": g_info.height
+  };
+
+  //g_info.qtree = new QuadTree(bounds, pointquad);
+  g_info.qtree = new Quadtree(bounds, pointquad);
 }
 
 function init() {
 
-  // EXAMPLE INIT
-  //
-
-  setTimeout(function() { init_fin(); }, 2000);
-
-  //
-  // EXAMPLE INIT
+  //setTimeout(function() { init_fin(); }, 2000);
+  init_fin();
 
 }
 
