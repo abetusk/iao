@@ -170,7 +170,11 @@ I Like Em
 * [jngl_tag by bejuco](https://www.fxhash.xyz/generative/slug/jngl_tag)
 * [Incorporeal Spaces by Leanardo Solaas](https://www.fxhash.xyz/generative/slug/incorporeal-spaces)
 * [Zee by Lucas S. Reveil](https://www.fxhash.xyz/generative/slug/zee-1)
-
+* [Acid Crystals by capnganj.tez](https://www.fxhash.xyz/generative/slug/acid-crystals)
+* [Tormented Textures I by TORMENTIAL](https://www.fxhash.xyz/generative/slug/tormented-textures-i)
+* [Perpetual Motion Squared by Juhani Halkomaki](https://www.fxhash.xyz/generative/2413)
+* [pixelflow by phil_osophie](https://www.fxhash.xyz/generative/2471)
+* [Cell by phil_osophie](https://www.fxhash.xyz/generative/2008)
 
 Artists
 ---
