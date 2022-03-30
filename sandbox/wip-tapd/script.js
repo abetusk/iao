@@ -925,6 +925,10 @@ function anim() {
     let s = g_info.group[i].s ;
     let shape = g_info.group[i].shape;
 
+    //shape = g_info.group[i].hist[ g_info.tick % g_info.group[i].hist.length ];
+
+    //let _c = g_info.group_color;
+
     //cx = g_info.width / 2;
     //cy = g_info.height / 2;
 
@@ -937,21 +941,17 @@ function anim() {
       //let pal =["#000000", "#d55a3a", "#2a5c8a", "#7e7d14", "#dbdac9"]; 
       //let pal = ["#dbdac9", "#d55a3a", "#2a5c8a", "#b47b8c", "#7e7d14"];
       //let pal = [ "#8bc9c3", "#ffae43", "#ea432c", "#228345", "#d1d7d3", "#524e9c", "#9dc35e", "#f0a1a1" ];
-      //let pal = [ "#313a42", "#9aad2e", "#f0ae3c", "#df4822", "#8eac9b", "#cc3d3f", "#ec8b1c", "#1b9268" ];
+      let pal = [ "#313a42", "#9aad2e", "#f0ae3c", "#df4822", "#8eac9b", "#cc3d3f", "#ec8b1c", "#1b9268" ];
       //let pal =  [ "#69766f", "#9ed6cb", "#f7e5cc", "#9d8f7f", "#936454", "#bf5c32", "#efad57" ];
       //let pal = [ "#fd3741", "#fe4f11", "#ff6800", "#ffa61a", "#ffc219", "#ffd114", "#fcd82e", "#f4d730",
       //        "#ced562", "#8ac38f", "#79b7a0", "#72b5b1", "#5b9bae", "#6ba1b7", "#49619d", "#604791",
       //        "#721e7f", "#9b2b77", "#ab2562", "#ca2847" ];
       //let pal = [ "#817c77", "#396c68", "#89e3b7", "#f59647", "#d63644", "#893f49", "#4d3240" ];
-      let pal = ["#20357e", "#f44242", "#ffffff"];
-
-
-
-
+      //let pal = ["#20357e", "#f44242", "#ffffff"];
 
       let _c = pal[ j%pal.length ];
 
-      polygons(ctx, cx, cy, [shape[j]], _c, g_info.size/3);
+      polygons(ctx, cx, cy, [shape[j]], _c, g_info.size*s);
     }
 
   }
@@ -1095,9 +1095,13 @@ function init_shapes() {
   // groups
   //
 
+  let N = 5;
 
-  let ngroup = 8;
-  for (let n=0; n<ngroup; n++) {
+  N = Math.floor(fxrand()*3) + 3;
+
+  let ngroup = 9;
+  for (let m=0; m<N; m++) {
+  for (let n=0; n<N; n++) {
     let _scale = 1.0;
     //let _scale = 1.0 - (0.75*fxrand());
     //_scale = (0.25)*fxrand() + 0.15;
@@ -1113,7 +1117,10 @@ function init_shapes() {
     let x = (0.8*fxrand()) + 0.1;
     let y = (0.8*fxrand()) + 0.1;
 
-    if (n==0) { x=0.5; y=0.5; }
+    x = (m+1)/(N+1) + (fxrand()-0.5)/16;
+    y = (n+1)/(N+1) + (fxrand()-0.5)/16;
+
+    //if (n==0) { x=0.5; y=0.5; }
 
     /*
     if (n==0) { x=g_info.width/2; y=g_info.height/2; }
@@ -1124,6 +1131,7 @@ function init_shapes() {
     */
 
     let _shape_scale = 1.0 - (0.75*fxrand());
+    _shape_scale = 1/8 + (fxrand()-0.5)/32;
 
     g_info.group.push({
       "x": x,
@@ -1141,6 +1149,7 @@ function init_shapes() {
       g_info.reset_info.group.push( { "shape": _copy_pgns( g_info.group[i].shape ) } );
     }
 
+  }
   }
 
 }
