@@ -928,9 +928,31 @@ function anim() {
     //cx = g_info.width / 2;
     //cy = g_info.height / 2;
 
+
     //polygon_with_holes(ctx, cx+shadow_dx, cy+shadow_dy, shape, "rgba(5,5,5,0.1)", g_info.size);
     //polygon_with_holes(ctx, cx, cy, shape, g_info.group_color, g_info.size/(i+1));
-    polygon_with_holes(ctx, cx, cy, shape, g_info.group_color, g_info.size/3);
+    //polygon_with_holes(ctx, cx, cy, shape, g_info.group_color, g_info.size/3);
+
+    for (let j=0; j<shape.length; j++) {
+      //let pal =["#000000", "#d55a3a", "#2a5c8a", "#7e7d14", "#dbdac9"]; 
+      //let pal = ["#dbdac9", "#d55a3a", "#2a5c8a", "#b47b8c", "#7e7d14"];
+      //let pal = [ "#8bc9c3", "#ffae43", "#ea432c", "#228345", "#d1d7d3", "#524e9c", "#9dc35e", "#f0a1a1" ];
+      //let pal = [ "#313a42", "#9aad2e", "#f0ae3c", "#df4822", "#8eac9b", "#cc3d3f", "#ec8b1c", "#1b9268" ];
+      //let pal =  [ "#69766f", "#9ed6cb", "#f7e5cc", "#9d8f7f", "#936454", "#bf5c32", "#efad57" ];
+      //let pal = [ "#fd3741", "#fe4f11", "#ff6800", "#ffa61a", "#ffc219", "#ffd114", "#fcd82e", "#f4d730",
+      //        "#ced562", "#8ac38f", "#79b7a0", "#72b5b1", "#5b9bae", "#6ba1b7", "#49619d", "#604791",
+      //        "#721e7f", "#9b2b77", "#ab2562", "#ca2847" ];
+      //let pal = [ "#817c77", "#396c68", "#89e3b7", "#f59647", "#d63644", "#893f49", "#4d3240" ];
+      let pal = ["#20357e", "#f44242", "#ffffff"];
+
+
+
+
+
+      let _c = pal[ j%pal.length ];
+
+      polygons(ctx, cx, cy, [shape[j]], _c, g_info.size/3);
+    }
 
   }
   }
@@ -948,7 +970,16 @@ function anim() {
 
     //polygon_with_holes(ctx, cx+shadow_dx, cy+shadow_dy, shape, "rgba(5,5,5,0.1)", g_info.size);
     //polygon_with_holes(ctx, cx, cy, shape, g_info.group_color, g_info.size/(i+1));
-    polygon_with_holes(ctx, cx, cy, shape, g_info.group_color, g_info.size/3);
+    //polygon_with_holes(ctx, cx, cy, shape, g_info.group_color, g_info.size/3);
+
+    for (let j=0; j<shape.length; j++) {
+      let pal =["#000000", "#d55a3a", "#2a5c8a", "#7e7d14", "#dbdac9"]; 
+      let _c = pal[ j%pal.length ];
+
+      polygons(ctx, cx, cy, [shape[j]], _c, g_info.size/3);
+    }
+
+
 
   }
 
@@ -1065,7 +1096,7 @@ function init_shapes() {
   //
 
 
-  let ngroup = 1;
+  let ngroup = 8;
   for (let n=0; n<ngroup; n++) {
     let _scale = 1.0;
     //let _scale = 1.0 - (0.75*fxrand());
