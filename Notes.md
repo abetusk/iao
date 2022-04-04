@@ -37,12 +37,23 @@ Concepts
 * [Halton Sequence](https://en.wikipedia.org/wiki/Halton_sequence)
 * [Poisson-Disc Sampling](https://www.jasondavies.com/poisson-disc/)
   - [Poisson Disk](https://www.cs.ubc.ca/~rbridson/docs/bridson-siggraph07-poissondisk.pdf)
-
+* [Quasi-Random Sequences](http://extremelearning.com.au/unreasonable-effectiveness-of-quasirandom-sequences/)
 
 Ideas
 ---
 
 * Have patterns at multiple scales
+  - Large/low complexity  patterns offer visual anchors for other areas of higher complexity
+  - Hierarchical grids are a good example
+  - Hierarchical grids offer independence of each recursive area
+  - Multiscale Truchet patterns offer another with a way of negotiating the interface between
+    scales
+* Simple patterns can have highlights to help add interest and highlight the pattern
+  - drop shadows
+  - lighter highlights and darker shading in regions to simulate position lighting
+  - gradient as a 'faux' lighting effect
+  - variation in line density or position variability to simulate strokes
+  - addition of texture noise to give more visual interest
 * Use the blend/alpha channel to soften lines, points and objects
 * Use CIE-LCH or similar colorspace if using color
   - Alternatively use pre-specified color palettes

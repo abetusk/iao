@@ -1492,6 +1492,7 @@ function disp(ctx, fname, x, y, w, c, phase, ropt) {
   }
 
   let v=1;
+  //let v=0;
 
   if (fname == "stripe_45_square") {
     //                    x  y  w  p   e   f    c
@@ -1628,6 +1629,9 @@ function gen_hist_r(ctx,opt) {
   let shape_lib_name = ((typeof opt.shape_lib_name === "undefined") ? "" : opt.shape_lib_name);
   let palette_idx = ((typeof opt.palette_idx === "undefined") ? -1 : opt.palette_idx);
 
+  //DEBUG
+  let _A = 1.0;
+
   if (typeof opt.f_hist  === "undefined") {
     opt.f_hist = [];
   }
@@ -1671,6 +1675,9 @@ function gen_hist_r(ctx,opt) {
   else if (p < p_vec[2]) {
     let _f = -1;
     let _a = (1.0 - _mrnd()*0.125) ;
+
+    //DEBUG
+    _a = _A;
 
     if (shape_lib_name == "") {
       _f = _pwrnd( g_info.f_list_cur );
@@ -2239,6 +2246,8 @@ function init_fin() {
 
   //ncell = nrow;
 
+  //let _R = 1.03;
+  let _R = 0.985;
 
   let _offx = (W - ncol*_winsz)/2;
   let _offy = (H - nrow*_winsz)/2;
@@ -2256,7 +2265,8 @@ function init_fin() {
           "x": _x,
           "y": _y,
           "w": _winsz,
-          "R": 0.95,
+          //"R": 0.95,
+          "R": _R,
           "recur_level": 0,
           "max_recur": 1,
           "sub_n": 2,
@@ -2314,7 +2324,8 @@ function init_fin() {
         "x": _x,
         "y": _y,
         "w": _winsz,
-        "R": 0.95,
+        //"R": 0.95,
+        "R": _R,
         "recur_level": 0,
         "max_recur": 1,
         "sub_n": 2,
@@ -2361,7 +2372,8 @@ function init_fin() {
         "x": _x,
         "y": _y,
         "w": _winsz,
-        "R": 0.95,
+        //"R": 0.95,
+        "R": _R,
         "recur_level": 0,
         "max_recur": 1,
         "sub_n": 2,
@@ -2407,7 +2419,8 @@ function init_fin() {
           "x": _x,
           "y": _y,
           "w": _winsz,
-          "R": 0.95,
+          //"R": 0.95,
+          "R": _R,
           "recur_level": 0,
           "max_recur": 1,
           "sub_n": 2,

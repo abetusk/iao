@@ -1,3 +1,10 @@
+// "name": "bezier-js",
+// "version": "6.0.0",
+// "author": "Pomax",
+// "description": "A javascript library for working with Bezier curves",
+// "license": "MIT",
+
+
 // math-inlining.
 const { abs, cos, sin, acos, atan2, sqrt, pow } = Math;
 
@@ -1970,5 +1977,4 @@ class Bezier {
   }
 }
 
-module.exports =  { Bezier };
 //export { Bezier };
