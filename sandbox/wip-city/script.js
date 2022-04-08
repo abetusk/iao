@@ -29,6 +29,8 @@ var g_info = {
   "tick" : 0,
   "tick_val" : 0,
 
+  "scale": 100,
+
   "capturer": {},
   "animation_capture": false,
   "capture_start":-1,
@@ -44,6 +46,8 @@ var g_info = {
 
   "speed_factor":256,
   "color": [ ],
+
+  "rinth": [],
 
   "rnd":[],
 
@@ -599,6 +603,22 @@ function loading_screen() {
 
 function anim() {
 
+  // fps
+  //
+  let now_t = Date.now();
+  let delta_t = (now_t - g_info.last_t);
+  g_info.last_t = now_t;
+  if (delta_t > 0) { g_info.fps = 1000/(delta_t); }
+  if (g_info.fps_debug) {
+    if ((g_info.tick%30)==0) {
+      console.log(g_info.fps);
+    }
+  }
+  //
+  // fps
+
+
+
   let _cw = g_info.canvas.width;
   let _ch = g_info.canvas.height;
   let ctx = g_info.ctx;
@@ -622,28 +642,57 @@ function anim() {
 
   }
 
-
   if (!g_info.ready) {
     loading_screen();
     return;
   }
 
-  // PER FRAME CODE
-  //
+  let cx = g_info.width/2;
+  let cy = g_info.height/2;
 
-  ctx.lineWidth = 0;
+  let scale = g_info.height/5;
 
-  let w2 = _cw / 2;
-  let h2 = _ch / 2;
+  scale = g_info.scale;
 
-  ctx.fillStyle = '#777';
-  ctx.lineWidth = 0;
-  ctx.beginPath();
-  ctx.fillRect(w2-30,h2-30,60,60);
+  //ctx.strokeStyle = "rgba(255, 0, 0, 0.025)";
+  for (let i=0; i<g_info.rinth.length; i++) {
 
-  //
-  // PER FRAME CODE
+    for (let j=0; j<g_info.rinth[i].length; j++) {
+      ctx.lineWidth = g_info.rinth[i][j][0].w;
+      let a = Math.floor( g_info.rinth[i][j][0].a*256 );
+      ctx.strokeStyle = "rgba(" + a + "," + a + "," + a + ", 0.7)";
+      ctx.beginPath();
+      ctx.moveTo( cx + scale*g_info.rinth[i][j][0].x, cy + scale*g_info.rinth[i][j][0].y );
+      ctx.lineTo( cx + scale*g_info.rinth[i][j][1].x, cy + scale*g_info.rinth[i][j][1].y );
+      ctx.stroke();
+    }
 
+    break;
+  }
+
+  return;
+
+  //---
+  //---
+  //---
+
+  let N = 1000;
+  let M = 500;
+
+  let idx = g_info.rinth.length-1;
+  let u = g_info.rinth[idx];
+  let seq = [];
+  for (let j=0; j<u.length; j++) { seq.push(j); }
+  fisher_yates_shuffle(u);
+
+  let opt = { "N": M, "line_seg": [] };
+  for (let j=0; j<u.length/2; j++) {
+    opt.line_seg.push( u[seq[j]] );
+  }
+
+  let z = rinth_create(opt);
+  g_info.rinth.shift();
+  g_info.rinth.push(z);
 
 }
 
@@ -692,8 +741,45 @@ function initCanvas() {
   g_info.size = Math.floor(dS - dS/3);
 }
 
+function fisher_yates_shuffle(a) {
+  var t, n = a.length;
+  for (var i=0; i<(n-1); i++) {
+    var idx = i + Math.floor(fxrand()*(n-i));
+    t = a[i];
+    a[i] = a[idx];
+    a[idx] = t;
+  }
+}
+
 function init_fin() {
   g_info.ready = true;
+
+  g_info.rinth = [];
+
+  let N = 10000;
+  let M = 500;
+  //let S = 50;
+  let S = 1;
+
+  let opt = {
+    "N": N,
+    "line_seg": []
+  };
+
+  for (let i=0; i<S; i++) {
+    let u = rinth_create(opt);
+    g_info.rinth.push(u);
+
+    let seq = [];
+    for (let j=0; j<u.length; j++) { seq.push(j); }
+    fisher_yates_shuffle(u);
+
+    opt.line_seg = [];
+    for (let j=0; j<u.length/2; j++) {
+      opt.line_seg.push( u[seq[j]] );
+    }
+
+  }
 }
 
 function init() {

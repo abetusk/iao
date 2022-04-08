@@ -174,7 +174,7 @@ function _clip_union( rop_pgns, _pgns) {
 
   ClipperLib.JS.ScaleUpPaths(pgns, scale);
 
-  clpr.AddPaths( pgns, subjPolyType );
+  clpr.AddPaths( pgns, subjPolyType, true );
   clpr.Execute( clipType, sol_polytree, fillType, fillType);
 
   let sol_paths = ClipperLib.Clipper.PolyTreeToPaths(sol_polytree);
@@ -313,6 +313,32 @@ function _clip_xor( rop_pgns, _pgnsA, _pgnsB ) {
 }
 
 function _clip_offset( ofs_pgns, inp_pgns, ds ) {
+  let joinType = ClipperLib.JoinType.jtRound;
+  let endType = ClipperLib.EndType.etClosedPolygon;
+  let miterLimit = 10;
+  let _prec = 0.25;
+  let autoFix = true;
+  let scale = 16384;
+
+  let inp_pgns = _copy_pgns(_inp_pgns);
+  ClipperLib.JS.ScaleUpPaths(inp_pgns, scale);
+
+  let clpr = new ClipperLib.ClipperOffset(miterLimit, _prec);
+  clpr.AddPaths( inp_pgns, joinType, endType );
+  let rop = new ClipperLib.Paths();
+  clpr.Execute(rop, ds*scale);
+
+  for (let ii=0; ii<rop.length; ii++) {
+    let idx = ofs_pgns.length;
+    ofs_pgns.push([]);
+    for (let jj=0; jj<rop[ii].length; jj++) {
+      ofs_pgns[idx].push({ "X": rop[ii][jj].X / scale, "Y": rop[ii][jj].Y/scale });
+    }
+  }
+  return ofs_pgns;
+
+
+  /*
   var joinType = ClipperLib.JoinType.jtRound;
   var miterLimit = 10;
   var autoFix = true;
@@ -324,6 +350,7 @@ function _clip_offset( ofs_pgns, inp_pgns, ds ) {
   for (var ind in t_pgns) {
     ofs_pgns.push(t_pgns[ind]);
   }
+  */
 
 }
 

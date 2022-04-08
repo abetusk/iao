@@ -1,3 +1,73 @@
+
+if (typeof module !== "undefined") {
+
+function _rnd() {
+  return Math.random();
+}
+
+
+
+
+// https://stackoverflow.com/a/1968345
+// CC-BY-SA Gavin (https://stackoverflow.com/users/78216/gavin)
+//
+/*
+char get_line_intersection(float p0_x, float p0_y, float p1_x, float p1_y, 
+    float p2_x, float p2_y, float p3_x, float p3_y, float *i_x, float *i_y)
+{
+    float s1_x, s1_y, s2_x, s2_y;
+    s1_x = p1_x - p0_x;     s1_y = p1_y - p0_y;
+    s2_x = p3_x - p2_x;     s2_y = p3_y - p2_y;
+
+    float s, t;
+    s = (-s1_y * (p0_x - p2_x) + s1_x * (p0_y - p2_y)) / (-s2_x * s1_y + s1_x * s2_y);
+    t = ( s2_x * (p0_y - p2_y) - s2_y * (p0_x - p2_x)) / (-s2_x * s1_y + s1_x * s2_y);
+
+    if (s >= 0 && s <= 1 && t >= 0 && t <= 1)
+    {
+        // Collision detected
+        if (i_x != NULL)
+            *i_x = p0_x + (t * s1_x);
+        if (i_y != NULL)
+            *i_y = p0_y + (t * s1_y);
+        return 1;
+    }
+
+    return 0; // No collision
+}
+*/
+
+}
+
+function line_intersect(p0_x, p0_y, p1_x, p1_y, p2_x, p2_y, p3_x, p3_y) {
+  let ret = false;
+  let _eps = Number.EPSILON;
+
+  let s1_x = p1_x - p0_x;
+  let s1_y = p1_y - p0_y;
+  let s2_x = p3_x - p2_x;
+  let s2_y = p3_y - p2_y;
+
+  let d0 = (-s2_x*s1_y + s1_x*s2_y);
+  let d1 = (-s2_x*s1_y + s1_x*s2_y);
+
+  if ((Math.abs(d0) < Number.EPSILON) ||
+      (Math.abs(d1) < Number.EPSILON)) {
+    return { "r": ret, "t":undefined, "s":undefined };
+  }
+  let t = (-s1_y*(p0_x - p2_x) + s1_x*(p0_y - p2_y)) / (-s2_x*s1_y + s1_x*s2_y);
+  let s = ( s2_x*(p0_y - p2_y) - s2_y*(p0_x - p2_x)) / (-s2_x*s1_y + s1_x*s2_y);
+
+  let x = p0_x + s*s1_x;
+  let y = p0_y + s*s1_y;
+
+  if ((s>=_eps) && (s<=(1-_eps)) && (t>=_eps) && (t<=(1-_eps))) {
+    ret = true;
+  }
+
+  return { "r": ret, "s": s, "t": t, "x": x, "y": y };
+}
+
 function vec_ang( pa, pb, pc ) {
   let v0 = {"x": pb.x - pa.x, "y":pb.y - pa.y };
   let v1 = {"x": pc.x - pa.x, "y":pc.y - pa.y };
@@ -44,65 +114,6 @@ function vec_diff(a,b) {
 
 
 
-
-// https://stackoverflow.com/a/1968345
-// CC-BY-SA Gavin (https://stackoverflow.com/users/78216/gavin)
-//
-/*
-char get_line_intersection(float p0_x, float p0_y, float p1_x, float p1_y, 
-    float p2_x, float p2_y, float p3_x, float p3_y, float *i_x, float *i_y)
-{
-    float s1_x, s1_y, s2_x, s2_y;
-    s1_x = p1_x - p0_x;     s1_y = p1_y - p0_y;
-    s2_x = p3_x - p2_x;     s2_y = p3_y - p2_y;
-
-    float s, t;
-    s = (-s1_y * (p0_x - p2_x) + s1_x * (p0_y - p2_y)) / (-s2_x * s1_y + s1_x * s2_y);
-    t = ( s2_x * (p0_y - p2_y) - s2_y * (p0_x - p2_x)) / (-s2_x * s1_y + s1_x * s2_y);
-
-    if (s >= 0 && s <= 1 && t >= 0 && t <= 1)
-    {
-        // Collision detected
-        if (i_x != NULL)
-            *i_x = p0_x + (t * s1_x);
-        if (i_y != NULL)
-            *i_y = p0_y + (t * s1_y);
-        return 1;
-    }
-
-    return 0; // No collision
-}
-*/
-
-function line_intersect(p0_x, p0_y, p1_x, p1_y, p2_x, p2_y, p3_x, p3_y) {
-  let ret = false;
-  let _eps = Number.EPSILON;
-
-  let s1_x = p1_x - p0_x;
-  let s1_y = p1_y - p0_y;
-  let s2_x = p3_x - p2_x;
-  let s2_y = p3_y - p2_y;
-
-  let d0 = (-s2_x*s1_y + s1_x*s2_y);
-  let d1 = (-s2_x*s1_y + s1_x*s2_y);
-
-  if ((Math.abs(d0) < Number.EPSILON) ||
-      (Math.abs(d1) < Number.EPSILON)) {
-    return { "r": ret, "t":undefined, "s":undefined };
-  }
-  let t = (-s1_y*(p0_x - p2_x) + s1_x*(p0_y - p2_y)) / (-s2_x*s1_y + s1_x*s2_y);
-  let s = ( s2_x*(p0_y - p2_y) - s2_y*(p0_x - p2_x)) / (-s2_x*s1_y + s1_x*s2_y);
-
-  let x = p0_x + s*s1_x;
-  let y = p0_y + s*s1_y;
-
-  if ((s>=_eps) && (s<=(1-_eps)) && (t>=_eps) && (t<=(1-_eps))) {
-    ret = true;
-  }
-
-  return { "r": ret, "s": s, "t": t, "x": x, "y": y };
-}
-
 function _line_intersect_test() {
   let p0 = [0,0], p1 = [1,0];
   let p2 = [0,1], p3 = [1,1];
@@ -121,11 +132,8 @@ function _line_intersect_test() {
   console.log( line_intersect(p0[0], p0[1], p1[0], p1[1], p2[0], p2[1], p3[0], p3[1]) );
 }
 
-function _rnd() {
-  return Math.random();
-}
-
-function cut_line(_lseg, lines) {
+function rinth_cut(_lseg, lines) {
+  let _debug = false;
 
   let lseg = [ {"x": _lseg[0].x, "y": _lseg[0].y}, {"x":_lseg[1].x, "y":_lseg[1].y}];
 
@@ -142,7 +150,7 @@ function cut_line(_lseg, lines) {
     if (!_r.r) { continue; }
 
     if (_debug) {
-      console.log("#cut_line:", i, JSON.stringify(_r));
+      console.log("#rinth_cut:", i, JSON.stringify(_r));
     }
 
     if ((_r.s > _eps) &&
@@ -163,29 +171,48 @@ function cut_line(_lseg, lines) {
 
 }
 
-var _debug = false;
+//var _debug = false;
 
-function ok() {
-  let N = 10000;
-  let line_seg = [];
+function rinth_create(_opt) {
+  opt = ((typeof _opt === "undefined") ? {} : _opt);
+
+  let N = ((typeof opt.N === "undefined") ? 10000 : opt.N);
+  let _base_off_ang = ((typeof opt.base_angle === "undefined") ? (Math.PI/2) : (opt.base_angle));
+  //let _range_ang = ((typeof opt.range_angle === "undefined") ? (Math.PI/4) : (opt.range_angle));
+  //let _range_ang = ((typeof opt.range_angle === "undefined") ? (Math.PI/100) : (opt.range_angle));
+  //let _range_ang = ((typeof opt.range_angle === "undefined") ? (Math.PI/24) : (opt.range_angle));
+  let _range_ang = ((typeof opt.range_angle === "undefined") ? (Math.PI/100) : (opt.range_angle));
+  //let _range_ang = ((typeof opt.range_angle === "undefined") ? (0) : (opt.range_angle));
+  let _vec_base_len = ((typeof opt.base_length === "undefined") ? (2) : (opt.base_length));
+  //let _vec_base_len = ((typeof opt.base_length === "undefined") ? (80) : (opt.base_length));
+  let _vec_range = ((typeof opt.range_length === "undefined") ? (0.5) : (opt.range_length));
+  //let _vec_range = ((typeof opt.range_length === "undefined") ? (0.125) : (opt.range_length));
+  let _eps = ((typeof opt.epsilon === "undefined") ? (1/(1024*1024)) : (opt.epsilon));
+  let _debug = ((typeof opt.debug === "undefined") ? false : (opt.debug));
+
+  let line_seg = ((typeof opt.line_seg === "undefined") ? [] : opt.line_seg);
+
   let p0 = {"x": _rnd()-1, "y": _rnd()-1 };
   let p1 = {"x": _rnd()+1, "y": _rnd()+1 };
 
-  let _base_off_ang = Math.PI/2;
-  //let _range_ang = Math.PI/24;
-  //let _range_ang = Math.PI/4;
-  let _range_ang = 0;
+  //let p0 = {"x": _rnd()-_vec_base_len/2, "y": _rnd()-_vec_base_len/2 };
+  //let p1 = {"x": _rnd()+_vec_base_len/2, "y": _rnd()+_vec_base_len/2 };
 
-  let _vec_base_len = 2;
-  let _vec_range = 0.5;
+  let max_choice = 3;
+  let choice_count = {};
 
-  let _eps = (1/(1024*1024));
-  //let _eps = (1/(16*1024));
+  choice_count[0] = max_choice;
 
   line_seg.push( [p0, p1] );
   for (let i=1; i<N; i++) {
 
+    choice_count[i] = max_choice;
+
     let ind = Math.floor(_rnd()*line_seg.length);
+    while (choice_count[ind]==0) {
+      ind = Math.floor(_rnd()*line_seg.length);
+    }
+    choice_count[ind]--;
 
     let _q0 = line_seg[ind][0];
     let _q1 = line_seg[ind][1];
@@ -224,14 +251,15 @@ function ok() {
       console.log("# cutting line", i);
     }
 
-    let _res_seg = cut_line( [_s,_v], line_seg );
+    let _res_seg = rinth_cut( [_s,_v], line_seg );
 
-    let _candidate_line = [ {"x": _s.x, "y": _s.y }, { "x": _res_seg[1].x, "y": _res_seg[1].y } ];
+    let w = _rnd() + 1
+    let a = 0.5*_rnd() ;
+
+    let _candidate_line = [ {"x": _s.x, "y": _s.y, "w": w, "a":a }, { "x": _res_seg[1].x, "y": _res_seg[1].y, "w": w, "a":a} ];
 
     if (vec_len(vec_sub(_candidate_line[0], _candidate_line[1])) < _eps) { continue; }
 
-    //lines.push( [_s, vec_add(_s, _v) ] );
-    //line_seg.push( [ {"x": _s.x, "y": _s.y }, { "x": _res_seg[1].x, "y": _res_seg[1].y } ] );
     line_seg.push( _candidate_line );
   }
   return line_seg;
@@ -245,9 +273,8 @@ function print_line(line) {
   }
 }
 
-
-let _l = ok();
-
+if (typeof module !== "undefined") {
+let _l = rinth_create();
 function check_consistency(_l) {
   for (let i=0; i<_l.length; i++) {
     for (let j=(i+1); j<_l.length; j++) {
@@ -263,6 +290,5 @@ function check_consistency(_l) {
     }
   }
 }
-
-
 print_line(_l);
+}
