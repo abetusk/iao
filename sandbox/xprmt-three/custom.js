@@ -11,7 +11,7 @@ var g_info = {
   "renderer": {},
   "mesh": {},
   "radius" : 500,
-  "frustumSize" : 1000,
+  "frustumSize" : 1500,
   "aspect": 1,
   "light": [],
 
@@ -20,7 +20,7 @@ var g_info = {
 
   "cx": 15,
   "cy": 15,
-  "cz": 20,
+  "cz": 0,
 
   //"rotx": Math.PI/5,
   //"roty": Math.PI/4,
@@ -80,6 +80,8 @@ var g_info = {
     "vadfad": {},
     "tri": {}
   },
+
+  "debug_line": false,
 
   "material_type" : "toon"
   //"material_type" : "phong"
@@ -1161,9 +1163,12 @@ function threejs_init() {
   //camera = new THREE.PerspectiveCamera( 27, window.innerWidth / window.innerHeight, 1, 3500 );
 
   g_info.aspect = window.innerWidth / window.innerHeight;
-  g_info.camera = new THREE.OrthographicCamera( g_info.frustumSize * g_info.aspect / -2,
-                                                g_info.frustumSize * g_info.aspect /  2,
-                                                g_info.frustumSize / 2, g_info.frustumSize / - 2, 1, 2000 );
+  g_info.camera = new THREE.OrthographicCamera(-g_info.frustumSize * g_info.aspect/2,
+                                                g_info.frustumSize * g_info.aspect/2,
+                                                g_info.frustumSize/2,
+                                               -g_info.frustumSize/2,
+                                                -1000,
+                                                8000);
 
   //camera.position.z = 2750;
   g_info.camera.position.z = 1000;
@@ -1257,7 +1262,10 @@ function threejs_init() {
 
   g_info.line_geom.computeBoundingSphere();
   g_info.tjs_line = new THREE.Line( g_info.line_geom, line_material );
-  g_info.scene.add( g_info.tjs_line );
+
+  if (g_info.debug_line) {
+    g_info.scene.add( g_info.tjs_line );
+  }
 
   //
   //------
@@ -1490,7 +1498,7 @@ var view_nxt = 0;
 var ang0 = 0;
 var ang1 = 0;
 
-var view_parity = 0;
+var view_counter = 0;
 
 function render() {
 
@@ -1506,16 +1514,22 @@ function render() {
     time_prv = time;
     _swap_update = true;
 
-    view_prv = view_nxt;
-    view_nxt = _irnd(5);
+    if (view_counter == 0) {
+      view_prv = view_nxt;
+      view_nxt = _irnd(3);
 
-    if (view_nxt == view_prv) {
-      view_nxt = (view_prv+1)%6;
+      if (view_nxt == view_prv) {
+        view_nxt = (view_prv+1)%6;
+      }
+
+
+      //view_nxt = view_prv;
     }
 
-    if (view_parity == 0) { view_nxt = view_prv; }
+    view_counter ++;
+    view_counter %= 30;
 
-    view_parity = 1-view_parity;
+    //view_parity = 1-view_parity;
   }
 
   //----
@@ -1560,7 +1574,7 @@ function render() {
     let mn1 = m4.yRotation(0);
 
 
-    if (view_parity == 1) {
+    if (view_counter != 0) {
       _t_rem = 0;
     }
     else {
@@ -1657,7 +1671,7 @@ function render() {
   */
 
   for (let i=0; i<g_info.light.length; i++) {
-    let _a = time/2+ i*Math.PI/2;
+    let _a = time/4 + i*Math.PI/2;
     let _x = Math.cos(_a);
     let _y = Math.sin(_a);
     let _z = Math.cos(_a)*Math.sin(_a);
