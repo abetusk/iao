@@ -100,6 +100,7 @@ Reference
 ---
 
 * [INVADER FRACTAL by Jared S Tarbell](http://www.complexification.net/gallery/machines/invaderfractal/)
+* [Frederik Vanhoutte](https://twitter.com/wblut/status/1492632480079306756)
 
 License
 ---
