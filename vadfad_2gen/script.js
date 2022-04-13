@@ -49,7 +49,6 @@ var g_info = {
   "aspect": 1,
   "light": [],
 
-  "n_vadfad": 2048,
 
   "take_screenshot_flag" : false,
 
@@ -124,7 +123,22 @@ var g_info = {
   "palette_idx": 1,
 
   "distribution_type": 0,
+  //"place_size": 64,
   "place_size": 64,
+  "n_vadfad": 2048,
+  //"speed_factor":  0.00075,
+  "speed_factor":  0.00075,
+  //"light_speed_factor":  1/4,
+  "light_speed_factor":  1/1,
+
+  "view_counter" : 18,
+  "view_counter_n" : 20,
+
+  "view_prv" : 0,
+  "view_nxt" : 1,
+  "time_prv": -1,
+
+
 
   "data": {
     "info": [],
@@ -1464,12 +1478,22 @@ function threejs_init() {
   //light1.position.set( 1, 1, 1 );
   g_info.light[0].position.set( 1, 1, 1 ).normalize();
 
+  //SHADOW
   /*
   g_info.light[0].castShadow = true;
+  g_info.light[0].shadow.camera.near  = -1000;
+  g_info.light[0].shadow.camera.far   =  1000;
+  g_info.light[0].shadow.camera.left  = -2500;
+  g_info.light[0].shadow.camera.right =  2500;
+
+  g_info.light[0].shadow.camera.top    =  2500;
+  g_info.light[0].shadow.camera.bottom = -2500;
+
   g_info.light[0].shadow.mapSize.width = 512;
   g_info.light[0].shadow.mapSize.height = 512;
-  g_info.light[0].shadow.mapSize.near = -1000;
-  g_info.light[0].shadow.mapSize.far = 8000;
+
+  g_info.light[0].shadow.radius = 4;
+  g_info.light[0].shadow.bias = -0.0005;
   */
 
   g_info.scene.add( g_info.light[0] );
@@ -1683,7 +1707,9 @@ function threejs_init() {
   g_info.renderer.setSize( window.innerWidth, window.innerHeight );
   g_info.renderer.outputEncoding = THREE.sRGBEncoding;
 
+  //SHADOW
   //g_info.renderer.shadowMap.enabled = true;
+  //g_info.renderer.shadowMap.type = THREE.VSMShadowMap;
 
 
   //---
@@ -1736,6 +1762,11 @@ function threejs_init() {
   }
 
   g_info.mesh = new THREE.Mesh( g_info.geometry, g_info.material );
+
+  //SHADOW
+  //g_info.mesh.castShadow = true;
+  //g_info.mesh.receiveShadow = true;
+
   g_info.scene.add( g_info.mesh );
 
   g_info.container.appendChild( g_info.renderer.domElement );
@@ -1807,46 +1838,34 @@ function animate() {
 
 }
 
-
-
-
-var time_prv = -1;
-var view_prv = 0;
-var view_nxt = 1;
-
-var view_counter = 18;
-var view_counter_n = 20;
-
 function render() {
 
-  let _fac = 0.00075;
 
-  let _swap_upate = false;
-  //const time = Date.now() * 0.001;
-  const time = Date.now() * _fac;
-
+  const time = Date.now() * g_info.speed_factor;
   let _t_rem = time - Math.floor(time);
-  if (time_prv < 0) { time_prv = time; }
-  if ( Math.floor(time_prv) != Math.floor(time)) {
-    time_prv = time;
-    _swap_update = true;
 
-    if (view_counter == 0) {
-      view_prv = view_nxt;
-      view_nxt = _irnd(3);
+  // init
+  //
+  if (g_info.time_prv < 0) {
+    g_info.time_prv = time;
+    g_info.view_nxt = (_irnd(2) + g_info.view_prv + 1)%3;
+  }
 
-      if (view_nxt == view_prv) {
-        view_nxt = (view_prv+1)%6;
+  if ( Math.floor(g_info.time_prv) != Math.floor(time)) {
+    g_info.time_prv = time;
+
+    if (g_info.view_counter == 0) {
+      g_info.view_prv = g_info.view_nxt;
+      g_info.view_nxt = _irnd(3);
+
+      if (g_info.view_nxt == g_info.view_prv) {
+        g_info.view_nxt = (g_info.view_prv+1)%6;
       }
 
-
-      //view_nxt = view_prv;
     }
 
-    view_counter ++;
-    view_counter %= view_counter_n;
-
-    //view_parity = 1-view_parity;
+    g_info.view_counter ++;
+    g_info.view_counter %= g_info.view_counter_n;
   }
 
   //----
@@ -1874,6 +1893,10 @@ function render() {
 
   //g_info.mesh.rotation.x = time * 0.25;
   //g_info.mesh.rotation.y = time * 0.5;
+
+  let view_prv = g_info.view_prv;
+  let view_nxt = g_info.view_nxt;
+  let view_counter = g_info.view_counter;
 
   let _euler = false;
   if (_euler) {
@@ -2000,7 +2023,7 @@ function render() {
   */
 
   for (let i=0; i<g_info.light.length; i++) {
-    let _a = time/4 + i*Math.PI/2;
+    let _a = time*g_info.light_speed_factor + i*Math.PI/2;
     let _x = Math.cos(_a);
     let _y = Math.sin(_a);
     let _z = Math.cos(_a)*Math.sin(_a);
