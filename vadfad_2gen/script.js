@@ -16,8 +16,17 @@
 
 //
 // Some portions have been copied from other sources, like StackOverflow.
+// and WebGL Fundamentals (https://webglfundamentals.org/,
+// https://github.com/gfxfundamentals/webgl-fundamentals).
 // Where appropriate, these have been laballed with their corresponding
 // license, attribution and link to the original source.
+
+//
+// Care has been taken to make sure all third party libraries,
+// whether parts used in this source file or used in external source
+// files, are under a libre/free/open source license that allows
+// for their use, alteration and redistribution, even for
+// commercial purposes.
 //
 
 var g_info = {
@@ -55,16 +64,10 @@ var g_info = {
   "geometry": {},
   "material": {},
 
-  //"cx": 15,
-  //"cy": 15,
-  //"cz": 0,
-
   "cx": 35/2,
   "cy": 35/2,
   "cz": 35/2,
 
-  //"rotx": Math.PI/5,
-  //"roty": Math.PI/4,
   "rotx": 0,
   "roty": 0,
   "rotz": 0,
@@ -123,12 +126,9 @@ var g_info = {
   "palette_idx": 1,
 
   "distribution_type": 0,
-  //"place_size": 64,
   "place_size": 64,
   "n_vadfad": 2048,
-  //"speed_factor":  0.00075,
   "speed_factor":  0.00075,
-  //"light_speed_factor":  1/4,
   "light_speed_factor":  1/4,
 
   "view_counter" : 18,
@@ -137,8 +137,6 @@ var g_info = {
   "view_prv" : 0,
   "view_nxt" : 1,
   "time_prv": -1,
-
-
 
   "data": {
     "info": [],
@@ -150,8 +148,9 @@ var g_info = {
   "debug_cube": [],
   "debug_cube_pos": [],
 
-  "material_type" : "toon"
   //"material_type" : "phong"
+  "material_type" : "toon"
+
 };
 
 
@@ -453,9 +452,8 @@ function welcome() {
   console.log("");
   console.log("commands:");
   console.log("");
-  console.log(" a   - save animation (webm)");
   console.log(" s   - save screenshot (PNG)");
-  console.log(" p   - pause");
+  console.log(" a   - save animation (5s webm) (advanced usage)");
   console.log("");
 
   console.log("Features:");
@@ -634,7 +632,7 @@ function _lookup_block_key(x,y,z) {
   return _x + ":" + _y + ":" + _z;
 }
 
-function vadfad_triangle1(vert, data) {
+function vadfad_triangle(vert, data) {
   vert = ((typeof vert === "undefined") ? [] : vert);
 
   let block_lookup = {};
@@ -757,23 +755,16 @@ function vadfad_triangle1(vert, data) {
   }
 
   return vert;
-  //return new Float32Array(vert);
 }
 
 
-function vadfad_triangle(vert, data, cx, cy, cz, ds) {
+function vadfad_triangle_old(vert, data, cx, cy, cz, ds) {
   cx = ((typeof cx === "undefined") ? 0 : cx);
   cy = ((typeof cy === "undefined") ? 0 : cy);
   cz = ((typeof cz === "undefined") ? 0 : cz);
   ds = ((typeof ds === "undefined") ? g_info.ds : ds);
 
   vert = ((typeof vert === "undefined") ? [] : vert);
-
-  //let ds = g_info.ds;
-  //let data = g_info.vadfad_data;
-  //console.log(data);
-
-  //let vert = [];
 
   for (let r=0; r<data.length; r++) {
     for (let c=0; c<data[r].length; c++) {
@@ -856,14 +847,22 @@ function vadfad_triangle(vert, data, cx, cy, cz, ds) {
   }
 
   return vert;
-  //return new Float32Array(vert);
 }
 
+
+
+//----
+// Parse of the following were taken from https://webglfundamentals.org/
+// https://github.com/gfxfundamentals/webgl-fundamentals
+// which are used with permission via a BSD-3 clause license.
+//
 
 var m4 = {
 
   projection: function(width, height, depth) {
+
     // Note: This matrix flips the Y axis so 0 is at the top.
+    //
     return [
        2 / width, 0, 0, 0,
        0, -2 / height, 0, 0,
@@ -999,6 +998,9 @@ var m4 = {
 
 };
 
+//
+//----
+
 
 //-----
 //-----
@@ -1091,8 +1093,6 @@ function quad_intersect(q0, q1) {
   if (q1.y >= (q0.y + q0.height))  { return false; }
   if (q0.x >= (q1.x + q1.width))   { return false; }
   if (q0.y >= (q1.y + q1.height))  { return false; }
-
-  //console.log("????", q0, q1);
 
   return true;
 }
@@ -1295,18 +1295,12 @@ function vadfad_init() {
     else if (g_info.distribution_type ==10) { _scale = _expow(2) + 1/32; }
     else { _scale = _rnd(2) + 1/32; }
 
-    //let _scale = _rndpow(1.25) + 0.0125;
-    //let _scale = _rndpow(0.25) + 0.5;
-    //let _scale = _expow(2.25) + 1/32;
-    //let _scale = 0.5;
-
     let _dx = cx + _irnd(-dxy,dxy);
     let _dy = cy + _irnd(-dxy,dxy);
     let _dz = cz + _irnd(-dxy,dxy);
 
-    //let plane = [ "xy", "xz", "yz", "yx", "zx", "zy" ][_irnd(6)];
-    let planes = [ "xy", "xz", "yz", "yx", "zx", "zy" ];
     //let planes = [ "xy", "xz", "yz" ];
+    let planes = [ "xy", "xz", "yz", "yx", "zx", "zy" ];
     let plane = planes[ _irnd(planes.length) ];
 
     _dx += fxrand()*g_info.fudge;
@@ -1315,63 +1309,21 @@ function vadfad_init() {
 
     let vf_candidate = vadfad_place(vf_data, plane, _dx, _dy, _dz, _scale);
 
-
-    //let vf_candidate = vadfad_place(vf_data, "xy", _dx, _dy, _dz, _scale);
-
-    //console.log("got:", vf_candidate);
-
     let _accept = true;
 
-    /*
-    for (let _r=0; _r<vf_candidate.length; _r++) {
-      for (let _c=0; _c<vf_candidate[_r].length; _c++) {
-        //let xy2d = iso_project("xy",  vf_candidate[_r][_c].x, vf_candidate[_r][_c].y, vf_candidate[_r][_c].z , vf_candidate[_r][_c].s );
-        let xy2d = iso_project(plane,  vf_candidate[_r][_c].x, vf_candidate[_r][_c].y, vf_candidate[_r][_c].z , vf_candidate[_r][_c].s );
-        let _w = _scale * vf_data[0].length;
-        let _h = _scale * vf_data.length;
-
-        _w = (Math.sqrt(3)/4 - 1/128)*_scale;
-        _h = (3/4 - 1/128)*_scale;
-
-        //console.log(">>>", xy2d, _w, _h);
-
-        let _q = {"x": xy2d.x, "y": xy2d.y, "width": _w, "height": _h };
-
-        let _res = qtree.retrieve(_q);
-        for (let ii=0; ii<_res.length; ii++) {
-
-          if (quad_intersect( _q, _res[ii])) {
-            //console.log("!!!!", ii, _res[ii], _q, "...", _r, _c, vf_candidate[_r][_c]);
-          }
-
-
-          //console.log("??", _res[ii], _q);
-        }
-      }
-    }
-    */
-
-    //if (slo_intersect(placed_list, vf_candidate)) { _accept = false; }
-    //console.log(">>>", slo_intersect( placed_list, vf_candidate));
-
-    //if (fst_intersect(placed_list, vf_candidate)) { _accept = false; }
-    //console.log(">>>", fst_intersect( placed_list, vf_candidate));
-
     if (_accept) {
-
-      //console.log("accept");
 
       vf.push( vf_data );
 
       let tri = [];
-      //vadfad_triangle(tri, vf_data, _dx, _dy, _dz, _scale);
 
       g_info.data.info.push(vf_candidate);
 
-      vadfad_triangle1(tri, vf_candidate);
+      vadfad_triangle(tri, vf_candidate);
+
+      /*
       for (let _r=0; _r<vf_candidate.length; _r++) {
         for (let _c=0; _c<vf_candidate[_r].length; _c++) {
-          //let xy2d = iso_project("xy",  vf_candidate[_r][_c].x, vf_candidate[_r][_c].y, vf_candidate[_r][_c].z , vf_candidate[_r][_c].s );
           let xy2d = iso_project(plane,  vf_candidate[_r][_c].x, vf_candidate[_r][_c].y, vf_candidate[_r][_c].z , vf_candidate[_r][_c].s );
           let _w = _scale * vf_data[0].length;
           let _h = _scale * vf_data.length;
@@ -1383,6 +1335,7 @@ function vadfad_init() {
           let _res = qtree.insert(_q);
         }
       }
+      */
 
       tri_vf.push(tri);
 
@@ -1394,12 +1347,8 @@ function vadfad_init() {
 
   }
 
-  //g_info.data
-
   g_info.data.vadfad = vf;
   g_info.data.tri = tri_vf;
-
-  console.log(">>>", vf.length);
 
 }
 
@@ -1444,9 +1393,7 @@ function threejs_init() {
 
   g_info.container = document.getElementById( 'container' );
 
-  //
-
-  //camera = new THREE.PerspectiveCamera( 27, window.innerWidth / window.innerHeight, 1, 3500 );
+  //---
 
   g_info.aspect = window.innerWidth / window.innerHeight;
   g_info.camera = new THREE.OrthographicCamera(-g_info.frustumSize * g_info.aspect/2,
@@ -1456,27 +1403,18 @@ function threejs_init() {
                                                 -8000,
                                                 8000);
 
-  //camera.position.z = 2750;
   g_info.camera.position.z = 0;
 
   g_info.scene = new THREE.Scene();
-  //scene.background = new THREE.Color( 0x050505 );
-  //g_info.scene.background = new THREE.Color( 0x0a0a0a );
 
   let bg = parseInt(g_info.palette[ g_info.palette_idx ].background.slice(1), 16);
 
-  //g_info.scene.background = new THREE.Color( 0x777777 );
   g_info.scene.background = new THREE.Color( bg );
   g_info.scene.fog = new THREE.Fog( 0x050505, 2000, 3500 );
 
-  //
+  //---
 
-  //g_info.scene.add( new THREE.AmbientLight( 0x444444 ) );
-
-  //g_info.light.push(new THREE.DirectionalLight( 0xffffff, 0.5 ));
   g_info.light.push(new THREE.DirectionalLight( 0xffffff, 1.5 ));
-  //const light1 = new THREE.DirectionalLight( 0xffffff, 0.5 );
-  //light1.position.set( 1, 1, 1 );
   g_info.light[0].position.set( 1, 1, 1 ).normalize();
 
   //SHADOW
@@ -1499,16 +1437,7 @@ function threejs_init() {
 
   g_info.scene.add( g_info.light[0] );
 
-
-  /*
-  //g_info.light.push( new THREE.DirectionalLight( 0xffffff, 1.5 ) );
-  g_info.light.push( new THREE.DirectionalLight( 0xffffff, 1.0 ) );
-  //light2.position.set( 0, - 1, 0 );
-  g_info.light[1].position.set( 0, - 1, 0 ).normalize();
-  g_info.scene.add( g_info.light[1] );
-*/
-
-  //
+  //---
 
   let cx = g_info.cx;
   let cy = g_info.cy;
@@ -1550,25 +1479,8 @@ function threejs_init() {
     line_color.push(_c);
   }
 
-
-  /*
-  for (let i=0; i<20; i++) {
-
-    let _x = _rnd(-line_range/2, line_range/2);
-    let _y = _rnd(-line_range/2, line_range/2);
-    let _z = _rnd(-line_range/2, line_range/2);
-
-    line_pos.push(_x,_y,_z);
-
-    line_color.push( (_x/line_range) + 0.5 );
-    line_color.push( (_y/line_range) + 0.5 );
-    line_color.push( (_z/line_range) + 0.5 );
-  }
-  */
-
   g_info.line_geom.setAttribute( 'position', new THREE.Float32BufferAttribute( line_pos, 3 ) );
   g_info.line_geom.setAttribute( 'color', new THREE.Float32BufferAttribute( line_color, 3 ) );
-  //generateMorphTargets( g_info.line_geom );
 
   g_info.line_geom.computeBoundingSphere();
   g_info.tjs_line = new THREE.Line( g_info.line_geom, line_material );
@@ -1582,10 +1494,6 @@ function threejs_init() {
   //------
   //------
 
-  //const n_triangles = 160000;
-  const n_triangles = 640000;
-
-
   g_info.geometry = new THREE.BufferGeometry();
 
   const positions = [];
@@ -1594,8 +1502,7 @@ function threejs_init() {
 
   const color = new THREE.Color();
 
-  const n = 800, n2 = n / 2; // triangles spread in the cube
-  const d = 12, d2 = d / 2; // individual triangle size
+  //const n = 800, n2 = n / 2; // triangles spread in the cube
 
   const pA = new THREE.Vector3();
   const pB = new THREE.Vector3();
@@ -1604,32 +1511,10 @@ function threejs_init() {
   const cb = new THREE.Vector3();
   const ab = new THREE.Vector3();
 
-  //let ok_tri = 0;
-
-  /*
-  //let dxy = 50;
-  let dxy = 20;
-  let vf = [];
-  let tri_vf = [];
-  for (let i=0; i<16; i++) {
-    vf.push( vadfad_gen() );
-
-    //let ss = _rndpow(1.25) + 0.0125;
-    let _scale = 2;
-    let _dx = cx + _irnd(-dxy,dxy);
-    let _dy = cy + _irnd(-dxy,dxy);
-    let _dz = cz + _irnd(-dxy,dxy);
-
-    let tri = [];
-    vadfad_triangle(tri, vf[i], _dx, _dy, _dz, _scale);
-
-    tri_vf.push(tri);
-  }
-  */
-
   let tri_vf = g_info.data.tri;
 
-
+  const d = 12,
+        d2 = d/2;
   for (let idx=0; idx<tri_vf.length; idx++) {
 
     let pal = g_info.palette[ g_info.palette_idx ];
@@ -1642,23 +1527,21 @@ function threejs_init() {
 
     for ( let i = 0; i < tri_vf[idx].length; i += 9 ) {
 
-      // positions
-
       const x = -200;
       const y = -200;
       const z = -200;
 
       let ax = x + tri_vf[idx][i + 0]*d - d2;
-      let ay = x + tri_vf[idx][i + 1]*d - d2;
-      let az = x + tri_vf[idx][i + 2]*d - d2;
+      let ay = y + tri_vf[idx][i + 1]*d - d2;
+      let az = z + tri_vf[idx][i + 2]*d - d2;
 
       let bx = x + tri_vf[idx][i + 3]*d - d2;
-      let by = x + tri_vf[idx][i + 4]*d - d2;
-      let bz = x + tri_vf[idx][i + 5]*d - d2;
+      let by = y + tri_vf[idx][i + 4]*d - d2;
+      let bz = z + tri_vf[idx][i + 5]*d - d2;
 
       let cx = x + tri_vf[idx][i + 6]*d - d2;
-      let cy = x + tri_vf[idx][i + 7]*d - d2;
-      let cz = x + tri_vf[idx][i + 8]*d - d2;
+      let cy = y + tri_vf[idx][i + 7]*d - d2;
+      let cz = z + tri_vf[idx][i + 8]*d - d2;
 
       positions.push( ax, ay, az );
       positions.push( bx, by, bz );
@@ -1703,7 +1586,6 @@ function threejs_init() {
   //---
 
   g_info.renderer = new THREE.WebGLRenderer({ "antialias": true });
-  //g_info.renderer = new THREE.WebGLRenderer();
   g_info.renderer.setPixelRatio( window.devicePixelRatio );
   g_info.renderer.setSize( window.innerWidth, window.innerHeight );
   g_info.renderer.outputEncoding = THREE.sRGBEncoding;
@@ -1714,9 +1596,6 @@ function threejs_init() {
 
 
   //---
-
-  //var material;
-
 
   if (g_info.material_type == "phong")  {
     g_info.material = new THREE.MeshPhongMaterial( {
@@ -1729,22 +1608,11 @@ function threejs_init() {
     let alpha = 0.0;
     let beta = 0.0;
     let gamma = 0.65;
-    //let diffuseColor = new THREE.Color().setHSL( alpha, 0.5, gamma * 0.5 + 0.1 ).multiplyScalar( 1 - beta * 0.2 );
-    //let diffuseColor = new THREE.Color().setHSL( alpha, beta, gamma ).multiplyScalar( 1 - 0.2 );
     let diffuseColor = new THREE.Color().setHSL( alpha, beta, gamma );
 
 
     let format = ( g_info.renderer.capabilities.isWebGL2 ) ? THREE.RedFormat : THREE.LuminanceFormat;
 
-    /*
-    //let alphaIndex = 8;
-    let alphaIndex = 256;
-    let colors = new Uint8Array( alphaIndex + 2 );
-    for ( let c = 0; c <= colors.length; c ++ ) {
-      colors[ c ] = ( c / colors.length ) * 256;
-    }
-    */
-    //let alphaIndex = 128;
     let alphaIndex = 256;
     let colors = new Uint8Array( alphaIndex  );
     for ( let c = 0; c < colors.length; c ++ ) {
@@ -1772,31 +1640,10 @@ function threejs_init() {
 
   g_info.container.appendChild( g_info.renderer.domElement );
 
-  //
-
-  //stats = new Stats();
-  //container.appendChild( stats.dom );
-
-  //
-
   window.addEventListener( 'resize', onWindowResize );
-
 }
 
 function onWindowResize() {
-
-  /*
-  g_info.aspect = window.innerWidth / window.innerHeight;
-  g_info.camera.aspect = g_info.aspect;
-  g_info.camera.left    = -g_info.frustumSize * g_info.aspect/2;
-  g_info.camera.right   =  g_info.frustumSize * g_info.aspect/2;
-  g_info.camera.top     =  g_info.frustumSize/2;
-  g_info.camera.bottom  = -g_info.frustumSize/2;
-  g_info.camera.near    = -1000;
-  g_info.camera.far     =  8000;
-  g_info.camera.updateProjectionMatrix();
-  g_info.renderer.setSize( window.innerWidth, window.innerHeight );
-  */
 
   g_info.aspect = window.innerWidth / window.innerHeight;
   g_info.camera = new THREE.OrthographicCamera(-g_info.frustumSize * g_info.aspect/2,
@@ -1808,11 +1655,7 @@ function onWindowResize() {
   g_info.camera.updateProjectionMatrix();
   g_info.renderer.setSize( window.innerWidth, window.innerHeight );
 
-  //camera.position.z = 2750;
   g_info.camera.position.z = 0;
-
-  //g_info.geometry.computeBoundingSphere();
-
 }
 
 //---
@@ -1840,6 +1683,7 @@ function animate() {
 }
 
 //----
+//
 // The following easing functions taken from https://github.com/ai/easings.net/
 // and available under a GPLv3 license.
 // See https://github.com/ai/easings.net/blob/master/LICENSE for details.
@@ -1859,11 +1703,10 @@ function easeInOutCubic(x) {
 function easeInOutQuart(x) {
   return ((x < 0.5) ? (8*x*x*x*x) : (1 - Math.pow(-2*x + 2,4)/2) );
 }
-
+//
 //----
 
 function render() {
-
 
   const time = Date.now() * g_info.speed_factor;
   let _t_rem_orig = time - Math.floor(time);
@@ -1872,6 +1715,7 @@ function render() {
   //
   if (g_info.time_prv < 0) {
     g_info.time_prv = time;
+    g_info.view_prv = _irnd(3);
     g_info.view_nxt = (_irnd(2) + g_info.view_prv + 1)%3;
   }
 
@@ -1896,27 +1740,12 @@ function render() {
   //----
   //----
 
-  //let tx = p_prv[0]*(1-_t_rem) + p_nxt[0]*_t_rem;
-  //let ty = p_prv[1]*(1-_t_rem) + p_nxt[1]*_t_rem;
-  //let tz = p_prv[2]*(1-_t_rem) + p_nxt[2]*_t_rem;
-
-  //g_info.rotx = tx;
-  //g_info.roty = ty;
-  //g_info.rotz = tz;
-
-  //g_info.rotx = 7*Math.PI/23;
-  //g_info.roty = 0;
-  //g_info.rotz = Math.PI/4;
-
 
   let theta_x = Math.sin(time*0.5)*0.125;
   let theta_y = time*0.5;
 
   theta_x = 0;
   theta_y = 0;
-
-  //g_info.mesh.rotation.x = time * 0.25;
-  //g_info.mesh.rotation.y = time * 0.5;
 
   let view_prv = g_info.view_prv;
   let view_nxt = g_info.view_nxt;
@@ -1997,15 +1826,6 @@ function render() {
     let mrn = m4.multiply(mn1, mn0);
 
     let mr = m4.multiply(mrp, mrn);
-
-    /*
-    let mr = [];
-    for (let ii=0; ii<16; ii++) {
-      mr.push( (mrp[ii] + mrn[ii]) / 2 );
-      mr[ii] = mrn[ii];
-    }
-    */
-
     let m = new THREE.Matrix4();
     m.set( mr[ 0], mr[ 1], mr[ 2], mr[ 3],
            mr[ 4], mr[ 5], mr[ 6], mr[ 7],
@@ -2038,15 +1858,6 @@ function render() {
   theta_x = Math.sin(time*0.5)*0.125;
   theta_y = time*0.5;
 
-  /*
-  for (let i=0; i<g_info.light.length; i++) {
-    g_info.light[i].rotation.x = g_info.rotx + theta_x;
-    g_info.light[i].rotation.y = g_info.roty + theta_y;
-    g_info.light[i].rotation.z = g_info.rotz;
-
-  }
-  */
-
   for (let i=0; i<g_info.light.length; i++) {
     let _a = time*g_info.light_speed_factor + i*Math.PI/2;
     let _x = Math.cos(_a);
@@ -2069,14 +1880,43 @@ function render() {
 
 //---
 
-function init() {
+function init_param() {
 
-  welcome();
+  // n creatures
+  //
+  g_info.n_vadfad = _arnd( [1024, 2048, 4096, 8192] );
 
+  g_info.features["Creature Count"] = g_info.n_vadfad;
+
+  // palette choice
+  //
   g_info.palette_idx = _irnd( g_info.palette.length );
   let pidx = g_info.palette_idx;
 
-  console.log(g_info.palette[pidx].name );
+  g_info.features["Palette"] = g_info.palette[pidx].name;
+
+  // distribution type
+  //
+
+  let dist_name = [ "Exponential (#0)", "Exponential (#1)", "Exponential (#2)", "Power Law (#0)", "Power Law (#1)" ];
+  let dist_id = [0, 9, 10, 1, 2] ;
+  let idx = _irnd( dist_id.length );
+  g_info.distribution_type = dist_id[idx];
+
+  g_info.features["Distribution"] = dist_name[idx];
+
+  // speed factor
+  //
+  g_info.speed_factor  = _rnd(1/2048, 1/512); //0.00075,
+
+  g_info.features["Speed Factor"] = g_info.speed_factor;
+}
+
+function init() {
+
+  init_param();
+
+  welcome();
 
   document.addEventListener('keydown', function(ev) {
     if (ev.key == 's') {
@@ -2094,7 +1934,6 @@ function init() {
       console.log(">>>", g_info.capture_start, g_info.capture_end, g_info.capture_dt);
     }
   });
-
 
   vadfad_init();
   threejs_init();
