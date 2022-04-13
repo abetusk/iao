@@ -129,7 +129,7 @@ var g_info = {
   //"speed_factor":  0.00075,
   "speed_factor":  0.00075,
   //"light_speed_factor":  1/4,
-  "light_speed_factor":  1/1,
+  "light_speed_factor":  1/4,
 
   "view_counter" : 18,
   "view_counter_n" : 20,
@@ -1282,8 +1282,9 @@ function vadfad_init() {
     let scale = 1;
 
     if      (g_info.distribution_type == 0) { _scale = _expow(2.25) + 1/32; }
-    else if (g_info.distribution_type == 1) { _scale = _rndpow(0.25) + 1/32; }
-    else if (g_info.distribution_type == 2) { _scale = _rndpow(0.5) + 1/32; }
+    //else if (g_info.distribution_type == 1) { _scale = _rndpow(-0.925, 1.25) + 1/32; }
+    else if (g_info.distribution_type == 1) { _scale = _rndpow(-0.925, 1.5) + 1/3; }
+    else if (g_info.distribution_type == 2) { _scale = _rndpow(-0.5, 1.125) + 1/16; }
     else if (g_info.distribution_type == 3) { _scale = _rndpow(0.75) + 1/32; }
     else if (g_info.distribution_type == 4) { _scale = _rndpow(1) + 1/32; }
     else if (g_info.distribution_type == 5) { _scale = _rndpow(1.25) + 1/32; }
@@ -1838,11 +1839,34 @@ function animate() {
 
 }
 
+//----
+// The following easing functions taken from https://github.com/ai/easings.net/
+// and available under a GPLv3 license.
+// See https://github.com/ai/easings.net/blob/master/LICENSE for details.
+//
+function easeInOutSine(x) {
+  return -(Math.cos(Math.PI*x) - 1)/2;
+}
+
+function easeInOutQuad(x) {
+  return ( (x<0.5) ? (2*x*x) : (1 - Math.pow(-2*x + 2,2)/2) );
+}
+
+function easeInOutCubic(x) {
+  return ((x<0.5) ? (4*x*x*x) : (1 - Math.pow(-2*x + 2,3)/2) );
+}
+
+function easeInOutQuart(x) {
+  return ((x < 0.5) ? (8*x*x*x*x) : (1 - Math.pow(-2*x + 2,4)/2) );
+}
+
+//----
+
 function render() {
 
 
   const time = Date.now() * g_info.speed_factor;
-  let _t_rem = time - Math.floor(time);
+  let _t_rem_orig = time - Math.floor(time);
 
   // init
   //
@@ -1913,6 +1937,7 @@ function render() {
     let mn0 = m4.xRotation(0);
     let mn1 = m4.yRotation(0);
 
+    let _t_rem = easeInOutSine(_t_rem_orig);
 
     if (view_counter != 0) {
       _t_rem = 0;
