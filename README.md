@@ -86,7 +86,7 @@ Works
 
 ---
 
-###### [I Stockpile Dreams With Tragedies : 2Gen](https://github.com/abetusk/iao/tree/main/i-stockpile-dreams-with-tragedies_2gen))
+###### [I Stockpile Dreams With Tragedies : 2Gen](https://github.com/abetusk/iao/tree/main/i-stockpile-dreams-with-tragedies_2gen)
 
 | |
 |---|
