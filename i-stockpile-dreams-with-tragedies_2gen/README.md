@@ -42,7 +42,7 @@ This work hopes to add to the conversation about examining the reality of the ec
 Tags
 ---
 
-minimal, geometric, concept, cover, cover art, futuristic, background, texture, recursive, shapes
+minimal, geometric, concept, cover, cover art, futuristic, background, texture, shapes
 
 Statement
 ---
