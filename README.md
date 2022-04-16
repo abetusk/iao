@@ -83,6 +83,15 @@ Works
 |---|
 | [![Through a Pixel, Darkly](img/through_a_pixel_darkly.png)](https://github.com/abetusk/iao/tree/main/through-a-pixel-darkly) |
 
+
+---
+
+###### [I Stockpile Dreams With Tragedies : 2Gen](https://github.com/abetusk/iao/tree/main/i-stockpile-dreams-with-tragedies_2gen))
+
+| |
+|---|
+| [![I Stockpile Dreams With Tragedies : 2Gen](img/stockpile-dream-tragedies_2.png)](https://github.com/abetusk/iao/tree/main/i-stockpile-dreams-with-tragedies_2gen) |
+
 ---
 
 ###### [VADFAD : 2Gen](https://github.com/abetusk/iao/tree/main/vadfad_2gen)
@@ -90,3 +99,4 @@ Works
 | |
 |---|
 | [![VADFAD : 2Gen](img/vadfad_2gen.png)](https://github.com/abetusk/iao/tree/main/vadfad_2gen) |
+
