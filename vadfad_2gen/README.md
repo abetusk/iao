@@ -46,7 +46,7 @@ This work takes inspiration from the artists `Jared Tarbell` and `Frederik Vanho
 Tags
 ---
 
-minimal, generative, 8-bit, coin-op, arcade, 1980s, retro, video game, nostalgia, orthographic, three.js
+minimal, generative, 8-bit, coin-op, arcade, 1980s, retro, video game, nostalgia, orthographic, three.js, voxel
 
 Statement
 ---
