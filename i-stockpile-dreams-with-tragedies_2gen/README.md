@@ -3,7 +3,7 @@ I Stockpile Dreams With Tragedies : 2Gen
 
 [![sample image](../img/stockpile-dream-tragedies_2.png)](https://github.com/abetusk/iao/tree/main/i-stockpile-dreams-with-tragedies_2gen)
 
-(not) Available on [fxhash](https://www.fxhash.xyz/generative/9459-XXXX).
+Available on [fxhash](https://www.fxhash.xyz/generative/slug/i-stockpile-dreams-with-tragedies-:-2gen)
 
 Quick Start
 ---
