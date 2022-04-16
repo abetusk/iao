@@ -126,6 +126,7 @@ var g_info = {
   "palette_idx": 1,
 
   "distribution_type": 0,
+  "place_type" : 0,
   "place_size": 64,
   "n_vadfad": 2048,
   "speed_factor":  0.00075,
@@ -1295,9 +1296,37 @@ function vadfad_init() {
     else if (g_info.distribution_type ==10) { _scale = _expow(2) + 1/32; }
     else { _scale = _rnd(2) + 1/32; }
 
-    let _dx = cx + _irnd(-dxy,dxy);
-    let _dy = cy + _irnd(-dxy,dxy);
-    let _dz = cz + _irnd(-dxy,dxy);
+    //let _dx = cx + _irnd(-dxy,dxy);
+    //let _dy = cy + _irnd(-dxy,dxy);
+    //let _dz = cz + _irnd(-dxy,dxy);
+
+    let _dx = 0;
+    let _dy = 0;
+    let _dz = 0;
+
+    if (g_info.place_type==1) {
+      let ds = cx / dxy;
+
+      let u = [_rnd(), _rnd(), _rnd() ];
+      let uu = [ u[0]*u[0]-0.5, u[1]*u[1]-0.5, u[2]*u[2]-0.5 ];
+
+
+      let v = [
+        Math.floor((uu[0] + ds)*dxy*2),
+        Math.floor((uu[1] + ds)*dxy*2),
+        Math.floor((uu[2] + ds)*dxy*2)
+      ];
+
+      _dx = v[0];
+      _dy = v[1];
+      _dz = v[2];
+    }
+    else {
+      _dx = cx + _irnd(-dxy,dxy);
+      _dy = cy + _irnd(-dxy,dxy);
+      _dz = cz + _irnd(-dxy,dxy);
+    }
+
 
     //let planes = [ "xy", "xz", "yz" ];
     let planes = [ "xy", "xz", "yz", "yx", "zx", "zy" ];
