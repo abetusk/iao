@@ -1939,6 +1939,9 @@ function init_param() {
   g_info.speed_factor  = _rnd(1/2048, 1/512); //0.00075,
 
   g_info.features["Speed Factor"] = g_info.speed_factor;
+
+  window.$fxhashFeatures = g_info.features;
+
 }
 
 function init() {
