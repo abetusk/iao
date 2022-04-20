@@ -1605,7 +1605,12 @@ function kettle_init(vert) {
   let down_left   = [-dn, -ds/2,0];
 
   //let c_sched = ".uuuuRRRrrrdddllLLLLL";
-  let c_sched = ".uuuuRRRrrrdddLEEEEEEE";
+  let c_sched = ".uuuuRRRrrrddddLEEEEEEEllldddddddddRRRIRu";
+  
+  //        " +++      --         -
+  //             ++++++  ---------
+  c_sched = ".uuuuRRRrrrdddLEEEEEllld++i-ii";
+  c_sched = ".uuuRRRddd";
   //let c_sched = "E";
 
   let sched = [];
@@ -1616,13 +1621,26 @@ function kettle_init(vert) {
     if      (ch == '.') { sched.push(nop); }
     else if (ch == "u") { sched.push(up); }
     else if (ch == "d") { sched.push(down); }
+
     else if (ch == "r") { sched.push(down_right); }
+    else if (ch == "i") { sched.push(down_right); }
+
     else if (ch == "l") { sched.push(down_left); }
+    else if (ch == "e") { sched.push(down_left); }
+
     else if (ch == "R") { sched.push(up_right); }
+    else if (ch == 'I') { sched.push(up_right); }
+
     else if (ch == "L") { sched.push(up_left); }
     else if (ch == 'E') { sched.push(up_left); }
 
+    else if (ch == '-') { sched.push(nop); }
+    else if (ch == '+') { sched.push(nop); }
+
   }
+
+  let count_x = [0];
+  let count_y = [0,0];
 
 
   console.log(">>> kettle_init");
@@ -1634,20 +1652,66 @@ function kettle_init(vert) {
   let m1 = _xrotate(-Math.PI/4);
 
 
-  let cur_x = 0, cur_y = -300, cur_z = 0;
+  let cur_x = 0, cur_y = -100, cur_z = 0;
   for (let i=0; i<sched.length; i++) {
 
     let ch = c_sched.charAt(i);
 
+    if      (ch == '.') { }
+    else if (ch == '-') { }
+    else if (ch == "u") { count_y[1]++; }
+    else if (ch == "d") { count_y[1]--; }
+
+    else if (ch == "r") { count_x[0]++; count_y[0]--; }
+    else if (ch == 'i') { count_x[0]++; count_y[0]--; }
+
+    else if (ch == "l") { count_x[0]--; count_y[0]--; }
+    else if (ch == "e") { count_x[0]--; count_y[0]--; }
+
+    else if (ch == "R") { count_x[0]++; count_y[0]++; }
+    else if (ch == 'I') { count_x[0]++; count_y[0]++; }
+
+    else if (ch == "L") { count_x[0]--; count_y[0]++; }
+    else if (ch == 'E') { count_x[0]--; count_y[0]++; }
+
     let dv = sched[i];
 
-    cur_x += dv[0];
-    cur_y += dv[1];
+    //cur_x += dv[0];
+    //cur_y += dv[1];
+
+    cur_x = count_x[0]*dn;
+    cur_y = count_y[0]*ds/2 + count_y[1]*dn;
+
+    console.log(count_x, count_y, cur_x, cur_y);
 
     let _face = face_full;
     if (ch == 'E') {
       cur_z = 800;
       _face = face_tubel;
+    }
+
+    else if (ch == 'e') {
+      _face = face_tubel;
+    }
+
+    else if (ch == 'i') {
+      cur_z -= 1200;
+      _face = face_tubel;
+    }
+
+    else if (ch == 'I') {
+      cur_z = 00;
+      _face = face_tuber;
+    }
+
+    else if (ch == '-') {
+      cur_z -= 800;
+      continue;
+    }
+
+    else if (ch == '+') {
+      cur_z += 800;
+      continue;
     }
 
     if ((ch == 'R') || (ch=='d') || (ch=='L')) {
