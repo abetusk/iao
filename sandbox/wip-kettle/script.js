@@ -29,6 +29,14 @@
 // commercial purposes.
 //
 
+// params:
+//  width / height - portrait, landscape, square all have different aesthetics
+//  tube width - skinnier vs. fatter
+//  step range - how dense it is
+//  # squiggles - ...
+//  symmetry ?
+//  # y count?
+
 var g_info = {
   "PROJECT" : "kettle",
   "VERSION" : "0.0.0",
@@ -140,7 +148,7 @@ var g_info = {
 
   "data": {
     "info": [],
-    "tri": {}
+    "tri": []
   },
 
   "debug_line": false,
@@ -1036,8 +1044,8 @@ function threejs_init() {
                                                 g_info.frustumSize * g_info.aspect/2,
                                                 g_info.frustumSize/2,
                                                -g_info.frustumSize/2,
-                                                -8000,
-                                                8000);
+                                                -80000,
+                                                80000);
 
   g_info.camera.position.z = 0;
 
@@ -1046,7 +1054,7 @@ function threejs_init() {
   let bg = parseInt(g_info.palette[ g_info.palette_idx ].background.slice(1), 16);
 
   g_info.scene.background = new THREE.Color( bg );
-  g_info.scene.fog = new THREE.Fog( 0x050505, 2000, 3500 );
+  //g_info.scene.fog = new THREE.Fog( 0x050505, 2000, 3500 );
 
   //---
 
@@ -1176,6 +1184,10 @@ function threejs_init() {
   g_info.renderer.setPixelRatio( window.devicePixelRatio );
   g_info.renderer.setSize( window.innerWidth, window.innerHeight );
   g_info.renderer.outputEncoding = THREE.sRGBEncoding;
+
+  g_info.renderer.autoClear = false;
+
+
 
   //SHADOW
   //g_info.renderer.shadowMap.enabled = true;
@@ -1584,9 +1596,144 @@ function _project(w,h,d) {
 }
 
 function kettle_init(vert) {
+  let ds = 50;
+  let dn = (ds)*Math.sqrt(2)/2;
+
+  let face_full  = [1,0,0,1,0,1];
+  let face_tuber = [0,0,0,1,0,1]
+  let face_tubel = [1,0,0,1,0,0]
+  let face_tubeu = [1,0,0,0,0,1]
+
+  let nop = [0,0];
+
+  let up_right  = [ dn, ds/2,0];
+  let up_left   = [-dn, ds/2,0];
+  let up        = [  0, dn,0];
+
+  let down        = [  0, -dn,0 ];
+  let down_right  = [ dn, -ds/2,0];
+  let down_left   = [-dn, -ds/2,0];
+
+
+  let n = 128;
+
+  let dir_choice = [
+    [ 'u', 'd' ],
+    [ 'l', 'L', 'r', 'R' ]
+  ];
+
+  let n_squiggle = 3;
+
+  let all_end_pnt = [];
+
+
+  for (let sidx=0; sidx<n_squiggle; sidx++) {
+    let _sched = ['.'];
+
+    let pos = [0,0];
+
+    let _width2 = 2048/2;
+    let _height2 = 1024/2;
+
+    let stride = 2;
+    let min_stride = 2;
+
+    let sx = 0;
+    let sy = 8*ds*sidx;
+
+    let end_pnt = [ [sx,sy] ];
+    all_end_pnt.push( [sx,sy] );
+
+    let dir_prv = 1;
+    for (let _idx=0; _idx<n; _idx++) {
+      let dir_cur = 1-dir_prv;
+
+      let _step_count = min_stride + (_irnd(10));
+      let _idir = _irnd( dir_choice[dir_cur].length );
+
+      let _dir = dir_choice[dir_cur][_idir];
+
+      let dpos = [0,0];
+
+      if      (_dir == 'u') { dpos[1] += dn; }
+      else if (_dir == 'd') { dpos[1] -= dn; }
+      else if (_dir == 'L') { dpos[0] -= dn; dpos[1] += ds/2; }
+      else if (_dir == 'l') { dpos[0] -= dn; dpos[1] -= ds/2; }
+      else if (_dir == 'R') { dpos[0] += dn; dpos[1] += ds/2; }
+      else if (_dir == 'r') { dpos[0] += dn; dpos[1] -= ds/2; }
+
+      dpos[0] *= _step_count;
+      dpos[1] *= _step_count;
+
+      // edge check
+      //
+      if ( (Math.abs(pos[0] + dpos[0]) > _width2) ||
+           (Math.abs(pos[1] + dpos[1]) > _height2) ) {
+        console.log("bang!");
+        continue;
+      }
+
+      let _ok = true;
+      for (let j=0; j<all_end_pnt.length; j++) {
+        let _dx = all_end_pnt[j][0] - (pos[0] + dpos[0]);
+        let _dy = all_end_pnt[j][1] - (pos[1] + dpos[1]);
+        let _l = Math.sqrt( _dx*_dx + _dy*_dy );
+        if (_l < (2*ds)) { _ok = false; break; }
+      }
+      if (!_ok) {
+        console.log("bang bang");
+        continue;
+      }
+
+      console.log("pos:", pos, "dpos:", dpos);
+
+
+      _ok = true;
+      for (let j=0; j<(end_pnt.length-1); j++) {
+        let _dx = end_pnt[j][0] - (pos[0] + dpos[0]);
+        let _dy = end_pnt[j][1] - (pos[1] + dpos[1]);
+
+        console.log("...", j, _dx, _dy, 2*ds);
+
+        if (Math.abs(_dy) < (1.0*ds)) { _ok = false; break; }
+        if (Math.abs(_dx) < (1.0*ds)) { _ok = false; break; }
+        continue;
+        if ((_dir == 'u') || (_dir == 'd')) {
+        if (Math.abs(_dy) < (2*ds)) { _ok = false; break; }
+        }
+        else {
+          if (Math.abs(_dx) < (2*ds)) { _ok = false; break; }
+        }
+      }
+      _ok = true;
+      if (!_ok) {
+        console.log("bang bang bang");
+        continue;
+      }
+
+      for (let j=0; j<_step_count; j++) {
+        _sched.push( _dir );
+      }
+
+      dir_prv = dir_cur;
+      pos[0] += dpos[0];
+      pos[1] += dpos[1];
+
+      end_pnt.push( [pos[0], pos[1] ] );
+      all_end_pnt.push( [pos[0], pos[1] ] );
+    }
+
+    console.log(">>>", _sched.join(""));
+    console.log("end_pnt.length:", end_pnt.length);
+
+    _kettle_init(vert, _sched.join(""));
+  }
+}
+
+function _kettle_init(vert, c_sched) {
   vert = ((typeof vert === "undefined") ? [] : vert);
 
-  let ds = 100;
+  let ds = 50;
   let dn = (ds)*Math.sqrt(2)/2;
 
   let face_full  = [1,0,0,1,0,1];
@@ -1605,13 +1752,15 @@ function kettle_init(vert) {
   let down_left   = [-dn, -ds/2,0];
 
   //let c_sched = ".uuuuRRRrrrdddllLLLLL";
-  let c_sched = ".uuuuRRRrrrddddLEEEEEEEllldddddddddRRRIRu";
+  //let c_sched = ".uuuuRRRrrrddddLEEEEEEEllldddddddddRRRIRu";
   
+  if (typeof c_sched === "undefined") {
   //        " +++      --         -
   //             ++++++  ---------
   c_sched = ".uuuuRRRrrrdddLEEEEEllld++i-ii";
   c_sched = ".uuuRRRddd";
   //let c_sched = "E";
+  }
 
   let sched = [];
 
@@ -1643,8 +1792,8 @@ function kettle_init(vert) {
   let count_y = [0,0];
 
 
-  console.log(">>> kettle_init");
-  console.log(c_sched, sched);
+  console.log(">>> _kettle_init");
+  //console.log(c_sched, sched);
 
   let V = [];
 
@@ -1682,7 +1831,7 @@ function kettle_init(vert) {
     cur_x = count_x[0]*dn;
     cur_y = count_y[0]*ds/2 + count_y[1]*dn;
 
-    console.log(count_x, count_y, cur_x, cur_y);
+    //console.log(count_x, count_y, cur_x, cur_y);
 
     let _face = face_full;
     if (ch == 'E') {
@@ -1739,52 +1888,8 @@ function kettle_init(vert) {
 
   }
 
-  g_info.data.tri = [_z];
-
-  return;
-
-  /*
-
-  let _vert = [];
-
-  // 0 -left down (front)
-  // 1
-  // 4 - top
-  // 5 -
-  // 6 - right
-  let face = [1, 0, 0, 1, 0, 1]
-
-  let face_full  = [1,0,0,1,0,1];
-  let face_tuber = [0,0,0,1,0,1]
-  let face_tubel = [1,0,0,1,0,0]
-  let face_tubeu = [1,0,0,0,0,1]
-
-  _vert.push( __cube( 0, 0, 0, ds, face) );
-  _vert.push( __cube( 0, 0, 0, ds) );
-  _vert.push( __cube( 0, 0, 0, ds) );
-
-
-  let m0 = _yrotate(-Math.PI/4);
-  let m1 = _xrotate(-Math.PI/4);
-
-
-  let M0 = numeric.dot(_translate(0,0,0), numeric.dot(m1, m0));
-  //let M0 = numeric.dot(numeric.dot(m1, m0), _translate(800, 1000, 0));
-
-  //let M1 = numeric.dot(_translate(Math.sqrt(2)*100,100,-400), numeric.dot(m1,m0));
-  //let M2 = numeric.dot(_translate(0,200,-800), numeric.dot(m1,m0));
-
-
-  let M1 = numeric.dot(_translate(0,dn,ds), numeric.dot(m1,m0));
-  let M2 = numeric.dot(_translate(dn,dn + ds/2,0), numeric.dot(m1,m0));
-
-
-  V.push(numeric.dot(M0, _vert[0]));
-  V.push(numeric.dot(M1, _vert[1]));
-  V.push(numeric.dot(M2, _vert[2]));
-
-  */
-
+  g_info.data.tri.push(_z);
+  //g_info.data.tri = [_z];
 }
 
 
