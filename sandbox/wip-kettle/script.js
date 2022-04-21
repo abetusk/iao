@@ -155,7 +155,17 @@ var g_info = {
   "debug_cube": [],
   "debug_cube_pos": [],
 
-  "tube_width": 25,
+  //"tube_width": 25,
+  //"tube_width_choice" : [20, 25, 30, 35, 40, 45, 50],
+  "tube_width_choice" : [20, 25, 30, 35 ],
+  "tube_width": 50,
+
+  "collision_width_choice": [2, 2.25, 2.5, 2.75, 3],
+  "collision_width": [3, 3],
+
+  "stride": 1,
+  "min_jump": 5,
+  "jump_range": 20,
 
   //"material_type" : "phong"
   "material_type" : "toon"
@@ -1616,12 +1626,17 @@ function kettle_init(vert) {
   let down_right  = [ dn, -ds/2,0];
   let down_left   = [-dn, -ds/2,0];
 
+  let collision_test = [ true, true, true];
+
   let n = 1024;
   //let n = 2;
 
   //let collision_width = 2.125;
-  let collision_width = 2;
-  let collision_width_p = 2;
+  //let collision_width = 2.5;
+  //let collision_width_p = 2.5;
+
+  let collision_width = g_info.collision_width[0];
+  let collision_width_p = g_info.collision_width[0]
 
   let dir_choice = [
     [ 'u', 'd' ],
@@ -1671,11 +1686,11 @@ function kettle_init(vert) {
 
 
     let _width2 = 2048/2;
-    let _height2 = 1224/2;
+    let _height2 = 1424/2;
 
-    let stride = 1;
-    let min_stride = 5;
-    let jump_range = 20;
+    let stride = g_info.stride;
+    let min_jump = g_info.min_jump;
+    let jump_range = g_info.jump_range;
 
     //let sx = 0;
     //let sy = 8*ds*sidx;
@@ -1690,7 +1705,7 @@ function kettle_init(vert) {
 
       let dir_cur = 1-dir_prv;
 
-      let _step_count = min_stride + (stride*_irnd(jump_range));
+      let _step_count = min_jump + (stride*_irnd(jump_range));
       let _idir = _irnd( dir_choice[dir_cur].length );
 
       let _dir = dir_choice[dir_cur][_idir];
@@ -1709,49 +1724,61 @@ function kettle_init(vert) {
 
       // edge check
       //
-      if ( (Math.abs(pos[0] + dpos[0]) > _width2) ||
-           (Math.abs(pos[1] + dpos[1]) > _height2) ) {
-        //console.log("bang!");
-        _reject_count++;
+      if (collision_test[0]) {
+        if ( (Math.abs(pos[0] + dpos[0]) > _width2) ||
+             (Math.abs(pos[1] + dpos[1]) > _height2) ) {
+          //console.log("bang!");
+          _reject_count++;
 
-        _coll_stat[0]++;
+          _coll_stat[0]++;
 
-        continue;
+          continue;
+        }
+        //console.log("???????????", pos, dpos, _width2, _height2, (Math.abs(pos[0] + dpos[0]) , _width2), (Math.abs(pos[1] + dpos[1]) , _height2) );
       }
-      //console.log("???????????", pos, dpos, _width2, _height2, (Math.abs(pos[0] + dpos[0]) , _width2), (Math.abs(pos[1] + dpos[1]) , _height2) );
 
-      let _ok = true;
-      for (let j=0; j<collision_pnt.length; j++) {
-        let _dx = collision_pnt[j][0] - (pos[0] + dpos[0]);
-        let _dy = collision_pnt[j][1] - (pos[1] + dpos[1]);
-        let _l = Math.sqrt( _dx*_dx + _dy*_dy );
-        if (_l < (collision_width*ds)) {
+      // make sure endpoint doesn't land on a line
+      //
 
-          //console.log("dir:", _dir, "rejected for pos", pos, "+dpos", dpos, "because of", collision_pnt[j], "(", j, ")");
+      if (collision_test[1]) {
+        let _ok = true;
+        for (let j=0; j<collision_pnt.length; j++) {
+          let _dx = collision_pnt[j][0] - (pos[0] + dpos[0]);
+          let _dy = collision_pnt[j][1] - (pos[1] + dpos[1]);
+          let _l = Math.sqrt( _dx*_dx + _dy*_dy );
+          if (_l < (collision_width*ds)) {
 
-          _ok = false;
-          break;
+            //console.log("dir:", _dir, "rejected for pos", pos, "+dpos", dpos, "because of", collision_pnt[j], "(", j, ")");
+
+            _ok = false;
+            break;
+          }
+        }
+        //_ok = true;
+        if (!_ok) {
+          //console.log("bang bang");
+          _reject_count++;
+
+          _coll_stat[1]++;
+
+          continue;
         }
       }
-      //_ok = true;
-      if (!_ok) {
-        //console.log("bang bang");
-        _reject_count++;
 
-        _coll_stat[1]++;
+      // make sure line under consideration doesn't
+      // cross any joints (endpoints)
+      //
 
-        continue;
-      }
-
-      let _path_collision = true;
+      //let _path_collision = true;
       //_path_collision=false;
-      if (_path_collision) {
+      if (collision_test[2]) {
         let _subfac = 0.25;
         let _dlen = Math.sqrt( dpos[0]*dpos[0] + dpos[1]*dpos[1] );
         let _dv = [ _subfac*ds*dpos[0]/_dlen, _subfac*ds*dpos[1]/_dlen ];
         let _n = Math.ceil( _dlen/(_subfac*ds) + 0 );
 
-        let _s = Math.ceil(collision_width_p/(_subfac));
+        let _s = Math.ceil(collision_width_p/(_subfac) + 2);
+        //console.log("_s:", _s);
 
         //for (i=_s; i<_n; i++) {
         for (i=_s; i<_n; i++) {
@@ -1765,7 +1792,14 @@ function kettle_init(vert) {
             let _l = Math.sqrt( _dx*_dx + _dy*_dy );
             if (_l < (collision_width_p*ds)) {
 
-              //console.log("path collision, p:", _p, "collision_pnt:", j, collision_pnt[j], "ds:", ds);
+              /*
+              if (sidx==1) {
+                console.log("sidx:", sidx, "pidx:", pidx,
+                    "path collision, p:", _p[0], _p[1],
+                    "collision_pnt:", j, collision_pnt[j][0], collision_pnt[j][1],
+                    "ds:", ds);
+              }
+              */
 
               _coll_stat[2]++;
 
@@ -1875,13 +1909,9 @@ function kettle_init(vert) {
       let _dvlen = Math.sqrt( _dv[0]*_dv[0] + _dv[1]*_dv[1] );
       let _n = Math.ceil( _dlen / (_subfac*ds) );
 
-      console.log("??", sidx, pidx, "dlen:", _dlen, "dvlen:", _dvlen, "n:", _n, "dxy:", dx, dy, "dv:", _dv);
-
       for (let i=0; i<_n; i++) {
         let _t = i;
         line_pnt.push( [ p_prv[0] + _t*_dv[0], p_prv[1] + _t*_dv[1], id_prv, id_cur, sidx, pidx ] );
-
-        console.log("????", i, _n, _t, p_prv[0] + _t*_dv[0], p_prv[1] + _t*_dv[1]);
       }
 
     }
@@ -1906,7 +1936,6 @@ function kettle_init(vert) {
         //bad_list.push( { "sidx": line_pnt[j][4], "pidx": line_pnt[j][5] } );
         bad_list.push( { "sidx": all_end_pnt[i][4], "pidx": all_end_pnt[i][5] } );
         
-        console.log("!!", i, j, all_end_pnt[i], line_pnt[j]);
         break;
       }
     }
@@ -1982,7 +2011,7 @@ function kettle_init_0(vert) {
     let _height2 = 1024/2;
 
     let stride = 1;
-    let min_stride = 5;
+    let min_jump = 5;
     let jump_range = 20;
 
     //let sx = 0;
@@ -2006,7 +2035,7 @@ function kettle_init_0(vert) {
     for (let _idx=0; _idx<n; _idx++) {
       let dir_cur = 1-dir_prv;
 
-      let _step_count = min_stride + (stride*_irnd(jump_range));
+      let _step_count = min_jump + (stride*_irnd(jump_range));
       let _idir = _irnd( dir_choice[dir_cur].length );
 
       let _dir = dir_choice[dir_cur][_idir];
@@ -2417,6 +2446,30 @@ function init_param() {
   g_info.speed_factor  = _rnd(1/2048, 1/512); //0.00075,
 
   g_info.features["Speed Factor"] = g_info.speed_factor;
+
+  // width
+  //
+  idx = _irnd( g_info.tube_width_choice.length );
+  g_info.tube_width = g_info.tube_width_choice[idx];
+
+  g_info.features["Channel Width"] = g_info.tube_width;
+
+  // collision width
+  //
+  idx = _irnd( g_info.collision_width_choice.length );
+  g_info.collision_width[0] = g_info.collision_width_choice[idx];
+
+  g_info.features["Collision Width"] = g_info.collision_width[0];
+
+  // jump range
+  //
+  g_info.jump_range = _irnd(10) + 10;
+
+  g_info.features["Jump Range"] = g_info.jump_range;
+
+  //----
+  //----
+  //----
 
   window.$fxhashFeatures = g_info.features;
 
