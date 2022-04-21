@@ -155,6 +155,8 @@ var g_info = {
   "debug_cube": [],
   "debug_cube_pos": [],
 
+  "tube_width": 25,
+
   //"material_type" : "phong"
   "material_type" : "toon"
 
@@ -1596,7 +1598,7 @@ function _project(w,h,d) {
 }
 
 function kettle_init(vert) {
-  let ds = 50;
+  let ds = g_info.tube_width;
   let dn = (ds)*Math.sqrt(2)/2;
 
   let face_full  = [1,0,0,1,0,1];
@@ -1614,41 +1616,81 @@ function kettle_init(vert) {
   let down_right  = [ dn, -ds/2,0];
   let down_left   = [-dn, -ds/2,0];
 
+  let n = 1024;
+  //let n = 2;
 
-  let n = 128;
+  //let collision_width = 2.125;
+  let collision_width = 2;
+  let collision_width_p = 2;
 
   let dir_choice = [
     [ 'u', 'd' ],
     [ 'l', 'L', 'r', 'R' ]
   ];
 
-  let n_squiggle = 3;
-
+  let end_pnt = [];
   let all_end_pnt = [];
+  let collision_pnt = [];
+  let line_pnt = [];
 
+  let tot_count = 0;
+  let _reject_count = 0;
 
+  let _coll_stat = [0,0,0];
+
+  let pnt_id = 0;
+
+  let n_squiggle = 4;
+  let squiggle = [];
+  let offset = [ -16*ds, -8*ds, 8*ds, 16*ds  ];
   for (let sidx=0; sidx<n_squiggle; sidx++) {
-    let _sched = ['.'];
+    let sx = offset[sidx];
+    let sy = 0;
 
-    let pos = [0,0];
+    let pos = [sx,sy];
+
+    end_pnt.push([pos[0],pos[1]]);
+    all_end_pnt.push( [pos[0],pos[1], -1, -1, -1, -1 ] );
+    collision_pnt.push( [pos[0],pos[1]] );
+
+    squiggle.push({ "sched": ['.'], "path": [ [offset[sidx], 0, -1, pnt_id] ], "dir_prv":1 });
+
+    pnt_id++;
+  }
+
+  for (let pidx=0; pidx<n; pidx++) {
+
+    let sidx = _irnd(squiggle.length);
+    let _sched = squiggle[sidx].sched;
+    let dir_prv = squiggle[sidx].dir_prv;
+    let _pos_idx = squiggle[sidx].path.length-1;
+    let prv_id = squiggle[sidx].path[_pos_idx][2];
+    let pos = [ squiggle[sidx].path[_pos_idx][0], squiggle[sidx].path[_pos_idx][1] ];
+
+    //let _sched = ['.'];
+
 
     let _width2 = 2048/2;
-    let _height2 = 1024/2;
+    let _height2 = 1224/2;
 
-    let stride = 2;
-    let min_stride = 2;
+    let stride = 1;
+    let min_stride = 5;
+    let jump_range = 20;
 
-    let sx = 0;
-    let sy = 8*ds*sidx;
+    //let sx = 0;
+    //let sy = 8*ds*sidx;
 
-    let end_pnt = [ [sx,sy] ];
-    all_end_pnt.push( [sx,sy] );
+    //let offset = [ -8*ds, 8*ds ];
+    //let offset = [ -16*ds, -8*ds, 8*ds, 16*ds  ];
 
-    let dir_prv = 1;
-    for (let _idx=0; _idx<n; _idx++) {
+    //console.log(pos[0], pos[1]);
+
+    //let dir_prv = 1;
+    //for (let _idx=0; _idx<n; _idx++) {
+
       let dir_cur = 1-dir_prv;
 
-      let _step_count = min_stride + (_irnd(10));
+      let _step_count = min_stride + (stride*_irnd(jump_range));
       let _idir = _irnd( dir_choice[dir_cur].length );
 
       let _dir = dir_choice[dir_cur][_idir];
@@ -1669,23 +1711,81 @@ function kettle_init(vert) {
       //
       if ( (Math.abs(pos[0] + dpos[0]) > _width2) ||
            (Math.abs(pos[1] + dpos[1]) > _height2) ) {
-        console.log("bang!");
+        //console.log("bang!");
+        _reject_count++;
+
+        _coll_stat[0]++;
+
         continue;
       }
+      //console.log("???????????", pos, dpos, _width2, _height2, (Math.abs(pos[0] + dpos[0]) , _width2), (Math.abs(pos[1] + dpos[1]) , _height2) );
 
       let _ok = true;
-      for (let j=0; j<all_end_pnt.length; j++) {
-        let _dx = all_end_pnt[j][0] - (pos[0] + dpos[0]);
-        let _dy = all_end_pnt[j][1] - (pos[1] + dpos[1]);
+      for (let j=0; j<collision_pnt.length; j++) {
+        let _dx = collision_pnt[j][0] - (pos[0] + dpos[0]);
+        let _dy = collision_pnt[j][1] - (pos[1] + dpos[1]);
         let _l = Math.sqrt( _dx*_dx + _dy*_dy );
-        if (_l < (2*ds)) { _ok = false; break; }
+        if (_l < (collision_width*ds)) {
+
+          //console.log("dir:", _dir, "rejected for pos", pos, "+dpos", dpos, "because of", collision_pnt[j], "(", j, ")");
+
+          _ok = false;
+          break;
+        }
       }
+      //_ok = true;
       if (!_ok) {
-        console.log("bang bang");
+        //console.log("bang bang");
+        _reject_count++;
+
+        _coll_stat[1]++;
+
         continue;
       }
 
-      console.log("pos:", pos, "dpos:", dpos);
+      let _path_collision = true;
+      //_path_collision=false;
+      if (_path_collision) {
+        let _subfac = 0.25;
+        let _dlen = Math.sqrt( dpos[0]*dpos[0] + dpos[1]*dpos[1] );
+        let _dv = [ _subfac*ds*dpos[0]/_dlen, _subfac*ds*dpos[1]/_dlen ];
+        let _n = Math.ceil( _dlen/(_subfac*ds) + 0 );
+
+        let _s = Math.ceil(collision_width_p/(_subfac));
+
+        //for (i=_s; i<_n; i++) {
+        for (i=_s; i<_n; i++) {
+          let _p = [ pos[0] + i*_dv[0], pos[1] + i*_dv[1] ];
+          _ok = true;
+          //let _cmp_list = collision_pnt;
+          let _cmp_list = all_end_pnt;
+          for (let j=0; j<(_cmp_list.length); j++) {
+            let _dx = _cmp_list[j][0] - _p[0];
+            let _dy = _cmp_list[j][1] - _p[1];
+            let _l = Math.sqrt( _dx*_dx + _dy*_dy );
+            if (_l < (collision_width_p*ds)) {
+
+              //console.log("path collision, p:", _p, "collision_pnt:", j, collision_pnt[j], "ds:", ds);
+
+              _coll_stat[2]++;
+
+              _ok = false; break;
+            }
+          }
+          if (!_ok) {
+            //console.log("bang bang");
+            break;
+          }
+        }
+        if (!_ok) {
+          _reject_count++;
+          continue;
+        }
+
+      }
+
+
+      //console.log("pos:", pos, "dpos:", dpos);
 
 
       _ok = true;
@@ -1693,7 +1793,7 @@ function kettle_init(vert) {
         let _dx = end_pnt[j][0] - (pos[0] + dpos[0]);
         let _dy = end_pnt[j][1] - (pos[1] + dpos[1]);
 
-        console.log("...", j, _dx, _dy, 2*ds);
+        //console.log("...", j, _dx, _dy, 2*ds);
 
         if (Math.abs(_dy) < (1.0*ds)) { _ok = false; break; }
         if (Math.abs(_dx) < (1.0*ds)) { _ok = false; break; }
@@ -1707,12 +1807,329 @@ function kettle_init(vert) {
       }
       _ok = true;
       if (!_ok) {
-        console.log("bang bang bang");
+        _reject_count++;
+        //console.log("bang bang bang");
         continue;
       }
 
       for (let j=0; j<_step_count; j++) {
         _sched.push( _dir );
+      }
+
+      let _subfac = 0.25;
+      let _dlen = Math.sqrt( dpos[0]*dpos[0] + dpos[1]*dpos[1] );
+      let _dv = [ _subfac*ds*dpos[0] / _dlen, _subfac*ds*dpos[1] / _dlen ];
+      let _n = Math.ceil( _dlen/(_subfac*ds) );
+      //console.log("dlen:", _dlen, "n:", _n);
+      for (let i=0; i<_n; i++) {
+        collision_pnt.push( [ pos[0] + i*_dv[0], pos[1] + i*_dv[1], pnt_id ] );
+
+        //if ((i>1) && (i<(_n-1))) {
+        //  line_pnt.push( [ pos[0] + i*_dv[0], pos[1] + i*_dv[1], pnt_id ] );
+        //}
+      }
+
+      dir_prv = dir_cur;
+      pos[0] += dpos[0];
+      pos[1] += dpos[1];
+
+      end_pnt.push( [pos[0], pos[1], pnt_id] );
+      all_end_pnt.push( [pos[0], pos[1], prv_id, pnt_id, sidx, squiggle[sidx].path.length ] );
+
+      let _ii = squiggle[sidx].path.length-1;
+      squiggle[sidx].path[_ii][3] = pnt_id;
+
+      squiggle[sidx].dir_prv = dir_cur;
+      squiggle[sidx].path.push( [ pos[0], pos[1], pnt_id, -1 ] );
+
+      pnt_id++;
+    //}
+
+    //console.log(">>>", _sched.join(""));
+    //console.log("end_pnt.length:", end_pnt.length);
+
+    tot_count++;
+
+  }
+
+  for (let sidx=0; sidx<squiggle.length; sidx++) {
+    _kettle_init(vert, squiggle[sidx].sched.join(""), squiggle[sidx].path[0][0], squiggle[sidx].path[0][1]);
+  }
+
+  for (let sidx=0; sidx<squiggle.length; sidx++) {
+    let _path = squiggle[sidx].path;
+    for (let pidx=1; pidx<_path.length; pidx++) {
+
+      let p_prv = _path[pidx-1];
+      let p_cur = _path[pidx];
+
+      let id_prv = p_prv[2];
+      let id_cur = p_cur[2];
+
+      let dx = p_cur[0] - p_prv[0];
+      let dy = p_cur[1] - p_prv[1];
+
+      let _subfac = 0.25;
+      let _dlen = Math.sqrt(dx*dx + dy*dy);
+      let _dv = [ _subfac*ds*dx/_dlen, _subfac*ds*dy/_dlen ];
+      let _dvlen = Math.sqrt( _dv[0]*_dv[0] + _dv[1]*_dv[1] );
+      let _n = Math.ceil( _dlen / (_subfac*ds) );
+
+      console.log("??", sidx, pidx, "dlen:", _dlen, "dvlen:", _dvlen, "n:", _n, "dxy:", dx, dy, "dv:", _dv);
+
+      for (let i=0; i<_n; i++) {
+        let _t = i;
+        line_pnt.push( [ p_prv[0] + _t*_dv[0], p_prv[1] + _t*_dv[1], id_prv, id_cur, sidx, pidx ] );
+
+        console.log("????", i, _n, _t, p_prv[0] + _t*_dv[0], p_prv[1] + _t*_dv[1]);
+      }
+
+    }
+  }
+
+  let bad_list = [];
+
+  let bad_count=0;
+  for (let i=0; i<all_end_pnt.length; i++) {
+    let is_ok = true;
+    for (let j=0; j<line_pnt.length; j++) {
+      if (line_pnt[j][2] == all_end_pnt[i][3]) { continue; }
+      if (line_pnt[j][3] == all_end_pnt[i][3]) { continue; }
+
+      let dx = all_end_pnt[i][0] - line_pnt[j][0];
+      let dy = all_end_pnt[i][1] - line_pnt[j][1];
+      let dlen = Math.sqrt( dx*dx + dy*dy );
+      if ( dlen < (2.5*ds) ) {
+        is_ok=false;
+        bad_count++;
+
+        //bad_list.push( { "sidx": line_pnt[j][4], "pidx": line_pnt[j][5] } );
+        bad_list.push( { "sidx": all_end_pnt[i][4], "pidx": all_end_pnt[i][5] } );
+        
+        console.log("!!", i, j, all_end_pnt[i], line_pnt[j]);
+        break;
+      }
+    }
+    if (!is_ok) { continue; }
+  }
+  console.log("bad_count:", bad_count, bad_list);
+
+  console.log("_reject_count:", _reject_count, _coll_stat);
+  console.log("tot_count:", tot_count);
+
+  g_info["debug_endpoint"] = all_end_pnt;
+  g_info["debug_line"] = line_pnt;
+  g_info["bad_list"] = bad_list;
+  g_info["squiggle"] = squiggle;
+}
+
+function debug_bad() {
+  for (let i=0; i<g_info.bad_list.length; i++) {
+    let sidx = g_info.bad_list[i].sidx;
+    let pidx = g_info.bad_list[i].pidx;
+
+    if ((sidx<0) || (pidx<0)) { continue; }
+
+    let p = g_info.squiggle[sidx].path[pidx];
+
+    debug_add(p[0], p[1], 5000, 50);
+  }
+}
+
+function kettle_init_0(vert) {
+  let ds = g_info.tube_width;
+  let dn = (ds)*Math.sqrt(2)/2;
+
+  let face_full  = [1,0,0,1,0,1];
+  let face_tuber = [0,0,0,1,0,1]
+  let face_tubel = [1,0,0,1,0,0]
+  let face_tubeu = [1,0,0,0,0,1]
+
+  let nop = [0,0];
+
+  let up_right  = [ dn, ds/2,0];
+  let up_left   = [-dn, ds/2,0];
+  let up        = [  0, dn,0];
+
+  let down        = [  0, -dn,0 ];
+  let down_right  = [ dn, -ds/2,0];
+  let down_left   = [-dn, -ds/2,0];
+
+  let n = 1024;
+  //let n = 2;
+
+  //let collision_width = 2.125;
+  let collision_width = 2;
+  let collision_width_p = 2;
+
+  let dir_choice = [
+    [ 'u', 'd' ],
+    [ 'l', 'L', 'r', 'R' ]
+  ];
+
+  let all_end_pnt = [];
+  let collision_pnt = [];
+
+  let _reject_count = 0;
+
+  let _coll_stat = [0,0,0];
+
+  let n_squiggle = 4;
+  for (let sidx=0; sidx<n_squiggle; sidx++) {
+    let _sched = ['.'];
+
+    let _width2 = 1024/2;
+    let _height2 = 1024/2;
+
+    let stride = 1;
+    let min_stride = 5;
+    let jump_range = 20;
+
+    //let sx = 0;
+    //let sy = 8*ds*sidx;
+
+    //let offset = [ -8*ds, 8*ds ];
+    let offset = [ -16*ds, -8*ds, 8*ds, 16*ds  ];
+
+    let sx = offset[sidx];
+    let sy = 0;
+
+    let pos = [sx,sy];
+
+    let end_pnt = [ [pos[0],pos[1]] ];
+    all_end_pnt.push( [pos[0],pos[1]] );
+    collision_pnt.push( [pos[0],pos[1]] );
+
+    //console.log(pos[0], pos[1]);
+
+    let dir_prv = 1;
+    for (let _idx=0; _idx<n; _idx++) {
+      let dir_cur = 1-dir_prv;
+
+      let _step_count = min_stride + (stride*_irnd(jump_range));
+      let _idir = _irnd( dir_choice[dir_cur].length );
+
+      let _dir = dir_choice[dir_cur][_idir];
+
+      let dpos = [0,0];
+
+      if      (_dir == 'u') { dpos[1] += dn; }
+      else if (_dir == 'd') { dpos[1] -= dn; }
+      else if (_dir == 'L') { dpos[0] -= dn; dpos[1] += ds/2; }
+      else if (_dir == 'l') { dpos[0] -= dn; dpos[1] -= ds/2; }
+      else if (_dir == 'R') { dpos[0] += dn; dpos[1] += ds/2; }
+      else if (_dir == 'r') { dpos[0] += dn; dpos[1] -= ds/2; }
+
+      dpos[0] *= _step_count;
+      dpos[1] *= _step_count;
+
+      // edge check
+      //
+      if ( (Math.abs(pos[0] + dpos[0]) > _width2) ||
+           (Math.abs(pos[1] + dpos[1]) > _height2) ) {
+        //console.log("bang!");
+        _reject_count++;
+
+        _coll_stat[0]++;
+
+        continue;
+      }
+
+      let _ok = true;
+      for (let j=0; j<collision_pnt.length; j++) {
+        let _dx = collision_pnt[j][0] - (pos[0] + dpos[0]);
+        let _dy = collision_pnt[j][1] - (pos[1] + dpos[1]);
+        let _l = Math.sqrt( _dx*_dx + _dy*_dy );
+        if (_l < (collision_width*ds)) { _ok = false; break; }
+      }
+      if (!_ok) {
+        //console.log("bang bang");
+        _reject_count++;
+
+        _coll_stat[1]++;
+
+        continue;
+      }
+
+      let _path_collision = true;
+      if (_path_collision) {
+        let _subfac = 0.25;
+        let _dlen = Math.sqrt( dpos[0]*dpos[0] + dpos[1]*dpos[1] );
+        let _dv = [ _subfac*ds*dpos[0]/_dlen, _subfac*ds*dpos[1]/_dlen ];
+        let _n = Math.ceil( _dlen/(_subfac*ds) + 0 );
+
+        let _s = Math.ceil(collision_width_p/(_subfac));
+
+        //for (i=_s; i<_n; i++) {
+        for (i=_s; i<_n; i++) {
+          let _p = [ pos[0] + i*_dv[0], pos[1] + i*_dv[1] ];
+          _ok = true;
+          //let _cmp_list = collision_pnt;
+          let _cmp_list = all_end_pnt;
+          for (let j=0; j<(_cmp_list.length); j++) {
+            let _dx = _cmp_list[j][0] - _p[0];
+            let _dy = _cmp_list[j][1] - _p[1];
+            let _l = Math.sqrt( _dx*_dx + _dy*_dy );
+            if (_l < (collision_width_p*ds)) {
+
+              //console.log("path collision, p:", _p, "collision_pnt:", j, collision_pnt[j], "ds:", ds);
+
+              _coll_stat[2]++;
+
+              _ok = false; break;
+            }
+          }
+          if (!_ok) {
+            //console.log("bang bang");
+            break;
+          }
+        }
+        if (!_ok) {
+          _reject_count++;
+          continue;
+        }
+
+      }
+
+
+      //console.log("pos:", pos, "dpos:", dpos);
+
+
+      _ok = true;
+      for (let j=0; j<(end_pnt.length-1); j++) {
+        let _dx = end_pnt[j][0] - (pos[0] + dpos[0]);
+        let _dy = end_pnt[j][1] - (pos[1] + dpos[1]);
+
+        //console.log("...", j, _dx, _dy, 2*ds);
+
+        if (Math.abs(_dy) < (1.0*ds)) { _ok = false; break; }
+        if (Math.abs(_dx) < (1.0*ds)) { _ok = false; break; }
+        continue;
+        if ((_dir == 'u') || (_dir == 'd')) {
+        if (Math.abs(_dy) < (2*ds)) { _ok = false; break; }
+        }
+        else {
+          if (Math.abs(_dx) < (2*ds)) { _ok = false; break; }
+        }
+      }
+      _ok = true;
+      if (!_ok) {
+        _reject_count++;
+        //console.log("bang bang bang");
+        continue;
+      }
+
+      for (let j=0; j<_step_count; j++) {
+        _sched.push( _dir );
+      }
+
+      let _subfac = 0.25;
+      let _dlen = Math.sqrt( dpos[0]*dpos[0] + dpos[1]*dpos[1] );
+      let _dv = [ _subfac*ds*dpos[0] / _dlen, _subfac*ds*dpos[1] / _dlen ];
+      let _n = Math.ceil( _dlen/(_subfac*ds) );
+      //console.log("dlen:", _dlen, "n:", _n);
+      for (let i=0; i<_n; i++) {
+        collision_pnt.push( [ pos[0] + i*_dv[0], pos[1] + i*_dv[1] ] );
       }
 
       dir_prv = dir_cur;
@@ -1723,17 +2140,25 @@ function kettle_init(vert) {
       all_end_pnt.push( [pos[0], pos[1] ] );
     }
 
-    console.log(">>>", _sched.join(""));
-    console.log("end_pnt.length:", end_pnt.length);
+    //console.log(">>>", _sched.join(""));
+    //console.log("end_pnt.length:", end_pnt.length);
 
-    _kettle_init(vert, _sched.join(""));
+    _kettle_init(vert, _sched.join(""), sx, sy);
   }
+
+
+  console.log("_reject_count:", _reject_count, _coll_stat);
 }
 
-function _kettle_init(vert, c_sched) {
+function _kettle_init(vert, c_sched, sx, sy) {
   vert = ((typeof vert === "undefined") ? [] : vert);
 
-  let ds = 50;
+  sx = ((typeof sx === "undefined") ? 0 : sx);
+  sy = ((typeof sy === "undefined") ? 0 : sy);
+
+  //console.log("ok:", sx, sy);
+
+  let ds = g_info.tube_width;
   let dn = (ds)*Math.sqrt(2)/2;
 
   let face_full  = [1,0,0,1,0,1];
@@ -1791,8 +2216,7 @@ function _kettle_init(vert, c_sched) {
   let count_x = [0];
   let count_y = [0,0];
 
-
-  console.log(">>> _kettle_init");
+  //console.log(">>> _kettle_init");
   //console.log(c_sched, sched);
 
   let V = [];
@@ -1800,8 +2224,9 @@ function _kettle_init(vert, c_sched) {
   let m0 = _yrotate(-Math.PI/4);
   let m1 = _xrotate(-Math.PI/4);
 
-
-  let cur_x = 0, cur_y = -100, cur_z = 0;
+  let cur_x = sx,
+      cur_y = sy,
+      cur_z = 0;
   for (let i=0; i<sched.length; i++) {
 
     let ch = c_sched.charAt(i);
@@ -1825,11 +2250,11 @@ function _kettle_init(vert, c_sched) {
 
     let dv = sched[i];
 
-    //cur_x += dv[0];
-    //cur_y += dv[1];
+    cur_x += dv[0];
+    cur_y += dv[1];
 
-    cur_x = count_x[0]*dn;
-    cur_y = count_y[0]*ds/2 + count_y[1]*dn;
+    //cur_x = count_x[0]*dn;
+    //cur_y = count_y[0]*ds/2 + count_y[1]*dn;
 
     //console.log(count_x, count_y, cur_x, cur_y);
 
@@ -1896,8 +2321,7 @@ function _kettle_init(vert, c_sched) {
 function kettle_init_bak(vert) {
   vert = ((typeof vert === "undefined") ? [] : vert);
 
-  console.log(">>> kettle_init");
-
+  //console.log(">>> kettle_init");
 
   let _vert = [];
 
