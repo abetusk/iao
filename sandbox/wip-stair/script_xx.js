@@ -155,10 +155,54 @@ var g_info = {
 
 let _g_w = 1/2;
 let _g_h = 2/8;
+//let _g_epd = 1/8;
+let _g_epd = 0;
 
 let g_template = {
 
-  "f|" : [
+  "endpoint": {
+    "|": [  [ -_g_w/2,  1/2 + _g_epd, -1/2+_g_h/2 ], [  _g_w/2,  1/2 + _g_epd, -1/2+_g_h/2 ],
+            [ -_g_w/2, -1/2 - _g_epd, -1/2+_g_h/2 ], [  _g_w/2, -1/2 - _g_epd, -1/2+_g_h/2 ] ],
+
+    "r": [  [ -_g_w/2, -1/2 - _g_epd, -1/2+_g_h/2 ], [  _g_w/2, -1/2 - _g_epd, -1/2+_g_h/2 ],
+            [ 1/2 + _g_epd,  _g_w/2, -1/2+_g_h/2 ], [ 1/2 + _g_epd, -_g_w/2, -1/2+_g_h/2 ] ],
+
+    "+": [  [ -_g_w/2,  1/2 + _g_epd, -1/2+_g_h/2 ], [  _g_w/2,  1/2 + _g_epd, -1/2+_g_h/2 ],
+            [ -_g_w/2, -1/2 - _g_epd, -1/2+_g_h/2 ], [  _g_w/2, -1/2 - _g_epd, -1/2+_g_h/2 ],
+            [ -1/2 - _g_epd,  _g_w/2, -1/2+_g_h/2 ], [ -1/2 - _g_epd, -_g_w/2, -1/2+_g_h/2 ],
+            [ 1/2 + _g_epd,  _g_w/2, -1/2+_g_h/2 ], [ 1/2 + _g_epd, -_g_w/2, -1/2+_g_h/2 ] ],
+
+    "T": [  [  _g_w/2, -1/2 - _g_epd, -1/2+_g_h/2 ], [ -_g_w/2, -1/2 - _g_epd, -1/2+_g_h/2 ],
+            [ -1/2 - _g_epd,  _g_w/2, -1/2+_g_h/2 ], [ -1/2 - _g_epd, -_g_w/2, -1/2+_g_h/2 ],
+            [ 1/2 + _g_epd,  _g_w/2, -1/2+_g_h/2 ], [ 1/2 + _g_epd, -_g_w/2, -1/2+_g_h/2 ] ],
+
+    "^": [  [  _g_w/2, -1/2 + _g_h/2, -1/2 - _g_epd ], [ -_g_w/2, -1/2 + _g_h/2, -1/2 - _g_epd ],
+            [  _g_w/2, 1/2 - _g_h/2, 1/2 + _g_epd ], [ -_g_w/2, 1/2 - _g_h/2, 1/2 + _g_epd ] ]
+  },
+
+  /*
+  "endpoint": {
+    "|": [  [ -_g_w/2,  1/2 + _g_epd, -1/2+_g_h/2 ], [  _g_w/2,  1/2 + _g_epd, -1/2+_g_h/2 ],
+            [ -_g_w/2, -1/2 - _g_epd, -1/2+_g_h/2 ], [  _g_w/2, -1/2 - _g_epd, -1/2+_g_h/2 ] ],
+
+    "r": [  [ -_g_w/2, -1/2 - _g_epd, -1/2+_g_h/2 ], [  _g_w/2, -1/2 - _g_epd, -1/2+_g_h/2 ],
+            [ 1/2 + _g_epd,  _g_w/2, -1/2+_g_h/2 ], [ 1/2 + _g_epd, -_g_w/2, -1/2+_g_h/2 ] ],
+
+    "+": [  [ -_g_w/2,  1/2 + _g_epd, -1/2+_g_h/2 ], [  _g_w/2,  1/2 + _g_epd, -1/2+_g_h/2 ],
+            [ -_g_w/2, -1/2 - _g_epd, -1/2+_g_h/2 ], [  _g_w/2, -1/2 - _g_epd, -1/2+_g_h/2 ],
+            [ -1/2 - _g_epd,  _g_w/2, -1/2+_g_h/2 ], [ -1/2 - _g_epd, -_g_w/2, -1/2+_g_h/2 ],
+            [ 1/2 + _g_epd,  _g_w/2, -1/2+_g_h/2 ], [ 1/2 + _g_epd, -_g_w/2, -1/2+_g_h/2 ] ],
+
+    "T": [  [  _g_w/2, -1/2 - _g_epd, -1/2+_g_h/2 ], [ -_g_w/2, -1/2 - _g_epd, -1/2+_g_h/2 ],
+            [ -1/2 - _g_epd,  _g_w/2, -1/2+_g_h/2 ], [ -1/2 - _g_epd, -_g_w/2, -1/2+_g_h/2 ],
+            [ 1/2 + _g_epd,  _g_w/2, -1/2+_g_h/2 ], [ 1/2 + _g_epd, -_g_w/2, -1/2+_g_h/2 ] ],
+
+    "^": [  [  _g_w/2, -1/2 + _g_h/2, -1/2 - _g_epd ], [ -_g_w/2, -1/2 + _g_h/2, -1/2 - _g_epd ],
+            [  _g_w/2, 1/2 - _g_h/2, 1/2 + _g_epd ], [ -_g_w/2, 1/2 - _g_h/2, 1/2 + _g_epd ] ]
+  },
+  */
+
+  "|" : [
 
     // front panel
     //
@@ -195,7 +239,7 @@ let g_template = {
 
   ],
 
-  "fr"  : [],
+  "r"  : [],
   "^"   : [],
   "+"   : [],
   "T"   : []
@@ -397,7 +441,7 @@ function init_template() {
     }
   }
 
-  g_template.fr = flat_fr;
+  g_template["r"] = flat_fr;
 
   //---
   // stairs
@@ -1899,6 +1943,216 @@ function init_param() {
   window.$fxhashFeatures = g_info.features;
 }
 
+function _template_rot_mov(tplate, rx, ry, rz, tx, ty, tz) {
+
+  let tri = [];
+
+  let mx = m4.xRotation(rx);
+  let my = m4.yRotation(ry);
+  let mz = m4.zRotation(rz);
+
+  let mr = m4.multiply( m4.multiply(mx, my), mz );
+
+  for (let p=0; p<tplate.length; p+=3) {
+    tri.push(tx); tri.push(ty); tri.push(tz);
+    for (let _i=0; _i<3; _i++) {
+      for (let _j=0; _j<3; _j++) {
+        tri[p+_i] += tplate[p+_j]*mr[4*_i + _j];
+      }
+    }
+  }
+
+  return tri;
+}
+
+function _p_mul_mov(v, s, tx, ty ,tz) {
+  for (let i=0; i<v.length; i++) {
+    v[i] *= s;
+
+    if ((i%3)==0) { v[i] += tx; }
+    if ((i%3)==1) { v[i] += ty; }
+    if ((i%3)==2) { v[i] += tz; }
+  }
+
+  return v;
+}
+
+function _m_v_mul(m, v) {
+  let tx = 0;
+  let ty = 0;
+  let tz = 0;
+
+  let tri = [];
+
+  tri.push(tx);
+  tri.push(ty);
+  tri.push(tz);
+  for (let _i=0; _i<3; _i++) {
+    for (let _j=0; _j<3; _j++) {
+      tri[_i] += m[4*_i + _j] * v[_j];
+    }
+  }
+
+  return tri;
+}
+
+function _dist3(u,v) {
+  let dsq = (u[0] - v[0])*(u[0] - v[0]) +
+            (u[1] - v[1])*(u[1] - v[1]) +
+            (u[2] - v[2])*(u[2] - v[2]);
+
+  return Math.sqrt(dsq);
+}
+
+function _v_in(v, va, _eps) {
+  _eps = ((typeof _eps === "undefined") ? (1/128.0) : _eps);
+
+  for (let i=0; i<va.length; i++) {
+    if (_dist3(v, va[i]) <= _eps) { return true; }
+  }
+  return false;
+}
+
+function _build_tile_library( _endp_lib ) {
+
+  let raw_lib = {};
+
+  // equiv_map holds array of equivalent rotations
+  //
+  let _equiv_map = {};
+
+  // repr map takes a single representation for all
+  // equivalent rotations
+  //
+  let _repr_map = {};
+
+  for (let pkey in _endp_lib) {
+
+    let _endp = _endp_lib[pkey];
+
+    let _type_a = [];
+    let _type_a_key = [];
+
+    for (let xidx=0; xidx<4; xidx++) {
+      for (let yidx=0; yidx<4; yidx++) {
+        for (let zidx=0; zidx<4; zidx++) {
+
+          mx = m4.xRotation(xidx*Math.PI/2);
+          my = m4.yRotation(yidx*Math.PI/2);
+          mz = m4.zRotation(zidx*Math.PI/2);
+          let mr = m4.multiply( m4.multiply(mx, my), mz );
+
+          let ukey = pkey + xidx.toString() + yidx.toString() + zidx.toString();
+
+          raw_lib[ukey] = [];
+
+          // rotate endpoints around the various pi/2 rotations (x,y,z)
+          // and put them in the 'raw' library
+          //
+          for (let ep_idx=0; ep_idx<_endp.length; ep_idx++) {
+            let v = _m_v_mul(mr, _endp[ep_idx]);
+            raw_lib[ukey].push(v);
+          }
+
+          _type_a.push( raw_lib[ukey] );
+          _type_a_key.push(ukey);
+
+        }
+      }
+
+    }
+
+
+    // once in the library, go through and compare each
+    // to see if they're equivalent by seeing if the endpoints
+    // line up
+    //
+    for (let i=0; i<_type_a.length; i++) {
+      for (let j=i+1; j<_type_a.length; j++) {
+
+        let k=0;
+        for (k=0; k<_type_a[i].length; k++) {
+          if (!(_v_in(_type_a[i][k], _type_a[j]))) { break; }
+        }
+
+        if (k==_type_a[i].length) {
+          if (!(_type_a_key[i] in _equiv_map)) { _equiv_map[_type_a_key[i]] = []; }
+          if (!(_type_a_key[j] in _equiv_map)) { _equiv_map[_type_a_key[j]] = []; }
+          _equiv_map[_type_a_key[i]].push( _type_a_key[j] );
+          _equiv_map[_type_a_key[j]].push( _type_a_key[i] );
+        }
+
+      }
+    }
+
+    // once we've constructed the equiv_map, go through and pick out the
+    // representative
+    //
+    for (let key in _equiv_map) {
+      if (key in _repr_map) { continue; }
+      _repr_map[key] = key;
+      for (let ii=0; ii<_equiv_map[key].length; ii++) {
+        _repr_map[_equiv_map[key][ii]] = key;
+      }
+    }
+
+  }
+
+  let uniq_repr = {};
+  for (let key in _repr_map) {
+    let repr_id = _repr_map[key];
+    if (!(repr_id in uniq_repr)) {
+      uniq_repr[repr_id] = 0;
+    }
+    uniq_repr[repr_id]++;
+  }
+
+  let tile_attach = {};
+
+  // now for each representative, test every other tile to see if can
+  // be joined
+  //
+  for (let anchor_key in uniq_repr) {
+    for (let test_key in uniq_repr) {
+
+      for (let dx=-1; dx<2; dx++) {
+        for (let dy=-1; dy<2; dy++) {
+          for (let dz=-1; dz<2; dz++) {
+            if ((dx==0) && (dy==0) && (dz==0)) { continue; }
+
+            let anch_endp = raw_lib[anchor_key];
+            let test_endp = raw_lib[test_key];
+
+
+            let count = 0;
+            for (let idx=0; idx<test_endp.length; idx++) {
+              let tv = [ test_endp[idx][0] + dx, test_endp[idx][1] + dy, test_endp[idx][2] + dz ];
+              if (_v_in(tv, anch_endp)) { count++; }
+            }
+
+            // should only be two...
+            //
+            if (count>0) {
+              //console.log(">>", dx, dy, dz, anchor_key, test_key, count);
+              if (!(anchor_key in tile_attach)) { tile_attach[anchor_key] = {}; }
+              tile_attach[anchor_key][test_key] = { "anchor": anchor_key, "attach": test_key, "dv": [ dx, dy, dz ] }
+            }
+
+          }
+        }
+      }
+    }
+
+  }
+
+
+  g_template["raw_lib"] = raw_lib;
+  g_template["equiv_map"] = _equiv_map;
+  g_template["repr_map"] = _repr_map
+  g_template["uniq_repr"] = uniq_repr;
+  g_template["tile_attach"] = tile_attach;
+}
+
 function _init() {
 
   init_template();
@@ -1911,23 +2165,26 @@ function _init() {
   mb = m4.zRotation(Math.PI/5);
 
   let mr = m4.multiply(ma, mb);
-  console.log(mr);
 
-
-  let ok = g_template["f|"];
+  //let ok = g_template["|"];
   //let ok = g_template["fr"];
   //let ok = g_template["^"];
   //let ok = g_template["T"];
   //let ok = g_template["+"];
-  for (let i=0; i<ok.length; i++) {
-    ok[i] *= 40.0;
 
-    if ((i%3)==0) { ok[i] += tx; }
-    if ((i%3)==1) { ok[i] += ty; }
-    if ((i%3)==2) { ok[i] += tz; }
-  }
+  let ok = _template_rot_mov(g_template["|"], 0, 0, 0, 0, 0, 0);
+  let ok1 = _template_rot_mov(g_template["|"], 0, 0, 0, 0, 1, 0);
+  let ok2 = _template_rot_mov(g_template["|"], Math.PI, 0, Math.PI/2, 0, 2, 0);
 
-  g_info.data.tri = [ ok ];
+  _p_mul_mov(ok, 40, tx, ty, tz);
+  _p_mul_mov(ok1, 40, tx, ty, tz);
+  _p_mul_mov(ok2, 40, tx, ty, tz);
+
+  g_info.data.tri = [ ok, ok1, ok2 ];
+
+  //---
+
+  _build_tile_library( g_template.endpoint );
 
 }
 
