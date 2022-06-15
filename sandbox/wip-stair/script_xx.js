@@ -2187,13 +2187,64 @@ function grid_clear(gr) {
 
 function grid_cull_one(gr) {
 
+  let processed_count = 0;
+  let tot_count = 0;
+
+  let marked_count = 0;
+  let marked_list = [];
   for (let z=0; z<gr.length; z++) {
     for (let y=0; y<gr[z].length; y++) {
       for (let x=0; x<gr[z][y].length; x++) {
 
+        let last_valid_idx = -1;
+        let valid_count = 0;
+        ele = gr[z][y][x];
+        for (let ii=0; ii<ele.length; ii++) {
+          if (!ele[ii].valid) { continue; }
+          valid_count++;
+          last_valid_idx = ii;
+        }
+
+
+        if (valid_count == 1) {
+          if (!ele[last_valid_idx].processed) {
+            marked_count++;
+            ele[last_valid_idx].processed = true;
+
+            marked_list.push( { "p": [x,y,z], "n": ele[last_valid_idx].n } );
+          }
+        }
+      }
+    }
+  }
+
+  if (marked_count > 0) {
+    console.log("at least one marked as processed...", marked_list);
+    return { "finished": false, "reason":"marked as processed", "data": marked_list, "error": false };
+  }
+
+
+
+
+  for (let z=0; z<gr.length; z++) {
+    for (let y=0; y<gr[z].length; y++) {
+      for (let x=0; x<gr[z][y].length; x++) {
+
+        tot_count++;
+
         for (let ii=0; ii<gr[z][y][x].length; ii++) {
+
+
+          let anch_ele = gr[z][y][x][ii];
+          //if ((x==1) && (y==1) && (z==0) && (anch_ele.n == '|011')) {
+          //  console.log("considering", x, y, z, ii, anch_ele.n, anch_ele.valid, anch_ele.processed);
+          //}
+
           if (gr[z][y][x][ii].valid == false) { continue; }
-          if (gr[z][y][x][ii].processed == true) { continue; }
+          if (gr[z][y][x][ii].processed == true) {
+            processed_count++;
+            continue;
+          }
 
           let anchor_name = gr[z][y][x][ii].n;
 
@@ -2207,9 +2258,12 @@ function grid_cull_one(gr) {
             for (let dv_idx=0; dv_idx<ta[nei_name].dv.length; dv_idx++) {
 
 
-
               let dv = ta[nei_name].dv[dv_idx];
               let dv_key = dv[0].toString() + ":" + dv[1].toString() + ":" + dv[2].toString();
+
+              //if ((x==1) && (y==1) && (z==0) && (anch_ele.n == '|011')) {
+              //  console.log("  ", anch_ele.n, "nei:", nei_name, dv_key);
+              //}
 
               let nx = x + dv[0];
               let ny = y + dv[1];
@@ -2229,17 +2283,36 @@ function grid_cull_one(gr) {
                 return { "p": [x,y,z], "n": anchor_name, "finished": false, "reason":"bound cull" };
               }
 
-              //??
-              //if (gr[nz][ny][nx].valid == false) { continue; }
-
-              attach_map[dv_key]++;
+              let found = false;
+              for (let jj=0; jj<gr[nz][ny][nx].length; jj++) {
+                let _ele = gr[nz][ny][nx][jj];
+                if (_ele.n == nei_name) {
+                  if (_ele.valid == true) {
+                    attach_map[dv_key]++;
+                    found = true;
+                  }
+                  break;
+                }
+              }
 
             }
 
           }
 
+          if ((x==2) && (y==1) && (z==0) && (anchor_name == 'r020')) {
+            //console.log("attach_map for", x, y, z, anchor_name, attach_map);
+          }
+
           for (let dv_key in attach_map) {
             if (attach_map[dv_key]==0) {
+
+              //DEBUG
+              //
+              console.log("culling", anchor_name, x, y, z, "(", dv_key, ")");
+
+              gr[z][y][x][ii].d = -1;
+              gr[z][y][x][ii].valid = false;
+
               return { "p": [x,y,z], "n": anchor_name, "finished": false, "reason":"removing for lack of neighbors" };
             }
           }
@@ -2250,6 +2323,14 @@ function grid_cull_one(gr) {
       }
     }
   }
+
+  if (processed_count == tot_count) {
+    //console.log("final state");
+    return { "finished": true, "reason": "converged" };
+  }
+
+  console.log("cp0:");
+  debug_print_gr(gr);
 
   //---
   // force processed
@@ -2348,17 +2429,6 @@ function grid_cull_one(gr) {
                     }
 
                     return { "finished":false, "reason":"forced cull", "p": [nx,ny,nz], "n": nam };
-
-                    /*
-                    if (!(nam in keep_map[dkey])) {
-                      gr[nz][ny][nx][jj].d = -1;
-                      gr[nz][ny][nx][jj].valid = false;
-
-                      console.log("forcing cull:", nx, ny, nz, nam);
-
-                      return { "finished":false, "reason":"forced cull", "p": [nx,ny,nz], "n": nam };
-                    }
-                    */
 
                   }
 
@@ -2465,6 +2535,8 @@ function grid_cull_one(gr) {
     if (ii!=idx) { gr[_z][_y][_x][ii].valid = false; continue; }
     gr[_z][_y][_x][ii].processed = true;
 
+  debug_print_gr(gr);
+
     console.log("MARKING", _x, _y, _z, ii, gr[_z][_y][_x][ii].n);
   }
 
@@ -2508,7 +2580,9 @@ function debug_print_gr(gr) {
         let u = '.';
         for (let ii=0; ii<gr[z][y][x].length; ii++) {
           if (!gr[z][y][x][ii].valid) { continue; }
-          u += ',' + gr[z][y][x][ii].n;
+
+          let sfx = (gr[z][y][x][ii].processed ? '*' : '');
+          u += ',' + gr[z][y][x][ii].n + sfx;
         }
 
         console.log(x,y,z,u);
@@ -2575,9 +2649,16 @@ function grid_cull(gr) {
       continue;
     }
 
-    if (r.n.charAt(0) == 'T') {
-      if (r.reason != "bound cull") {
-        console.log("???", r.p[0], r.p[1], r.p[2], r.n, r.reason);
+    if ("n" in r) {
+      if (r.n.charAt(0) == 'T') {
+        if (r.reason != "bound cull") {
+          console.log("???", r.p[0], r.p[1], r.p[2], r.n, r.reason);
+        }
+        //return { "p": [x,y,z], "n": anchor_name, "finished": false, "reason":"removing for lack of neighbors" };
+        else if (r.reason == "removing for lack of neighbors") {
+          console.log("xxx");
+        }
+
       }
     }
 
@@ -2664,7 +2745,21 @@ function _init() {
     ]
   ];
 
-  gr = gen_simple_grid(pgr);
+  gr = [
+    [
+      [ "r003", "|011", "r002" ],
+      [ "r000", "|011", "r001" ]
+    ]
+  ];
+
+  gr = [
+    [
+      [ ".", "r003", "r002" ],
+      [ ".", ".", "r001" ]
+    ]
+  ];
+
+  //gr = gen_simple_grid(pgr);
 
   //??
   //Array(3)]
