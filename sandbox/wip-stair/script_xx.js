@@ -169,6 +169,8 @@ let _g_epd = 0;
 let g_template = {
 
   "endpoint": {
+    ".": [],
+
     "|": [  [ -_g_w/2,  1/2 + _g_epd, -1/2+_g_h/2 ], [  _g_w/2,  1/2 + _g_epd, -1/2+_g_h/2 ],
             [ -_g_w/2, -1/2 - _g_epd, -1/2+_g_h/2 ], [  _g_w/2, -1/2 - _g_epd, -1/2+_g_h/2 ] ],
 
@@ -187,6 +189,8 @@ let g_template = {
     "^": [  [  _g_w/2, -1/2 + _g_h/2, -1/2 - _g_epd ], [ -_g_w/2, -1/2 + _g_h/2, -1/2 - _g_epd ],
             [  _g_w/2,  1/2 - _g_h/2,  1/2 + _g_epd ], [ -_g_w/2,  1/2 - _g_h/2,  1/2 + _g_epd ] ]
   },
+
+  ":" : [],
 
   "|" : [
 
@@ -2190,42 +2194,11 @@ function grid_cull_one(gr) {
   let processed_count = 0;
   let tot_count = 0;
 
-  let marked_count = 0;
-  let marked_list = [];
-  for (let z=0; z<gr.length; z++) {
-    for (let y=0; y<gr[z].length; y++) {
-      for (let x=0; x<gr[z][y].length; x++) {
-
-        let last_valid_idx = -1;
-        let valid_count = 0;
-        ele = gr[z][y][x];
-        for (let ii=0; ii<ele.length; ii++) {
-          if (!ele[ii].valid) { continue; }
-          valid_count++;
-          last_valid_idx = ii;
-        }
-
-
-        if (valid_count == 1) {
-          if (!ele[last_valid_idx].processed) {
-            marked_count++;
-            ele[last_valid_idx].processed = true;
-
-            marked_list.push( { "p": [x,y,z], "n": ele[last_valid_idx].n } );
-          }
-        }
-      }
-    }
-  }
-
-  if (marked_count > 0) {
-    console.log("at least one marked as processed...", marked_list);
-    return { "finished": false, "reason":"marked as processed", "data": marked_list, "error": false };
-  }
-
-
-
-
+  // cull possbile grid tiles that don't have any neighbors
+  // (bounds checking)
+  // In addition, build 'attach_map' that collects number of neighbors
+  // for each tile and grid position
+  //
   for (let z=0; z<gr.length; z++) {
     for (let y=0; y<gr[z].length; y++) {
       for (let x=0; x<gr[z][y].length; x++) {
@@ -2299,9 +2272,9 @@ function grid_cull_one(gr) {
 
           }
 
-          if ((x==2) && (y==1) && (z==0) && (anchor_name == 'r020')) {
-            //console.log("attach_map for", x, y, z, anchor_name, attach_map);
-          }
+          //if ((x==2) && (y==1) && (z==0) && (anchor_name == 'r020')) {
+          //  console.log("attach_map for", x, y, z, anchor_name, attach_map);
+          //}
 
           for (let dv_key in attach_map) {
             if (attach_map[dv_key]==0) {
@@ -2329,13 +2302,9 @@ function grid_cull_one(gr) {
     return { "finished": true, "reason": "converged" };
   }
 
-  console.log("cp0:");
-  debug_print_gr(gr);
-
   //---
   // force processed
   //
-
   for (let z=0; z<gr.length; z++) {
     for (let y=0; y<gr[z].length; y++) {
       for (let x=0; x<gr[z][y].length; x++) {
@@ -2373,7 +2342,7 @@ function grid_cull_one(gr) {
 
                 if (!(dv_key in keep_map)) { keep_map[dv_key] = {}; }
 
-                console.log("++keep_map[", dv_key, "][", nei_name, "]: anchor:", anchor_name, "nei:", nei_name, "anch_pos:", x,y,z, "nei_pos:", nx, ny, nz);
+                //console.log("++keep_map[", dv_key, "][", nei_name, "]: anchor:", anchor_name, "nei:", nei_name, "anch_pos:", x,y,z, "nei_pos:", nx, ny, nz);
 
                 keep_map[dv_key][nei_name] = { "anchor":anchor_name, "nei": nei_name, "anchor_pos": [x,y,z], "nei_pos":[nx,ny,nz] };
 
@@ -2445,6 +2414,52 @@ function grid_cull_one(gr) {
       }
     }
   }
+
+  // at this point, all tiles that can be forced are and
+  // the only remaining tiles are singletons, which we should
+  // mark as processed, or have some choice.
+  //
+
+  // mark all single elements remaining in the grid list
+  // as processed
+  //
+  let marked_count = 0;
+  let marked_list = [];
+  for (let z=0; z<gr.length; z++) {
+    for (let y=0; y<gr[z].length; y++) {
+      for (let x=0; x<gr[z][y].length; x++) {
+
+        let last_valid_idx = -1;
+        let valid_count = 0;
+        ele = gr[z][y][x];
+        for (let ii=0; ii<ele.length; ii++) {
+          if (!ele[ii].valid) { continue; }
+          valid_count++;
+          last_valid_idx = ii;
+        }
+
+
+        if (valid_count == 1) {
+          if (!ele[last_valid_idx].processed) {
+            marked_count++;
+            ele[last_valid_idx].processed = true;
+
+            marked_list.push( { "p": [x,y,z], "n": ele[last_valid_idx].n } );
+          }
+        }
+      }
+    }
+  }
+
+  if (marked_count > 0) {
+    console.log("at least one marked as processed...", marked_list);
+    return { "finished": false, "reason":"marked as processed", "data": marked_list, "error": false };
+  }
+
+  console.log("cp0:");
+  debug_print_gr(gr);
+
+
 
 
   //---
@@ -2577,12 +2592,16 @@ function debug_print_gr(gr) {
     for (let y=0; y<gr[z].length; y++) {
       for (let x=0; x<gr[z][y].length; x++) {
 
-        let u = '.';
+        let valid_count = 0;
+        let u = '';
         for (let ii=0; ii<gr[z][y][x].length; ii++) {
           if (!gr[z][y][x][ii].valid) { continue; }
 
           let sfx = (gr[z][y][x][ii].processed ? '*' : '');
-          u += ',' + gr[z][y][x][ii].n + sfx;
+          if (valid_count>0) { u += ","; }
+          //u += ',' + gr[z][y][x][ii].n + sfx;
+          u += gr[z][y][x][ii].n + sfx;
+          valid_count++;
         }
 
         console.log(x,y,z,u);
@@ -2759,7 +2778,7 @@ function _init() {
     ]
   ];
 
-  //gr = gen_simple_grid(pgr);
+  gr = gen_simple_grid(pgr);
 
   //??
   //Array(3)]
