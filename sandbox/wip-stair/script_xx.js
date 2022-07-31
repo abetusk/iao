@@ -156,11 +156,9 @@ var g_info = {
 };
 
 //let _g_w = 1/2;
-let _g_w = 1/5;
+let _g_w = 1/4;
 //let _g_h = 2/8;
-let _g_h = 1/16;
-
-_g_h = 1/8;
+let _g_h = 1/8;
 
 //DEBUG
 //_g_h = 0.25;
@@ -475,34 +473,34 @@ function init_template() {
 
   let n = Math.floor( ((_st_U - _st_L) / _g_h) + (_g_h/2) );
 
-  let _st_h = _g_h;
-  let _st_w = 2*_g_w;
+  let _st_height = _g_h;
+  let _st_length = 2*_g_w;
 
-  let _st_y_s = -(1/2) + (_st_w/2);
-  let _st_y_e =  (1/2) - (_st_w/2);
+  let _st_y_s = -(1/2) + (_st_length/2);
+  let _st_y_e =  (1/2) - (_st_length/2);
   let _st_dy = (_st_y_e - _st_y_s)/(n-1);
 
-  let _st_d = _g_h/2;
+  let _st_depth = _g_h/2;
+
+  console.log("_st_y_s", _st_y_s, "st_y_e", _st_y_e, "st_dy", _st_dy, "st_depth", _st_depth, "n", n);
 
   let dx=0, dy=0, dz=0;
 
   for (let i=0; i<n; i++) {
 
-    // NEEDS WORK
-    // overhange needs to calculated correctly
-    // dy needs work
-    // as far as I know, dx and dz are correct
+    // top upper step
     //
     dx = 0;
-    dy = i*_st_dy - _st_dy/2;
-    //dy = i*_st_dy - _st_dy/2  - 1;
-    //dz = i*_g_h + _g_h/2;
-    dz = i*_g_h - 3*_g_h - _g_h/2;
+    dy = -1/2 + i*_st_dy  + _st_dy/2;
+    dz = i*_g_h  - 1/2 + _g_h/2 ;
 
-    let _r = _3rect_xy( _g_w, _st_d,
+    let _r = _3rect_xy( _g_w, _st_dy,
       dx, dy, dz,
-      parity);
-    for (let j=0; j<_r.length; j++) { st.push(_r[j]); }
+      1-parity);
+
+    if (i < (n-1)) {
+      for (let j=0; j<_r.length; j++) { st.push(_r[j]); }
+    }
 
     // up facing top stairs
     //
@@ -517,19 +515,18 @@ function init_template() {
 
     //---
     //
-    // NEEDS WORK
-    // overhange needs to calculated correctly
-    // dy needs work
-    // as far as I know, dx and dz are correct
+    // bottom lower setp
     //
     dx = 0;
-    dy = i*_st_dy + 2*_g_w - 1 + 0.05;
-    dz = -(1/2) + i*_g_h - _g_h/2;
+    dy = 1/2 - i*_st_dy + _st_dy/2;
+    dz = 1/2 - i*_g_h + _g_h/2;
 
-    _r = _3rect_xy( _g_w, _st_d,
+    _r = _3rect_xy( _g_w, _st_dy,
       dx, dy, dz,
-      1-parity);
-    for (let j=0; j<_r.length; j++) { st.push(_r[j]); }
+      parity);
+    if (i>0) {
+      for (let j=0; j<_r.length; j++) { st.push(_r[j]); }
+    }
 
 
     // bottom facing bottom steps
@@ -551,7 +548,7 @@ function init_template() {
     dy = _st_y_s + i*_st_dy;
 
     _r = _3rect_zy(
-      _st_h, _st_w,
+      _st_height, _st_length,
       dx, dy, dz,
       1-parity);
     for (let j=0; j<_r.length; j++) { st.push(_r[j]); }
@@ -564,7 +561,7 @@ function init_template() {
     dz = _st_L + _g_h/2 + i*_g_h;
 
     _r = _3rect_zy(
-      _st_h, _st_w,
+      _st_height, _st_length,
       dx, dy, dz,
       parity);
     for (let j=0; j<_r.length; j++) { st.push(_r[j]); }
@@ -574,18 +571,18 @@ function init_template() {
 
   // bottom platform
   //
-  _r = _3rect_xy( _g_w, _st_w,
+  _r = _3rect_xy( _g_w, _st_length,
     0,
-    -1/2+_st_w/2,
+    -1/2+_st_length/2,
     -1/2-_g_h/2,
     parity);
   for (let j=0; j<_r.length; j++) { st.push(_r[j]); }
 
   // top platform
   //
-  _r = _3rect_xy( _g_w, _st_w,
+  _r = _3rect_xy( _g_w, _st_length,
     0,
-    1/2-_st_w/2,
+    1/2-_st_length/2,
     1/2+_g_h/2,
     1-parity);
   for (let j=0; j<_r.length; j++) { st.push(_r[j]); }
@@ -1605,7 +1602,7 @@ function threejs_init() {
   //SCALE
 
   //const d = 12,
-  const d = 9,
+  const d = 5,
         d2 = d/2;
   for (let idx=0; idx<tri_vf.length; idx++) {
 
@@ -1870,7 +1867,7 @@ function render() {
 
       let D = 4;
       D = 1.75;
-      D = 1.087;
+      D = 1.387;
 
       if (view_prv == 0) {
         mp0 = m4.xRotation((1-_t_rem)*Math.PI/D);
@@ -2944,14 +2941,16 @@ function _init() {
 
   gr = [
     [
-      [ "d000", "d000", "d000" ],
-      [ "d000", "^000", "d000" ],
-      [ "d000", "d000", "d000" ]
+      [ ".", ".", "." ],
+      [ ".", "^020", "." ],
+      [ ".", "^000", "." ],
+      [ ".", ".", "." ]
     ],
     [
-      [ "d000", "d000", "d000" ],
-      [ "d000", ".", "d000" ],
-      [ "d000", "d000", "d000" ]
+      [ ".", "r003", "r002" ],
+      [ ".", ".", "|000" ],
+      [ ".", ".", "|000" ],
+      [ ".", "r000", "r001" ]
     ],
   ];
 
