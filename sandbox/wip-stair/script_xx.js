@@ -149,6 +149,8 @@ var g_info = {
   "debug_cube": [],
   "debug_cube_pos": [],
 
+  "debug_level": 2,
+
   "material_type" : "toon"
 
 };
@@ -157,6 +159,13 @@ var g_info = {
 let _g_w = 1/5;
 //let _g_h = 2/8;
 let _g_h = 1/16;
+
+_g_h = 1/8;
+
+//DEBUG
+//_g_h = 0.25;
+//_g_h = 0.5;
+
 //let _g_epd = 1/8;
 let _g_epd = 0;
 
@@ -171,58 +180,69 @@ let g_template = {
   "endpoint": {
     ".": [],
 
-    "|": [  [ -_g_w/2,  1/2 + _g_epd, -1/2+_g_h/2 ], [  _g_w/2,  1/2 + _g_epd, -1/2+_g_h/2 ],
-            [ -_g_w/2, -1/2 - _g_epd, -1/2+_g_h/2 ], [  _g_w/2, -1/2 - _g_epd, -1/2+_g_h/2 ] ],
+    "d": [],
 
-    "r": [  [ -_g_w/2, -1/2 - _g_epd, -1/2+_g_h/2 ], [  _g_w/2, -1/2 - _g_epd, -1/2+_g_h/2 ],
-            [ 1/2 + _g_epd,  _g_w/2, -1/2+_g_h/2 ], [ 1/2 + _g_epd, -_g_w/2, -1/2+_g_h/2 ] ],
+    "|": [  [ -_g_w/2,  1/2 + _g_epd, -1/2 ], [  _g_w/2,  1/2 + _g_epd, -1/2 ],
+            [ -_g_w/2, -1/2 - _g_epd, -1/2 ], [  _g_w/2, -1/2 - _g_epd, -1/2 ] ],
 
-    "+": [  [ -_g_w/2,  1/2 + _g_epd, -1/2+_g_h/2 ], [  _g_w/2,  1/2 + _g_epd, -1/2+_g_h/2 ],
-            [ -_g_w/2, -1/2 - _g_epd, -1/2+_g_h/2 ], [  _g_w/2, -1/2 - _g_epd, -1/2+_g_h/2 ],
-            [ -1/2 - _g_epd,  _g_w/2, -1/2+_g_h/2 ], [ -1/2 - _g_epd, -_g_w/2, -1/2+_g_h/2 ],
-            [  1/2 + _g_epd,  _g_w/2, -1/2+_g_h/2 ], [  1/2 + _g_epd, -_g_w/2, -1/2+_g_h/2 ] ],
+    "r": [  [ -_g_w/2, -1/2 - _g_epd, -1/2 ], [  _g_w/2, -1/2 - _g_epd, -1/2 ],
+            [ 1/2 + _g_epd,  _g_w/2, -1/2 ], [ 1/2 + _g_epd, -_g_w/2, -1/2 ] ],
 
-    "T": [  [  _g_w/2, -1/2 - _g_epd, -1/2+_g_h/2 ], [ -_g_w/2, -1/2 - _g_epd, -1/2+_g_h/2 ],
-            [ -1/2 - _g_epd,  _g_w/2, -1/2+_g_h/2 ], [ -1/2 - _g_epd, -_g_w/2, -1/2+_g_h/2 ],
-            [  1/2 + _g_epd,  _g_w/2, -1/2+_g_h/2 ], [  1/2 + _g_epd, -_g_w/2, -1/2+_g_h/2 ] ],
+    "+": [  [ -_g_w/2,  1/2 + _g_epd, -1/2 ], [  _g_w/2,  1/2 + _g_epd, -1/2 ],
+            [ -_g_w/2, -1/2 - _g_epd, -1/2 ], [  _g_w/2, -1/2 - _g_epd, -1/2 ],
+            [ -1/2 - _g_epd,  _g_w/2, -1/2 ], [ -1/2 - _g_epd, -_g_w/2, -1/2 ],
+            [  1/2 + _g_epd,  _g_w/2, -1/2 ], [  1/2 + _g_epd, -_g_w/2, -1/2 ] ],
 
-    "^": [  [  _g_w/2, -1/2 + _g_h/2, -1/2 - _g_epd ], [ -_g_w/2, -1/2 + _g_h/2, -1/2 - _g_epd ],
-            [  _g_w/2,  1/2 - _g_h/2,  1/2 + _g_epd ], [ -_g_w/2,  1/2 - _g_h/2,  1/2 + _g_epd ] ]
+    "T": [  [  _g_w/2, -1/2 - _g_epd, -1/2 ], [ -_g_w/2, -1/2 - _g_epd, -1/2 ],
+            [ -1/2 - _g_epd,  _g_w/2, -1/2 ], [ -1/2 - _g_epd, -_g_w/2, -1/2 ],
+            [  1/2 + _g_epd,  _g_w/2, -1/2 ], [  1/2 + _g_epd, -_g_w/2, -1/2 ] ],
+
+    "^": [  [  _g_w/2, -1/2 , -1/2 - _g_epd ], [ -_g_w/2, -1/2 , -1/2 - _g_epd ],
+            [  _g_w/2,  1/2 ,  1/2 + _g_epd ], [ -_g_w/2,  1/2 ,  1/2 + _g_epd ] ]
   },
 
   ":" : [],
+
+  "d": [
+    -1/2,  1/2, -1/2,  -1/2, -1/2, -1/2,    1/2,  1/2, -1/2,
+    -1/2, -1/2, -1/2,   1/2, -1/2, -1/2,    1/2,  1/2, -1/2,
+
+
+    -1/2,  1/2, -1/2,   1/2,  1/2, -1/2,   -1/2, -1/2, -1/2,
+    -1/2, -1/2, -1/2,   1/2,  1/2, -1/2,    1/2, -1/2, -1/2
+  ],
 
   "|" : [
 
     // front panel
     //
-    -_g_w/2,  1/2, -1/2 , _g_w/2,  1/2, -1/2, -_g_w/2, -1/2, -1/2 ,
-     _g_w/2,  1/2, -1/2 , _g_w/2, -1/2, -1/2 , -_g_w/2, -1/2, -1/2  ,
+    -_g_w/2,  1/2, -1/2-_g_h/2,  _g_w/2,  1/2, -1/2-_g_h/2,   -_g_w/2, -1/2, -1/2-_g_h/2,
+     _g_w/2,  1/2, -1/2-_g_h/2,  _g_w/2, -1/2, -1/2-_g_h/2,   -_g_w/2, -1/2, -1/2-_g_h/2,
 
     // back panel
     //
-    -_g_w/2,  1/2, -1/2+_g_h , -_g_w/2, -1/2, -1/2+_g_h  , _g_w/2,  1/2, -1/2+_g_h ,
-     _g_w/2,  1/2, -1/2+_g_h , -_g_w/2, -1/2, -1/2+_g_h  , _g_w/2, -1/2, -1/2+_g_h ,
+    -_g_w/2,  1/2, -1/2+_g_h/2, -_g_w/2, -1/2, -1/2+_g_h/2,   _g_w/2,  1/2, -1/2+_g_h/2,
+     _g_w/2,  1/2, -1/2+_g_h/2, -_g_w/2, -1/2, -1/2+_g_h/2,   _g_w/2, -1/2, -1/2+_g_h/2,
 
     // left side stripe
     //
-    -_g_w/2,  1/2, -1/2 , -_g_w/2, -1/2, -1/2 , -_g_w/2, -1/2, -1/2+_g_h  ,
-    -_g_w/2,  1/2, -1/2 , -_g_w/2, -1/2, -1/2+_g_h , -_g_w/2,  1/2, -1/2+_g_h  ,
+    -_g_w/2,  1/2, -1/2-_g_h/2,   -_g_w/2, -1/2, -1/2-_g_h/2,  -_g_w/2, -1/2, -1/2+_g_h/2,
+    -_g_w/2,  1/2, -1/2-_g_h/2,   -_g_w/2, -1/2, -1/2+_g_h/2,  -_g_w/2,  1/2, -1/2+_g_h/2,
 
     // right side stripe
     //
-     _g_w/2,  1/2, -1/2 , _g_w/2, -1/2, -1/2+_g_h  , _g_w/2, -1/2, -1/2 ,
-     _g_w/2,  1/2, -1/2 , _g_w/2,  1/2, -1/2+_g_h  , _g_w/2, -1/2, -1/2+_g_h ,
+     _g_w/2,  1/2, -1/2-_g_h/2,   _g_w/2, -1/2, -1/2+_g_h/2,  _g_w/2, -1/2, -1/2-_g_h/2,
+     _g_w/2,  1/2, -1/2-_g_h/2,   _g_w/2,  1/2, -1/2+_g_h/2,  _g_w/2, -1/2, -1/2+_g_h/2,
 
     // top panel
     //
-    -_g_w/2,  1/2, -1/2 , -_g_w/2,  1/2, -1/2+_g_h  , _g_w/2,  1/2, -1/2 ,
-     _g_w/2,  1/2, -1/2 , -_g_w/2,  1/2, -1/2+_g_h  , _g_w/2,  1/2, -1/2+_g_h ,
+    -_g_w/2,  1/2, -1/2-_g_h/2,   -_g_w/2,  1/2, -1/2+_g_h/2,   _g_w/2,  1/2, -1/2-_g_h/2,
+     _g_w/2,  1/2, -1/2-_g_h/2,   -_g_w/2,  1/2, -1/2+_g_h/2,   _g_w/2,  1/2, -1/2+_g_h/2,
 
     // bottom panel
     //
-    -_g_w/2, -1/2, -1/2 , _g_w/2, -1/2, -1/2 , -_g_w/2, -1/2, -1/2+_g_h  ,
-     _g_w/2, -1/2, -1/2 , _g_w/2, -1/2, -1/2+_g_h, -_g_w/2, -1/2, -1/2+_g_h,
+    -_g_w/2, -1/2, -1/2-_g_h/2,   _g_w/2, -1/2, -1/2+_g_h/2,    -_g_w/2, -1/2, -1/2+_g_h/2,
+     _g_w/2, -1/2, -1/2-_g_h/2,   _g_w/2, -1/2, -1/2+_g_h/2,    -_g_w/2, -1/2, -1/2-_g_h/2
 
   ],
 
@@ -244,37 +264,37 @@ function init_template() {
   //
   let fr = [];
   let tri = [];
-  tri.push( [ -_g_w/2, -1/2,    -1/2] );
-  tri.push( [  _g_w/2, -_g_w/2, -1/2] );
-  tri.push( [  _g_w/2, -1/2,    -1/2] );
+  tri.push( [ -_g_w/2, -1/2,    -1/2-_g_h/2 ] );
+  tri.push( [  _g_w/2, -_g_w/2, -1/2-_g_h/2 ] );
+  tri.push( [  _g_w/2, -1/2,    -1/2-_g_h/2 ] );
   fr.push(tri);
 
   tri = [];
-  tri.push( [ -_g_w/2, -1/2,    -1/2] );
-  tri.push( [ -_g_w/2, -_g_w/2, -1/2] );
-  tri.push( [  _g_w/2, -_g_w/2, -1/2] );
+  tri.push( [ -_g_w/2, -1/2,    -1/2-_g_h/2 ] );
+  tri.push( [ -_g_w/2, -_g_w/2, -1/2-_g_h/2 ] );
+  tri.push( [  _g_w/2, -_g_w/2, -1/2-_g_h/2 ] );
   fr.push(tri);
 
   // connecting triangle
   //
   tri = [];
-  tri.push( [ -_g_w/2, -_g_w/2, -1/2] );
-  tri.push( [  _g_w/2,  _g_w/2, -1/2] );
-  tri.push( [  _g_w/2, -_g_w/2, -1/2] );
+  tri.push( [ -_g_w/2, -_g_w/2, -1/2-_g_h/2 ] );
+  tri.push( [  _g_w/2,  _g_w/2, -1/2-_g_h/2 ] );
+  tri.push( [  _g_w/2, -_g_w/2, -1/2-_g_h/2 ] );
   fr.push(tri);
 
   // right square
   //
   tri = [];
-  tri.push( [  1/2,    -_g_w/2, -1/2 ] )
-  tri.push( [  _g_w/2,  _g_w/2, -1/2 ] )
-  tri.push( [  1/2,     _g_w/2, -1/2 ] )
+  tri.push( [  1/2,    -_g_w/2, -1/2-_g_h/2 ] )
+  tri.push( [  _g_w/2,  _g_w/2, -1/2-_g_h/2 ] )
+  tri.push( [  1/2,     _g_w/2, -1/2-_g_h/2 ] )
   fr.push(tri);
 
   tri = [];
-  tri.push( [  1/2,    -_g_w/2, -1/2 ] )
-  tri.push( [  _g_w/2, -_g_w/2, -1/2 ] )
-  tri.push( [  _g_w/2,  _g_w/2, -1/2 ] )
+  tri.push( [  1/2,    -_g_w/2, -1/2-_g_h/2 ] )
+  tri.push( [  _g_w/2, -_g_w/2, -1/2-_g_h/2 ] )
+  tri.push( [  _g_w/2,  _g_w/2, -1/2-_g_h/2 ] )
   fr.push(tri);
 
   //--
@@ -285,37 +305,37 @@ function init_template() {
   // bottom square
   //
   tri = [];
-  tri.push( [ -_g_w/2, -1/2,    -1/2+_g_h ] );
-  tri.push( [  _g_w/2, -1/2,    -1/2+_g_h ] );
-  tri.push( [  _g_w/2, -_g_w/2, -1/2+_g_h ] );
+  tri.push( [ -_g_w/2, -1/2,    -1/2+_g_h/2 ] );
+  tri.push( [  _g_w/2, -1/2,    -1/2+_g_h/2 ] );
+  tri.push( [  _g_w/2, -_g_w/2, -1/2+_g_h/2 ] );
   fr.push(tri);
 
   tri = [];
-  tri.push( [ -_g_w/2, -1/2,    -1/2+_g_h ] );
-  tri.push( [  _g_w/2, -_g_w/2, -1/2+_g_h ] );
-  tri.push( [ -_g_w/2, -_g_w/2, -1/2+_g_h ] );
+  tri.push( [ -_g_w/2, -1/2,    -1/2+_g_h/2 ] );
+  tri.push( [  _g_w/2, -_g_w/2, -1/2+_g_h/2 ] );
+  tri.push( [ -_g_w/2, -_g_w/2, -1/2+_g_h/2 ] );
   fr.push(tri);
 
   // connecting triangle
   //
   tri = [];
-  tri.push( [ -_g_w/2, -_g_w/2, -1/2+_g_h ] );
-  tri.push( [  _g_w/2, -_g_w/2, -1/2+_g_h ] );
-  tri.push( [  _g_w/2,  _g_w/2, -1/2+_g_h ] );
+  tri.push( [ -_g_w/2, -_g_w/2, -1/2+_g_h/2 ] );
+  tri.push( [  _g_w/2, -_g_w/2, -1/2+_g_h/2 ] );
+  tri.push( [  _g_w/2,  _g_w/2, -1/2+_g_h/2 ] );
   fr.push(tri);
 
   // right square
   //
   tri = [];
-  tri.push( [  1/2,    -_g_w/2, -1/2 +_g_h ] )
-  tri.push( [  1/2,     _g_w/2, -1/2 +_g_h ] )
-  tri.push( [  _g_w/2,  _g_w/2, -1/2 +_g_h ] )
+  tri.push( [  1/2,    -_g_w/2, -1/2 +_g_h/2 ] )
+  tri.push( [  1/2,     _g_w/2, -1/2 +_g_h/2 ] )
+  tri.push( [  _g_w/2,  _g_w/2, -1/2 +_g_h/2 ] )
   fr.push(tri);
 
   tri = [];
-  tri.push( [  1/2,    -_g_w/2, -1/2+_g_h ] )
-  tri.push( [  _g_w/2,  _g_w/2, -1/2+_g_h ] )
-  tri.push( [  _g_w/2, -_g_w/2, -1/2+_g_h ] )
+  tri.push( [  1/2,    -_g_w/2, -1/2+_g_h/2 ] )
+  tri.push( [  _g_w/2,  _g_w/2, -1/2+_g_h/2 ] )
+  tri.push( [  _g_w/2, -_g_w/2, -1/2+_g_h/2 ] )
   fr.push(tri);
 
   //--
@@ -323,43 +343,43 @@ function init_template() {
   // front edge
   //
   tri = [];
-  tri.push( [ -_g_w/2, -1/2, -1/2 ] )
-  tri.push( [  _g_w/2, -1/2, -1/2 ] )
-  tri.push( [  _g_w/2, -1/2, -1/2+_g_h ] )
+  tri.push( [ -_g_w/2, -1/2, -1/2-_g_h/2 ] )
+  tri.push( [  _g_w/2, -1/2, -1/2-_g_h/2 ] )
+  tri.push( [  _g_w/2, -1/2, -1/2+_g_h/2 ] )
   fr.push(tri);
 
   tri = [];
-  tri.push( [ -_g_w/2, -1/2, -1/2+_g_h ] )
-  tri.push( [ -_g_w/2, -1/2, -1/2 ] )
-  tri.push( [  _g_w/2, -1/2, -1/2+_g_h ] )
+  tri.push( [ -_g_w/2, -1/2, -1/2+_g_h/2 ] )
+  tri.push( [ -_g_w/2, -1/2, -1/2-_g_h/2 ] )
+  tri.push( [  _g_w/2, -1/2, -1/2+_g_h/2 ] )
   fr.push(tri);
 
   // front right edge
   //
   tri = [];
-  tri.push( [  _g_w/2, -1/2,    -1/2 ] )
-  tri.push( [  _g_w/2, -_g_w/2, -1/2 ] )
-  tri.push( [  _g_w/2, -1/2,    -1/2+_g_h ] )
+  tri.push( [  _g_w/2, -1/2,    -1/2-_g_h/2 ] )
+  tri.push( [  _g_w/2, -_g_w/2, -1/2-_g_h/2 ] )
+  tri.push( [  _g_w/2, -1/2,    -1/2+_g_h/2 ] )
   fr.push(tri);
 
   tri = [];
-  tri.push( [  _g_w/2, -1/2,    -1/2+_g_h ] )
-  tri.push( [  _g_w/2, -_g_w/2, -1/2 ] )
-  tri.push( [  _g_w/2, -_g_w/2, -1/2+_g_h ] )
+  tri.push( [  _g_w/2, -1/2,    -1/2+_g_h/2 ] )
+  tri.push( [  _g_w/2, -_g_w/2, -1/2-_g_h/2 ] )
+  tri.push( [  _g_w/2, -_g_w/2, -1/2+_g_h/2 ] )
   fr.push(tri);
 
   // front left edge
   //
   tri = [];
-  tri.push( [ -_g_w/2, -1/2,    -1/2 ] )
-  tri.push( [ -_g_w/2, -1/2,    -1/2+_g_h ] )
-  tri.push( [ -_g_w/2, -_g_w/2, -1/2 ] )
+  tri.push( [ -_g_w/2, -1/2,    -1/2-_g_h/2 ] )
+  tri.push( [ -_g_w/2, -1/2,    -1/2+_g_h/2 ] )
+  tri.push( [ -_g_w/2, -_g_w/2, -1/2-_g_h/2 ] )
   fr.push(tri);
 
   tri = [];
-  tri.push( [ -_g_w/2, -1/2,    -1/2+_g_h ] )
-  tri.push( [ -_g_w/2, -_g_w/2, -1/2+_g_h ] )
-  tri.push( [ -_g_w/2, -_g_w/2, -1/2 ] )
+  tri.push( [ -_g_w/2, -1/2,    -1/2+_g_h/2 ] )
+  tri.push( [ -_g_w/2, -_g_w/2, -1/2+_g_h/2 ] )
+  tri.push( [ -_g_w/2, -_g_w/2, -1/2-_g_h/2 ] )
   fr.push(tri);
 
   //---
@@ -367,58 +387,58 @@ function init_template() {
   // right edge
   //
   tri = [];
-  tri.push( [ 1/2, -_g_w/2, -1/2 ] )
-  tri.push( [ 1/2,  _g_w/2, -1/2 ] )
-  tri.push( [ 1/2,  _g_w/2, -1/2+_g_h ] )
+  tri.push( [ 1/2, -_g_w/2, -1/2-_g_h/2 ] )
+  tri.push( [ 1/2,  _g_w/2, -1/2-_g_h/2 ] )
+  tri.push( [ 1/2,  _g_w/2, -1/2+_g_h/2 ] )
   fr.push(tri);
 
   tri = [];
-  tri.push( [ 1/2, -_g_w/2, -1/2+_g_h ] )
-  tri.push( [ 1/2, -_g_w/2, -1/2 ] )
-  tri.push( [ 1/2,  _g_w/2, -1/2+_g_h ] )
+  tri.push( [ 1/2, -_g_w/2, -1/2+_g_h/2 ] )
+  tri.push( [ 1/2, -_g_w/2, -1/2-_g_h/2 ] )
+  tri.push( [ 1/2,  _g_w/2, -1/2+_g_h/2 ] )
   fr.push(tri);
 
 
   // right up edge
   //
   tri = [];
-  tri.push( [ 1/2,     _g_w/2, -1/2 ] )
-  tri.push( [ _g_w/2,  _g_w/2, -1/2 ] )
-  tri.push( [ 1/2,     _g_w/2, -1/2+_g_h ] )
+  tri.push( [ 1/2,     _g_w/2, -1/2-_g_h/2 ] )
+  tri.push( [ _g_w/2,  _g_w/2, -1/2-_g_h/2 ] )
+  tri.push( [ 1/2,     _g_w/2, -1/2+_g_h/2 ] )
   fr.push(tri);
 
   tri = [];
-  tri.push( [ _g_w/2,  _g_w/2, -1/2 ] )
-  tri.push( [ _g_w/2,  _g_w/2, -1/2+_g_h ] )
-  tri.push( [ 1/2,     _g_w/2, -1/2+_g_h ] )
+  tri.push( [ _g_w/2,  _g_w/2, -1/2-_g_h/2 ] )
+  tri.push( [ _g_w/2,  _g_w/2, -1/2+_g_h/2 ] )
+  tri.push( [ 1/2,     _g_w/2, -1/2+_g_h/2 ] )
   fr.push(tri);
 
   // right down edge
   //
   tri = [];
-  tri.push( [ 1/2,    -_g_w/2, -1/2 ] )
-  tri.push( [ 1/2,    -_g_w/2, -1/2+_g_h ] )
-  tri.push( [ _g_w/2, -_g_w/2, -1/2 ] )
+  tri.push( [ 1/2,    -_g_w/2, -1/2-_g_h/2 ] )
+  tri.push( [ 1/2,    -_g_w/2, -1/2+_g_h/2 ] )
+  tri.push( [ _g_w/2, -_g_w/2, -1/2-_g_h/2 ] )
   fr.push(tri);
 
   tri = [];
-  tri.push( [ _g_w/2, -_g_w/2, -1/2 ] )
-  tri.push( [ 1/2,    -_g_w/2, -1/2+_g_h ] )
-  tri.push( [ _g_w/2, -_g_w/2, -1/2+_g_h ] )
+  tri.push( [ _g_w/2, -_g_w/2, -1/2-_g_h/2 ] )
+  tri.push( [ 1/2,    -_g_w/2, -1/2+_g_h/2 ] )
+  tri.push( [ _g_w/2, -_g_w/2, -1/2+_g_h/2 ] )
   fr.push(tri);
 
   // diagnoal connecting edge
   //
   tri = [];
-  tri.push( [ -_g_w/2,  -_g_w/2, -1/2 ] )
-  tri.push( [  _g_w/2,   _g_w/2, -1/2+_g_h ] )
-  tri.push( [  _g_w/2,   _g_w/2, -1/2 ] )
+  tri.push( [ -_g_w/2,  -_g_w/2, -1/2-_g_h/2 ] )
+  tri.push( [  _g_w/2,   _g_w/2, -1/2+_g_h/2 ] )
+  tri.push( [  _g_w/2,   _g_w/2, -1/2-_g_h/2 ] )
   fr.push(tri);
 
   tri = [];
-  tri.push( [  _g_w/2,   _g_w/2, -1/2+_g_h ] )
-  tri.push( [ -_g_w/2,  -_g_w/2, -1/2 ] )
-  tri.push( [ -_g_w/2,  -_g_w/2, -1/2+_g_h ] )
+  tri.push( [  _g_w/2,   _g_w/2, -1/2+_g_h/2 ] )
+  tri.push( [ -_g_w/2,  -_g_w/2, -1/2-_g_h/2 ] )
+  tri.push( [ -_g_w/2,  -_g_w/2, -1/2+_g_h/2 ] )
   fr.push(tri);
 
   let flat_fr = [];
@@ -432,34 +452,63 @@ function init_template() {
 
   g_template["r"] = flat_fr;
 
+
+
   //---
   // stairs
   //
 
-  let ds = 1/16;
+  //let ds = 1/16;
+  //ds = 1/2;
+  //ds = _g_h;
 
   let parity = 1;
 
   //let n = 6;
-  let n = Math.floor( (1/ds) + 0.25 ) - 2;
+  //let n = Math.floor( (1/ds) + 0.25 ) - 1;
+  //let n = Math.floor( (1/ds) + 0.25 );
+
   let st = [];
+
+
+  //DEBUG
+  //
+  /*
+  st.push(  [ [ -0.05, -0.5, 0 ],
+              [  0.05,  0.5, 0 ],
+              [ -0.05,  0.5, 0 ] ] );
+  */
+  //
+  //DEBUG
+
+  let _st_L = -1/2 - _g_h/2;
+  let _st_U =  1/2 + _g_h/2;
+
+  let n = Math.floor( ((_st_U - _st_L) / _g_h) + (_g_h/2) );
+
+  let _st_h = _g_h;
+  let _st_w = 2*_g_w;
+
+  let _st_y_s = -(1/2) + (_st_w/2);
+  let _st_y_e =  (1/2) - (_st_w/2);
+  let _st_dy = (_st_y_e - _st_y_s)/(n-1);
+
   for (let i=0; i<n; i++) {
 
+    /*
     // front facing top steps
     //
-    //let dz = (-1/2) + (ds + (i*ds));
     let dz = (-1/2) + (ds + (i*ds));
-    let dy = (-1/2) + (2*ds) + (i*ds) + ds/2;
+    let dy = (-1/2) + (2*ds) + (i*ds) + ds/2 - _g_h/2;
     let dx = 0;
 
     let _r = _3rect_xy( _g_w, ds, dx, dy, dz, parity);
     for (let j=0; j<_r.length; j++) { st.push(_r[j]); }
 
-
     // up facing top stairs
     //
     dz = (-1/2) + (i*ds + ds/2);
-    dy = (-1/2) + 2*ds + i*ds;
+    dy = (-1/2) + 2*ds + i*ds - _g_h/2;
     dx = 0;
 
     _r = _3rect_xz( _g_w, ds, dx, dy, dz, parity);
@@ -470,7 +519,7 @@ function init_template() {
     // back facting bottom steps
     //
     dz = (-1/2) + ((2*ds) + (i*ds));
-    dy = (-1/2) + ((i*ds) + ds/2);
+    dy = (-1/2) + ((i*ds) + ds/2) - _g_h/2;
     dx = 0;
 
     _r = _3rect_xy( _g_w, ds, dx, dy, dz, 1-parity);
@@ -480,61 +529,86 @@ function init_template() {
     // bottom facing bottom steps
     //
     dz = (-1/2) + (i*ds + 2*ds + ds/2);
-    dy = (-1/2) + i*ds  + ds;
+    dy = (-1/2) + i*ds  + ds - _g_h/2;
     dx = 0;
 
     _r = _3rect_xz( _g_w, ds, dx, dy, dz, 1-parity);
     for (let j=0; j<_r.length; j++) { st.push(_r[j]); }
 
+    */
 
     // left side face
     //
+    //dz = (-1/2) + ds + ds/2 + i*ds;
 
-    dz = (-1/2) + ds + ds/2 + i*ds;
-    dy = (-1/2) + ds/2 + ds + i*ds;
     dx = -_g_w/2;
 
-    _r = _3rect_zy( ds, 3*ds, dx, dy, dz, 1-parity);
+    //dz =  ds + ds/2 + i*ds - 1 + _g_h/2;
+    //dy = (-1/2) + ds/2 + ds + i*ds - _g_h/2;
+    //_r = _3rect_zy( ds, 3*ds, dx, dy, dz, 1-parity);
+    dz = _st_L + _g_h/2 + i*_g_h;
+    //dy = -1/2 + i*_g_h;
+    dy = _st_y_s + i*_st_dy;
+
+    _r = _3rect_zy(
+      _st_h, _st_w,
+      dx, dy, dz,
+      1-parity);
     for (let j=0; j<_r.length; j++) { st.push(_r[j]); }
+
 
     // right side face
     //
-
-    dz = (-1/2) + ds + ds/2 + i*ds;
-    dy = (-1/2) + ds/2 + ds + i*ds;
+    //dz = (-1/2) + ds + ds/2 + i*ds;
     dx =  _g_w/2;
 
-    _r = _3rect_zy( ds, 3*ds, dx, dy, dz, parity);
+    //dz =  ds + ds/2 + i*ds - 1 + _g_h/2;
+    //dy = (-1/2) + ds/2 + ds + i*ds - _g_h/2;
+
+    dz = _st_L + _g_h/2 + i*_g_h;
+    //dy = -1/2 + i*_g_h;
+    dy = _st_y_s + i*_st_dy;
+
+    //_r = _3rect_zy( ds, 3*ds, dx, dy, dz, parity);
+    _r = _3rect_zy(
+      _st_h, _st_w,
+      dx, dy, dz,
+      parity);
     for (let j=0; j<_r.length; j++) { st.push(_r[j]); }
 
 
   }
 
+  // ***
+  //
+
+  /*
+
   // bottom facing bottom step
   //
-  let _r = _3rect_xz( _g_w, 2*ds, 0, -1/2, -1/2+ds, 1-parity);
+  let _r = _3rect_xz( _g_w, 2*ds, 0, -1/2 - _g_h/2, -1/2+ds, 1-parity);
   for (let j=0; j<_r.length; j++) { st.push(_r[j]); }
 
   // forward facing bottom step
   //
-  _r = _3rect_xy( _g_w, 2*ds, 0, -1/2+ds, -1/2, parity);
+  _r = _3rect_xy( _g_w, 2*ds, 0, -1/2+ds - _g_h/2, -1/2, parity);
   for (let j=0; j<_r.length; j++) { st.push(_r[j]); }
 
   // top facing back step
   //
-  _r = _3rect_xz( _g_w, 2*ds, 0, 1/2, 1/2-ds, parity);
+  _r = _3rect_xz( _g_w, 2*ds, 0, 1/2, 1/2-ds + _g_h/2, parity);
   for (let j=0; j<_r.length; j++) { st.push(_r[j]); }
 
   // back facing back step
   //
-  _r = _3rect_xy( _g_w, 2*ds, 0, 1/2-ds, 1/2, 1-parity);
+  _r = _3rect_xy( _g_w, 2*ds, 0, 1/2-ds + _g_h/2, 1/2, 1-parity);
   for (let j=0; j<_r.length; j++) { st.push(_r[j]); }
 
 
   // left side bottom
   //
-  dz = -1/2 + ds/2
-  dy = -1/2 + ds
+  dz = -1/2 + ds/2 ;
+  dy = -1/2 + ds ;
   dx = -_g_w/2;
 
   _r = _3rect_zy( ds, 2*ds, dx, dy, dz, 1-parity);
@@ -542,31 +616,37 @@ function init_template() {
 
   // right side bottom
   //
-  dz = -1/2 + ds/2
-  dy = -1/2 + ds
+  dz = -1/2 + ds/2 ;
+  dy = -1/2 + ds ;
   dx =  _g_w/2;
 
   _r = _3rect_zy( ds, 2*ds, dx, dy, dz, parity);
   for (let j=0; j<_r.length; j++) { st.push(_r[j]); }
+*/
 
+  /*
 
   // left side top 
   //
-  dz =  1/2 - ds/2
-  dy =  1/2 - ds
+  dz =  1/2 - ds/2;
+  dy =  1/2 - ds + _g_h/2;
   dx = -_g_w/2;
 
   _r = _3rect_zy( ds, 2*ds, dx, dy, dz, 1-parity);
   for (let j=0; j<_r.length; j++) { st.push(_r[j]); }
+*/
+
+  /*
 
   // right side top 
   //
-  dz =  1/2 - ds/2
-  dy =  1/2 - ds
+  dz =  1/2 - ds/2 ;
+  dy =  1/2 - ds ;
   dx =  _g_w/2;
 
   _r = _3rect_zy( ds, 2*ds, dx, dy, dz, parity);
   for (let j=0; j<_r.length; j++) { st.push(_r[j]); }
+  */
 
 
   let flat_st = [];
@@ -587,44 +667,53 @@ function init_template() {
   // t faces (top and bottom)
   //
   let T = [];
-  _r = _3rect_xy( 1, _g_w, 0, 0, -1/2, 1);
-  for (let j=0; j<_r.length; j++) { T.push(_r[j]); }
-  _r = _3rect_xy(_g_w, (1-_g_w)/2, 0, -1/2 + (1-_g_w)/4, -1/2, 1);
+
+  _r = _3rect_xy( 1, _g_w, 0, 0, -1/2-_g_h/2, 1);
   for (let j=0; j<_r.length; j++) { T.push(_r[j]); }
 
-  _r = _3rect_xy( 1, _g_w, 0, 0, -1/2 + _g_h, 0);
+  _r = _3rect_xy(_g_w, (1-_g_w)/2, 0, -1/2 + (1-_g_w)/4, -1/2-_g_h/2, 1);
   for (let j=0; j<_r.length; j++) { T.push(_r[j]); }
-  _r = _3rect_xy(_g_w, (1-_g_w)/2, 0, -1/2 + (1-_g_w)/4, -1/2 + _g_h, 0);
+
+  _r = _3rect_xy( 1, _g_w, 0, 0, -1/2 + _g_h/2, 0);
+  for (let j=0; j<_r.length; j++) { T.push(_r[j]); }
+  _r = _3rect_xy(_g_w, (1-_g_w)/2, 0, -1/2 + (1-_g_w)/4, -1/2 + _g_h/2, 0);
   for (let j=0; j<_r.length; j++) { T.push(_r[j]); }
 
   // optional...
   // bottom and top
   //
-  _r = _3rect_xz( _g_w, _g_h, 0, -1/2, -1/2 + _g_h/2, 0);
+  //_r = _3rect_xz( _g_w, _g_h, 0, -1/2, -1/2 + _g_h/2, 0);
+  _r = _3rect_xz( _g_w, _g_h, 0, -1/2, -1/2 , 0);
   for (let j=0; j<_r.length; j++) { T.push(_r[j]); }
-  _r = _3rect_xz( 1, _g_h, 0, _g_w/2, -1/2 + _g_h/2, 1);
+  //_r = _3rect_xz( 1, _g_h, 0, _g_w/2, -1/2 + _g_h/2, 1);
+  _r = _3rect_xz( 1, _g_h, 0, _g_w/2, -1/2 , 1);
   for (let j=0; j<_r.length; j++) { T.push(_r[j]); }
 
   // optional...
   // left and right
   //
-  _r = _3rect_zy( _g_h, _g_w, 1/2, 0, -1/2 + _g_h/2, 1);
+  //_r = _3rect_zy( _g_h, _g_w, 1/2, 0, -1/2 + _g_h/2, 1);
+  _r = _3rect_zy( _g_h, _g_w, 1/2, 0, -1/2, 1);
   for (let j=0; j<_r.length; j++) { T.push(_r[j]); }
-  _r = _3rect_zy( _g_h, _g_w,-1/2, 0, -1/2 + _g_h/2, 0);
+  //_r = _3rect_zy( _g_h, _g_w,-1/2, 0, -1/2 + _g_h/2, 0);
+  _r = _3rect_zy( _g_h, _g_w,-1/2, 0, -1/2, 0);
   for (let j=0; j<_r.length; j++) { T.push(_r[j]); }
-
 
   // inner caps
   //
-  _r = _3rect_zy( _g_h, (1-_g_w)/2, -_g_w/2, -1/2+(1-_g_w)/4, -1/2+_g_h/2, 0);
+  //_r = _3rect_zy( _g_h, (1-_g_w)/2, -_g_w/2, -1/2+(1-_g_w)/4, -1/2+_g_h/2, 0);
+  _r = _3rect_zy( _g_h, (1-_g_w)/2, -_g_w/2, -1/2+(1-_g_w)/4, -1/2, 0);
   for (let j=0; j<_r.length; j++) { T.push(_r[j]); }
-  _r = _3rect_zy( _g_h, (1-_g_w)/2,  _g_w/2, -1/2+(1-_g_w)/4, -1/2+_g_h/2, 1);
+  //_r = _3rect_zy( _g_h, (1-_g_w)/2,  _g_w/2, -1/2+(1-_g_w)/4, -1/2+_g_h/2, 1);
+  _r = _3rect_zy( _g_h, (1-_g_w)/2,  _g_w/2, -1/2+(1-_g_w)/4, -1/2, 1);
   for (let j=0; j<_r.length; j++) { T.push(_r[j]); }
 
-  _r = _3rect_xz( (1-_g_w)/2, _g_h, -1/2+(1-_g_w)/4, -_g_w/2, -1/2 + _g_h/2, 0);
+  //_r = _3rect_xz( (1-_g_w)/2, _g_h, -1/2+(1-_g_w)/4, -_g_w/2, -1/2 + _g_h/2, 0);
+  _r = _3rect_xz( (1-_g_w)/2, _g_h, -1/2+(1-_g_w)/4, -_g_w/2, -1/2, 0);
   for (let j=0; j<_r.length; j++) { T.push(_r[j]); }
 
-  _r = _3rect_xz( (1-_g_w)/2, _g_h,  1/2-(1-_g_w)/4, -_g_w/2, -1/2 + _g_h/2, 0);
+  //_r = _3rect_xz( (1-_g_w)/2, _g_h,  1/2-(1-_g_w)/4, -_g_w/2, -1/2 + _g_h/2, 0);
+  _r = _3rect_xz( (1-_g_w)/2, _g_h,  1/2-(1-_g_w)/4, -_g_w/2, -1/2, 0);
   for (let j=0; j<_r.length; j++) { T.push(_r[j]); }
 
   let flat_T = [];
@@ -645,73 +734,94 @@ function init_template() {
   // + faces (top and bottom)
   //
   let pl = [];
-  _r = _3rect_xy( 1, _g_w, 0, 0, -1/2, 1);
+  //_r = _3rect_xy( 1, _g_w, 0, 0, -1/2, 1);
+  _r = _3rect_xy( 1, _g_w, 0, 0, -1/2-_g_h/2, 1);
   for (let j=0; j<_r.length; j++) { pl.push(_r[j]); }
 
   //_r = _3rect_xy(_g_w, (1-_g_w)/2, 0, -1/2 + _g_w/2, -1/2, 1);
-  _r = _3rect_xy(_g_w, (1-_g_w)/2, 0, -1/2 + (1-_g_w)/4, -1/2, 1);
-  for (let j=0; j<_r.length; j++) { pl.push(_r[j]); }
-  //_r = _3rect_xy(_g_w, _g_w, 0,  1/2 - _g_w/2, -1/2, 1);
-  _r = _3rect_xy(_g_w, (1-_g_w)/2, 0, 1/2 - (1-_g_w)/4, -1/2, 1);
+  //_r = _3rect_xy(_g_w, (1-_g_w)/2, 0, -1/2 + (1-_g_w)/4, -1/2, 1);
+  _r = _3rect_xy(_g_w, (1-_g_w)/2, 0, -1/2 + (1-_g_w)/4, -1/2-_g_h/2, 1);
   for (let j=0; j<_r.length; j++) { pl.push(_r[j]); }
 
-  _r = _3rect_xy( 1, _g_w, 0, 0, -1/2 + _g_h, 0);
+  //_r = _3rect_xy(_g_w, _g_w, 0,  1/2 - _g_w/2, -1/2, 1);
+  //_r = _3rect_xy(_g_w, (1-_g_w)/2, 0, 1/2 - (1-_g_w)/4, -1/2, 1);
+  _r = _3rect_xy(_g_w, (1-_g_w)/2, 0, 1/2 - (1-_g_w)/4, -1/2-_g_h/2, 1);
+  for (let j=0; j<_r.length; j++) { pl.push(_r[j]); }
+
+  //_r = _3rect_xy( 1, _g_w, 0, 0, -1/2 + _g_h, 0);
+  _r = _3rect_xy( 1, _g_w, 0, 0, -1/2 + _g_h/2, 0);
   for (let j=0; j<_r.length; j++) { pl.push(_r[j]); }
 
   //_r = _3rect_xy(_g_w, _g_w, 0, -1/2 + _g_w/2, -1/2 + _g_h, 0);
-  _r = _3rect_xy(_g_w, (1-_g_w)/2, 0, -1/2 + (1-_g_w)/4, -1/2 + _g_h, 0);
+  //_r = _3rect_xy(_g_w, (1-_g_w)/2, 0, -1/2 + (1-_g_w)/4, -1/2 + _g_h, 0);
+  _r = _3rect_xy(_g_w, (1-_g_w)/2, 0, -1/2 + (1-_g_w)/4, -1/2 + _g_h/2, 0);
   for (let j=0; j<_r.length; j++) { pl.push(_r[j]); }
   //_r = _3rect_xy(_g_w, _g_w, 0,  1/2 - _g_w/2, -1/2 + _g_h, 0);
-  _r = _3rect_xy(_g_w, (1-_g_w)/2, 0,  1/2 - (1-_g_w)/4, -1/2 + _g_h, 0);
+  //_r = _3rect_xy(_g_w, (1-_g_w)/2, 0,  1/2 - (1-_g_w)/4, -1/2 + _g_h, 0);
+  _r = _3rect_xy(_g_w, (1-_g_w)/2, 0,  1/2 - (1-_g_w)/4, -1/2 + _g_h/2, 0);
   for (let j=0; j<_r.length; j++) { pl.push(_r[j]); }
 
   // optional...
   // bottom and top
   //
-  _r = _3rect_xz( _g_w, _g_h, 0, -1/2, -1/2 + _g_h/2, 0);
+  //_r = _3rect_xz( _g_w, _g_h, 0, -1/2, -1/2 + _g_h/2, 0);
+  _r = _3rect_xz( _g_w, _g_h, 0, -1/2, -1/2, 0);
   for (let j=0; j<_r.length; j++) { pl.push(_r[j]); }
-  _r = _3rect_xz( _g_w, _g_h, 0,  1/2, -1/2 + _g_h/2, 1);
+
+  //_r = _3rect_xz( _g_w, _g_h, 0,  1/2, -1/2 + _g_h/2, 1);
+  _r = _3rect_xz( _g_w, _g_h, 0,  1/2, -1/2, 1);
   for (let j=0; j<_r.length; j++) { pl.push(_r[j]); }
 
   // optional...
   // left and right
   //
-  _r = _3rect_zy( _g_h, _g_w, 1/2, 0, -1/2 + _g_h/2, 1);
+  //_r = _3rect_zy( _g_h, _g_w, 1/2, 0, -1/2 + _g_h/2, 1);
+  _r = _3rect_zy( _g_h, _g_w, 1/2, 0, -1/2, 1);
   for (let j=0; j<_r.length; j++) { pl.push(_r[j]); }
-  _r = _3rect_zy( _g_h, _g_w,-1/2, 0, -1/2 + _g_h/2, 0);
+
+
+  //_r = _3rect_zy( _g_h, _g_w,-1/2, 0, -1/2 + _g_h/2, 0);
+  _r = _3rect_zy( _g_h, _g_w, -1/2, 0, -1/2, 0);
   for (let j=0; j<_r.length; j++) { pl.push(_r[j]); }
 
 
   // middle caps
   //
-  _r = _3rect_zy( _g_h, (1-_g_w)/2, -_g_w/2, -1/2+(1-_g_w)/4, -1/2+_g_h/2, 0);
+  //_r = _3rect_zy( _g_h, (1-_g_w)/2, -_g_w/2, -1/2+(1-_g_w)/4, -1/2+_g_h/2, 0);
+  _r = _3rect_zy( _g_h, (1-_g_w)/2, -_g_w/2, -1/2+(1-_g_w)/4, -1/2, 0);
   for (let j=0; j<_r.length; j++) { pl.push(_r[j]); }
+
   //_r = _3rect_zy( _g_h, _g_w,  _g_w/2, -1/2+_g_w/2, -1/2+_g_h/2, 1);
-  _r = _3rect_zy( _g_h, (1-_g_w)/2,  _g_w/2, -1/2+(1-_g_w)/4, -1/2+_g_h/2, 1);
-  for (let j=0; j<_r.length; j++) { pl.push(_r[j]); }
-  _r = _3rect_zy( _g_h, (1-_g_w)/2, -_g_w/2,  1/2-(1-_g_w)/4, -1/2+_g_h/2, 0);
-  for (let j=0; j<_r.length; j++) { pl.push(_r[j]); }
-  _r = _3rect_zy( _g_h, (1-_g_w)/2,  _g_w/2,  1/2-(1-_g_w)/4, -1/2+_g_h/2, 1);
+  _r = _3rect_zy( _g_h, (1-_g_w)/2,  _g_w/2, -1/2+(1-_g_w)/4, -1/2, 1);
   for (let j=0; j<_r.length; j++) { pl.push(_r[j]); }
 
-  _r = _3rect_zy( _g_h, (1-_g_w)/2, -_g_w/2, -1/2+(1-_g_w)/4, -1/2+_g_h/2, 1);
-  for (let j=0; j<_r.length; j++) { pl.push(_r[j]); }
-  _r = _3rect_zy( _g_h, (1-_g_w)/2,  _g_w/2, -1/2+(1-_g_w)/4, -1/2+_g_h/2, 1);
-  for (let j=0; j<_r.length; j++) { pl.push(_r[j]); }
-  _r = _3rect_zy( _g_h, (1-_g_w)/2, -_g_w/2,  1/2-(1-_g_w)/4, -1/2+_g_h/2, 0);
-  for (let j=0; j<_r.length; j++) { pl.push(_r[j]); }
-  _r = _3rect_zy( _g_h, (1-_g_w)/2,  _g_w/2,  1/2-(1-_g_w)/4, -1/2+_g_h/2, 1);
+  _r = _3rect_zy( _g_h, (1-_g_w)/2, -_g_w/2,  1/2-(1-_g_w)/4, -1/2, 0);
   for (let j=0; j<_r.length; j++) { pl.push(_r[j]); }
 
-  _r = _3rect_xz( (1-_g_w)/2, _g_h, -1/2+(1-_g_w)/4, -_g_w/2, -1/2 + _g_h/2, 0);
-  for (let j=0; j<_r.length; j++) { pl.push(_r[j]); }
-  _r = _3rect_xz( (1-_g_w)/2, _g_h,  1/2-(1-_g_w)/4, -_g_w/2, -1/2 + _g_h/2, 0);
+  _r = _3rect_zy( _g_h, (1-_g_w)/2,  _g_w/2,  1/2-(1-_g_w)/4, -1/2, 1);
   for (let j=0; j<_r.length; j++) { pl.push(_r[j]); }
 
-  _r = _3rect_xz( (1-_g_w)/2, _g_h, -1/2+(1-_g_w)/4,  _g_w/2, -1/2 + _g_h/2, 1);
+  _r = _3rect_zy( _g_h, (1-_g_w)/2, -_g_w/2, -1/2+(1-_g_w)/4, -1/2, 1);
   for (let j=0; j<_r.length; j++) { pl.push(_r[j]); }
-  _r = _3rect_xz( (1-_g_w)/2, _g_h,  1/2-(1-_g_w)/4,  _g_w/2, -1/2 + _g_h/2, 1);
+
+  _r = _3rect_zy( _g_h, (1-_g_w)/2,  _g_w/2, -1/2+(1-_g_w)/4, -1/2, 1);
   for (let j=0; j<_r.length; j++) { pl.push(_r[j]); }
+
+  _r = _3rect_zy( _g_h, (1-_g_w)/2, -_g_w/2,  1/2-(1-_g_w)/4, -1/2, 0);
+  for (let j=0; j<_r.length; j++) { pl.push(_r[j]); }
+  _r = _3rect_zy( _g_h, (1-_g_w)/2,  _g_w/2,  1/2-(1-_g_w)/4, -1/2, 1);
+  for (let j=0; j<_r.length; j++) { pl.push(_r[j]); }
+
+  _r = _3rect_xz( (1-_g_w)/2, _g_h, -1/2+(1-_g_w)/4, -_g_w/2, -1/2, 0);
+  for (let j=0; j<_r.length; j++) { pl.push(_r[j]); }
+  _r = _3rect_xz( (1-_g_w)/2, _g_h,  1/2-(1-_g_w)/4, -_g_w/2, -1/2, 0);
+  for (let j=0; j<_r.length; j++) { pl.push(_r[j]); }
+
+  _r = _3rect_xz( (1-_g_w)/2, _g_h, -1/2+(1-_g_w)/4,  _g_w/2, -1/2, 1);
+  for (let j=0; j<_r.length; j++) { pl.push(_r[j]); }
+  _r = _3rect_xz( (1-_g_w)/2, _g_h,  1/2-(1-_g_w)/4,  _g_w/2, -1/2, 1);
+  for (let j=0; j<_r.length; j++) { pl.push(_r[j]); }
+
 
   let flat_pl = [];
   for (let i=0; i<pl.length; i++) {
@@ -1548,7 +1658,10 @@ function threejs_init() {
 
   let tri_vf = g_info.data.tri;
 
-  const d = 12,
+  //SCALE
+
+  //const d = 12,
+  const d = 6,
         d2 = d/2;
   for (let idx=0; idx<tri_vf.length; idx++) {
 
@@ -1812,7 +1925,7 @@ function render() {
     }
 
       let D = 4;
-      //D = 1.75;
+      D = 1.75;
 
       if (view_prv == 0) {
         mp0 = m4.xRotation((1-_t_rem)*Math.PI/D);
@@ -1941,7 +2054,7 @@ function init_param() {
   g_info.speed_factor  = _rnd(1/2048, 1/512); //0.00075,
 
   //DEBUG
-  g_info.speed_factor = 1/512;
+  g_info.speed_factor = 1/2048;
 
   g_info.features["Speed Factor"] = g_info.speed_factor;
 
@@ -2253,7 +2366,7 @@ function grid_cull_one(gr) {
 
                 //console.log("bound cull:", anchor_name, x,y,z);
 
-                return { "p": [x,y,z], "n": anchor_name, "finished": false, "reason":"bound cull" };
+                return { "p": [x,y,z], "n": anchor_name, "finished": false, "reason":"bound cull", "error": false  };
               }
 
               let found = false;
@@ -2281,12 +2394,14 @@ function grid_cull_one(gr) {
 
               //DEBUG
               //
-              console.log("culling", anchor_name, x, y, z, "(", dv_key, ")");
+              if (g_info.debug_level > 3) {
+                console.log("culling", anchor_name, x, y, z, "(", dv_key, ")");
+              }
 
               gr[z][y][x][ii].d = -1;
               gr[z][y][x][ii].valid = false;
 
-              return { "p": [x,y,z], "n": anchor_name, "finished": false, "reason":"removing for lack of neighbors" };
+              return { "p": [x,y,z], "n": anchor_name, "finished": false, "reason":"removing for lack of neighbors", "error": false };
             }
           }
 
@@ -2299,7 +2414,7 @@ function grid_cull_one(gr) {
 
   if (processed_count == tot_count) {
     //console.log("final state");
-    return { "finished": true, "reason": "converged" };
+    return { "finished": true, "error": false, "reason": "converged" };
   }
 
   //---
@@ -2315,7 +2430,9 @@ function grid_cull_one(gr) {
 
             let anchor_name = gr[z][y][x][ii].n;
 
-            console.log("x->", x,y,z,ii,anchor_name);
+            if (g_info.debug_level > 3) {
+              console.log("x->", x,y,z,ii,anchor_name);
+            }
 
             let keep_map = {};
 
@@ -2336,7 +2453,7 @@ function grid_cull_one(gr) {
                     (nz >= gr.length)) {
                   gr[z][y][x][ii].d = -1;
                   gr[z][y][x][ii].valid = false;
-                  return { "finished":true, "reason":"processed tile contradiction",
+                  return { "finished":true, "error": false, "reason":"processed tile contradiction",
                            "p": [x,y,z], "n": anchor_name };
                 }
 
@@ -2380,10 +2497,12 @@ function grid_cull_one(gr) {
                     gr[nz][ny][nx][jj].valid = false;
 
                     //DEBUG
-                    console.log("forcing cull:", nx, ny, nz, nam, dkey, keep_map[dkey] );
-                    console.log("dkey:", dkey);
-                    console.log("keep_map:", keep_map);
-                    debug_print_gr(gr);
+                    if (g_info.debug_level > 3) {
+                      console.log("forcing cull:", nx, ny, nz, nam, dkey, keep_map[dkey] );
+                      console.log("dkey:", dkey);
+                      console.log("keep_map:", keep_map);
+                      debug_print_gr(gr);
+                    }
 
                     let count = 0, latest_valid_idx = -1;
                     for (let _i=0; _i<gr[nz][ny][nx].length; _i++) {
@@ -2393,11 +2512,15 @@ function grid_cull_one(gr) {
                       }
                     }
                     if (count==1) {
-                      console.log("culled leaves", gr[nz][ny][nx][latest_valid_idx].n, "...marking");
+
+                      if (g_info.debug_level > 3) {
+                        console.log("culled leaves", gr[nz][ny][nx][latest_valid_idx].n, "...marking");
+                      }
+
                       gr[nz][ny][nx][latest_valid_idx].processed = true;
                     }
 
-                    return { "finished":false, "reason":"forced cull", "p": [nx,ny,nz], "n": nam };
+                    return { "finished":false, "error":false, "reason":"forced cull", "p": [nx,ny,nz], "n": nam };
 
                   }
 
@@ -2452,12 +2575,17 @@ function grid_cull_one(gr) {
   }
 
   if (marked_count > 0) {
-    console.log("at least one marked as processed...", marked_list);
-    return { "finished": false, "reason":"marked as processed", "data": marked_list, "error": false };
+
+    if (g_info.debug_level > 3) {
+      console.log("at least one marked as processed...", marked_list);
+    }
+    return { "finished": false, "error": false, "reason":"marked as processed", "data": marked_list, "error": false };
   }
 
-  console.log("cp0:");
-  debug_print_gr(gr);
+  if (g_info.debug_level > 3) {
+    console.log("cp0:");
+    debug_print_gr(gr);
+  }
 
 
 
@@ -2509,7 +2637,7 @@ function grid_cull_one(gr) {
     }
   }
 
-  if (!min_info.init) { return { "finished": true, "error": "???" } ; };
+  if (!min_info.init) { return { "finished": true, "error": true, "reason": "No candidate information for choice. Contradiction?" } ; };
 
   let min_choice = [];
 
@@ -2538,7 +2666,7 @@ function grid_cull_one(gr) {
     }
   }
 
-  if (min_choice.length==0) { return { "finished": true, "error": "(1)???" }; }
+  if (min_choice.length==0) { return { "finished": true, "error": true, "reason": "No choice for candidates. Contradiction? (1)" }; }
 
   let min_choice_idx = _irnd(min_choice.length);
   let _x    = min_choice[min_choice_idx].v[0];
@@ -2550,21 +2678,22 @@ function grid_cull_one(gr) {
     if (ii!=idx) { gr[_z][_y][_x][ii].valid = false; continue; }
     gr[_z][_y][_x][ii].processed = true;
 
-  debug_print_gr(gr);
-
-    console.log("MARKING", _x, _y, _z, ii, gr[_z][_y][_x][ii].n);
+    if (g_info.debug_level > 3) {
+      debug_print_gr(gr);
+      console.log("MARKING", _x, _y, _z, ii, gr[_z][_y][_x][ii].n);
+    }
   }
 
-  console.log("...");
-  debug_print_gr(gr);
-  console.log(">> min choice:", min_choice[min_choice_idx].name, _x, _y, _z);
-  return { "finished":false, "p":[_x,_y,_z], "n": min_choice[min_choice_idx].name, "reason":"min choice" };
+  if (g_info.debug_level > 3) {
+    console.log("...");
+    debug_print_gr(gr);
+    console.log(">> min choice:", min_choice[min_choice_idx].name, _x, _y, _z);
+  }
 
+  return { "finished":false, "error": false, "p":[_x,_y,_z], "n": min_choice[min_choice_idx].name, "reason":"min choice" };
 
-  console.log("???", min_choice);
-
-  return { "finished": true };
-
+  //console.log("???", min_choice);
+  //return { "finished": true, "error": false, "reason": "end" };
 }
 
 function debug_print() {
@@ -2626,7 +2755,9 @@ function gen_simple_grid(pgr) {
     }
   }
 
-  console.log(dim);
+  if (g_info.debug_level > 3) {
+    console.log(dim);
+  }
 
   for (let z=0; z<pgr.length; z++) {
     //gr.push([]);
@@ -2642,7 +2773,9 @@ function gen_simple_grid(pgr) {
           break;
         }
 
-        console.log(x,y,z, u);
+        if (g_info.debug_level > 3) {
+          console.log(x,y,z, u);
+        }
 
         gr[z][y][x] = u;
 
@@ -2653,31 +2786,42 @@ function gen_simple_grid(pgr) {
   return gr;
 }
 
-function grid_cull(gr) {
+var xxx = 0;
+function grid_wfc(gr) {
 
   let debug_count = 0;
 
   let culling = true;
   while (culling) {
+    xxx++;
     grid_clear(gr);
     let r = grid_cull_one(gr);
 
     if (r.finished) {
-      console.log(r);
+      if (g_info.debug_level > 0) {
+        console.log(r);
+      }
+
+      if (g_info.debug_level > 1) {
+        debug_print_gr(gr);
+      }
+
       culling = false;
       continue;
     }
 
-    if ("n" in r) {
-      if (r.n.charAt(0) == 'T') {
-        if (r.reason != "bound cull") {
-          console.log("???", r.p[0], r.p[1], r.p[2], r.n, r.reason);
-        }
-        //return { "p": [x,y,z], "n": anchor_name, "finished": false, "reason":"removing for lack of neighbors" };
-        else if (r.reason == "removing for lack of neighbors") {
-          console.log("xxx");
-        }
+    if (g_info.debug_level > 3) {
+      if ("n" in r) {
+        if (r.n.charAt(0) == 'T') {
+          if (r.reason != "bound cull") {
+            console.log("???", r.p[0], r.p[1], r.p[2], r.n, r.reason);
+          }
+          //return { "p": [x,y,z], "n": anchor_name, "finished": false, "reason":"removing for lack of neighbors" };
+          else if (r.reason == "removing for lack of neighbors") {
+            console.log("xxx");
+          }
 
+        }
       }
     }
 
@@ -2687,8 +2831,10 @@ function grid_cull(gr) {
       culling = false;
     }
 
-    if ((debug_count %100)==0) {
-      console.log("!!!", debug_count);
+    if (g_info.debug_level > 0) {
+      if ((debug_count %100)==0) {
+        console.log("!!!", debug_count);
+      }
     }
     debug_count++;
   }
@@ -2705,7 +2851,8 @@ function _init() {
 
   let pgr = [];
 
-  let pgr_dim = [3,2,1];
+  //let pgr_dim = [5,5,5];
+  let pgr_dim = [4,3,2];
   for (let z=0; z<pgr_dim[2]; z++) {
     pgr.push([]);
     for (let y=0; y<pgr_dim[1]; y++) {
@@ -2721,7 +2868,7 @@ function _init() {
     }
   }
 
-  grid_cull(pgr);
+  //grid_wfc(pgr);
 
   g_template["debug"] = pgr;
 
@@ -2778,7 +2925,91 @@ function _init() {
     ]
   ];
 
-  gr = gen_simple_grid(pgr);
+  //gr = gen_simple_grid(pgr);
+
+  gr = [
+    [
+      [ "^000" ]
+    ]
+  ];
+
+  gr = [
+    [
+      [ "d000", "d001", "d002", "d003" ],
+      [ "d010", "d011", "d012", "d013" ],
+      [ "d020", "d021", "d022", "d023" ],
+      [ "d030", "d031", "d032", "d033" ]
+    ],
+
+    [
+      [ "^000", "^001", "^002", "^003" ],
+      [ "^010", "^011", "^012", "^013" ],
+      [ "^020", "^021", "^022", "^023" ],
+      [ "^030", "^031", "^032", "^033" ]
+    ],
+    [
+      [ "|000", "|001", "|002", "|003" ],
+      [ "|010", "|011", "|012", "|013" ],
+      [ "|020", "|021", "|022", "|023" ],
+      [ "|030", "|031", "|032", "|033" ]
+    ],
+    [
+      [ "+000", "+001", "+002", "+003" ],
+      [ "+010", "+011", "+012", "+013" ],
+      [ "+020", "+021", "+022", "+023" ],
+      [ "+030", "+031", "+032", "+033" ]
+    ],
+    [
+      [ "r000", "r001", "r002", "r003" ],
+      [ "r010", "r011", "r012", "r013" ],
+      [ "r020", "r021", "r022", "r023" ],
+      [ "r030", "r031", "r032", "r033" ]
+    ],
+    [
+      [ "T000", "T001", "T002", "T003" ],
+      [ "T010", "T011", "T012", "T013" ],
+      [ "T020", "T021", "T022", "T023" ],
+      [ "T030", "T031", "T032", "T033" ]
+    ]
+  ];
+
+
+  /*
+    "|": [  [ -_g_w/2,  1/2 + _g_epd, -1/2 ], [  _g_w/2,  1/2 + _g_epd, -1/2 ],
+            [ -_g_w/2, -1/2 - _g_epd, -1/2 ], [  _g_w/2, -1/2 - _g_epd, -1/2 ] ],
+
+    "r": [  [ -_g_w/2, -1/2 - _g_epd, -1/2 ], [  _g_w/2, -1/2 - _g_epd, -1/2 ],
+            [ 1/2 + _g_epd,  _g_w/2, -1/2 ], [ 1/2 + _g_epd, -_g_w/2, -1/2 ] ],
+
+    "+": [  [ -_g_w/2,  1/2 + _g_epd, -1/2 ], [  _g_w/2,  1/2 + _g_epd, -1/2 ],
+            [ -_g_w/2, -1/2 - _g_epd, -1/2 ], [  _g_w/2, -1/2 - _g_epd, -1/2 ],
+            [ -1/2 - _g_epd,  _g_w/2, -1/2 ], [ -1/2 - _g_epd, -_g_w/2, -1/2 ],
+            [  1/2 + _g_epd,  _g_w/2, -1/2 ], [  1/2 + _g_epd, -_g_w/2, -1/2 ] ],
+
+    "T": [  [  _g_w/2, -1/2 - _g_epd, -1/2 ], [ -_g_w/2, -1/2 - _g_epd, -1/2 ],
+            [ -1/2 - _g_epd,  _g_w/2, -1/2 ], [ -1/2 - _g_epd, -_g_w/2, -1/2 ],
+            [  1/2 + _g_epd,  _g_w/2, -1/2 ], [  1/2 + _g_epd, -_g_w/2, -1/2 ] ],
+
+    "^": [  [  _g_w/2, -1/2 , -1/2 - _g_epd ], [ -_g_w/2, -1/2 , -1/2 - _g_epd ],
+            [  _g_w/2,  1/2 ,  1/2 + _g_epd ], [ -_g_w/2,  1/2 ,  1/2 + _g_epd ] ]
+  },
+  */
+
+
+
+  gr = [
+    [
+      [ "d000", "d000", "d000" ],
+      [ "d000", "^000", "d000" ],
+      [ "d000", "d000", "d000" ]
+    ],
+    [
+      [ "d000", "d000", "d000" ],
+      [ "d000", ".", "d000" ],
+      [ "d000", "d000", "d000" ]
+    ],
+  ];
+
 
   //??
   //Array(3)]
@@ -2794,7 +3025,7 @@ function _init() {
 
   g_info.data.tri = [];
 
-  let S = 20;
+  let S = 60;
   let tx = g_info.cx,
       ty = g_info.cy,
       tz = g_info.cz;
@@ -2819,7 +3050,9 @@ function _init() {
         g_info.data.tri.push(_tri);
 
 
-        console.log(u, template_u);
+        if (g_info.debug_leve > 3) {
+          console.log(u, template_u);
+        }
       }
     }
   }
