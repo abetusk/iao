@@ -470,17 +470,6 @@ function init_template() {
 
   let st = [];
 
-
-  //DEBUG
-  //
-  /*
-  st.push(  [ [ -0.05, -0.5, 0 ],
-              [  0.05,  0.5, 0 ],
-              [ -0.05,  0.5, 0 ] ] );
-  */
-  //
-  //DEBUG
-
   let _st_L = -1/2 - _g_h/2;
   let _st_U =  1/2 + _g_h/2;
 
@@ -493,61 +482,72 @@ function init_template() {
   let _st_y_e =  (1/2) - (_st_w/2);
   let _st_dy = (_st_y_e - _st_y_s)/(n-1);
 
+  let _st_d = _g_h/2;
+
+  let dx=0, dy=0, dz=0;
+
   for (let i=0; i<n; i++) {
 
-    /*
-    // front facing top steps
+    // NEEDS WORK
+    // overhange needs to calculated correctly
+    // dy needs work
+    // as far as I know, dx and dz are correct
     //
-    let dz = (-1/2) + (ds + (i*ds));
-    let dy = (-1/2) + (2*ds) + (i*ds) + ds/2 - _g_h/2;
-    let dx = 0;
+    dx = 0;
+    dy = i*_st_dy - _st_dy/2;
+    //dy = i*_st_dy - _st_dy/2  - 1;
+    //dz = i*_g_h + _g_h/2;
+    dz = i*_g_h - 3*_g_h - _g_h/2;
 
-    let _r = _3rect_xy( _g_w, ds, dx, dy, dz, parity);
+    let _r = _3rect_xy( _g_w, _st_d,
+      dx, dy, dz,
+      parity);
     for (let j=0; j<_r.length; j++) { st.push(_r[j]); }
 
     // up facing top stairs
     //
-    dz = (-1/2) + (i*ds + ds/2);
-    dy = (-1/2) + 2*ds + i*ds - _g_h/2;
     dx = 0;
+    dy = -1/2 + i*_st_dy + 2*_g_w;
+    dz = _st_L + i*_g_h + _g_h/2;
 
-    _r = _3rect_xz( _g_w, ds, dx, dy, dz, parity);
+    _r = _3rect_xz( _g_w, _g_h,
+      dx, dy, dz,
+      parity);
     for (let j=0; j<_r.length; j++) { st.push(_r[j]); }
 
     //---
-
-    // back facting bottom steps
     //
-    dz = (-1/2) + ((2*ds) + (i*ds));
-    dy = (-1/2) + ((i*ds) + ds/2) - _g_h/2;
+    // NEEDS WORK
+    // overhange needs to calculated correctly
+    // dy needs work
+    // as far as I know, dx and dz are correct
+    //
     dx = 0;
+    dy = i*_st_dy + 2*_g_w - 1 + 0.05;
+    dz = -(1/2) + i*_g_h - _g_h/2;
 
-    _r = _3rect_xy( _g_w, ds, dx, dy, dz, 1-parity);
+    _r = _3rect_xy( _g_w, _st_d,
+      dx, dy, dz,
+      1-parity);
     for (let j=0; j<_r.length; j++) { st.push(_r[j]); }
 
 
     // bottom facing bottom steps
     //
-    dz = (-1/2) + (i*ds + 2*ds + ds/2);
-    dy = (-1/2) + i*ds  + ds - _g_h/2;
     dx = 0;
+    dy = -1/2 + i*_st_dy;
+    dz = _st_L + i*_g_h + _g_h/2;
 
-    _r = _3rect_xz( _g_w, ds, dx, dy, dz, 1-parity);
+    _r = _3rect_xz( _g_w, _g_h,
+      dx, dy, dz,
+      1-parity);
     for (let j=0; j<_r.length; j++) { st.push(_r[j]); }
 
-    */
 
     // left side face
     //
-    //dz = (-1/2) + ds + ds/2 + i*ds;
-
     dx = -_g_w/2;
-
-    //dz =  ds + ds/2 + i*ds - 1 + _g_h/2;
-    //dy = (-1/2) + ds/2 + ds + i*ds - _g_h/2;
-    //_r = _3rect_zy( ds, 3*ds, dx, dy, dz, 1-parity);
     dz = _st_L + _g_h/2 + i*_g_h;
-    //dy = -1/2 + i*_g_h;
     dy = _st_y_s + i*_st_dy;
 
     _r = _3rect_zy(
@@ -559,94 +559,38 @@ function init_template() {
 
     // right side face
     //
-    //dz = (-1/2) + ds + ds/2 + i*ds;
     dx =  _g_w/2;
-
-    //dz =  ds + ds/2 + i*ds - 1 + _g_h/2;
-    //dy = (-1/2) + ds/2 + ds + i*ds - _g_h/2;
-
-    dz = _st_L + _g_h/2 + i*_g_h;
-    //dy = -1/2 + i*_g_h;
     dy = _st_y_s + i*_st_dy;
+    dz = _st_L + _g_h/2 + i*_g_h;
 
-    //_r = _3rect_zy( ds, 3*ds, dx, dy, dz, parity);
     _r = _3rect_zy(
       _st_h, _st_w,
       dx, dy, dz,
       parity);
     for (let j=0; j<_r.length; j++) { st.push(_r[j]); }
 
-
   }
 
-  // ***
-  //
 
-  /*
-
-  // bottom facing bottom step
+  // bottom platform
   //
-  let _r = _3rect_xz( _g_w, 2*ds, 0, -1/2 - _g_h/2, -1/2+ds, 1-parity);
+  _r = _3rect_xy( _g_w, _st_w,
+    0,
+    -1/2+_st_w/2,
+    -1/2-_g_h/2,
+    parity);
   for (let j=0; j<_r.length; j++) { st.push(_r[j]); }
 
-  // forward facing bottom step
+  // top platform
   //
-  _r = _3rect_xy( _g_w, 2*ds, 0, -1/2+ds - _g_h/2, -1/2, parity);
-  for (let j=0; j<_r.length; j++) { st.push(_r[j]); }
-
-  // top facing back step
-  //
-  _r = _3rect_xz( _g_w, 2*ds, 0, 1/2, 1/2-ds + _g_h/2, parity);
-  for (let j=0; j<_r.length; j++) { st.push(_r[j]); }
-
-  // back facing back step
-  //
-  _r = _3rect_xy( _g_w, 2*ds, 0, 1/2-ds + _g_h/2, 1/2, 1-parity);
+  _r = _3rect_xy( _g_w, _st_w,
+    0,
+    1/2-_st_w/2,
+    1/2+_g_h/2,
+    1-parity);
   for (let j=0; j<_r.length; j++) { st.push(_r[j]); }
 
 
-  // left side bottom
-  //
-  dz = -1/2 + ds/2 ;
-  dy = -1/2 + ds ;
-  dx = -_g_w/2;
-
-  _r = _3rect_zy( ds, 2*ds, dx, dy, dz, 1-parity);
-  for (let j=0; j<_r.length; j++) { st.push(_r[j]); }
-
-  // right side bottom
-  //
-  dz = -1/2 + ds/2 ;
-  dy = -1/2 + ds ;
-  dx =  _g_w/2;
-
-  _r = _3rect_zy( ds, 2*ds, dx, dy, dz, parity);
-  for (let j=0; j<_r.length; j++) { st.push(_r[j]); }
-*/
-
-  /*
-
-  // left side top 
-  //
-  dz =  1/2 - ds/2;
-  dy =  1/2 - ds + _g_h/2;
-  dx = -_g_w/2;
-
-  _r = _3rect_zy( ds, 2*ds, dx, dy, dz, 1-parity);
-  for (let j=0; j<_r.length; j++) { st.push(_r[j]); }
-*/
-
-  /*
-
-  // right side top 
-  //
-  dz =  1/2 - ds/2 ;
-  dy =  1/2 - ds ;
-  dx =  _g_w/2;
-
-  _r = _3rect_zy( ds, 2*ds, dx, dy, dz, parity);
-  for (let j=0; j<_r.length; j++) { st.push(_r[j]); }
-  */
 
 
   let flat_st = [];
@@ -1661,7 +1605,7 @@ function threejs_init() {
   //SCALE
 
   //const d = 12,
-  const d = 6,
+  const d = 9,
         d2 = d/2;
   for (let idx=0; idx<tri_vf.length; idx++) {
 
@@ -1926,6 +1870,7 @@ function render() {
 
       let D = 4;
       D = 1.75;
+      D = 1.087;
 
       if (view_prv == 0) {
         mp0 = m4.xRotation((1-_t_rem)*Math.PI/D);
