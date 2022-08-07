@@ -535,139 +535,99 @@ function init_template() {
   //  /
   // L
 
-  //let ds = 1/16;
-  //ds = 1/2;
-  //ds = _g_h;
-
   let parity = 1;
 
-  //let n = 6;
-  //let n = Math.floor( (1/ds) + 0.25 ) - 1;
-  //let n = Math.floor( (1/ds) + 0.25 );
-
   let st = [];
+  let _st_n = Math.floor( 2/_g_h );
 
-  let _st_L = -1/2 - _g_h/2;
-  let _st_U =  1/2 + _g_h/2;
+  let _st_ds = 1/_st_n;
+  let _st_dy = 1/_st_n;
+  let _st_dz = 1/_st_n;
 
-  let n = Math.floor( ((_st_U - _st_L) / _g_h) + (_g_h/2) );
+  for (let i=0; i<_st_n; i++) {
 
-  let _st_height = _g_h;
-  //let _st_length = 2*_g_w;
-  let _st_length = 2*_g_h;
-  _st_length = 1.5*_g_h;
+    let _r = {};
+    let dx=0, dy=0, dz=0;
 
-  let _st_y_s = -(1/2) + (_st_length/2);
-  let _st_y_e =  (1/2) - (_st_length/2);
-  let _st_dy = (_st_y_e - _st_y_s)/(n-1);
-
-  let _st_depth = _g_h/2;
-
-  let dx=0, dy=0, dz=0;
-
-  for (let i=0; i<n; i++) {
-
-    // top upper step
+    // front facing step
     //
     dx = 0;
-    dy = -1/2 + i*_st_dy  + _st_dy/2;
-    dz = i*_g_h  - 1/2 + _g_h/2 ;
+    dy = -0.5 + (i*_st_ds);
+    dz = -0.5 + ((3/2)*_st_ds) + (i*_st_ds);
+    _r = _3rect_xz( _g_w, _st_ds,
+      dx, dy, dz, 1-parity);
+    for (let j=0; j<_r.length; j++) { st.push(_r[j]); }
 
-    let _r = _3rect_xy( _g_w, _st_dy,
-      dx, dy, dz,
-      1-parity);
-
-    if (i < (n-1)) {
-      for (let j=0; j<_r.length; j++) { st.push(_r[j]); }
-    }
-
-    // up facing top stairs
+    // back facing step
     //
     dx = 0;
-    dy = -1/2 + i*_st_dy + _st_length;
-    dz = _st_L + i*_g_h + _g_h/2;
-    //!!!
+    dy = -0.5 + _st_ds + (i*_st_ds);
+    dz = -0.5 - ((1/2)*_st_ds) + (i*_st_ds);
+    _r = _3rect_xz( _g_w, _st_ds,
+      dx, dy, dz, parity);
+    for (let j=0; j<_r.length; j++) { st.push(_r[j]); }
 
-    _r = _3rect_xz( _g_w, _g_h,
+    // up facing top step
+    //
+    dx = 0;
+    dy = -0.5 + ((1/2)*_st_ds) + (i*_st_ds);
+    dz = -0.5 + (2*_st_ds) + (i*_st_ds);
+    _r = _3rect_xy( _g_w, _st_ds,
+      dx, dy, dz, 1-parity);
+    for (let j=0; j<_r.length; j++) { st.push(_r[j]); }
+
+    // bottom facing bottom step
+    //
+    dx = 0;
+    dy = -0.5 + ((1/2)*_st_ds) + (i*_st_ds);
+    dz = -0.5 - (_st_ds) + (i*_st_ds);
+    _r = _3rect_xy( _g_w, _st_ds,
+      dx, dy, dz, parity);
+    for (let j=0; j<_r.length; j++) { st.push(_r[j]); }
+
+    // right side stair
+    //
+    dx = _g_w/2;
+    dy = -0.5 + _st_ds/2 + i*_st_ds;
+    dz = -0.5 + _st_ds/2 + i*_st_ds;
+    _r = _3rect_zy(
+      3*_st_ds, _st_ds,
       dx, dy, dz,
       parity);
     for (let j=0; j<_r.length; j++) { st.push(_r[j]); }
 
-    //---
-    //
-    // bottom lower setp
-    //
-    dx = 0;
-    dy = 1/2 - i*_st_dy + _st_dy/2;
-    dz = 1/2 - i*_g_h + _g_h/2;
-
-    _r = _3rect_xy( _g_w, _st_dy,
-      dx, dy, dz,
-      parity);
-    if (i>0) {
-      for (let j=0; j<_r.length; j++) { st.push(_r[j]); }
-    }
-
-
-    // bottom facing bottom steps
-    //
-    dx = 0;
-    dy = -1/2 + i*_st_dy;
-    dz = _st_L + i*_g_h + _g_h/2;
-
-    _r = _3rect_xz( _g_w, _g_h,
-      dx, dy, dz,
-      1-parity);
-    for (let j=0; j<_r.length; j++) { st.push(_r[j]); }
-
-
-    // left side face
+    // left side stair 
     //
     dx = -_g_w/2;
-    dz = _st_L + _g_h/2 + i*_g_h;
-    dy = _st_y_s + i*_st_dy;
-
+    dy = -0.5 + _st_ds/2 + i*_st_ds;
+    dz = -0.5 + _st_ds/2 + i*_st_ds;
     _r = _3rect_zy(
-      _st_height, _st_length,
+      3*_st_ds, _st_ds,
       dx, dy, dz,
       1-parity);
-    for (let j=0; j<_r.length; j++) { st.push(_r[j]); }
-
-
-    // right side face
-    //
-    dx =  _g_w/2;
-    dy = _st_y_s + i*_st_dy;
-    dz = _st_L + _g_h/2 + i*_g_h;
-
-    _r = _3rect_zy(
-      _st_height, _st_length,
-      dx, dy, dz,
-      parity);
     for (let j=0; j<_r.length; j++) { st.push(_r[j]); }
 
   }
 
-
-  // bottom platform
+  // optional end caps
   //
-  _r = _3rect_xy( _g_w, _st_length,
-    0,
-    -1/2+_st_length/2,
-    -1/2-_g_h/2,
-    parity);
-  for (let j=0; j<_r.length; j++) { st.push(_r[j]); }
+  let _st_endcap = true;
+  if (_st_endcap) {
+    let _r = {};
+    let dx=0, dy=0, dz=0;
 
-  // top platform
-  //
-  _r = _3rect_xy( _g_w, _st_length,
-    0,
-    1/2-_st_length/2,
-    1/2+_g_h/2,
-    1-parity);
-  for (let j=0; j<_r.length; j++) { st.push(_r[j]); }
+    // front endcap
+    //
+    _r = _3rect_xz( _g_w, _g_h,
+      0, -0.5, -0.5, 0);
+    for (let j=0; j<_r.length; j++) { st.push(_r[j]); }
 
-
+    // back endcap
+    //
+    _r = _3rect_xz( _g_w, _g_h,
+      0, 0.5, 0.5, 1);
+    for (let j=0; j<_r.length; j++) { st.push(_r[j]); }
+  }
 
 
   let flat_st = [];
@@ -696,41 +656,193 @@ function init_template() {
   //  /
   // L
 
-
-  let bent_st = [];
-
-  let _bent_L = -1/2 - _g_h/2;
-  let _bent_U =  1/2 + _g_h/2;
-
-  let bent_n = Math.floor( ((_bent_U - _bent_L) / _g_h) + (_g_h/2) );
-
-  let _bent_height = _g_h;
-  //let _bent_length = 2*_g_w;
-  let _bent_length = 2*_g_h;
-  _bent_length = 1.5*_g_h;
-
-  let _bent_y_s = -(1/2) + (_bent_length/2);
-  let _bent_y_e =  (1/2) - (_bent_length/2);
-  let _bent_dy = (_bent_y_e - _bent_y_s)/(n-1);
-
-  let _bent_depth = _g_h/2;
-
-  console.log("_bent_y_s", _bent_y_s, "st_y_e", _bent_y_e, "st_dy", _bent_dy, "st_depth", _bent_depth, "n", n);
-
-  let bent_dx=0, bent_dy=0, bent_dz=0;
+  //        tfs
+  // ffs   .xx
+  //       xxx  bfs
+  //        bfs
+  //
 
 
-  __bent_st = [];
-  for (let i=0; i<bent_st.length; i++) {
-    for (let j=0; j<bent_st[i].length; j++) {
-      for (let k=0; k<bent_st[i][j].length; k++) {
-        __bent_st.push( bent_st[i][j][k] );
+  let bent = [];
+  let _bent_n = Math.floor( 2/_g_h );
+
+  let _bent_ds = 1/_bent_n;
+  let _bent_dy = 1/_bent_n;
+  let _bent_dz = 1/_bent_n;
+
+  for (let i=0; i<_bent_n; i++) {
+
+    let _r = {};
+    let dx=0, dy=0, dz=0;
+
+    let _hh = 3;
+
+    // front facing step
+    //
+    if (i<(_bent_n-1)) {
+      dx = 0;
+      dy = -0.5 + (i*_bent_ds);
+      dz = -0.5 + ((3/2)*_bent_ds) + (i*_bent_ds);
+      _r = _3rect_xz( _g_w, _bent_ds,
+        dx, dy, dz, 1-parity);
+      for (let j=0; j<_r.length; j++) { bent.push(_r[j]); }
+    }
+
+    // back facing step
+    // (need extra at end)
+    //
+    dx = 0;
+    dy = -0.5 + _bent_ds + (i*_bent_ds);
+    dz = -0.5 - ((1/2)*_bent_ds) + (i*_bent_ds);
+    _r = _3rect_xz( _g_w, _bent_ds,
+      dx, dy, dz, parity);
+    for (let j=0; j<_r.length; j++) { bent.push(_r[j]); }
+
+    // up facing top step
+    //
+    if (i<(_bent_n-1)) {
+      dx = 0;
+      dy = -0.5 + ((1/2)*_bent_ds) + (i*_bent_ds);
+      dz = -0.5 + (2*_bent_ds) + (i*_bent_ds);
+      _r = _3rect_xy( _g_w, _bent_ds,
+        dx, dy, dz, 1-parity);
+      for (let j=0; j<_r.length; j++) { bent.push(_r[j]); }
+    }
+
+    // bottom facing bottom step
+    // (needs extra)
+    //
+    dx = 0;
+    dy = -0.5 + ((1/2)*_bent_ds) + (i*_bent_ds);
+    dz = -0.5 - (_bent_ds) + (i*_bent_ds);
+    _r = _3rect_xy( _g_w, _bent_ds,
+      dx, dy, dz, parity);
+    for (let j=0; j<_r.length; j++) { bent.push(_r[j]); }
+
+    // right side stair
+    //
+    if (i<(_bent_n-1)) {
+      dx = _g_w/2;
+      dy = -0.5 + _bent_ds/2 + i*_bent_ds;
+      dz = -0.5 + _bent_ds/2 + i*_bent_ds;
+      _r = _3rect_zy(
+        3*_bent_ds, _bent_ds,
+        dx, dy, dz,
+        parity);
+      for (let j=0; j<_r.length; j++) { bent.push(_r[j]); }
+    }
+
+    // left side stair 
+    //
+    if (i<(_bent_n-1)) {
+      dx = -_g_w/2;
+      dy = -0.5 + _bent_ds/2 + i*_bent_ds;
+      dz = -0.5 + _bent_ds/2 + i*_bent_ds;
+      _r = _3rect_zy(
+        3*_bent_ds, _bent_ds,
+        dx, dy, dz,
+        1-parity);
+      for (let j=0; j<_r.length; j++) { bent.push(_r[j]); }
+    }
+
+  }
+
+  // end fixups
+  //
+  {
+    let _r = {};
+    let dx=0, dy=0, dz=0;
+
+    // extra back facing step
+    //
+    dx = 0;
+    dy = 0.5 + _bent_ds;
+    dz = 0.5 - ((1/2)*_bent_ds);
+    _r = _3rect_xz( _g_w, _bent_ds,
+      dx, dy, dz, parity);
+    for (let j=0; j<_r.length; j++) { bent.push(_r[j]); }
+
+    // extra bottom facing bottom step
+    //
+    dx = 0;
+    dy = 0.5 + ((1/2)*_bent_ds);
+    dz = 0.5 - (_bent_ds);
+    _r = _3rect_xy( _g_w, _bent_ds,
+      dx, dy, dz, parity);
+    for (let j=0; j<_r.length; j++) { bent.push(_r[j]); }
+
+    // right side stair
+    //
+    dx = _g_w/2;
+    dy = 0.5 - (_bent_ds/2);
+    dz = 0.5 - _bent_ds;
+    _r = _3rect_zy(
+      2*_bent_ds, _bent_ds,
+      dx, dy, dz,
+      parity);
+    for (let j=0; j<_r.length; j++) { bent.push(_r[j]); }
+
+    dx = _g_w/2;
+    dy = 0.5 + (_bent_ds/2);
+    dz = 0.5 - (_bent_ds/2);
+    _r = _3rect_zy(
+      1*_bent_ds, _bent_ds,
+      dx, dy, dz,
+      parity);
+    for (let j=0; j<_r.length; j++) { bent.push(_r[j]); }
+
+    // left side stair
+    //
+    dx = -_g_w/2;
+    dy = 0.5 - (_bent_ds/2);
+    dz = 0.5 - _bent_ds;
+    _r = _3rect_zy(
+      2*_bent_ds, _bent_ds,
+      dx, dy, dz,
+      1-parity);
+    for (let j=0; j<_r.length; j++) { bent.push(_r[j]); }
+
+    dx = -_g_w/2;
+    dy = 0.5 + (_bent_ds/2);
+    dz = 0.5 - (_bent_ds/2);
+    _r = _3rect_zy(
+      1*_bent_ds, _bent_ds,
+      dx, dy, dz,
+      1-parity);
+    for (let j=0; j<_r.length; j++) { bent.push(_r[j]); }
+  }
+
+  // optional end caps
+  //
+  let _bent_endcap = true;
+  if (_bent_endcap) {
+    let _r = {};
+    let dx=0, dy=0, dz=0;
+
+    // front endcap
+    //
+    _r = _3rect_xz( _g_w, _g_h,
+      0, -0.5, -0.5, 0);
+    for (let j=0; j<_r.length; j++) { bent.push(_r[j]); }
+
+    // back endcap
+    //
+    _r = _3rect_xy( _g_w, _g_h,
+      0, 0.5, 0.5, 0);
+    for (let j=0; j<_r.length; j++) { bent.push(_r[j]); }
+  }
+
+
+  let flat_bent = [];
+  for (let i=0; i<bent.length; i++) {
+    for (let j=0; j<bent[i].length; j++) {
+      for (let k=0; k<bent[i][j].length; k++) {
+        flat_bent.push( bent[i][j][k] );
       }
     }
   }
 
-  g_template["%"] = __bent_st;
-
+  g_template["%"] = flat_bent;
 
   //---
   // T
@@ -3202,14 +3314,29 @@ function _init() {
   gr = [
     [
       [ ".", "d000", ".", "d000" ],
-      [ ".", "^000", ".", ".000" ],
+      [ ".", "%000", ".", ".000" ],
       [ ".", "d000", ".", "d000"],
       [ ".", ".", "." , "." ]
     ],
     [
       [ ".", "d000", ".", "." ],
       [ ".", ".000", ".", "d100" ],
+      [ ".", "d011", ".", "." ],
+      [ ".", ".", ".", "."  ]
+    ],
+  ];
+
+  gr = [
+    [
+      [ ".", "|000", ".", "d000" ],
+      [ ".", "%000", ".", ".000" ],
+      [ ".", "d000", ".", "d000"],
+      [ ".", ".", "." , "." ]
+    ],
+    [
       [ ".", "d000", ".", "." ],
+      [ ".", ".000", ".", "d100" ],
+      [ ".", "|100", ".", "." ],
       [ ".", ".", ".", "."  ]
     ],
   ];
