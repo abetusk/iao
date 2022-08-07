@@ -160,6 +160,8 @@ let _g_w = 1/4;
 //let _g_h = 2/8;
 let _g_h = 1/8;
 
+_g_h = 1/4;
+
 //DEBUG
 //_g_h = 0.25;
 //_g_h = 0.5;
@@ -175,32 +177,92 @@ let _g_epd = 0;
 //
 let g_template = {
 
+  // enpoints tell how we can connect to the other tiles
+  //
   "endpoint": {
     ".": [],
 
     "d": [],
 
-    "|": [  [ -_g_w/2,  1/2 + _g_epd, -1/2 ], [  _g_w/2,  1/2 + _g_epd, -1/2 ],
-            [ -_g_w/2, -1/2 - _g_epd, -1/2 ], [  _g_w/2, -1/2 - _g_epd, -1/2 ] ],
+    "|": [
+      [ -_g_w/2,  1/2 + _g_epd, -1/2 + _g_h/2 ], [  _g_w/2,  1/2 + _g_epd, -1/2 + _g_h/2 ],
+      [ -_g_w/2,  1/2 + _g_epd, -1/2 - _g_h/2 ], [  _g_w/2,  1/2 + _g_epd, -1/2 - _g_h/2 ],
 
-    "r": [  [ -_g_w/2, -1/2 - _g_epd, -1/2 ], [  _g_w/2, -1/2 - _g_epd, -1/2 ],
-            [ 1/2 + _g_epd,  _g_w/2, -1/2 ], [ 1/2 + _g_epd, -_g_w/2, -1/2 ] ],
+      [ -_g_w/2, -1/2 - _g_epd, -1/2 + _g_h/2 ], [  _g_w/2, -1/2 - _g_epd, -1/2 + _g_h/2 ],
+      [ -_g_w/2, -1/2 - _g_epd, -1/2 - _g_h/2 ], [  _g_w/2, -1/2 - _g_epd, -1/2 - _g_h/2 ]
+    ],
 
-    "+": [  [ -_g_w/2,  1/2 + _g_epd, -1/2 ], [  _g_w/2,  1/2 + _g_epd, -1/2 ],
-            [ -_g_w/2, -1/2 - _g_epd, -1/2 ], [  _g_w/2, -1/2 - _g_epd, -1/2 ],
-            [ -1/2 - _g_epd,  _g_w/2, -1/2 ], [ -1/2 - _g_epd, -_g_w/2, -1/2 ],
-            [  1/2 + _g_epd,  _g_w/2, -1/2 ], [  1/2 + _g_epd, -_g_w/2, -1/2 ] ],
+    "r": [
+      [ -_g_w/2, -1/2 - _g_epd, -1/2 + _g_h/2 ], [  _g_w/2, -1/2 - _g_epd, -1/2 + _g_h/2 ],
+      [ -_g_w/2, -1/2 - _g_epd, -1/2 - _g_h/2 ], [  _g_w/2, -1/2 - _g_epd, -1/2 - _g_h/2 ],
 
-    "T": [  [  _g_w/2, -1/2 - _g_epd, -1/2 ], [ -_g_w/2, -1/2 - _g_epd, -1/2 ],
-            [ -1/2 - _g_epd,  _g_w/2, -1/2 ], [ -1/2 - _g_epd, -_g_w/2, -1/2 ],
-            [  1/2 + _g_epd,  _g_w/2, -1/2 ], [  1/2 + _g_epd, -_g_w/2, -1/2 ] ],
+      [ 1/2 + _g_epd,  _g_w/2, -1/2 + _g_h/2 ], [ 1/2 + _g_epd, -_g_w/2, -1/2 + _g_h/2 ],
+      [ 1/2 + _g_epd,  _g_w/2, -1/2 - _g_h/2 ], [ 1/2 + _g_epd, -_g_w/2, -1/2 - _g_h/2 ]
+    ],
 
-    "^": [  [  _g_w/2, -1/2 , -1/2 - _g_epd ], [ -_g_w/2, -1/2 , -1/2 - _g_epd ],
-            [  _g_w/2,  1/2 ,  1/2 + _g_epd ], [ -_g_w/2,  1/2 ,  1/2 + _g_epd ] ]
+    "+": [
+      [ -_g_w/2,  1/2 + _g_epd, -1/2 + _g_h/2 ], [  _g_w/2,  1/2 + _g_epd, -1/2 + _g_h/2 ],
+      [ -_g_w/2,  1/2 + _g_epd, -1/2 - _g_h/2 ], [  _g_w/2,  1/2 + _g_epd, -1/2 - _g_h/2 ],
+
+      [ -_g_w/2, -1/2 - _g_epd, -1/2 + _g_h/2 ], [  _g_w/2, -1/2 - _g_epd, -1/2 + _g_h/2 ],
+      [ -_g_w/2, -1/2 - _g_epd, -1/2 - _g_h/2 ], [  _g_w/2, -1/2 - _g_epd, -1/2 - _g_h/2 ],
+
+      [ -1/2 - _g_epd,  _g_w/2, -1/2 + _g_h/2 ], [ -1/2 - _g_epd, -_g_w/2, -1/2 + _g_h/2 ],
+      [ -1/2 - _g_epd,  _g_w/2, -1/2 - _g_h/2 ], [ -1/2 - _g_epd, -_g_w/2, -1/2 - _g_h/2 ],
+
+      [  1/2 + _g_epd,  _g_w/2, -1/2 + _g_h/2 ], [  1/2 + _g_epd, -_g_w/2, -1/2 + _g_h/2 ],
+      [  1/2 + _g_epd,  _g_w/2, -1/2 - _g_h/2 ], [  1/2 + _g_epd, -_g_w/2, -1/2 - _g_h/2 ]
+    ],
+
+    "T": [
+      [  _g_w/2, -1/2 - _g_epd, -1/2 + _g_h/2 ], [ -_g_w/2, -1/2 - _g_epd, -1/2 + _g_h/2 ],
+      [  _g_w/2, -1/2 - _g_epd, -1/2 - _g_h/2 ], [ -_g_w/2, -1/2 - _g_epd, -1/2 - _g_h/2 ],
+
+      [ -1/2 - _g_epd,  _g_w/2, -1/2 + _g_h/2 ], [ -1/2 - _g_epd, -_g_w/2, -1/2 + _g_h/2 ],
+      [ -1/2 - _g_epd,  _g_w/2, -1/2 - _g_h/2 ], [ -1/2 - _g_epd, -_g_w/2, -1/2 - _g_h/2 ],
+
+      [  1/2 + _g_epd,  _g_w/2, -1/2 + _g_h/2 ], [  1/2 + _g_epd, -_g_w/2, -1/2 + _g_h/2 ],
+      [  1/2 + _g_epd,  _g_w/2, -1/2 - _g_h/2 ], [  1/2 + _g_epd, -_g_w/2, -1/2 - _g_h/2 ]
+    ],
+
+    "^": [
+      [  _g_w/2, -1/2 , -1/2 + _g_h/2 ], [ -_g_w/2, -1/2 , -1/2 + _g_h/2 ],
+      [  _g_w/2, -1/2 , -1/2 - _g_h/2 ], [ -_g_w/2, -1/2 , -1/2 - _g_h/2 ],
+
+      [  _g_w/2,  1/2 ,  1/2 + _g_h/2 ], [ -_g_w/2,  1/2 ,  1/2 + _g_h/2 ],
+      [  _g_w/2,  1/2 ,  1/2 - _g_h/2 ], [ -_g_w/2,  1/2 ,  1/2 - _g_h/2 ]
+    ],
+
+    // wip
+    //
+    "%": [
+      [  _g_w/2, -1/2 , -1/2 + _g_h/2 ], [ -_g_w/2, -1/2 , -1/2 + _g_h/2 ],
+      [  _g_w/2, -1/2 , -1/2 - _g_h/2 ], [ -_g_w/2, -1/2 , -1/2 - _g_h/2 ],
+
+      [  _g_w/2,  1/2 ,  1/2 + _g_h/2 ], [ -_g_w/2,  1/2 ,  1/2 + _g_h/2 ],
+      [  _g_w/2,  1/2 ,  1/2 - _g_h/2 ], [ -_g_w/2,  1/2 ,  1/2 - _g_h/2 ]
+    ],
+
+  },
+
+  "force" : {
+    "." : [],
+    "d": [],
+    "|" : [ { "dv" : [0, 0, -1], "tile": "." } ],
+    "r" : [ { "dv" : [0, 0, -1], "tile": "." } ],
+    "+" : [ { "dv" : [0, 0, -1], "tile": "." } ],
+    "T" : [ { "dv" : [0, 0, -1], "tile": "." } ],
+    "^" : [ { "dv" : [0, 0, -1], "tile": "." }, { "dv": [0,0,1], "tile":"." } ],
+
+    // wip
+    //
+    "%" : [ { "dv" : [0, 0, -1], "tile": "." }, { "dv": [0,0,1], "tile":"." } ]
   },
 
   ":" : [],
 
+  // simple plane for debuging
+  //
   "d": [
     -1/2,  1/2, -1/2,  -1/2, -1/2, -1/2,    1/2,  1/2, -1/2,
     -1/2, -1/2, -1/2,   1/2, -1/2, -1/2,    1/2,  1/2, -1/2,
@@ -249,10 +311,17 @@ let g_template = {
   "r"  : [],
   "^"   : [],
   "+"   : [],
-  "T"   : []
+  "T"   : [],
+
+  //wip
+  //
+  "%" : []
 
 };
 
+// the geometry for some of the more copmlex shapes is a little
+// too involved to list out statically so do it here.
+//
 function init_template() {
 
   // top
@@ -453,8 +522,18 @@ function init_template() {
 
 
   //---
-  // stairs
   //
+  // stairs (^)
+  //
+  //     ^
+  //     |           x-
+  //     z         .xx-
+  //     |         xxx
+  //     ._y_>    -xx.
+  //    /         -x
+  //   x
+  //  /
+  // L
 
   //let ds = 1/16;
   //ds = 1/2;
@@ -474,15 +553,15 @@ function init_template() {
   let n = Math.floor( ((_st_U - _st_L) / _g_h) + (_g_h/2) );
 
   let _st_height = _g_h;
-  let _st_length = 2*_g_w;
+  //let _st_length = 2*_g_w;
+  let _st_length = 2*_g_h;
+  _st_length = 1.5*_g_h;
 
   let _st_y_s = -(1/2) + (_st_length/2);
   let _st_y_e =  (1/2) - (_st_length/2);
   let _st_dy = (_st_y_e - _st_y_s)/(n-1);
 
   let _st_depth = _g_h/2;
-
-  console.log("_st_y_s", _st_y_s, "st_y_e", _st_y_e, "st_dy", _st_dy, "st_depth", _st_depth, "n", n);
 
   let dx=0, dy=0, dz=0;
 
@@ -505,8 +584,9 @@ function init_template() {
     // up facing top stairs
     //
     dx = 0;
-    dy = -1/2 + i*_st_dy + 2*_g_w;
+    dy = -1/2 + i*_st_dy + _st_length;
     dz = _st_L + i*_g_h + _g_h/2;
+    //!!!
 
     _r = _3rect_xz( _g_w, _g_h,
       dx, dy, dz,
@@ -600,6 +680,57 @@ function init_template() {
   }
 
   g_template["^"] = flat_st;
+
+
+  //---
+  //
+  // 90 degree stair bridge (%)
+  //
+  //     ^
+  //     |           ||
+  //     z         .xxx
+  //     |         xxx
+  //     ._y_>    -xx.
+  //    /         -x
+  //   x
+  //  /
+  // L
+
+
+  let bent_st = [];
+
+  let _bent_L = -1/2 - _g_h/2;
+  let _bent_U =  1/2 + _g_h/2;
+
+  let bent_n = Math.floor( ((_bent_U - _bent_L) / _g_h) + (_g_h/2) );
+
+  let _bent_height = _g_h;
+  //let _bent_length = 2*_g_w;
+  let _bent_length = 2*_g_h;
+  _bent_length = 1.5*_g_h;
+
+  let _bent_y_s = -(1/2) + (_bent_length/2);
+  let _bent_y_e =  (1/2) - (_bent_length/2);
+  let _bent_dy = (_bent_y_e - _bent_y_s)/(n-1);
+
+  let _bent_depth = _g_h/2;
+
+  console.log("_bent_y_s", _bent_y_s, "st_y_e", _bent_y_e, "st_dy", _bent_dy, "st_depth", _bent_depth, "n", n);
+
+  let bent_dx=0, bent_dy=0, bent_dz=0;
+
+
+  __bent_st = [];
+  for (let i=0; i<bent_st.length; i++) {
+    for (let j=0; j<bent_st[i].length; j++) {
+      for (let k=0; k<bent_st[i][j].length; k++) {
+        __bent_st.push( bent_st[i][j][k] );
+      }
+    }
+  }
+
+  g_template["%"] = __bent_st;
+
 
   //---
   // T
@@ -2075,7 +2206,7 @@ function _v_in(v, va, _eps) {
   return false;
 }
 
-function _build_tile_library( _endp_lib ) {
+function _build_tile_library( _endp_lib, _force_lib ) {
 
   let raw_lib = {};
   let rot_lib = {};
@@ -2120,7 +2251,19 @@ function _build_tile_library( _endp_lib ) {
           _type_a.push( raw_lib[ukey] );
           _type_a_key.push(ukey);
 
-          rot_lib[ukey] = { "m": [mx, my, mz], "r": [xidx, yidx, zidx ] };
+          // force tile has dv to be placed and a 'tile type' (just '.')
+          // that must be placed afterthis tile is placed.
+          // The location is held in the 'dv' array which is rotated
+          // with the rotation of the tile.
+          //
+          let _force_list = [];
+          for (let fidx=0; fidx<_force_lib[pkey].length; fidx++) {
+            let v = _m_v_mul(mr, _force_lib[pkey][fidx].dv);
+            for (let ii=0; ii<v.length; ii++) { v[ii] = Math.floor(v[ii] + 0.5); }
+            _force_list.push({"dv": v, "tile": _force_lib[pkey][fidx]["tile"]});
+          }
+
+          rot_lib[ukey] = { "m": [mx, my, mz], "r": [xidx, yidx, zidx ], "f": _force_list };
 
         }
       }
@@ -2195,10 +2338,7 @@ function _build_tile_library( _endp_lib ) {
               if (_v_in(tv, anch_endp)) { count++; }
             }
 
-            // should only be two...
-            //
-            if (count>0) {
-              //console.log(">>", dx, dy, dz, anchor_key, test_key, count);
+            if (count==4) {
               if (!(anchor_key in tile_attach)) { tile_attach[anchor_key] = {}; }
               if (!(test_key in tile_attach[anchor_key])) {
                 tile_attach[anchor_key][test_key] = { "anchor": anchor_key, "attach": test_key, "dv": [] };
@@ -2235,7 +2375,7 @@ function grid_clear(gr) {
       for (let x=0; x<gr[z][y].length; x++) {
 
         for (let ii=0; ii<gr[z][y][x].length; ii++) {
-          gr[z][y][x].d = 0;
+          //gr[z][y][x].d = 0;
         }
 
       }
@@ -2244,7 +2384,116 @@ function grid_clear(gr) {
 
 }
 
+// grid elements contain array of objects.
+// Each object:
+//   n          - tile name
+//   valid      - still a candidate
+//   processed  - processed or not
+//
+
 function grid_cull_one(gr) {
+
+
+
+
+  // cull edge
+  //
+
+  let tile_attach = g_template.tile_attach;
+
+  for (let z=0; z<gr.length; z++) {
+    for (let y=0; y<gr[z].length; y++) {
+      for (let x=0; x<gr[z][y].length; x++) {
+
+        let idx=0;
+        while (idx < gr[z][y][x].length) {
+
+          let key_anchor = gr[z][y][x][idx].n;
+          if (!(key_anchor in tile_attach)) { idx++; continue; }
+
+          let _culled = false;
+          let ta_o = tile_attach[key_anchor];
+          for (let key_neighbor in ta_o) {
+            let _dv_a = ta_o[key_neighbor].dv;
+            for (let ii=0; ii<_dv_a.length; ii++) {
+              let ux = _dv_a[ii][0] + x;
+              let uy = _dv_a[ii][1] + y;
+              let uz = _dv_a[ii][2] + z;
+
+              if ((ux < 0) || (ux >= gr[z][y].length) ||
+                  (uy < 0) || (uy >= gr[z].length) ||
+                  (uz < 0) || (uz >= gr.length)) {
+                gr[z][y][x][idx] = gr[z][y][x][ gr[z][y][x].length-1 ];
+                gr[z][y][x].pop();
+                _culled = true;
+
+                console.log("culled", x, y, z, "anch", key_anchor, "nei", key_neighbor);
+
+                break;
+              }
+
+              if (_culled) { break; }
+            }
+            if (_culled) { break; }
+          }
+          if (_culled) { continue; }
+
+          idx++;
+        }
+
+      }
+    }
+  }
+
+  console.log(">>>", gr);
+
+
+  // pick random candidate
+  //
+
+  let min_val = -1;
+  let candidate_coord = [];
+
+  for (let z=0; z<gr.length; z++) {
+    for (let y=0; y<gr[z].length; y++) {
+      for (let x=0; x<gr[z][y].length; x++) {
+
+        let n_cand = gr[z][y][x].length;
+
+        candidate_coord.push({ "x":x, "y":y, "z":z, "n":n_cand });
+
+        if (min_val < 0) { min_val = n_cand; }
+        if (n_cand < min_val) {
+          min_val = n_cand;
+        }
+
+      }
+    }
+  }
+
+  // cull candidates
+  //
+  let idx=0;
+  while (idx < candidate_coord.length) {
+
+    if (candidate_coord[idx].n != min_val) {
+      candidate_coord[idx] = candidate_coord[ candidate_coord.length-1 ];
+      candidate_coord.pop();
+      continue;
+    }
+
+    idx++;
+  }
+
+  let r_idx = Math.floor(fxrand()*candidate_coord.length);
+  let r_ele = candidate_coord[r_idx];
+
+  console.log("grid_cull_one:", min_val, "::", r_ele.x, r_ele.y, r_ele.z, "...", candidate_coord);
+
+
+}
+
+function _grid_cull_one(gr) {
 
   let processed_count = 0;
   let tot_count = 0;
@@ -2303,7 +2552,7 @@ function grid_cull_one(gr) {
                   (nx >= gr[z][y].length) ||
                   (ny >= gr[z].length) ||
                   (nz >= gr.length)) {
-                gr[z][y][x][ii].d = -1;
+                //gr[z][y][x][ii].d = -1;
                 gr[z][y][x][ii].valid = false;
 
                 //console.log("bound cull:", anchor_name, x,y,z);
@@ -2340,7 +2589,7 @@ function grid_cull_one(gr) {
                 console.log("culling", anchor_name, x, y, z, "(", dv_key, ")");
               }
 
-              gr[z][y][x][ii].d = -1;
+              //gr[z][y][x][ii].d = -1;
               gr[z][y][x][ii].valid = false;
 
               return { "p": [x,y,z], "n": anchor_name, "finished": false, "reason":"removing for lack of neighbors", "error": false };
@@ -2393,7 +2642,7 @@ function grid_cull_one(gr) {
                     (nx >= gr[z][y].length) ||
                     (ny >= gr[z].length) ||
                     (nz >= gr.length)) {
-                  gr[z][y][x][ii].d = -1;
+                  //gr[z][y][x][ii].d = -1;
                   gr[z][y][x][ii].valid = false;
                   return { "finished":true, "error": false, "reason":"processed tile contradiction",
                            "p": [x,y,z], "n": anchor_name };
@@ -2435,7 +2684,7 @@ function grid_cull_one(gr) {
                     //if (!(nam in keep_map[dkey])) { continue; }
                     if (nam in keep_map[dkey]) { continue; }
 
-                    gr[nz][ny][nx][jj].d = -1;
+                    //gr[nz][ny][nx][jj].d = -1;
                     gr[nz][ny][nx][jj].valid = false;
 
                     //DEBUG
@@ -2739,6 +2988,9 @@ function grid_wfc(gr) {
     grid_clear(gr);
     let r = grid_cull_one(gr);
 
+    //DEBUG
+    break;
+
     if (r.finished) {
       if (g_info.debug_level > 0) {
         console.log(r);
@@ -2787,7 +3039,7 @@ function _init() {
 
   init_template();
 
-  _build_tile_library( g_template.endpoint );
+  _build_tile_library( g_template.endpoint, g_template.force );
 
   //---
 
@@ -2803,16 +3055,23 @@ function _init() {
 
         pgr[z][y].push([]);
         for (let tile_name in g_template.uniq_repr) {
-          pgr[z][y][x].push( {"n":tile_name, "d":0, "valid": true, "processed":false });
+
+          // n - name
+          // valid - still a candidate
+          // processed - processed or not
+          //
+          //pgr[z][y][x].push( {"n":tile_name, "d":0, "valid": true, "processed":false });
+          pgr[z][y][x].push( {"n":tile_name, "valid": true, "processed":false });
         }
 
       }
     }
   }
 
-  //grid_wfc(pgr);
+  //let _r = grid_wfc(pgr);
+  //console.log(">>", _r, pgr);
+  //g_template["debug"] = pgr;
 
-  g_template["debug"] = pgr;
 
   let gr = [
     [
@@ -2875,6 +3134,7 @@ function _init() {
     ]
   ];
 
+  /*
   gr = [
     [
       [ "d000", "d001", "d002", "d003" ],
@@ -2914,7 +3174,7 @@ function _init() {
       [ "T030", "T031", "T032", "T033" ]
     ]
   ];
-
+  */
 
   /*
     "|": [  [ -_g_w/2,  1/2 + _g_epd, -1/2 ], [  _g_w/2,  1/2 + _g_epd, -1/2 ],
@@ -2941,16 +3201,16 @@ function _init() {
 
   gr = [
     [
-      [ ".", ".", "." ],
-      [ ".", "^020", "." ],
-      [ ".", "^000", "." ],
-      [ ".", ".", "." ]
+      [ ".", "d000", ".", "d000" ],
+      [ ".", "^000", ".", ".000" ],
+      [ ".", "d000", ".", "d000"],
+      [ ".", ".", "." , "." ]
     ],
     [
-      [ ".", "r003", "r002" ],
-      [ ".", ".", "|000" ],
-      [ ".", ".", "|000" ],
-      [ ".", "r000", "r001" ]
+      [ ".", "d000", ".", "." ],
+      [ ".", ".000", ".", "d100" ],
+      [ ".", "d000", ".", "." ],
+      [ ".", ".", ".", "."  ]
     ],
   ];
 
