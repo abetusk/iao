@@ -179,6 +179,11 @@ let g_template = {
 
   // enpoints tell how we can connect to the other tiles
   //
+  // these are flush with the interface plane but in a rectangular pattern, so
+  // four points to an interface.
+  //
+  // The null ('.') and debug ('d') tiles don't have any interfaces
+  //
   "endpoint": {
     ".": [],
 
@@ -233,14 +238,17 @@ let g_template = {
       [  _g_w/2,  1/2 ,  1/2 - _g_h/2 ], [ -_g_w/2,  1/2 ,  1/2 - _g_h/2 ]
     ],
 
-    // wip
-    //
     "%": [
+
+      // front
+      //
       [  _g_w/2, -1/2 , -1/2 + _g_h/2 ], [ -_g_w/2, -1/2 , -1/2 + _g_h/2 ],
       [  _g_w/2, -1/2 , -1/2 - _g_h/2 ], [ -_g_w/2, -1/2 , -1/2 - _g_h/2 ],
 
-      [  _g_w/2,  1/2 ,  1/2 + _g_h/2 ], [ -_g_w/2,  1/2 ,  1/2 + _g_h/2 ],
-      [  _g_w/2,  1/2 ,  1/2 - _g_h/2 ], [ -_g_w/2,  1/2 ,  1/2 - _g_h/2 ]
+      // back top
+      //
+      [  _g_w/2,  1/2 + _g_h/2, 1/2 ], [ -_g_w/2, 1/2 + _g_h/2, 1/2 ],
+      [  _g_w/2,  1/2 - _g_h/2, 1/2 ], [ -_g_w/2, 1/2 - _g_h/2, 1/2 ]
     ],
 
   },
@@ -253,13 +261,10 @@ let g_template = {
     "+" : [ { "dv" : [0, 0, -1], "tile": "." } ],
     "T" : [ { "dv" : [0, 0, -1], "tile": "." } ],
     "^" : [ { "dv" : [0, 0, -1], "tile": "." }, { "dv": [0,0,1], "tile":"." } ],
-
-    // wip
-    //
-    "%" : [ { "dv" : [0, 0, -1], "tile": "." }, { "dv": [0,0,1], "tile":"." } ]
+    "%" : [ { "dv" : [0, 0, -1], "tile": "." }, { "dv": [0,1,0], "tile":"." } ]
   },
 
-  ":" : [],
+  //":" : [],
 
   // simple plane for debuging
   //
@@ -312,9 +317,6 @@ let g_template = {
   "^"   : [],
   "+"   : [],
   "T"   : [],
-
-  //wip
-  //
   "%" : []
 
 };
