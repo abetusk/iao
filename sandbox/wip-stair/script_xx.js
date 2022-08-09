@@ -2473,15 +2473,11 @@ function _build_tile_library( _endp_lib, _force_lib ) {
               if ((_anchor_force[ii].dv[0] == dx) &&
                   (_anchor_force[ii].dv[1] == dy) &&
                   (_anchor_force[ii].dv[2] == dz)) {
-
                 _skip_tile = true;
                 break;
               }
             }
-            if (_skip_tile) {
-              //console.log("skipping.0:", anchor_key, "-", test_key, "(", dx, dy, dz, ")");
-              continue;
-            }
+            if (_skip_tile) { continue; }
 
             // if the test tile has a blank tile forced in
             // the (0,0,0) (dv) position (our current center
@@ -2498,10 +2494,7 @@ function _build_tile_library( _endp_lib, _force_lib ) {
                 break;
               }
             }
-            if (_skip_tile) {
-              //console.log("skipping.1:", anchor_key, "-", test_key, "(", dx, dy, dz, ")");
-              continue;
-            }
+            if (_skip_tile) { continue; }
 
             //---
 
@@ -2516,21 +2509,8 @@ function _build_tile_library( _endp_lib, _force_lib ) {
               if (_anch_endp_pos >= 0) {
                 endp_count++;
                 endp_group = Math.floor(_anch_endp_pos/4);
-
-                /*
-                //DEBUG
-                if ((anchor_key == "|000") && (test_key == "r000")) {
-                  console.log("|000 - r000, tv:", tv, "_anch_endp_pos:", _anch_endp_pos, "g:", endp_group);
-                }
-                //DEBUG
-                if ((anchor_key == "|000") && (test_key == "|000")) {
-                  console.log("|000 - |000, tv:", tv, "_anch_endp_pos:", _anch_endp_pos, "g:", endp_group);
-                }
-                */
-
               }
 
-              //if (_v_in(tv, anch_endp)) { count++; }
             }
 
             if (endp_count==4) {
@@ -2540,17 +2520,6 @@ function _build_tile_library( _endp_lib, _force_lib ) {
               }
               tile_attach[anchor_key][test_key].dv.push( [dx, dy, dz ] );
               tile_attach[anchor_key][test_key].endpoint_group.push( endp_group );
-
-              /*
-                //DEBUG
-                if ((anchor_key == "|000") && (test_key == "r000")) {
-                  console.log("|000 - r000, dv:", dx,dy,dz, "g:", endp_group);
-                }
-                //DEBUG
-                if ((anchor_key == "|000") && (test_key == "|000")) {
-                  console.log("|000 - |000, dv:", dx,dy,dz, "g:", endp_group);
-                }
-                */
 
               dv_key = dx.toString() + ":" + dy.toString() + ":" + dz.toString();
               uniq_repr[anchor_key].attach_dv[ dv_key ] = [ dx, dy, dz ];
@@ -2593,9 +2562,26 @@ function grid_clear(gr) {
 
 // grid elements contain array of objects.
 // Each object:
-//   n          - tile name
+//   name       - tile name
 //   valid      - still a candidate
 //   processed  - processed or not
+//
+
+// This proceeds in steps
+// - First cull tiles on the edge.
+//   If tiles need a connection that's on the edge,
+//   it can never be satisfied so remove it
+// - Choose a tile to force
+//   This is some 'entropy' heuristic
+//   (currently min options > 1)
+// - Once this tile is forced, start a
+//   'needs_visit' structure that marks
+//   neighbors that need to be looked at to
+//   see if they still have valid tiles.
+//   For each position under consideration,
+//   each tile is made sure that it has neighbor
+//   tile options that can fill it's "endpoing group".
+//
 //
 
 function grid_cull_one(gr) {
@@ -2608,6 +2594,10 @@ function grid_cull_one(gr) {
   for (let z=0; z<gr.length; z++) {
     for (let y=0; y<gr[z].length; y++) {
       for (let x=0; x<gr[z][y].length; x++) {
+
+        if (gr[z][y][x].length==0) {
+          return {"status":"error", "state":"finished", "msg":"found 0 entries at " + _pos_keystr(x,y,z) };
+        }
 
         let idx=0;
         while (idx < gr[z][y][x].length) {
@@ -2662,13 +2652,8 @@ function grid_cull_one(gr) {
 
               let endpoint_group = ta_nei[key_nei].endpoint_group[ii];
 
-              //console.log("anch:", key_anchor, "nei:",
-              //  key_nei, "(x,y,z)", x,y,z, "(ux,uy,uz)", ux,uy,uz,
-              //  "keeping endpg", endpoint_group, "(dv:", _dv_a[ii][0], _dv_a[ii][1], _dv_a[ii][2], ")");
               endpoint_group_valid[endpoint_group] = true;
             }
-
-            //console.log("-");
 
           }
 
@@ -2680,11 +2665,16 @@ function grid_cull_one(gr) {
             }
           }
 
-          //console.log("cull?", x,y,z,"::",key_anchor, endpoint_group_valid, cull_tile);
-
           if (cull_tile) {
             gr[z][y][x][idx] = gr[z][y][x][ gr[z][y][x].length-1 ];
             gr[z][y][x].pop();
+
+            if (gr[z][y][x].length==0) {
+              return {"status":"error",
+                      "state":"finished",
+                      "msg":"found 0 entries at " + _pos_keystr(x,y,z) + " after culling edge tile " + key_anchor };
+            }
+
             continue;
           }
 
@@ -2695,21 +2685,15 @@ function grid_cull_one(gr) {
     }
   }
 
-  console.log("grid after edge cull");
-  console.log(">>>");
-  console.log(gr);
-  console.log(">>>");
+  //DEBUG
+  console.log("edge cull done");
 
-  return;
-
-
-  // create candidate list...
+  // create candidate to 'collapse' list...
   //
-
   // First generate whole list with all neighbors,
   // recording the minimum possible neighbor count.
   //
-  // primitive entropy (just take min neighbors)
+  // primitive entropy (just take min neighbors > 1)
   //
 
   let min_val = -1;
@@ -2721,6 +2705,10 @@ function grid_cull_one(gr) {
 
         let n_cand = gr[z][y][x].length;
 
+        // skip completel forced positions
+        //
+        if (n_cand == 1) { continue; }
+
         candidate_coord.push({ "x":x, "y":y, "z":z, "n":n_cand });
 
         if (min_val < 0) { min_val = n_cand; }
@@ -2730,6 +2718,11 @@ function grid_cull_one(gr) {
 
       }
     }
+  }
+
+  if (min_val==-1) {
+    console.log("FINISHED");
+    return { "status":"success", "state":"finished", "msg":"no more candidates found"};
   }
 
   // remove entries in candidate list that don't match the
@@ -2747,12 +2740,12 @@ function grid_cull_one(gr) {
     idx++;
   }
 
-  console.log("#candidates:", candidate_coord.length);
+  //console.log("#candidates:", candidate_coord.length, candidate_coord);
 
   let r_idx = Math.floor(fxrand()*candidate_coord.length);
   let r_ele = candidate_coord[r_idx];
 
-  console.log("grid_cull_one: min_val:", min_val, "::", r_ele.x, r_ele.y, r_ele.z, "... (r_idx:", r_idx, ")", candidate_coord);
+  //console.log("grid_cull_one: min_val:", min_val, "::", r_ele.x, r_ele.y, r_ele.z, "... (r_idx:", r_idx, ")", candidate_coord);
 
   // now that we have a candidate, choose it and go through forced
   // implication
@@ -2761,20 +2754,331 @@ function grid_cull_one(gr) {
   let cand_coord = gr[ r_ele.z ][ r_ele.y ][ r_ele.x ];
   let cand_coord_idx = Math.floor(fxrand()*cand_coord.length);
 
-  console.log(">>>>", cand_coord_idx, cand_coord[cand_coord_idx] );
-
-  //CURRENT POSITION
-  // - need to remove all non picked elements from gr
-  // - cull implied elements from neighbors
-  // - make sure to cull before too just in case
+  //console.log(">>>>", cand_coord_idx, cand_coord[cand_coord_idx] );
 
   // keep track of positions visited so we can check their neighbors
   //
-  let visited = {};
+  let needs_visit = {};
 
+  // remove all other tiles in the position where we've forced the pick
+  //
   gr[r_ele.z][r_ele.y][r_ele.x][0] = gr[r_ele.z][r_ele.y][r_ele.x][ cand_coord_idx ];
   let _popn = gr[r_ele.z][r_ele.y][r_ele.x].length-1;
   for (let i=0; i<_popn; i++) { gr[r_ele.z][r_ele.y][r_ele.x].pop(); }
+
+  let anchor_gr = gr[r_ele.z][r_ele.y][r_ele.x][0];
+  anchor_gr.processed=true;
+
+  console.log("COLLAPSING:", r_ele.x, r_ele.y, r_ele.z, gr[r_ele.z][r_ele.y][r_ele.x][0].name);
+
+  let _prop_ret = _prop_collapsed_grid_pos(gr, r_ele.x, r_ele.y, r_ele.z);
+
+  console.log("prop collapsed:", _prop_ret);
+  let _still_processing = false;
+  for (let _k in _prop_ret.needs_visit) {
+    let _p = _prop_ret.needs_visit[_k];
+
+    if (gr[_p[2]][_p[1]][_p[0]].length == 1) {
+      _still_processing =true;
+    }
+  }
+
+  while (_still_processing) {
+
+    let _nv = _prop_ret.needs_visit;
+
+    _still_processing= false;
+    for (let _k in _nv) {
+      let _p = _nv[_k];
+      let gr_ele = gr[_p[2]][_p[1]][_p[0]];
+
+      //console.log("????", _k, _p, gr_ele.length, gr
+
+      if ((gr_ele.length == 1) && (gr_ele[0].processed==false)) {
+
+        console.log("COLLAPSING...:", _p[0], _p[1], _p[2], gr[_p[2]][_p[1]][_p[0]][0].name);
+
+        _still_processing = true;
+        _prop_ret = _prop_collapsed_grid_pos(gr, _p[0], _p[1], _p[2]);
+        break;
+      }
+    }
+
+  }
+
+  console.log("**********");
+
+  /*
+  let key_anchor = gr[r_ele.z][r_ele.y][r_ele.x][0].name;
+
+  //DEBUG
+  console.log("forced", r_ele.x, r_ele.y, r_ele.z, key_anchor);
+
+  // create a lookup by position instead of by tile name
+  //
+  let tile_pos_attach = {};
+  for (let nei_key in tile_attach[key_anchor]) {
+    let dv = tile_attach[key_anchor][nei_key].dv;
+    let eg = tile_attach[key_anchor][nei_key].endpoint_group;
+    for (let ii=0; ii<dv.length; ii++) {
+      let _pk = _pos_keystr(dv[ii][0], dv[ii][1], dv[ii][2]);
+      if (!(_pk in tile_pos_attach)) {
+        tile_pos_attach[_pk] = { "endpoint_group": eg[ii], "tile_neighbor": {} };
+      }
+      tile_pos_attach[_pk].tile_neighbor[nei_key] = { "endpoint_group": eg[ii], "dv": dv, "nei" : nei_key };
+    }
+  }
+
+  console.log("tile_pos_attach(", key_anchor, "):");
+  console.log(tile_pos_attach);
+
+  console.log("BEFORE\n--------------")
+  debug_print_gr(gr);
+  console.log("--------------")
+
+
+  let cull_grid_pos = {};
+
+  // Since this tile is forced, we can look at the neighbors to make sure
+  // they're still valid
+  //
+  // mark all nearest neighbors to visit
+  //
+  for (let dx=-1; dx<2; dx++) {
+    for (let dy=-1; dy<2; dy++) {
+      for (let dz=-1; dz<2; dz++) {
+        if ((dx==0) && (dy==0) && (dz==0)) { continue; }
+        let ux = r_ele.x + dx;
+        let uy = r_ele.y + dy;
+        let uz = r_ele.z + dz;
+
+        if ((uz<0) || (uz>=gr.length) ||
+            (uy<0) || (uy>=gr[uz].length) ||
+            (ux<0) || (ux>=gr[uz][uy].length)) {
+          continue;
+        }
+        let _poskey = _pos_keystr(ux,uy,uz);
+        needs_visit[ _poskey ] = [ ux, uy, uz ];
+
+        let _dvp_key = _pos_keystr(dx,dy,dz);
+        if (_dvp_key in tile_pos_attach) {
+          for (let ii=0; ii<gr[uz][uy][ux].length; ii++) {
+            let nei_key = gr[uz][uy][ux][ii].name;
+
+            if (nei_key in tile_pos_attach[_dvp_key].tile_neighbor) {
+              //ok
+              console.log("should keep", ux,uy,uz, nei_key);
+            }
+            else {
+              console.log("should remove", ux,uy,uz, nei_key, "(dvp:", _dvp_key, ")");
+              gr[uz][uy][ux][ii].valid = false;
+              cull_grid_pos[_poskey] = [ux,uy,uz];
+            }
+          }
+        }
+
+      }
+    }
+  }
+
+
+  // take all marked tiles above and cull
+  //
+  for (let _poskey in cull_grid_pos) {
+    let p = cull_grid_pos[_poskey];
+    let _x = p[0],
+        _y = p[1],
+        _z = p[2];
+
+    let _ii=0;
+    while (_ii<gr[_z][_y][_x].length) {
+      if (gr[_z][_y][_x][_ii].valid) { _ii++; continue; }
+
+      let _v = gr[_z][_y][_x].pop();
+      if (gr[_z][_y][_x].length == 0) {
+        return { "status":"error", "state":"finished", "msg":"got 0 count in grid when force culling from key_anchor " + _poskey + " " + key_anchor };
+      }
+      if (_ii<gr[_z][_y][_x].length) {
+        gr[_z][_y][_x][_ii] = _v;
+      }
+
+      // mark surrounding neighbors for inspection
+      //
+      for (let dx=-1; dx<2; dx++) {
+        for (let dy=-1; dy<2; dy++) {
+          for (let dz=-1; dz<2; dz++) {
+            if ((dx==0) && (dy==0) && (dz==0)) { continue; }
+
+            let ux = _x + dx,
+                uy = _y + dy,
+                uz = _z + dz;
+
+            if ((uz<0) || (uz>=gr.length) ||
+                (uy<0) || (uy>=gr[uz].length) ||
+                (ux<0) || (ux>=gr[uz][uy].length)) {
+              continue;
+            }
+
+            let _pk = _pos_keystr(ux,uy,uz);
+            needs_visit[ _pk ] = [ ux, uy, uz ];
+
+          }
+        }
+      }
+
+
+    }
+  }
+  */
+
+  console.log("NOW\n--------------")
+  debug_print_gr(gr);
+  console.log("--------------")
+
+  //DEBUG
+  return { "status":"success", "state":"processing", "msg":"..." };
+
+  // CURRENT CHECKPOINT
+  // WIP
+  //
+
+  let n_remain = 0;
+  for (let _k in needs_visit) { n_remain++; }
+
+  while (n_remain>0) {
+
+    console.log("n_remain:", n_remain);
+   
+    let vk_pos = {};
+    for (vk_pos in needs_visit) { break; }
+
+    let v = needs_visit[vk_pos];
+    let x = v[0],
+        y = v[1],
+        z = v[2];
+
+    delete needs_visit[vk_pos];
+    n_remain=0;
+    for (let _k in needs_visit) { n_remain++; }
+
+    //---
+
+    console.log("considering", vk_pos, x,y,z, "(remain:", n_remain,")");
+
+    let gr_list = gr[z][y][x];
+
+    let idx = 0;
+    while (idx < gr_list.length) {
+      let key_anchor = gr_list[idx].name;
+
+      //console.log(">", x,y,z, "anch:", key_anchor, key_anchor in tile_attach);
+
+      if (!(key_anchor in tile_attach)) { idx++; continue; }
+      let ta_nei = tile_attach[key_anchor];
+
+      // first collect all endpoint_group
+      //
+      let endpoint_group_valid = [];
+      let n_endpoint_group = 0;
+      for (let key_nei in ta_nei) {
+        for (let i=0; i<ta_nei[key_nei].endpoint_group.length; i++) {
+          if (n_endpoint_group < ta_nei[key_nei].endpoint_group[i]) {
+            n_endpoint_group = ta_nei[key_nei].endpoint_group[i];
+          }
+        }
+      }
+      n_endpoint_group++;
+      for (let i=0; i<n_endpoint_group; i++) { endpoint_group_valid.push(false); }
+
+      for (let key_nei in ta_nei) {
+
+        let _dv_a = ta_nei[key_nei].dv;
+        for (let ii=0; ii<_dv_a.length; ii++) {
+          let ux = _dv_a[ii][0] + x;
+          let uy = _dv_a[ii][1] + y;
+          let uz = _dv_a[ii][2] + z;
+
+          // if a neighbor falls of the edge of the grid,
+          // it can never be realized so cull it.
+          //
+          if ((ux < 0) || (ux >= gr[z][y].length) ||
+              (uy < 0) || (uy >= gr[z].length) ||
+              (uz < 0) || (uz >= gr.length)) {
+            continue;
+          }
+
+          // check neighbor in grid to see if it connects,
+          // if so, mark the endpoint group as valid
+          //
+          for (let jj=0; jj<gr[uz][uy][ux].length; jj++) {
+            if (gr[uz][uy][ux][jj].name == key_nei) {
+              let endpoint_group = ta_nei[key_nei].endpoint_group[ii];
+              endpoint_group_valid[endpoint_group] = true;
+            }
+          }
+
+        }
+
+      }
+
+      //console.log("finished", key_anchor, "epgv:", endpoint_group_valid);
+
+      let cull_tile = false;
+      for (let ii=0; ii<endpoint_group_valid.length; ii++) {
+        if (!(endpoint_group_valid[ii])) {
+          cull_tile = true;
+          break;
+        }
+      }
+
+      if (cull_tile) {
+
+        console.log("cull_tile:", x,y,z, gr[z][y][x][idx]);
+
+        gr[z][y][x][idx] = gr[z][y][x][ gr[z][y][x].length-1 ];
+        gr[z][y][x].pop();
+
+        if (gr[z][y][x].length==0) {
+          return {"status":"error",
+                  "state":"finished",
+                  "msg":"found 0 entries at " + _pos_keystr(x,y,z) + " after culling " + key_anchor };
+        }
+
+
+        for (let dx=-1; dx<2; dx++) {
+          for (let dy=-1; dy<2; dy++) {
+            for (let dz=-1; dz<2; dz++) {
+              if ((dx==0) && (dy==0) && (dz==0)) { continue; }
+              let ux = x + dx;
+              let uy = y + dy;
+              let uz = z + dz;
+
+              if ((uz<0) || (uz>=gr.length) ||
+                  (uy<0) || (uy>=gr[uz].length) ||
+                  (ux<0) || (ux>=gr[uz][uy].length)) {
+                continue;
+              }
+              let _k = _pos_keystr(ux,uy,uz);
+              needs_visit[ _k ] = [ ux, uy, uz ];
+            }
+          }
+        }
+
+        n_remain=0;
+        for (let _k in needs_visit) { n_remain++; }
+
+        continue;
+      }
+
+      idx++;
+    }
+
+  }
+
+
+  console.log("...");
+  return { "status":"success", "state":"processing", "msg":"made progress, still needs more processing"};
+
 
   visited[ _pos_keystr(r_ele.x, r_ele.y, r_ele.z) ] = [ r_ele.x, r_ele.y, r_ele.z ];
 
@@ -2942,6 +3246,144 @@ function grid_cull_one(gr) {
 
 
 
+}
+
+function _prop_collapsed_grid_pos(gr, x, y, z) {
+
+  let _ret = {
+    "status": "fail",
+    "needs_visit": {},
+    "msg": ""
+  };
+
+  let needs_visit = _ret.needs_visit;
+  let tile_attach = g_template.tile_attach;
+
+  if (gr[z][y][x].length!=1) {
+    _ret.msg = "sanity error, _prop_collapsed_grid_pos expecting one element at ", x, y, z, "got", gr[z][y][x].length;
+    _ret.status = 'error';
+    return _ret;
+  }
+
+  let key_anchor = gr[z][y][x][0].name;
+  gr[z][y][x][0].processed=true;
+
+  // create a lookup by position instead of by tile name
+  //
+  let tile_pos_attach = {};
+  for (let nei_key in tile_attach[key_anchor]) {
+    let dv = tile_attach[key_anchor][nei_key].dv;
+    let eg = tile_attach[key_anchor][nei_key].endpoint_group;
+    for (let ii=0; ii<dv.length; ii++) {
+      let _pk = _pos_keystr(dv[ii][0], dv[ii][1], dv[ii][2]);
+      if (!(_pk in tile_pos_attach)) {
+        tile_pos_attach[_pk] = { "endpoint_group": eg[ii], "tile_neighbor": {} };
+      }
+      tile_pos_attach[_pk].tile_neighbor[nei_key] = { "endpoint_group": eg[ii], "dv": dv, "nei" : nei_key };
+    }
+  }
+  let cull_grid_pos = {};
+
+  // Since this tile is forced, we can look at the neighbors to make sure
+  // they're still valid.
+  //
+  // There are two major tests:
+  //
+  // * for each potential connecting tile for the collapsed tile, make sure it
+  //   has an actual valid entry in gr that can connect to it
+  // * for non-connecting interface to the collapsed tile, remove neighboring
+  //   tiles that require a connecting to the current grid position
+  //
+  // Additionally, mark all nearest neighbors to visit
+  //
+  for (let dx=-1; dx<2; dx++) {
+    for (let dy=-1; dy<2; dy++) {
+      for (let dz=-1; dz<2; dz++) {
+        if ((dx==0) && (dy==0) && (dz==0)) { continue; }
+        let ux = x + dx;
+        let uy = y + dy;
+        let uz = z + dz;
+
+        if ((uz<0) || (uz>=gr.length) ||
+            (uy<0) || (uy>=gr[uz].length) ||
+            (ux<0) || (ux>=gr[uz][uy].length)) {
+          continue;
+        }
+        let _poskey = _pos_keystr(ux,uy,uz);
+        needs_visit[ _poskey ] = [ ux, uy, uz ];
+
+        let _dvp_key = _pos_keystr(dx,dy,dz);
+        if (_dvp_key in tile_pos_attach) {
+          for (let ii=0; ii<gr[uz][uy][ux].length; ii++) {
+            let nei_key = gr[uz][uy][ux][ii].name;
+
+            if (nei_key in tile_pos_attach[_dvp_key].tile_neighbor) {
+              //ok
+              console.log("should keep", ux,uy,uz, nei_key);
+            }
+            else { 
+              console.log("should remove", ux,uy,uz, nei_key, "(dvp:", _dvp_key, ")");
+              gr[uz][uy][ux][ii].valid = false;
+              cull_grid_pos[_poskey] = [ux,uy,uz];
+            }
+          }
+        }
+  
+      }
+    }
+  }
+
+  // take all marked tiles above and cull
+  //
+  for (let _poskey in cull_grid_pos) {
+    let p = cull_grid_pos[_poskey];
+    let _x = p[0],
+        _y = p[1],
+        _z = p[2];
+
+    let _ii=0;
+    while (_ii<gr[_z][_y][_x].length) {
+      if (gr[_z][_y][_x][_ii].valid) { _ii++; continue; }
+
+      let _v = gr[_z][_y][_x].pop();
+      if (gr[_z][_y][_x].length == 0) {
+        return {  "status":"error",
+                  "state":"finished",
+                  "msg":"got 0 count in grid when force culling from key_anchor " + _poskey + " " + key_anchor };
+      }
+      if (_ii<gr[_z][_y][_x].length) {
+        gr[_z][_y][_x][_ii] = _v;
+      }
+
+      // mark surrounding neighbors for inspection
+      //  
+      for (let dx=-1; dx<2; dx++) {
+        for (let dy=-1; dy<2; dy++) {
+          for (let dz=-1; dz<2; dz++) {
+            if ((dx==0) && (dy==0) && (dz==0)) { continue; }
+
+            let ux = _x + dx,
+                uy = _y + dy,
+                uz = _z + dz;
+
+            if ((uz<0) || (uz>=gr.length) ||
+                (uy<0) || (uy>=gr[uz].length) ||
+                (ux<0) || (ux>=gr[uz][uy].length)) {
+              continue;
+            }
+
+            let _pk = _pos_keystr(ux,uy,uz);
+            needs_visit[ _pk ] = [ ux, uy, uz ];
+
+          }
+        }
+      }
+
+    }
+  }
+
+  _ret.status = "success";
+  return _ret;
 }
 
 function _gen_debug_name_list(gr_list) {
@@ -3413,7 +3855,7 @@ function debug_print_gr(gr) {
           let sfx = (gr[z][y][x][ii].processed ? '*' : '');
           if (valid_count>0) { u += ","; }
           //u += ',' + gr[z][y][x][ii].n + sfx;
-          u += gr[z][y][x][ii].n + sfx;
+          u += gr[z][y][x][ii].name + sfx;
           valid_count++;
         }
 
@@ -3481,8 +3923,19 @@ function grid_wfc(gr) {
     grid_clear(gr);
     let r = grid_cull_one(gr);
 
+    console.log("GOT>>>", r);
+    console.log("grid:\n>>>>>>>>>>>>");
+    debug_print_gr(gr);
+    console.log(">>>>>>>>>>>>");
+
+    if (r.state == "finished") { break; }
+    continue;
+
     //DEBUG
     r = grid_cull_one(gr);
+    r = grid_cull_one(gr);
+    r = grid_cull_one(gr);
+
     break;
 
     if (r.finished) {
@@ -3541,7 +3994,7 @@ function _init() {
   let pgr = [];
 
   //let pgr_dim = [5,5,5];
-  let pgr_dim = [4,3,1];
+  let pgr_dim = [2,2,1];
   for (let z=0; z<pgr_dim[2]; z++) {
     pgr.push([]);
     for (let y=0; y<pgr_dim[1]; y++) {
