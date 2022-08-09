@@ -2902,6 +2902,7 @@ function grid_cull_one(gr) {
                     "msg":"found 0 entries at " + _pos_keystr(_x,_y,_z) + " after culling " + key_anchor };
           }
 
+          needs_visit_next[ _pos_keystr(_x,_y,_z) ] = [ _x, _y, _z ];
 
           for (let dx=-1; dx<2; dx++) {
             for (let dy=-1; dy<2; dy++) {
@@ -3353,9 +3354,20 @@ function _prop_collapsed_grid_pos(gr, x, y, z) {
         tile_pos_attach[_pk] = { "endpoint_group": eg[ii], "tile_neighbor": {} };
       }
       tile_pos_attach[_pk].tile_neighbor[nei_key] = { "endpoint_group": eg[ii], "dv": dv, "nei" : nei_key };
+
     }
   }
+
+  let endpoint_group_count = {};
+  for (let dv_key in tile_pos_attach) {
+    let eg = tile_pos_attach[dv_key].endpoint_group;
+    if (!(eg in endpoint_group_count)) { endpoint_group_count[eg] = 0; }
+    endpoint_group_count[eg]++;
+  }
+
   let cull_grid_pos = {};
+
+  console.log(key_anchor, "tile_pos_attach:", tile_pos_attach, endpoint_group_count);
 
   // Since this tile is forced, we can look at the neighbors to make sure
   // they're still valid.
@@ -3395,9 +3407,15 @@ function _prop_collapsed_grid_pos(gr, x, y, z) {
               console.log("should keep", ux,uy,uz, nei_key);
             }
             else { 
-              console.log("should remove", ux,uy,uz, nei_key, "(dvp:", _dvp_key, ")");
-              gr[uz][uy][ux][ii].valid = false;
-              cull_grid_pos[_poskey] = [ux,uy,uz];
+
+              // THIS STILL NEEDS WORK
+
+              if (endpoint_group_count[ tile_pos_attach[_dvp_key].endpoint_group ]==1) {
+                console.log("should remove", ux,uy,uz, nei_key, "(dvp:", _dvp_key, ",", key_anchor, ")");
+                gr[uz][uy][ux][ii].valid = false;
+                cull_grid_pos[_poskey] = [ux,uy,uz];
+              }
+
             }
           }
         }
@@ -3990,6 +4008,9 @@ function grid_wfc(gr) {
 
   let debug_count = 0;
 
+  let n_iter = 8;
+  let iter = 0;
+
   let culling = true;
   while (culling) {
     xxx++;
@@ -4002,6 +4023,9 @@ function grid_wfc(gr) {
     console.log(">>>>>>>>>>>>");
 
     if (r.state == "finished") { break; }
+
+    iter++;
+    if (iter>=n_iter) { break; }
     continue;
 
     //DEBUG
@@ -4093,6 +4117,9 @@ function _init() {
   let _r = grid_wfc(pgr);
   console.log(">>", _r, pgr);
   g_template["debug"] = pgr;
+
+  realize_tri_from_sp_grid(pgr);
+  return;
 
 
   let gr = [
@@ -4319,8 +4346,65 @@ function _init() {
 
   //gr = [ [ [ "r003", "T022", "r021" ] ] ];
 
-  g_info.debug = gr;
+  //realize_tri_from_grid(gr);
+  realize_tri_from_sp_grid(pgr);
 
+  /*
+  g_info.debug = gr;
+  g_info.data.tri = [];
+
+  let S = 60;
+  let tx = g_info.cx,
+      ty = g_info.cy,
+      tz = g_info.cz;
+
+  for (let zidx=0; zidx<gr.length; zidx++) {
+    for (let yidx=0; yidx<gr[zidx].length; yidx++) {
+      for (let xidx=0; xidx<gr[zidx][yidx].length; xidx++) {
+        let u = gr[zidx][yidx][xidx];
+        let template_u = u[0];
+        if (template_u == '.') { continue; }
+
+        let ent = g_template.rot_lib[u];
+
+        //rot_lib[ukey] = { "m": [mx, my, mz], "r": [xidx, yidx, zidx ] };
+
+        let _rx = Math.PI*ent.r[0]/2;
+        let _ry = Math.PI*ent.r[1]/2;
+        let _rz = Math.PI*ent.r[2]/2;
+
+        let _tri = _template_rot_mov(g_template[template_u], _rx, _ry, _rz, xidx, yidx, zidx);
+        _p_mul_mov(_tri, S, tx, ty, tz);
+        g_info.data.tri.push(_tri);
+
+
+        if (g_info.debug_level > 3) {
+          console.log(u, template_u);
+        }
+      }
+    }
+  }
+  */
+
+  /*
+  let ok = _template_rot_mov(g_template["|"], 0, 0, 0, 0, 0, 0);
+  let ok1 = _template_rot_mov(g_template["|"], 0, 0, 0, 0, 1, 0);
+  let ok2 = _template_rot_mov(g_template["|"], Math.PI, 0, Math.PI/2, 0, 2, 0);
+
+  _p_mul_mov(ok, 40, tx, ty, tz);
+  _p_mul_mov(ok1, 40, tx, ty, tz);
+  _p_mul_mov(ok2, 40, tx, ty, tz);
+
+  g_info.data.tri = [ ok, ok1, ok2 ];
+  */
+
+  //---
+
+
+}
+
+function realize_tri_from_grid(gr) {
+  g_info.debug = gr;
   g_info.data.tri = [];
 
   let S = 60;
@@ -4355,19 +4439,74 @@ function _init() {
     }
   }
 
-  /*
-  let ok = _template_rot_mov(g_template["|"], 0, 0, 0, 0, 0, 0);
-  let ok1 = _template_rot_mov(g_template["|"], 0, 0, 0, 0, 1, 0);
-  let ok2 = _template_rot_mov(g_template["|"], Math.PI, 0, Math.PI/2, 0, 2, 0);
 
-  _p_mul_mov(ok, 40, tx, ty, tz);
-  _p_mul_mov(ok1, 40, tx, ty, tz);
-  _p_mul_mov(ok2, 40, tx, ty, tz);
+}
 
-  g_info.data.tri = [ ok, ok1, ok2 ];
-  */
+function realize_tri_from_sp_grid(gr) {
+  g_info.debug = gr;
+  g_info.data.tri = [];
 
-  //---
+  //let S = 60;
+  let S = 160;
+  let tx = g_info.cx,
+      ty = g_info.cy,
+      tz = g_info.cz;
+
+  for (let zidx=0; zidx<gr.length; zidx++) {
+    for (let yidx=0; yidx<gr[zidx].length; yidx++) {
+      for (let xidx=0; xidx<gr[zidx][yidx].length; xidx++) {
+
+        let m = gr[zidx][yidx][xidx].length;
+        let _fac = Math.pow( (1/3), Math.floor(m/27)+1 );
+
+        for (let cidx=0; cidx<m; cidx++) {
+          let u = gr[zidx][yidx][xidx][cidx].name;
+          let template_u = u.charAt(0);
+          if (template_u == '.') { continue; }
+
+          let _f = 0.125;
+
+          let __x = fxrand()*_f;
+          let __y = fxrand()*_f;
+          let __z = fxrand()*_f;
+          __x = 0;
+          __y = 0;
+          __z = 0;
+
+          let dx = _f*(cidx%3) + __x;
+          let dy = _f*(Math.floor(cidx/3)%3) + __y;
+          let dz = _f*(Math.floor(cidx/9)%3) + __z;
+
+
+          let ent = g_template.rot_lib[u];
+
+          //console.log("u?", u, template_u, ent);
+
+          //rot_lib[ukey] = { "m": [mx, my, mz], "r": [xidx, yidx, zidx ] };
+
+          let _rx = Math.PI*ent.r[0]/2;
+          let _ry = Math.PI*ent.r[1]/2;
+          let _rz = Math.PI*ent.r[2]/2;
+
+          let tu = [];
+          for (let ii=0; ii<g_template[template_u].length; ii++) {
+            tu.push( g_template[template_u][ii] );
+          }
+          let vv = _p_mul_mov(tu, _fac, dx, dy, dz);
+
+          //let _tri = _template_rot_mov(g_template[template_u], _rx, _ry, _rz, xidx, yidx, zidx);
+          let _tri = _template_rot_mov(vv, _rx, _ry, _rz, xidx, yidx, zidx);
+          _p_mul_mov(_tri, S, tx + dx, ty + dy, tz + dz);
+          g_info.data.tri.push(_tri);
+
+
+          if (g_info.debug_level > 3) {
+            console.log(u, template_u);
+          }
+        }
+      }
+    }
+  }
 
 
 }
