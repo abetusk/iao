@@ -2383,6 +2383,12 @@ function _build_tile_library( _endp_lib, _force_lib ) {
   //
   let _repr_map = {};
 
+  // *all* admissible nieghbors
+  //
+  let admissible_tile_pos = {};
+  let admissible_pos_tile = {};
+  let admissible_nei = {};
+
   for (let pkey in _endp_lib) {
 
     let _endp = _endp_lib[pkey];
@@ -2590,6 +2596,172 @@ function _build_tile_library( _endp_lib, _force_lib ) {
     uniq_repr[key].n_endpoint_group = n_endpoint_group;
   }
 
+  let admissible_pos = [
+    { "dv_key" : "-1:0:0" , "dv": [-1,  0,  0] },
+    { "dv_key" : "1:0:0"  , "dv": [ 1,  0,  0] },
+
+    { "dv_key" : "0:-1:0" , "dv": [ 0, -1,  0] },
+    { "dv_key" : "0:1:0"  , "dv": [ 0,  1,  0] },
+
+    { "dv_key" : "0:0:-1" , "dv": [ 0,  0, -1] },
+    { "dv_key" : "0:0:1"  , "dv": [ 0,  0,  1] }
+  ];
+
+  let oppo = {
+    "-1:0:0" :  "1:0:0",
+    "1:0:0"  : "-1:0:0",
+
+    "0:-1:0" :  "0:1:0",
+    "0:1:0"  : "0:-1:0",
+
+    "0:0:-1" : "0:0:1",
+    "0:0:1"  : "0:0:-1"
+  }
+
+  /*
+  for (let key_anchor in uniq_repr) {
+    admissible_nei[key_anchor] = {
+      "tile": {},
+      "pos": {}
+    };
+
+    for (let ii=0; ii<admissible_pos.length; ii++) {
+      let dv_key = admissible_pos[ii].dv_key;
+      admissible_nei[key_anchor].pos[dv_key] = { "tile":{}, "dv": admissible_pos[ii].dv };
+    }
+
+    //for (let key_nei in uniq_repr) {
+    //  admissible_nei[ key_anchor ].tile[ key_nei ] = { "dv_key": [], "dv": [], "conn": [] };
+    //}
+
+  }
+  */
+
+  /*
+  // special processing for blank tiles
+  //
+  for (let ii=0; ii<admissible_pos.length; ii++) {
+    let dv_key = admissible_pos[ii].dv_key;
+    let dv = admissible_pos[ii].dv;
+    admissible_nei[".000"].pos[ dv_key ].tile[".000"] = {"conn": false, "dv":dv };
+    admissible_nei[".000"].pos[ dv_key ].tile["d000"] = {"conn": false, "dv":dv };
+    admissible_nei["d000"].pos[ dv_key ].tile[".000"] = {"conn": false, "dv":dv };
+    admissible_nei["d000"].pos[ dv_key ].tile["d000"] = {"conn": false, "dv":dv };
+
+    if (!(".000" in admissible_nei[".000"].tile)) {
+      admissible_nei[".000"].tile[".000"] = { "dv_key" : [], "dv": [], "conn": [] };
+      admissible_nei[".000"].tile["d000"] = { "dv_key" : [], "dv": [], "conn": [] };
+      admissible_nei["d000"].tile[".000"] = { "dv_key" : [], "dv": [], "conn": [] };
+      admissible_nei["d000"].tile["d000"] = { "dv_key" : [], "dv": [], "conn": [] };
+    }
+    admissible_nei[".000"].tile[".000"].dv_key.push(dv_key);
+    admissible_nei[".000"].tile[".000"].dv.push(dv);
+    admissible_nei[".000"].tile[".000"].conn.push(false);
+
+    admissible_nei[".000"].tile["d000"].dv_key.push(dv_key);
+    admissible_nei[".000"].tile["d000"].dv.push(dv);
+    admissible_nei[".000"].tile["d000"].conn.push(false);
+
+    admissible_nei["d000"].tile[".000"].dv_key.push(dv_key);
+    admissible_nei["d000"].tile[".000"].dv.push(dv);
+    admissible_nei["d000"].tile[".000"].conn.push(false);
+
+    admissible_nei["d000"].tile["d000"].dv_key.push(dv_key);
+    admissible_nei["d000"].tile["d000"].dv.push(dv);
+    admissible_nei["d000"].tile["d000"].conn.push(false);
+  }
+  */
+
+  //WIP
+
+  // tile_attach only has actual connections
+  // use it to fill out the admissible_attach
+  // hash with *all* valid neighboring tile pairs
+  //
+  for (let key_anchor in uniq_repr) {
+
+    if (!(key_anchor in admissible_nei)) {
+      admissible_nei[key_anchor] = {};
+    }
+
+    for (let key_nei in uniq_repr) {
+
+      if (!(key_nei in admissible_nei)) {
+        admissible_nei[key_nei] = {};
+      }
+
+      for (let ii=0; ii<admissible_pos.length; ii++) {
+        let dv_anch = admissible_pos[ii].dv_key;
+        let dv_nei = oppo[dv_anch];
+
+        if ((dv_anch in uniq_repr[key_anchor].pos_tile_attach) &&
+            (dv_nei  in uniq_repr[key_nei].pos_tile_attach)) {
+          if (key_nei in uniq_repr[key_anchor].pos_tile_attach[dv_anch]) {
+
+            if (!(key_nei in admissible_nei[key_anchor])) {
+              admissible_nei[key_anchor][key_nei] = {};
+            }
+            if (!(dv_anch in admissible_nei[key_anchor][key_nei])) {
+              admissible_nei[key_anchor][key_nei][dv_anch] = {};
+            }
+            if (!(dv_anch in admissible_nei[key_anchor])) {
+              admissible_nei[key_anchor][dv_anch] = {};
+            }
+
+
+            if (!(key_anchor in admissible_nei[key_nei])) {
+              admissible_nei[key_nei][key_anchor] = {};
+            }
+            if (!(key_anchor in admissible_nei[key_nei][key_anchor])) {
+              admissible_nei[key_nei][key_anchor][dv_nei] = {};
+            }
+            if (!(dv_nei in admissible_nei[key_nei])) {
+              admissible_nei[key_nei][dv_nei] = {};
+            }
+
+
+            admissible_nei[key_anchor][key_nei][dv_anch] = {"conn": true};
+            admissible_nei[key_nei][key_anchor][dv_nei] = {"conn": true};
+
+            admissible_nei[key_anchor][dv_anch][key_nei] = {"conn": true};
+            admissible_nei[key_nei][dv_nei][key_anchor] = {"conn": true};
+          }
+        }
+
+        if ((!(dv_anch in uniq_repr[key_anchor].pos_tile_attach)) &&
+            (!(dv_nei  in uniq_repr[key_nei].pos_tile_attach))) {
+
+          if (!(key_nei in admissible_nei[key_anchor])) {
+            admissible_nei[key_anchor][key_nei] = {};
+          }
+          if (!(dv_anch in admissible_nei[key_anchor][key_nei])) {
+            admissible_nei[key_anchor][key_nei][dv_anch] = {};
+          }
+          if (!(dv_anch in admissible_nei[key_anchor])) {
+            admissible_nei[key_anchor][dv_anch] = {};
+          }
+
+          if (!(key_anchor in admissible_nei[key_nei])) {
+            admissible_nei[key_nei][key_anchor] = {};
+          }
+          if (!(key_anchor in admissible_nei[key_nei][key_anchor])) {
+            admissible_nei[key_nei][key_anchor][dv_nei] = {};
+          }
+          if (!(dv_nei in admissible_nei[key_nei])) {
+            admissible_nei[key_nei][dv_nei] = {};
+          }
+
+          admissible_nei[key_anchor][key_nei][dv_anch] = {"conn": false};
+          admissible_nei[key_nei][key_anchor][dv_nei] = {"conn": false};
+
+          admissible_nei[key_anchor][dv_anch][key_nei] = {"conn": false};
+          admissible_nei[key_nei][dv_nei][key_anchor] = {"conn": false};
+        }
+
+      }
+
+    }
+  }
 
   g_template["raw_lib"] = raw_lib;
   g_template["equiv_map"] = _equiv_map;
@@ -2597,6 +2769,8 @@ function _build_tile_library( _endp_lib, _force_lib ) {
   g_template["uniq_repr"] = uniq_repr;
   g_template["tile_attach"] = tile_attach;
   g_template["rot_lib"] = rot_lib;
+
+  g_template["admissible_nei"] = admissible_nei;
 
 }
 
@@ -2644,6 +2818,120 @@ function grid_clear(gr) {
 //
 
 function grid_cull_boundary(gr) {
+
+  // cull edge
+  //
+
+  let admissible_nei = g_template.admissible_nei;
+
+  let admissible_pos = [
+    { "dv_key" : "-1:0:0" , "dv": [-1,  0,  0] },
+    { "dv_key" : "1:0:0"  , "dv": [ 1,  0,  0] },
+
+    { "dv_key" : "0:-1:0" , "dv": [ 0, -1,  0] },
+    { "dv_key" : "0:1:0"  , "dv": [ 0,  1,  0] },
+
+    { "dv_key" : "0:0:-1" , "dv": [ 0,  0, -1] },
+    { "dv_key" : "0:0:1"  , "dv": [ 0,  0,  1] }
+  ];
+
+  let oppo = {
+    "-1:0:0" :  "1:0:0",
+    "1:0:0"  : "-1:0:0",
+
+    "0:-1:0" :  "0:1:0",
+    "0:1:0"  : "0:-1:0",
+
+    "0:0:-1" : "0:0:1",
+    "0:0:1"  : "0:0:-1"
+  }
+
+
+  for (let z=0; z<gr.length; z++) {
+    for (let y=0; y<gr[z].length; y++) {
+      for (let x=0; x<gr[z][y].length; x++) {
+
+        if ((x>0) && (x<(gr[z][y].length-1)) &&
+            (y>0) && (y<(gr[z].length-1)) &&
+            (z>0) && (z<(gr.length-1))) {
+          continue;
+        }
+
+        if (gr[z][y][x].length==0) {
+          return {"status":"error", "state":"finished", "msg":"found 0 entries at " + _pos_keystr(x,y,z) };
+        }
+
+        let idx=0;
+        while (idx < gr[z][y][x].length) {
+
+          let key_anchor = gr[z][y][x][idx].name;
+
+          // each 'key_anchor' has attach points grouped in
+          // 'endpoint_group'.
+          // If a key_anchor can't satisfy the endpoint_group,
+          // because it's near the boundary, it can be culled.
+          //
+
+          let cull_tile = false;
+
+          for (let apos_idx=0; apos_idx<admissible_pos.length; apos_idx++) {
+            let dv_key = admissible_pos[apos_idx].dv_key;
+            let dv = admissible_pos[apos_idx].dv;
+
+            let ux = dv[0] + x;
+            let uy = dv[1] + y;
+            let uz = dv[2] + z;
+
+            let nei_oob = false;
+            if ((ux < 0) || (ux >= gr[z][y].length) ||
+                (uy < 0) || (uy >= gr[z].length) ||
+                (uz < 0) || (uz >= gr.length)) {
+              nei_oob = true;
+            }
+            if (!nei_oob) { continue; }
+
+
+            if (!(dv_key in admissible_nei[key_anchor])) { continue; }
+
+            for (let key_nei in admissible_nei[key_anchor][dv_key]) {
+              if (cull_tile) { break; }
+              if (admissible_nei[key_anchor][dv_key][key_nei].conn) {
+                cull_tile = true;
+              }
+            }
+
+            if (cull_tile) { break; }
+          }
+
+          if (cull_tile) {
+            gr[z][y][x][idx] = gr[z][y][x][ gr[z][y][x].length-1 ];
+            gr[z][y][x].pop();
+
+            if (gr[z][y][x].length==0) {
+              return {"status":"error",
+                      "state":"finished",
+                      "msg":"found 0 entries at " + _pos_keystr(x,y,z) + " after culling edge tile " + key_anchor };
+            }
+
+            continue;
+          }
+
+          idx++;
+        }
+
+      }
+    }
+  }
+
+  //DEBUG
+  console.log("edge cull done");
+
+  return {"status":"success",
+          "state":"processing",
+          "msg":"boundary cull"};
+}
+
+function _grid_cull_boundary(gr) {
 
   // cull edge
   //
@@ -2969,21 +3257,9 @@ function grid_cull_propagate(gr, debug) {
   let tile_attach = g_template.tile_attach;
   let uniq_repr = g_template.uniq_repr;
 
-  let new_needs_visit = {};
-
-  for (let z=0; z<gr.length; z++) {
-    for (let y=0; y<gr[z].length; y++) {
-      for (let x=0; x<gr[z][y].length; x++) {
-        let pkey = _pos_keystr(x,y,z);
-        new_needs_visit[pkey] = [x,y,z];
-      }
-    }
-  }
-
   let still_processing = true;
   while (still_processing) {
 
-    let needs_visit = new_needs_visit;
     still_processing = false;
 
     let _rrp = _grid_cull_remove_invalid(gr);
@@ -2993,12 +3269,204 @@ function grid_cull_propagate(gr, debug) {
       continue;
     }
 
-    for (let pkey in needs_visit) {
+    // count incoming vs outgouing connections for each
+    // cell position.
+    // If a cell position has 0 outgoing but non-zero incoming
+    // or non-zero outging but zero incoming,
+    // we can cull one or the other.
+    //
+    for (let z=0; z<gr.length; z++) {
+      for (let y=0; y<gr[z].length; y++) {
+        for (let x=0; x<gr[z][y].length; x++) {
 
-      let p = needs_visit[pkey];
-      let _x = p[0],
-          _y = p[1],
-          _z = p[2];
+          let nei_dv_a = [
+            [-1,  0,  0], [ 1,  0,  0],
+            [ 0, -1,  0], [ 0,  1,  0],
+            [ 0,  0, -1], [ 0,  0,  1] ];
+
+          let out_conn = [0,0,0,0,0,0];
+          let in_conn  = [0,0,0,0,0,0];
+
+          let dv_key_idx = {
+            "-1:0:0"  : 0,
+            "1:0:0"   : 1,
+            "0:-1:0"  : 2,
+            "0:1:0"   : 3,
+            "0:0:-1"  : 4,
+            "0:0:1"   : 5
+          };
+
+          let gr_cell_anchor = gr[z][y][x];
+          for (let idx0=0; idx0<gr_cell_anchor.length; idx0++) {
+            let key_anchor = gr_cell_anchor[idx0].name;
+            let uniq_ele = uniq_repr[key_anchor];
+            for (let dv_key in uniq_ele.pos_tile_attach) {
+              out_conn[ dv_key_idx[dv_key] ]++;
+            }
+          }
+
+          for (let dv_idx=0; dv_idx<nei_dv_a.length; dv_idx++) {
+            let dv = nei_dv_a[dv_idx];
+
+            let ux = x + dv[0],
+                uy = y + dv[1],
+                uz = z + dv[2];
+
+            if ((uz < 0) || (uz >= gr.length) ||
+                (uy < 0) || (uy >= gr[z].length) ||
+                (ux < 0) || (ux >= gr[z][y].length)) {
+              continue;
+            }
+
+            let gr_cell_nei = gr[uz][uy][ux];
+            for (let idx1=0; idx1<gr_cell_nei.length; idx1++) {
+              let key_nei = gr[uz][uy][ux][idx1].name;
+              let uniq_ele = uniq_repr[key_nei];
+              for (let dv_key in uniq_ele.attach_dv) {
+                let nei_dv = uniq_ele.attach_dv[dv_key];
+                if ((nei_dv[0] == -dv[0]) && (nei_dv[1] == -dv[1]) && (nei_dv[2] == -dv[2])) {
+                  in_conn[dv_idx]++;
+                }
+              }
+
+            }
+
+          }
+
+          let cull_incoming_dv_idx = [];
+          let cull_outgoing_dv_idx = [];
+
+          for (let ii=0; ii<out_conn.length; ii++) {
+            let dv = nei_dv_a[ii];
+
+            if ((out_conn[ii] == 0) && (in_conn[ii] > 0)) {
+              cull_incoming_dv_idx.push(ii);
+            }
+            
+            if ((out_conn[ii] > 0) && (in_conn[ii] == 0)) {
+              cull_outgoing_dv_idx.push(ii);
+            }
+            
+          }
+
+          for (let ii=0; ii<cull_incoming_dv_idx.length; ii++) {
+            let dv_idx = cull_incoming_dv_idx[ii];
+            let dv = nei_dv_a[dv_idx]
+            let dv_key = _pos_keystr(dv[0], dv[1], dv[2]);
+            let ux = dv[0] + x,
+                uy = dv[1] + y,
+                uz = dv[2] + z;
+            let gr_cell_nei = gr[uz][uy][ux];
+            for (let jj=0; jj<gr_cell_nei.length; jj++) {
+              if (dv_key in uniq_repr[gr_cell_nei[jj].name].attach_dv) {
+                gr_cell_nei[jj].valid = false;
+
+                if (debug) {
+                  console.log("CULL.n2a:", gr_cell_nei[jj].name, "@(", ux, uy, uz, ") has connection to anchor pos", x, y, z, " but no anchor tile has connection to receive it");
+                }
+
+                still_processing = true;
+              }
+            }
+          }
+
+          for (let ii=0; ii<cull_outgoing_dv_idx.length; ii++) {
+            let dv_idx = cull_outgoing_dv_idx[ii];
+            let dv = nei_dv_a[dv_idx]
+            let dv_key = _pos_keystr(dv[0], dv[1], dv[2]);
+
+            let ux = x + dv[0],
+                uy = y + dv[1],
+                uz = z + dv[2];
+            for (let jj=0; jj<gr_cell_anchor.length; jj++) {
+              if (dv_key in uniq_repr[gr_cell_anchor[jj].name].attach_dv) {
+                gr_cell_anchor[jj].valid = false;
+
+                if (debug) {
+                  console.log("CULL.a2n:", gr_cell_anchor[jj].name, "@(", x, y, z, ") has outgoing conn to (", ux, uy, uz, ") but no neighbor to receive it");
+                }
+
+                still_processing = true;
+              }
+            }
+          }
+
+        }
+      }
+    }
+
+    if (still_processing) { continue; }
+
+    // check to make sure every tile has a potential
+    // connection to a neighboring cell
+    //
+    for (let z=0; z<gr.length; z++) {
+      for (let y=0; y<gr[z].length; y++) {
+        for (let x=0; x<gr[z][y].length; x++) {
+
+          let gr_cell_anchor = gr[z][y][x];
+          for (let idx=0; idx<gr_cell_anchor.length; idx++) {
+            let key_anchor = gr_cell_anchor[idx].name;
+            let uniq_ele = uniq_repr[key_anchor];
+
+
+            if ((key_anchor.charAt(0) == '.') || (key_anchor.charAt(0) == 'd')) {
+              continue;
+            }
+
+            for (let dv_key in uniq_ele.pos_tile_attach) {
+              let dv = uniq_ele.attach_dv[dv_key];
+
+              let ux = x+dv[0],
+                  uy = y+dv[1],
+                  uz = z+dv[2];
+
+              if ((uz < 0) || (uz >= gr.length) ||
+                  (uy < 0) || (uy >= gr[z].length) ||
+                  (ux < 0) || (ux >= gr[z][y].length)) {
+                continue;
+              }
+
+              let conn_found = false;
+
+              let gr_cell_nei = gr[uz][uy][ux];
+              for (let nei_idx=0; nei_idx<gr_cell_nei.length; nei_idx++) {
+                let nei_name = gr_cell_nei[nei_idx].name;
+
+                if (nei_name in uniq_ele.pos_tile_attach[dv_key]) {
+                  conn_found = true;
+                  break;
+                }
+
+              }
+
+              if (!conn_found) {
+
+                if (debug) {
+                  console.log("CULL.vn: no valid neighbor for tile", key_anchor, x,y,z, "dv(", dv_key, ") -> (", ux, uy, uz, ")");
+                }
+
+                gr[z][y][x][idx].valid = false;
+                still_processing=true;
+
+              }
+
+            }
+          }
+
+
+        }
+      }
+    }
+
+    if (still_processing) { continue; }
+
+
+    /*
+
+    for (let _z=0; _z<gr.length; _z++) for (let _y=0; _y<gr[_z].length; _y++) for (let _x=0; _x<gr[_z][_y].length; _x++) {
+
+      pkey = _pos_keystr(_x,_y,_z);
 
       let gr_cell = gr[_z][_y][_x];
       if (gr_cell.length == 0) {
@@ -3073,7 +3541,7 @@ function grid_cull_propagate(gr, debug) {
               console.log("CULL.0", gr_cell[idx].name, "@(", _x, _y, _z, ")");
             }
 
-            new_needs_visit[ _pos_keystr(_x, _y, _z) ] = [_x, _y, _z];
+            //new_needs_visit[ _pos_keystr(_x, _y, _z) ] = [_x, _y, _z];
             break;
           }
         }
@@ -3087,22 +3555,14 @@ function grid_cull_propagate(gr, debug) {
 
     }
 
-    //---
-
     if (still_processing) { continue; }
 
+    */
+    //---
 
-    /*
+
     // propagate single cells
     //
-    for (let pkey in needs_visit) {
-      //let p = needs_visit[pkey];
-      let _x = p[0],
-          _y = p[1],
-          _z = p[2];
-
-    */
-
     for (_z=0; _z<gr.length; _z++) for (_y=0; _y<gr[_z].length; _y++) for (_x=0; _x<gr[_z][_y].length; _x++) {
       let pkey = _pos_keystr(_x, _y, _z);
 
@@ -3110,7 +3570,7 @@ function grid_cull_propagate(gr, debug) {
 
       let gr_cell = gr[_z][_y][_x];
       if (gr_cell.length == 0) {
-        return { "status":"error", "state":"finished", "msg":"0 length cell at " + _nvk };
+        return { "status":"error", "state":"finished", "msg":"0 length cell at " + pkey };
       }
 
       if (gr_cell.length!=1) { continue; }
@@ -3136,8 +3596,6 @@ function grid_cull_propagate(gr, debug) {
         let ux = _x + nei_dv[0],
             uy = _y + nei_dv[1],
             uz = _z + nei_dv[2];
-
-        //console.log("??", _x, _y, _z, "nei_dv:", nei_dv[0], nei_dv[1], nei_dv[2], "u:", ux, uy, uz);
 
         // OOB
         //
@@ -4482,9 +4940,21 @@ function gen_simple_grid(pgr) {
 function grid_consistency(gr) {
   let _ret = { "status": "success", "state":"ok", "msg":"ok", "data":{} };
 
+  let admissible_nei = g_template.admissible_nei;
+
+
+}
+
+function _grid_consistency(gr) {
+  let _ret = { "status": "success", "state":"ok", "msg":"ok", "data":{} };
+
   let tile_attach = g_template.tile_attach;
   let uniq_repr = g_template.uniq_repr;
 
+  let oob_check = true;
+
+  // zero occupancy test
+  //
   for (let z=0; z<gr.length; z++) {
     for (let y=0; y<gr[z].length; y++) {
       for (let x=0; x<gr[z][y].length; x++) {
@@ -4495,6 +4965,50 @@ function grid_consistency(gr) {
           _ret.msg = "no tiles at cell " + _pos_keystr(x,y,z);
           return _ret;
         }
+
+      }
+    }
+  }
+
+  // oob
+  //
+  if (oob_check) {
+    for (let z=0; z<gr.length; z++) {
+      for (let y=0; y<gr[z].length; y++) {
+        for (let x=0; x<gr[z][y].length; x++) {
+
+          if (gr[z][y][x].length != 1) { continue; }
+
+          let key_anchor = gr[z][y][x][0].name;
+          let uniq_ele = uniq_repr[key_anchor];
+
+          for (let dv_key in uniq_ele.attach_dv) {
+            let dv = uniq_ele.attach_dv[dv_key];
+            let ux = x + dv[0],
+                uy = y + dv[1],
+                uz = z + dv[2];
+
+            if ((uz < 0) || (uz >= gr.length) ||
+                (uy < 0) || (uy >= gr[z].length) ||
+                (ux < 0) || (ux >= gr[z][y].length)) {
+              _ret.status = "fail";
+              _ret.data[ _pos_keystr(x, y, z) ] = [x,y,z];
+              _ret.msg = key_anchor + "@(" + _pos_keystr(x,y,z) + ") has connection over edge boundary:  "+
+                _pos_keystr(ux,uy,uz) + " (" + dv_key + ")";
+              return _ret;
+            }
+
+          }
+        }
+      }
+    }
+  }
+
+  // single occupancy neighbor tests
+  //
+  for (let z=0; z<gr.length; z++) {
+    for (let y=0; y<gr[z].length; y++) {
+      for (let x=0; x<gr[z][y].length; x++) {
 
         if (gr[z][y][x].length != 1) { continue; }
 
@@ -4544,14 +5058,234 @@ function grid_consistency(gr) {
     }
   }
 
+  // simple connection count
+  // it's rough so it misses some connections
+  //
+  for (let z=0; z<gr.length; z++) {
+    for (let y=0; y<gr[z].length; y++) {
+      for (let x=0; x<gr[z][y].length; x++) {
+
+        let nei_dv_a = [
+          [-1,  0,  0], [ 1,  0,  0],
+          [ 0, -1,  0], [ 0,  1,  0],
+          [ 0,  0, -1], [ 0,  0,  1] ];
+
+        let out_conn = [0,0,0,0,0,0];
+        let in_conn  = [0,0,0,0,0,0];
+
+        let dv_key_idx = {
+          "-1:0:0"  : 0,
+          "1:0:0"   : 1,
+          "0:-1:0"  : 2,
+          "0:1:0"   : 3,
+          "0:0:-1"  : 4,
+          "0:0:1"   : 5
+        };
+
+        let gr_cell_anchor = gr[z][y][x];
+        for (let idx0=0; idx0<gr_cell_anchor.length; idx0++) {
+          let key_anchor = gr_cell_anchor[idx0].name;
+          let uniq_ele = uniq_repr[key_anchor];
+          for (let dv_key in uniq_ele.pos_tile_attach) {
+            out_conn[ dv_key_idx[dv_key] ]++;
+          }
+        }
+
+        for (let dv_idx=0; dv_idx<nei_dv_a.length; dv_idx++) {
+          let dv = nei_dv_a[dv_idx];
+
+          let ux = x + dv[0],
+              uy = y + dv[1],
+              uz = z + dv[2];
+
+          if ((uz < 0) || (uz >= gr.length) ||
+              (uy < 0) || (uy >= gr[z].length) ||
+              (ux < 0) || (ux >= gr[z][y].length)) {
+            continue;
+          }
+
+          let gr_cell_nei = gr[uz][uy][ux];
+          for (let idx1=0; idx1<gr_cell_nei.length; idx1++) {
+            let key_nei = gr[uz][uy][ux][idx1].name;
+            let uniq_ele = uniq_repr[key_nei];
+            for (let dv_key in uniq_ele.attach_dv) {
+              let nei_dv = uniq_ele.attach_dv[dv_key];
+              if ((nei_dv[0] == -dv[0]) && (nei_dv[1] == -dv[1]) && (nei_dv[2] == -dv[2])) {
+                in_conn[dv_idx]++;
+              }
+            }
+
+          }
+
+        }
+
+        for (let ii=0; ii<out_conn.length; ii++) {
+          let dv = nei_dv_a[ii];
+
+          if ((out_conn[ii] == 0) && (in_conn[ii] > 0)) {
+            _ret.status = "error";
+            _ret.msg = "grid pos " + _pos_keystr(x,y,z) + " has 0 outgoing connections on dv(" +
+              _pos_keystr(dv[0], dv[1], dv[2]) + ") and " + in_conn[ii].toString() + " incoming connections";
+            return _ret;
+          }
+          
+          if ((out_conn[ii] > 0) && (in_conn[ii] == 0)) {
+            _ret.status = "error";
+            _ret.msg = "grid pos " + _pos_keystr(x,y,z) + " has " + out_conn[ii].toString() + " outgoing connections on " +
+              _pos_keystr(dv[0], dv[1], dv[2]) + " and 0 incoming connections";
+            return _ret;
+          }
+          
+        }
+
+        //debug
+        //console.log(":::consistency:", x,y,z, "out:", out_conn.toString(), "in:", in_conn.toString());
+
+      }
+    }
+  }
+
+
+  // check to make sure every tile has a potential
+  // connection to a neighboring cell
+  //
+  for (let z=0; z<gr.length; z++) {
+    for (let y=0; y<gr[z].length; y++) {
+      for (let x=0; x<gr[z][y].length; x++) {
+
+        let gr_cell_anchor = gr[z][y][x];
+        for (let idx=0; idx<gr_cell_anchor.length; idx++) {
+          let key_anchor = gr_cell_anchor[idx].name;
+          let uniq_ele = uniq_repr[key_anchor];
+
+
+          if ((key_anchor.charAt(0) == '.') || (key_anchor.charAt(0) == 'd')) {
+            continue;
+          }
+
+          for (let dv_key in uniq_ele.pos_tile_attach) {
+            let dv = uniq_ele.attach_dv[dv_key];
+
+            let ux = x+dv[0],
+                uy = y+dv[1],
+                uz = z+dv[2];
+
+            if ((uz < 0) || (uz >= gr.length) ||
+                (uy < 0) || (uy >= gr[z].length) ||
+                (ux < 0) || (ux >= gr[z][y].length)) {
+              continue;
+            }
+
+            let conn_found = false;
+
+            let gr_cell_nei = gr[uz][uy][ux];
+            for (let nei_idx=0; nei_idx<gr_cell_nei.length; nei_idx++) {
+              let nei_name = gr_cell_nei[nei_idx].name;
+
+              if (nei_name in uniq_ele.pos_tile_attach[dv_key]) {
+                conn_found = true;
+                break;
+              }
+
+            }
+
+            if (!conn_found) {
+              _ret.status = "error";
+              _ret.msg = "grid pos " + _pos_keystr(x,y,z) + " has no valid neighbors @(" + dv_key +")";
+              return _ret;
+            }
+
+          }
+        }
+
+
+      }
+    }
+  }
+
+
   return _ret;
+}
+
+function test_config(gr) {
+
+
+
+}
+
+function nu_cull_boundary(gr) {
+
+  let admissible_pos = [
+    { "dv_key" : "-1:0:0" , "dv": [-1,  0,  0] },
+    { "dv_key" : "1:0:0"  , "dv": [ 1,  0,  0] },
+
+    { "dv_key" : "0:-1:0" , "dv": [ 0, -1,  0] },
+    { "dv_key" : "0:1:0"  , "dv": [ 0,  1,  0] },
+
+    { "dv_key" : "0:0:-1" , "dv": [ 0,  0, -1] },
+    { "dv_key" : "0:0:1"  , "dv": [ 0,  0,  1] }
+  ];
+
+  let oppo = {
+    "-1:0:0" :  "1:0:0",
+    "1:0:0"  : "-1:0:0",
+
+    "0:-1:0" :  "0:1:0",
+    "0:1:0"  : "0:-1:0",
+
+    "0:0:-1" : "0:0:1",
+    "0:0:1"  : "0:0:-1"
+  }
+
+  for (let z=0; z<gr.length; z++) {
+    for (let y=0; y<gr[z].length; y++) {
+      for (let x=0; x<gr[z][y].length; x++) {
+
+        let gr_cell = gr[z][y][x];
+
+        for (let ii=0; ii<admissible_pos.length; ii++) {
+          let dv_key = admissible_pos[ii].dv_key;
+          let dv = admissible_pos[ii].dv;
+
+          let ux = x + dv[0],
+              uy = y + dv[1],
+              uz = z + dv[2];
+
+          // OOB check:
+          // if a neighbor falls of the edge of the grid,
+          // it can never be realized so cull it (don't
+          // mark as valid).
+          //
+          if ((ux < 0) || (ux >= gr[_z][_y].length) ||
+              (uy < 0) || (uy >= gr[_z].length) ||
+              (uz < 0) || (uz >= gr.length)) {
+
+            for (let ii=0; ii<gr_cell.length; ii++) {
+
+            }
+
+            continue;
+          }
+
+
+
+        }
+
+      }
+    }
+  }
+}
+
+function __grid_wfc(gr) {
+
+  nu_cull_boundary(gr); 
 
 }
 
 function grid_wfc(gr) {
 
   let debug = true;
-  let n_iter = 100;
+  let n_iter = 1;
   let iter = 0;
 
   grid_cull_boundary(gr);
@@ -4561,12 +5295,13 @@ function grid_wfc(gr) {
   debug_print_gr(gr);
   console.log(">>>>>>>>>>>>");
 
+  let _r_c = {};
 
   let culling = true;
   while (culling) {
 
     let _rgr = grid_consistency(gr);
-    console.log("consistency:", _rgr.msg);
+    console.log("CONSISTENCY.B:", _rgr.msg);
 
     grid_clear(gr);
 
@@ -4588,6 +5323,10 @@ function grid_wfc(gr) {
       break;
     }
 
+    _r_c = grid_consistency(gr);
+    console.log("CONSISTENCY.0:", _r_c.msg);
+
+
     r = grid_cull_collapse_one(gr, debug);
 
     if (r.state == "finished") {
@@ -4598,6 +5337,10 @@ function grid_wfc(gr) {
       console.log("collapse one:", r.data.tile, r.data.pos);
     }
 
+    _r_c = grid_consistency(gr);
+    console.log("CONSISTENCY.1:", _r_c.msg);
+
+
     r = grid_cull_propagate(gr, debug);
     if (r.state == "finished") {
       console.log("2!!", r.status, r.msg);
@@ -4607,6 +5350,9 @@ function grid_wfc(gr) {
     console.log("ENDOFLOOP:\n=================");
     debug_print_gr(gr);
     console.log("=================");
+
+    _r_c = grid_consistency(gr);
+    console.log("CONSISTENCY.2:", _r_c.msg);
 
 
     iter++;
@@ -4638,7 +5384,7 @@ function _init() {
 
   let pgr = [];
 
-  let pgr_dim = [3,2,2];
+  let pgr_dim = [3,2,1];
   //let pgr_dim = [3,2,2];
   //let pgr_dim = [4,3,2];
   for (let z=0; z<pgr_dim[2]; z++) {
