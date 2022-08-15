@@ -179,6 +179,28 @@ let _g_epd = 0;
 //
 let g_template = {
 
+  "admissible_pos" : [
+    { "dv_key" : "-1:0:0" , "dv": [-1,  0,  0] },
+    { "dv_key" : "1:0:0"  , "dv": [ 1,  0,  0] },
+
+    { "dv_key" : "0:-1:0" , "dv": [ 0, -1,  0] },
+    { "dv_key" : "0:1:0"  , "dv": [ 0,  1,  0] },
+
+    { "dv_key" : "0:0:-1" , "dv": [ 0,  0, -1] },
+    { "dv_key" : "0:0:1"  , "dv": [ 0,  0,  1] }
+  ],
+
+  "oppo" :  {
+    "-1:0:0" :  "1:0:0",
+    "1:0:0"  : "-1:0:0",
+
+    "0:-1:0" :  "0:1:0",
+    "0:1:0"  : "0:-1:0",
+
+    "0:0:-1" : "0:0:1",
+    "0:0:1"  : "0:0:-1"
+  },
+
   // enpoints tell how we can connect to the other tiles
   //
   // these are flush with the interface plane but in a rectangular pattern, so
@@ -1885,14 +1907,18 @@ function threejs_init() {
 
   //SCALE
 
+  let pal = g_info.palette[ g_info.palette_idx ];
+  let color_idx = _irnd(pal.colors.length);
+
   //const d = 12,
   const d = 2,
         d2 = d/2;
   for (let idx=0; idx<tri_vf.length; idx++) {
 
-    let pal = g_info.palette[ g_info.palette_idx ];
+    //let pal = g_info.palette[ g_info.palette_idx ];
+    //let color_hex = pal.colors[ _irnd(pal.colors.length) ];
 
-    let color_hex = pal.colors[ _irnd(pal.colors.length) ];
+    let color_hex = pal.colors[ color_idx ];
     let rgb = _hex2rgb(color_hex );
     color.setRGB( rgb.r/255, rgb.g/255, rgb.b/255 );
 
@@ -2672,8 +2698,6 @@ function _build_tile_library( _endp_lib, _force_lib ) {
   }
   */
 
-  //WIP
-
   // tile_attach only has actual connections
   // use it to fill out the admissible_attach
   // hash with *all* valid neighboring tile pairs
@@ -3222,7 +3246,7 @@ function __grid_cull_collapse_one(gr) {
 
 }
 
-function _grid_cull_remove_invalid(gr) {
+function grid_cull_remove_invalid(gr) {
   let _ret = { "status": "success", "state":"done", "msg":"...", "data": []};
 
   for (let z=0; z<gr.length; z++) {
@@ -3251,7 +3275,128 @@ function _grid_cull_remove_invalid(gr) {
 
 }
 
+//WIP
+//
 function grid_cull_propagate(gr, debug) {
+  let _ret = { "status": "success", "state":"processing", "msg":"..." };
+
+  let admissible_nei = g_template.admissible_nei;
+  let admissible_pos = g_template.admissible_pos;
+  let oppo = g_template.oppo;
+
+  let still_processing = true;
+  while (still_processing) {
+
+    still_processing = false;
+
+    let _rrp = grid_cull_remove_invalid(gr);
+    if (_rrp.status != "success") {
+      _ret.status = "error";
+      _ret.msg = "grid_cull_remove_invalid:" + _rrp.msg;
+      continue;
+    }
+
+    for (let z=0; z<gr.length; z++) {
+      for (let y=0; y<gr[z].length; y++) {
+        for (let x=0; x<gr[z][y].length; x++) {
+
+
+          let gr_cell = gr[z][y][x];
+          for (let cidx=0; cidx<gr_cell.length; cidx++) {
+            let key_anchor = gr_cell[cidx].name;
+
+            let tile_valid = true;
+
+            for (let posidx=0; posidx<admissible_pos.length; posidx++) {
+              let dv_key = admissible_pos[posidx].dv_key;
+              let dv = admissible_pos[posidx].dv;
+
+              let ux = x + dv[0],
+                  uy = y + dv[1],
+                  uz = z + dv[2];
+
+              if (!(dv_key in admissible_nei[key_anchor])) { continue; }
+
+              // oob check
+              //
+              for (let key_nei in admissible_nei[key_anchor][dv_key]) {
+                if (admissible_nei[key_anchor][dv_key][key_nei].conn) {
+                  if ((uz < 0) || (uz >= gr.length) ||
+                      (uy < 0) || (uy >= gr[z].length) ||
+                      (ux < 0) || (ux >= gr[z][y].length)) {
+                    tile_valid = false;
+
+                    if (debug) {
+                      console.log("CULL.oob: anch:", key_anchor, "@(", x,y,z, ") has connecting outside of boundary");
+                    }
+
+                    break;
+                  }
+                }
+              }
+
+              if (!(tile_valid)) {
+                gr_cell[cidx].valid = false;
+                still_processing = true;
+                break;;
+              }
+
+              if ((uz < 0) || (uz >= gr.length) ||
+                  (uy < 0) || (uy >= gr[z].length) ||
+                  (ux < 0) || (ux >= gr[z][y].length)) {
+                continue;
+              }
+
+              let anchor_has_valid_conn = false;
+
+              let gr_nei = gr[uz][uy][ux];
+              for (let nei_idx=0; nei_idx<gr_nei.length; nei_idx++) {
+                let dv_nei_key = oppo[dv_key];
+                let key_nei = gr_nei[nei_idx].name;
+
+                // if anchor has hvaid connection to at least one
+                // tile ...
+                //
+                if (key_nei in admissible_nei[key_anchor][dv_key]) {
+                  let dv_nei_key = oppo[dv_key];
+                  if (admissible_nei[key_anchor][dv_key][key_nei].conn == admissible_nei[key_nei][dv_nei_key][key_anchor].conn) {
+                    anchor_has_valid_conn = true;
+
+                    break;
+                  }
+                }
+
+              }
+
+              //if (!tile_valid) {
+
+              if (!anchor_has_valid_conn) {
+                tile_valid = false;
+
+                if (debug) {
+                  console.log("CULL.c: anch:", key_anchor, "@(", x,y,z, ") has no possible connections to neighbors");
+                }
+
+                gr_cell[cidx].valid = false;
+                still_processing = true;
+                break;
+              }
+
+            }
+
+          }
+
+        }
+      }
+    }
+
+  }
+
+  return _ret;
+}
+
+
+function _grid_cull_propagate(gr, debug) {
   let _ret = { "status": "success", "state":"processing", "msg":"..." };
 
   let tile_attach = g_template.tile_attach;
@@ -3262,7 +3407,7 @@ function grid_cull_propagate(gr, debug) {
 
     still_processing = false;
 
-    let _rrp = _grid_cull_remove_invalid(gr);
+    let _rrp = grid_cull_remove_invalid(gr);
     if (_rrp.status != "success") {
       _ret.status = "error";
       _ret.msg = "grid_cull_remove_invalid:" + _rrp.msg;
@@ -4940,9 +5085,136 @@ function gen_simple_grid(pgr) {
 function grid_consistency(gr) {
   let _ret = { "status": "success", "state":"ok", "msg":"ok", "data":{} };
 
+  let admissible_pos = [
+    { "dv_key" : "-1:0:0" , "dv": [-1,  0,  0] },
+    { "dv_key" : "1:0:0"  , "dv": [ 1,  0,  0] },
+
+    { "dv_key" : "0:-1:0" , "dv": [ 0, -1,  0] },
+    { "dv_key" : "0:1:0"  , "dv": [ 0,  1,  0] },
+
+    { "dv_key" : "0:0:-1" , "dv": [ 0,  0, -1] },
+    { "dv_key" : "0:0:1"  , "dv": [ 0,  0,  1] }
+  ];
+
+  let oppo = {
+    "-1:0:0" :  "1:0:0",
+    "1:0:0"  : "-1:0:0",
+
+    "0:-1:0" :  "0:1:0",
+    "0:1:0"  : "0:-1:0",
+
+    "0:0:-1" : "0:0:1",
+    "0:0:1"  : "0:0:-1"
+  }
+
   let admissible_nei = g_template.admissible_nei;
 
+  // zero occupancy test
+  //
+  for (let z=0; z<gr.length; z++) {
+    for (let y=0; y<gr[z].length; y++) {
+      for (let x=0; x<gr[z][y].length; x++) {
 
+        if (gr[z][y][x].length == 0) {
+          _ret.status = "fail";
+          _ret.data[ _pos_keystr(x, y, z) ] = [x,y,z];
+          _ret.msg = "no tiles at cell " + _pos_keystr(x,y,z);
+          return _ret;
+        }
+
+        let gr_cell = gr[z][y][x];
+        for (let cell_idx=0; cell_idx<gr_cell.length; cell_idx++) {
+
+          let key_anchor = gr_cell[cell_idx].name;
+
+          for (let posidx=0; posidx<admissible_pos.length; posidx++) {
+            let dv_key = admissible_pos[posidx].dv_key;
+            let dv = admissible_pos[posidx].dv;
+
+            let ux = x + dv[0],
+                uy = y + dv[1],
+                uz = z + dv[2];
+
+            if (!(dv_key in admissible_nei[key_anchor])) { continue; }
+
+            for (let key_nei in admissible_nei[key_anchor][dv_key]) {
+
+              //--
+
+              // oob check
+              //
+              if (admissible_nei[key_anchor][dv_key][key_nei].conn) {
+                if ((uz < 0) || (uz >= gr.length) ||
+                    (uy < 0) || (uy >= gr[z].length) ||
+                    (ux < 0) || (ux >= gr[z][y].length)) {
+                  _ret.status = "fail";
+                  _ret.data[ _pos_keystr(x, y, z) ] = [x,y,z];
+                  _ret.msg = key_anchor + "@(" + _pos_keystr(x,y,z) + ") has connection over edge boundary:  "+
+                    _pos_keystr(ux,uy,uz) + " (" + dv_key + ")";
+                  return _ret;
+                }
+              }
+
+              //--
+
+            }
+
+            if (!((uz < 0) || (uz >= gr.length) ||
+                  (uy < 0) || (uy >= gr[z].length) ||
+                  (ux < 0) || (ux >= gr[z][y].length))) {
+
+              let tile_valid = false;
+              let gr_nei = gr[uz][uy][ux];
+              for (let nei_idx=0; nei_idx<gr_nei.length; nei_idx++) {
+                let dv_nei_key = oppo[dv_key];
+                let key_nei = gr_nei[nei_idx].name;
+                if ((key_nei in admissible_nei[key_anchor][dv_key]) &&
+                    (!(key_anchor in admissible_nei[key_nei][dv_nei_key]))) {
+                  _ret.status = "fail";
+                  _ret.msg = key_anchor + "@(" + _pos_keystr(x,y,z) + ") does not have entry for  "+
+                    key_nei + "@(" + _pos_keystr(ux,uy,uz) + ") dv(" + dv_key + ") but neighbor " +
+                    "has connection to anchor";
+                  return _ret;
+                }
+                if ((!(key_nei in admissible_nei[key_anchor][dv_key])) &&
+                    (key_anchor in admissible_nei[key_nei][dv_nei_key])) {
+                  _ret.status = "fail";
+                  _ret.msg = key_anchor + "@(" + _pos_keystr(x,y,z) + ") has entry for  "+
+                    key_nei + "@(" + _pos_keystr(ux,uy,uz) + ") dv(" + dv_key + ") but neighbor " +
+                    "does not have connection to anchor";
+                  return _ret;
+                }
+
+
+                if (key_nei in admissible_nei[key_anchor][dv_key]) {
+                  if (admissible_nei[key_anchor][dv_key][key_nei].conn == admissible_nei[key_nei][dv_nei_key][key_anchor].conn) {
+                    tile_valid = true;
+                    break;
+                  }
+                }
+
+              }
+
+              if (!tile_valid) {
+                _ret.status = "fail";
+                _ret.msg = key_anchor + "@(" + _pos_keystr(x,y,z) + ") could not find valid neighbor "+
+                  "@(" + _pos_keystr(ux,uy,uz) + ") dv(" + dv_key + ")";
+                return _ret;
+              }
+
+            }
+
+          }
+
+        }
+
+      }
+    }
+  }
+
+
+
+  return _ret;
 }
 
 function _grid_consistency(gr) {
@@ -5207,86 +5479,13 @@ function _grid_consistency(gr) {
   return _ret;
 }
 
-function test_config(gr) {
-
-
-
-}
-
-function nu_cull_boundary(gr) {
-
-  let admissible_pos = [
-    { "dv_key" : "-1:0:0" , "dv": [-1,  0,  0] },
-    { "dv_key" : "1:0:0"  , "dv": [ 1,  0,  0] },
-
-    { "dv_key" : "0:-1:0" , "dv": [ 0, -1,  0] },
-    { "dv_key" : "0:1:0"  , "dv": [ 0,  1,  0] },
-
-    { "dv_key" : "0:0:-1" , "dv": [ 0,  0, -1] },
-    { "dv_key" : "0:0:1"  , "dv": [ 0,  0,  1] }
-  ];
-
-  let oppo = {
-    "-1:0:0" :  "1:0:0",
-    "1:0:0"  : "-1:0:0",
-
-    "0:-1:0" :  "0:1:0",
-    "0:1:0"  : "0:-1:0",
-
-    "0:0:-1" : "0:0:1",
-    "0:0:1"  : "0:0:-1"
-  }
-
-  for (let z=0; z<gr.length; z++) {
-    for (let y=0; y<gr[z].length; y++) {
-      for (let x=0; x<gr[z][y].length; x++) {
-
-        let gr_cell = gr[z][y][x];
-
-        for (let ii=0; ii<admissible_pos.length; ii++) {
-          let dv_key = admissible_pos[ii].dv_key;
-          let dv = admissible_pos[ii].dv;
-
-          let ux = x + dv[0],
-              uy = y + dv[1],
-              uz = z + dv[2];
-
-          // OOB check:
-          // if a neighbor falls of the edge of the grid,
-          // it can never be realized so cull it (don't
-          // mark as valid).
-          //
-          if ((ux < 0) || (ux >= gr[_z][_y].length) ||
-              (uy < 0) || (uy >= gr[_z].length) ||
-              (uz < 0) || (uz >= gr.length)) {
-
-            for (let ii=0; ii<gr_cell.length; ii++) {
-
-            }
-
-            continue;
-          }
-
-
-
-        }
-
-      }
-    }
-  }
-}
-
-function __grid_wfc(gr) {
-
-  nu_cull_boundary(gr); 
-
-}
-
 function grid_wfc(gr) {
 
-  let debug = true;
-  let n_iter = 1;
+  let debug = false;
+  let n_iter = 1000;
   let iter = 0;
+
+  let check_consistency = false;
 
   grid_cull_boundary(gr);
 
@@ -5300,12 +5499,12 @@ function grid_wfc(gr) {
   let culling = true;
   while (culling) {
 
-    let _rgr = grid_consistency(gr);
-    console.log("CONSISTENCY.B:", _rgr.msg);
+    if (check_consistency) {
+      let _rgr = grid_consistency(gr);
+      console.log("CONSISTENCY.B:", _rgr.msg);
+    }
 
     grid_clear(gr);
-
-    console.log("iter");
 
     console.log("========================");
     console.log("iter", iter, "/", n_iter);
@@ -5313,32 +5512,36 @@ function grid_wfc(gr) {
 
     let r = grid_cull_propagate(gr, debug);
 
-    console.log("GOT>>>", r);
-    console.log("grid:\n>>>>>>>>>>>>");
-    debug_print_gr(gr);
-    console.log(">>>>>>>>>>>>");
+    if (debug) {
+      console.log("GOT>>>", r);
+      console.log("grid:\n>>>>>>>>>>>>");
+      debug_print_gr(gr);
+      console.log(">>>>>>>>>>>>");
+    }
 
     if (r.state == "finished") {
       console.log("0!!", r.status);
       break;
     }
 
-    _r_c = grid_consistency(gr);
-    console.log("CONSISTENCY.0:", _r_c.msg);
-
+    if (check_consistency) {
+      _r_c = grid_consistency(gr);
+      console.log("CONSISTENCY.0:", _r_c.msg);
+    }
 
     r = grid_cull_collapse_one(gr, debug);
-
     if (r.state == "finished") {
       console.log("1!!", r.status, r.msg);
       break;
     }
     else {
-      console.log("collapse one:", r.data.tile, r.data.pos);
+      //console.log("collapse one:", r.data.tile, r.data.pos);
     }
 
-    _r_c = grid_consistency(gr);
-    console.log("CONSISTENCY.1:", _r_c.msg);
+    if (check_consistency) {
+      _r_c = grid_consistency(gr);
+      console.log("CONSISTENCY.1:", _r_c.msg);
+    }
 
 
     r = grid_cull_propagate(gr, debug);
@@ -5347,13 +5550,16 @@ function grid_wfc(gr) {
       break;
     }
 
-    console.log("ENDOFLOOP:\n=================");
-    debug_print_gr(gr);
-    console.log("=================");
+    if (debug) {
+      console.log("ENDOFLOOP:\n=================");
+      debug_print_gr(gr);
+      console.log("=================");
+    }
 
-    _r_c = grid_consistency(gr);
-    console.log("CONSISTENCY.2:", _r_c.msg);
-
+    if (check_consistency) {
+      _r_c = grid_consistency(gr);
+      console.log("CONSISTENCY.2:", _r_c.msg);
+    }
 
     iter++;
     if (iter>=n_iter) { break; }
@@ -5384,9 +5590,10 @@ function _init() {
 
   let pgr = [];
 
-  let pgr_dim = [3,2,1];
+  //let pgr_dim = [3,3,2];
   //let pgr_dim = [3,2,2];
   //let pgr_dim = [4,3,2];
+  let pgr_dim = [6,6,4];
   for (let z=0; z<pgr_dim[2]; z++) {
     pgr.push([]);
     for (let y=0; y<pgr_dim[1]; y++) {
@@ -5413,8 +5620,8 @@ function _init() {
   //debug_print_gr(pgr);
   g_template["debug"] = pgr;
 
-  realize_tri_from_sp_grid(pgr);
-  return;
+  //realize_tri_from_sp_grid(pgr);
+  //return;
 
   let fin_gr = gen_simple_grid(pgr);
   //console.log(fin_gr);
