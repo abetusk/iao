@@ -157,12 +157,12 @@ var g_info = {
 
 //let _g_w = 1/2;
 let _g_w = 1/4;
-_g_w = 1/2;
+//_g_w = 1/2;
 
 //let _g_h = 2/8;
 let _g_h = 1/8;
 
-_g_h = 1/4;
+//_g_h = 1/4;
 
 //DEBUG
 //_g_h = 0.25;
@@ -200,6 +200,29 @@ let g_template = {
     "0:0:-1" : "0:0:1",
     "0:0:1"  : "0:0:-1"
   },
+
+  "weight": {
+    ".": 1,
+    "d": 1,
+    "|": 1,
+    "+": 1,
+    "T": 1,
+    "r": 1,
+    "^": 1
+  },
+
+  "pdf":  {
+    ".": -1,
+    "d": -1,
+    "|": -1,
+    "+": -1,
+    "T": -1,
+    "r": -1,
+    "^": -1
+  },
+
+  "cdf": [],
+
 
   // enpoints tell how we can connect to the other tiles
   //
@@ -366,6 +389,23 @@ let g_template = {
 // too involved to list out statically so do it here.
 //
 function init_template() {
+
+  let S = 0;
+  for (let _tsn in g_template.weight) {
+    S += g_template.weight[_tsn];
+  }
+
+  let cdf_s = 0;
+  for (let _tsn in g_template.weight) {
+    g_template.pdf[_tsn] = g_template.weight[_tsn]/S;
+    cdf_s += g_template.pdf[_tsn];
+    g_template.cdf.push( { "tile_code": _tsn, "s": cdf_s } );
+  }
+  g_template.cdf[ g_template.cdf.length-1 ].s = 1.01;
+
+
+
+
 
   // 'r'
   // top
@@ -2176,8 +2216,8 @@ function render() {
     }
 
       let D = 4;
-      D = 1.75;
-      D = 1.387;
+      //D = 1.75;
+      //D = 1.387;
 
       if (view_prv == 0) {
         mp0 = m4.xRotation((1-_t_rem)*Math.PI/D);
@@ -3065,6 +3105,7 @@ function _grid_cull_boundary(gr) {
 }
 
 function grid_cull_collapse_one(gr) {
+  let _eps = 1/(1024*1024);
 
   let tile_attach = g_template.tile_attach;
 
@@ -3079,6 +3120,35 @@ function grid_cull_collapse_one(gr) {
   let min_val = -1;
   let candidate_coord = [];
 
+  for (let z=0; z<gr.length; z++) {
+    for (let y=0; y<gr[z].length; y++) {
+      for (let x=0; x<gr[z][y].length; x++) {
+
+        let gr_cell = gr[z][y][x];
+        if (gr_cell.length<2) { continue; }
+
+        let s = 0.0;
+        for (let cidx=0; cidx<gr_cell.length; cidx++) {
+          let tile_name = gr[z][y][x][cidx].name;
+          let tile_type = tile_name.charAt(0);
+          let p = g_template.pdf[tile_type];
+
+          if (p < _eps) { continue; }
+
+          s -= p*Math.log(p);
+        }
+
+        if (min_val<0) { min_val = s; }
+        if (min_val<s) { min_val = s; }
+
+        candidate_coord.push({ "x":x, "y":y, "z":z, "s":s });
+
+      }
+    }
+  }
+
+
+  /*
   for (let z=0; z<gr.length; z++) {
     for (let y=0; y<gr[z].length; y++) {
       for (let x=0; x<gr[z][y].length; x++) {
@@ -3099,6 +3169,7 @@ function grid_cull_collapse_one(gr) {
       }
     }
   }
+  */
 
   if (min_val==-1) {
     console.log("FINISHED");
@@ -3111,7 +3182,8 @@ function grid_cull_collapse_one(gr) {
   let idx=0;
   while (idx < candidate_coord.length) {
 
-    if (candidate_coord[idx].n != min_val) {
+    //if (candidate_coord[idx].n != min_val) {
+    if (Math.abs(candidate_coord[idx].s - min_val) >= _eps) {
       candidate_coord[idx] = candidate_coord[ candidate_coord.length-1 ];
       candidate_coord.pop();
       continue;
@@ -3132,7 +3204,30 @@ function grid_cull_collapse_one(gr) {
   //
 
   let cand_coord = gr[ r_ele.z ][ r_ele.y ][ r_ele.x ];
-  let cand_coord_idx = Math.floor(fxrand()*cand_coord.length);
+  //let cand_coord_idx = Math.floor(fxrand()*cand_coord.length);
+
+  let R = 0.0;
+  let _cdf = [];
+  let gr_cell = gr[r_ele.z][r_ele.y][r_ele.x];
+  for (let ii=0; ii<gr_cell.length; ii++) {
+    let tile_type = gr_cell[ii].name.charAt(0);
+    let v = g_template.pdf[tile_type];
+    _cdf.push(v);
+    R += v;
+  }
+
+  for (let ii=0; ii<_cdf.length; ii++) {
+    _cdf[ii] /= R;
+  }
+
+  let cand_coord_idx = _cdf.length-1;
+  let p = fxrand();
+  for (let ii=0; ii<_cdf.length; ii++) {
+    if (p<_cdf[ii]) {
+      cand_coord_idx = ii;
+      break;
+    }
+  }
 
   // remove all other tiles in the position where we've forced the pick
   //
@@ -5535,7 +5630,9 @@ function grid_wfc(gr) {
       break;
     }
     else {
-      //console.log("collapse one:", r.data.tile, r.data.pos);
+      if (debug) {
+        console.log("collapse one:", r.data.tile, r.data.pos);
+      }
     }
 
     if (check_consistency) {
@@ -5593,7 +5690,10 @@ function _init() {
   //let pgr_dim = [3,3,2];
   //let pgr_dim = [3,2,2];
   //let pgr_dim = [4,3,2];
-  let pgr_dim = [6,6,4];
+  //let pgr_dim = [4,4,3];
+  //let pgr_dim = [5,5,5];
+  //let pgr_dim = [4,4,4];
+  let pgr_dim = [6,6,6];
   for (let z=0; z<pgr_dim[2]; z++) {
     pgr.push([]);
     for (let y=0; y<pgr_dim[1]; y++) {
