@@ -1,12 +1,12 @@
-VADFAD : 2Gen
+Like Go Up
 ===
 
 
-[![vadfad : 2gen](../img/vadfad_2gen.png)](https://abetusk.github.io/iao/vadfad_2gen)
+[![Like Go Up](../img/....png)](https://abetusk.github.io/iao/like-go-up)
 
-[Live](https://abetusk.github.io/iao/vadfad_2gen/)
+[Live](https://abetusk.github.io/iao/like-go-up/)
 
-(not) Available on [fxhash](https://www.fxhash.xyz/generative/slug/vadfad-:-2gen)
+(not) Available on [fxhash](https://www.fxhash.xyz/generative/slug/like-go-up)
 
 Quick Start
 ---
@@ -22,36 +22,29 @@ chromium 'http://localhost:8000'
 Short Statement
 ---
 
-"VADFAD : 2Gen" is an experimental generative art piece that attempts to highlight some of the inherent contradictions surrounding the discussion of non-fungible tokens (NFTs) and its place as a vehicle for artistic creation, artistic expression and the potential of remuneration for artists.
+"Like Go Up" is an experimental generative art piece that attempts to highlight some of the inherent contradictions surrounding the discussion of non-fungible tokens (NFTs) and its place as a vehicle for artistic creation, artistic expression and the potential of remuneration for artists.
 
 s - Screenshot (PNG)
 
 a - Animation (5s, webm) (advanced use)
 
+p - Pause animation
+
 To the extent possible, the source code is dedicated to the public domain (CC0) and can be used for any purpose, even commercial, by anyone. All third party libraries used are libre/free. Please check individual files for their respective licenses.
 
-The hope is that the "VADFAD : 2Gen" NFT draws a parallel to other technological trends of the past and highlights how new technologies that are only just being understood, or experimented with, can have unforeseen benefits and whose enjoyment might seem obscure to an outside observer.
-
-The video game arcade industry helped create video game empires, drive the adoption of home video consoles and advance the proliferation of personal computers. Just as video games of the past helped promote innovative new technologies, NFTs have the potential to drive innovation in other markets that aren't well understood or explored yet.
-
-By combining a 1980s "8-bit" aesthetic, "VADFAD : 2Gen" tries to touch on the nostalgia for the arcade video game era of the 1980s while using a generative process to create almost surely unique 8-bit like monster scenes and creations. The combination of styles is done to try emphasize the similarity between the two eras, where the exuberance for the new technology, art and entertainment of the past has a similar spirit to the exhilaration of the present.
-
-"VADFAD : 2Gen" is a continuation of "VADFAD" incorporating different compositions, color palettes and export options.
+The hope is that the "Like Go Up" NFT draws a parallel to other technological trends of the past and highlights how new technologies that are only just being understood, or experimented with, can have unforeseen benefits and whose enjoyment might seem obscure to an outside observer.
 
 This work hopes to add to the conversation about examining the reality of the ecosystem that we've developed around digital goods and intellectual property.
-
-This work takes inspiration from the artists `Jared Tarbell` and `Frederik Vanhoutte`.
-
 
 Tags
 ---
 
-minimal, generative, 8-bit, coin-op, arcade, 1980s, retro, video game, nostalgia, orthographic, three.js, voxel
+minimal, generative, wave function collapse, isographic, three.js, voxel
 
 Statement
 ---
 
-"VADFAD : 2Gen" is an experimental generative art piece that
+"Like Go Up" is an experimental generative art piece that
 attempts to highlight some of the inherent contradictions
 surrounding the discussion of non-fungible tokens (NFTs) and
 its place as a vehicle for artistic creation, artistic expression
@@ -62,47 +55,68 @@ domain (CC0) and can be used for any purpose, even commercial, by anyone.
 All third party libraries used are libre/free. Please check individual files
 for their respective licenses.
 
-The hope is that the "VADFAD : 2Gen" NFT draws a parallel to other technological trends of the past and
-highlights how new technologies that are only just being understood, or experimented with, can
-have unforeseen benefits and whose enjoyment might seem obscure to an outside observer.
+The hope is that the "Like Go Up" NFT highlights the hypocrisy an industry that
+makes money off of commoditizing attention to get advertisement revenue, sponsor payments
+and supporter funds through subscriptions while condemning artists that provide an
+avenue for fan support through NFTs.
 
-The video game arcade industry helped create video game empires, drive the adoption of home
-video consoles and advance the proliferation of personal computers.
-Just as video games of the past helped promote innovative new technologies, NFTs have
-the potential to drive innovation in other markets that aren't well understood or explored yet.
+As of this writing, making a popular video on a streaming site can garner around $3 per
+1000 video views.
+Videos that incorporate sponsors into their content can expect up to $20 per 1000 visits.
+Often, online celebrity personalities will have an avenue for fans to support them
+with recurring revenue, with the ability to convert even moderate celebrity status into
+upwards of $7000 a month or more in recurring revenue.
 
-I believe many people in the NFT space are acting in "good faith", helping fund artists,
-driving innovation and willing to spend money for art and experiences that they enjoy,
-just like people enjoying video game arcades of 1980s and 1990s.
+The current ecosystem of social media incentivizes behavior for content creators to
+focus on attention metrics for fan engagement.
+Content creators that want to create a livelyhood from their work must keep producing
+engaging content to get ad revenue, sponsorships and to drive fans to subscription services.
 
-By combining a 1980s "8-bit" aesthetic, "VADFAD : 2Gen" tries to touch on the nostalgia for the
-arcade video game era of the 1980s while using a generative process to create almost surely
-unique 8-bit like monster creations.
-The combination of styles is done to try emphasize the similarity between the two eras,
-where the exuberance for the new technology, art and entertainment of the past has a similar
-spirit to the exhilaration of the present.
+Well researched, measured and fair critiques of social trends are overlooked in favor
+of sensationalist content that supply user engagement.
 
-In addition, since all code is libre/free, artists and fans alike are encouraged to alter,
+A critique of artistic NFTs is that creators are primarily concerned with seeing the price
+of their art go up and collectors are primarily concerned with seeing the value of
+their purchased art go up so they can resell it a later point.
+
+"Like Go Up" tries to highlight the hypocrisy of the perverse incentives that allow
+for low quality but high engagement content that critiques a perceived system
+producing low quality but high engagement content.
+
+Just as one cannot discount a whole $100 billion content creator industry from the
+venal actions of a few, one cannot discount the whole NFT or cryptocurrency space
+from actions of a few self serving parties.
+Despite the incentive structure, content creators and NFT artists both create quality
+content, providing access to fans in new and novel ways.
+
+I believe many people in the NFT space, as in the video content creation space, are
+acting in "good faith", helping fund artists,
+driving innovation and willing to spend money for art and experiences that they enjoy.
+
+The aesthetics of "Like Go Up" are meant to draw attention to how confusing and disorienting
+new technology can be.
+Were an observer to view the structure presented in "Like Go Up" locally, it would seem
+jumbled, contradictory and chaotic.
+By viewing it from vantage point further away, structures become clear and the chaos that
+was overwhelming can be seen to be a localized phenomena, sometimes resulting in loops
+while other times resulting in paths to other parts of the structure.
+
+All code is libre/free. Artists and fans are encouraged to alter,
 experiment and publish, even for commercial gain, ideas expressed in this NFT.
 The license in the code used to create the art associated with this NFT allows for
 further exploration, innovation and experimentation.
 
-I don't know if "VADFAD : 2Gen"
+I don't know if "Like Go Up"
 is worth anything nor do I know if NFTs are
-a worthwhile idea but perhaps we can start
-to have a conversation that isn't a continuous
-stream of incredulous dismissals and start to examine
-the reality of the ecosystem that we've developed
+a worthwhile idea. 
+The hope is we can
+elevate the discussion from bad faith arguments and outright personal insults
+to a more balanced and didactic discussion of
+of the ecosystem that we've developed
 around digital goods and intellectual property.
-
-This work takes inspiration from the artist `Jared Tarbell`.
-
 
 Reference
 ---
-
-* [INVADER FRACTAL by Jared S Tarbell](http://www.complexification.net/gallery/machines/invaderfractal/)
-* [Frederik Vanhoutte](https://twitter.com/wblut/status/1492632480079306756)
 
 License
 ---
