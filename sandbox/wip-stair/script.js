@@ -46,6 +46,8 @@ var g_info = {
   "rnd": [],
   "ds": 5,
 
+  "quiet":false,
+
   "download_filename":"like_go_up.png",
 
   "capturer": {},
@@ -167,13 +169,14 @@ var g_info = {
 let _g_w = 1/4;
 //_g_w = 1/2;
 //_g_w=1/3;
-_g_w=1/8;
+//_g_w=1/4;
 
 //let _g_h = 2/8;
 let _g_h = 1/8;
 //_g_h = 1/16;
 //_g_h = 1/12;
 //_g_h = 1/4;
+//_g_h = 1/6;
 
 //_g_h = 1/4;
 
@@ -216,21 +219,23 @@ let g_template = {
 
   "weight": {
     ".": 1,
-    "d": 0,
+    //"d": 0,
     "|": 1,
     "+": 1,
     "T": 1,
     "r": 1,
+    "p": 1,
     "^": 1
   },
 
   "pdf":  {
     ".": -1,
-    "d": -1,
+    //"d": -1,
     "|": -1,
     "+": -1,
     "T": -1,
     "r": -1,
+    "p": -1,
     "^": -1
   },
 
@@ -247,7 +252,7 @@ let g_template = {
   "endpoint": {
     ".": [],
 
-    "d": [],
+    //"d": [],
 
     "|": [
       [ -_g_w/2, -1/2, -_g_h/2 ], [ _g_w/2, -1/2, -_g_h/2 ],
@@ -255,6 +260,11 @@ let g_template = {
 
       [ -_g_w/2,  1/2, -_g_h/2 ], [  _g_w/2,  1/2, -_g_h/2 ],
       [ -_g_w/2,  1/2, +_g_h/2 ], [  _g_w/2,  1/2, +_g_h/2 ]
+    ],
+
+    "p": [
+      [ -_g_w/2, -1/2, -_g_h/2 ], [  _g_w/2, -1/2, -_g_h/2 ],
+      [ -_g_w/2, -1/2, +_g_h/2 ], [  _g_w/2, -1/2, +_g_h/2 ]
     ],
 
     "r": [
@@ -318,7 +328,8 @@ let g_template = {
 
   "force_empty" : {
     "." : [],
-    "d": [],
+    //"d": [],
+    "p" : [],
     "|" : [],
     "r" : [],
     "+" : [],
@@ -341,6 +352,7 @@ let g_template = {
 
   //":" : [],
 
+  /*
   // simple plane for debuging
   //
   "d": [
@@ -352,6 +364,7 @@ let g_template = {
     -1/2,  1/2, 0,   1/2,  1/2, 0,   -1/2, -1/2, 0,
     -1/2, -1/2, 0,   1/2,  1/2, 0,    1/2, -1/2, 0
   ],
+  */
 
   "|" : [
 
@@ -375,12 +388,46 @@ let g_template = {
      _g_w/2,  1/2, -_g_h/2,   _g_w/2, -1/2, +_g_h/2,  _g_w/2, -1/2, -_g_h/2,
      _g_w/2,  1/2, -_g_h/2,   _g_w/2,  1/2, +_g_h/2,  _g_w/2, -1/2, +_g_h/2,
 
-    // top panel
+    // back cap (optional)
     //
     -_g_w/2,  1/2, -_g_h/2,   -_g_w/2,  1/2, +_g_h/2,   _g_w/2,  1/2, -_g_h/2,
      _g_w/2,  1/2, -_g_h/2,   -_g_w/2,  1/2, +_g_h/2,   _g_w/2,  1/2, +_g_h/2,
 
-    // bottom panel
+    // front cap (optional)
+    //
+    -_g_w/2, -1/2, -_g_h/2,   _g_w/2, -1/2, +_g_h/2,    -_g_w/2, -1/2, +_g_h/2,
+     _g_w/2, -1/2, -_g_h/2,   _g_w/2, -1/2, +_g_h/2,    -_g_w/2, -1/2, -_g_h/2
+
+  ],
+
+  "p" : [
+
+    // front panel
+    //
+    -_g_w/2,    0, -_g_h/2,  _g_w/2,    0, -_g_h/2,   -_g_w/2, -1/2, -_g_h/2,
+     _g_w/2,    0, -_g_h/2,  _g_w/2, -1/2, -_g_h/2,   -_g_w/2, -1/2, -_g_h/2,
+
+    // back panel
+    //
+    -_g_w/2,    0, +_g_h/2, -_g_w/2, -1/2, +_g_h/2,   _g_w/2,    0, +_g_h/2,
+     _g_w/2,    0, +_g_h/2, -_g_w/2, -1/2, +_g_h/2,   _g_w/2, -1/2, +_g_h/2,
+
+    // left side stripe
+    //
+    -_g_w/2,    0, -_g_h/2,   -_g_w/2, -1/2, -_g_h/2,  -_g_w/2, -1/2, +_g_h/2,
+    -_g_w/2,    0, -_g_h/2,   -_g_w/2, -1/2, +_g_h/2,  -_g_w/2,    0, +_g_h/2,
+
+    // right side stripe
+    //
+     _g_w/2,    0, -_g_h/2,   _g_w/2, -1/2, +_g_h/2,  _g_w/2, -1/2, -_g_h/2,
+     _g_w/2,    0, -_g_h/2,   _g_w/2,    0, +_g_h/2,  _g_w/2, -1/2, +_g_h/2,
+
+    // back cap (not optional anymore);
+    //
+    -_g_w/2,    0, -_g_h/2,   -_g_w/2,    0, +_g_h/2,   _g_w/2,    0, -_g_h/2,
+     _g_w/2,    0, -_g_h/2,   -_g_w/2,    0, +_g_h/2,   _g_w/2,    0, +_g_h/2,
+
+    // front cap (optional)
     //
     -_g_w/2, -1/2, -_g_h/2,   _g_w/2, -1/2, +_g_h/2,    -_g_w/2, -1/2, +_g_h/2,
      _g_w/2, -1/2, -_g_h/2,   _g_w/2, -1/2, +_g_h/2,    -_g_w/2, -1/2, -_g_h/2
@@ -638,8 +685,6 @@ function init_template() {
   let st = [];
   let _st_n = Math.floor( (2/_g_h) + _g_h );
   let _st_m = Math.floor( (1/_g_h) + _g_h );
-
-  console.log(">>>>", _st_n, _st_m);
 
   let _st_ds = 1/_st_n;
   let _st_dy = 1/_st_n;
@@ -1242,6 +1287,10 @@ function _3rect_xy(w,h,x,y,z,o) {
 
 
 if (typeof fxrand === "undefined") {
+  if (!g_info.quiet) {
+    console.log("WARNING: USING BUILT-IN Math.random() INSTEAD OF fxrand()");
+  }
+
   var fxrand = Math.random;
 }
 
@@ -1541,6 +1590,7 @@ function welcome() {
   console.log("");
   console.log(" s   - save screenshot (PNG)");
   console.log(" a   - save animation (5s webm) (advanced usage)");
+  console.log(" p   - pause");
   console.log("");
 
   console.log("Features:");
@@ -3511,7 +3561,7 @@ function gen_simple_grid(pgr) {
 }
 
 function grid_consistency(gr) {
-  let _ret = { "status": "success", "state":"ok", "msg":"ok", "data":{} };
+  let _ret = { "status": "success", "state":"finished", "msg":"ok", "data":{} };
 
   let admissible_pos = [
     { "dv_key" : "-1:0:0" , "dv": [-1,  0,  0] },
@@ -3651,7 +3701,7 @@ function grid_wfc_opt(gr) {
   let n_iter = 1000;
   let iter = 0;
 
-  let check_consistency = true;
+  let check_consistency = false;
 
   grid_cull_boundary(gr);
 
@@ -3761,6 +3811,7 @@ function grid_wfc_opt(gr) {
   let _rgr = grid_consistency(gr);
   console.log("consistency:", _rgr.msg);
 
+  return _rgr;
 }
 
 function grid_wfc(gr) {
@@ -3861,28 +3912,8 @@ function grid_wfc(gr) {
 
 }
 
-function _init() {
-
-  init_template();
-
-  _build_tile_library( g_template.endpoint, g_template.force_empty );
-
-  //DEBUG
-  let uniq_count = 0;
-  for (let key in g_template.tile_attach) { uniq_count++; }
-  console.log(">>>> uniq_count:", uniq_count);
-
-  //---
-
+function init_pgr(pgr_dim) {
   let pgr = [];
-
-  //let pgr_dim = [3,3,2];
-  //let pgr_dim = [3,2,2];
-  //let pgr_dim = [4,3,2];
-  //let pgr_dim = [4,4,3];
-  //let pgr_dim = [5,5,5];
-  //let pgr_dim = [4,4,4];
-  let pgr_dim = [6,6,6];
   for (let z=0; z<pgr_dim[2]; z++) {
     pgr.push([]);
     for (let y=0; y<pgr_dim[1]; y++) {
@@ -3892,11 +3923,10 @@ function _init() {
         pgr[z][y].push([]);
         for (let tile_name in g_template.uniq_repr) {
 
-          // n - name
+          // name - tile name
           // valid - still a candidate
           // processed - processed or not
           //
-          //pgr[z][y][x].push( {"n":tile_name, "d":0, "valid": true, "processed":false });
           pgr[z][y][x].push( {"name":tile_name, "valid": true, "processed":false });
         }
 
@@ -3904,9 +3934,32 @@ function _init() {
     }
   }
 
+
+  return pgr;
+}
+
+
+
+function _init() {
+
+  init_template();
+  _build_tile_library( g_template.endpoint, g_template.force_empty );
+
+  //DEBUG
+  let uniq_count = 0;
+  for (let key in g_template.tile_attach) { uniq_count++; }
+  console.log(">>>> uniq_count:", uniq_count);
+
+  //---
+
+
+  //let pgr = init_pgr([5,5,5]);
+  let pgr = init_pgr([8,8,8]);
+
   //let _r = grid_wfc(pgr);
   let _r = grid_wfc_opt(pgr);
   console.log(">>", _r, pgr);
+
   //debug_print_gr(pgr);
   g_template["debug"] = pgr;
 
@@ -4375,6 +4428,12 @@ function realize_tri_from_grid(gr, show_debug) {
       ty = g_info.cy,
       tz = g_info.cz;
 
+  let n = gr.length;
+
+  tx = -15*n+1;
+  ty = -15*n+1;
+  tz = -15*n+1;
+
   for (let zidx=0; zidx<gr.length; zidx++) {
     for (let yidx=0; yidx<gr[zidx].length; yidx++) {
       for (let xidx=0; xidx<gr[zidx][yidx].length; xidx++) {
@@ -4506,4 +4565,48 @@ function init() {
   animate();
 }
 
+//-----------------------------------
+//-----------------------------------
+//-----------------------------------
+//-----------------------------------
+//-----------------------------------
+//-----------------------------------
 
+
+function _ok() {
+  let admissible_nei = g_template.admissible_nei;
+  let uniq_repr = g_template.uniq_repr;
+
+  for (let x in uniq_repr) {
+    console.log(">>", x);
+  }
+}
+
+function _main() {
+
+  init_template();
+  _build_tile_library( g_template.endpoint, g_template.force_empty );
+
+  //let pgr = init_pgr([4,4,4]);
+  //let pgr = init_pgr([4,4,4]);
+  let pgr = init_pgr([5,5,1]);
+
+  let _ret = grid_cull_boundary(pgr);
+  if (_ret.status != "success") { console.log("error"); return; }
+
+  debug_print_gr(pgr);
+
+  return;
+
+
+  let _r = grid_wfc_opt(pgr);
+  console.log("got>>", _r);
+  let fin_gr = gen_simple_grid(pgr);
+  console.log(fin_gr);
+
+}
+
+if (typeof module !== "undefined") {
+  var m4 = require("./m4.js");
+  _main();
+}

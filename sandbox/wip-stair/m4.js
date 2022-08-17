@@ -145,4 +145,8 @@ var m4 = {
 
 };
 
-
+if (typeof module !== "undefined") {
+  for (let x in m4) {
+    module.exports[x] = m4[x];
+  }
+}
