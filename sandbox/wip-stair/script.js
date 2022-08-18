@@ -170,15 +170,14 @@ let _g_w = 1/4;
 //_g_w = 1/2;
 //_g_w=1/3;
 //_g_w=1/4;
+//_g_w = 1/6;
 
 //let _g_h = 2/8;
 let _g_h = 1/8;
 //_g_h = 1/16;
 //_g_h = 1/12;
 //_g_h = 1/4;
-//_g_h = 1/6;
-
-//_g_h = 1/4;
+_g_h = 1/6;
 
 //DEBUG
 //_g_h = 0.25;
@@ -2725,6 +2724,7 @@ function _build_tile_library( _endp_lib, _force_lib ) {
     uniq_repr[key].n_endpoint_group = n_endpoint_group;
   }
 
+  /*
   let admissible_pos = [
     { "dv_key" : "-1:0:0" , "dv": [-1,  0,  0] },
     { "dv_key" : "1:0:0"  , "dv": [ 1,  0,  0] },
@@ -2746,6 +2746,10 @@ function _build_tile_library( _endp_lib, _force_lib ) {
     "0:0:-1" : "0:0:1",
     "0:0:1"  : "0:0:-1"
   }
+  */
+
+  let admissible_pos = g_template.admissible_pos;
+  let oppo  = g_template.oppo;
 
   // tile_attach only has actual connections
   // use it to fill out the admissible_attach
@@ -2845,7 +2849,110 @@ function _build_tile_library( _endp_lib, _force_lib ) {
 
   g_template["admissible_nei"] = admissible_nei;
 
+
+  // restrict undesirable combinations
+  //
+  filter_steeple(admissible_nei);
+
 }
+
+function filter_steeple() {
+  let _eps = 1/(1024*1024);
+
+  let admissible_nei  = g_template.admissible_nei;
+  let admissible_pos  = g_template.admissible_pos;
+  let oppo            = g_template.oppo;
+  let raw_lib         = g_template.raw_lib;
+
+  let delete_list = [];
+
+  for (let key_anchor in admissible_nei) {
+    if (key_anchor.charAt(0) != '^') { continue; }
+
+    let anc_p_repr = [0,0,0];
+    let endp = raw_lib[key_anchor];
+    for (let ii=0; ii<endp.length; ii++) {
+      anc_p_repr[0] += endp[ii][0];
+      anc_p_repr[1] += endp[ii][1];
+      anc_p_repr[2] += endp[ii][2];
+    }
+    //anc_p_repr[0] /= endp.length;
+    //anc_p_repr[1] /= endp.length;
+    //anc_p_repr[2] /= endp.length;
+
+    for (let posidx=0; posidx<admissible_pos.length; posidx++) {
+      let dv_anc_key = admissible_pos[posidx].dv_key;
+      let dv_nei_key = oppo[dv_anc_key];
+
+      let dv_anc = admissible_pos[posidx].dv;
+      let dv_nei = [ -dv_anc[0], -dv_anc[1], -dv_anc[2] ];
+
+      for (let key_nei in admissible_nei[key_anchor][dv_anc_key]) {
+        if (key_nei.charAt(0) != '^') { continue; }
+        if (!admissible_nei[key_anchor][dv_anc_key][key_nei].conn) { continue; }
+
+        let nei_p_repr = [0,0,0];
+        let endp = raw_lib[key_nei];
+        for (let ii=0; ii<endp.length; ii++) {
+          nei_p_repr[0] += endp[ii][0];
+          nei_p_repr[1] += endp[ii][1];
+          nei_p_repr[2] += endp[ii][2];
+        }
+
+        let anc_v = [
+          anc_p_repr[0] - 2*dv_anc[0],
+          anc_p_repr[1] - 2*dv_anc[1],
+          anc_p_repr[2] - 2*dv_anc[2]
+        ];
+
+        let nei_v = [
+          nei_p_repr[0] - 2*dv_nei[0],
+          nei_p_repr[1] - 2*dv_nei[1],
+          nei_p_repr[2] - 2*dv_nei[2]
+        ];
+
+        //console.log(">>", key_anchor , "=>", key_nei,
+        //  "(a:", dv_anc_key, "::", anc_v.toString(), ")",
+        //  "(n:", dv_nei_key, "::", nei_v.toString(), ")");
+
+        let de = Math.abs(nei_v[0] - anc_v[0] + nei_v[1] - anc_v[1] + nei_v[2] - anc_v[2]);
+        if (de < _eps) {
+          console.log("STEEPLE?", key_anchor, key_nei);
+
+          delete_list.push( [ key_anchor, key_nei, dv_anc_key ] );
+          delete_list.push( [ key_anchor, dv_anc_key, key_nei ] );
+
+        }
+      }
+
+    }
+  }
+
+  for (let ii=0; ii<delete_list.length; ii++) {
+    let a = delete_list[ii][0];
+    let b = delete_list[ii][1];
+    let c = delete_list[ii][2];
+
+    delete admissible_nei[a][b][c];
+  }
+
+  return;
+
+  delete admissible_nei['^000']['^002']['0:1:0'];
+  delete admissible_nei['^000']['0:1:0']['^002'];
+
+  delete admissible_nei['^002']['^000']['0:-1:0'];
+  delete admissible_nei['^002']['0:-1:0']['^000'];
+
+  //????
+  delete admissible_nei['^001']['^003']['-1:0:0'];
+  delete admissible_nei['^001']['-1:0:0']['^003'];
+
+  delete admissible_nei['^003']['^001']['1:0:0'];
+  delete admissible_nei['^003']['1:0:0']['^001'];
+}
+
+
 
 function grid_clear(gr) {
 
@@ -3955,6 +4062,8 @@ function _init() {
 
   //let pgr = init_pgr([5,5,5]);
   let pgr = init_pgr([8,8,8]);
+  //let pgr = init_pgr([3,3,3]);
+  //let pgr = init_pgr([10,10,10]);
 
   //let _r = grid_wfc(pgr);
   let _r = grid_wfc_opt(pgr);
@@ -3967,6 +4076,7 @@ function _init() {
   //return;
 
   let fin_gr = gen_simple_grid(pgr);
+
   //console.log(fin_gr);
   realize_tri_from_grid(fin_gr);
 
@@ -3975,11 +4085,20 @@ function _init() {
 
   let gr = [
     [
-      [ ".",   "r003", "+000" ],
-      [ "r003","+000", "|000" ],
-      [ "r000","T000", "|000" ]
+      [ ".",   ".", "." ],
+      [ ".","^000", "." ],
+      [ ".",".", "." ]
+    ],
+    [
+      [ ".", ".", "." ],
+      [ ".","^020", "." ],
+      [ ".",".", "." ]
     ]
   ];
+  realize_tri_from_grid(gr);
+  return;
+
+
 
   gr = [
     [
