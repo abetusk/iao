@@ -177,7 +177,8 @@ let _g_h = 1/8;
 //_g_h = 1/16;
 //_g_h = 1/12;
 //_g_h = 1/4;
-_g_h = 1/6;
+//_g_h = 1/6;
+//_g_h = 1/5;
 
 //DEBUG
 //_g_h = 0.25;
@@ -2020,6 +2021,8 @@ function threejs_init() {
     //let pal = g_info.palette[ g_info.palette_idx ];
     //let color_hex = pal.colors[ _irnd(pal.colors.length) ];
 
+    color_idx = g_info.data.tri_color_idx[idx] % pal.colors.length;
+
     let color_hex = pal.colors[ color_idx ];
     let rgb = _hex2rgb(color_hex );
     color.setRGB( rgb.r/255, rgb.g/255, rgb.b/255 );
@@ -2917,11 +2920,8 @@ function filter_steeple() {
 
         let de = Math.abs(nei_v[0] - anc_v[0] + nei_v[1] - anc_v[1] + nei_v[2] - anc_v[2]);
         if (de < _eps) {
-          console.log("STEEPLE?", key_anchor, key_nei);
-
           delete_list.push( [ key_anchor, key_nei, dv_anc_key ] );
           delete_list.push( [ key_anchor, dv_anc_key, key_nei ] );
-
         }
       }
 
@@ -2936,20 +2936,6 @@ function filter_steeple() {
     delete admissible_nei[a][b][c];
   }
 
-  return;
-
-  delete admissible_nei['^000']['^002']['0:1:0'];
-  delete admissible_nei['^000']['0:1:0']['^002'];
-
-  delete admissible_nei['^002']['^000']['0:-1:0'];
-  delete admissible_nei['^002']['0:-1:0']['^000'];
-
-  //????
-  delete admissible_nei['^001']['^003']['-1:0:0'];
-  delete admissible_nei['^001']['-1:0:0']['^003'];
-
-  delete admissible_nei['^003']['^001']['1:0:0'];
-  delete admissible_nei['^003']['1:0:0']['^001'];
 }
 
 
@@ -3608,6 +3594,10 @@ function debug_print_gr(gr) {
           if (!gr[z][y][x][ii].valid) { continue; }
 
           let sfx = (gr[z][y][x][ii].processed ? '*' : '');
+
+          if ("cgroup" in gr[z][y][x][ii]) {
+            sfx += "[g" + gr[z][y][x][ii].cgroup.toString() + "]";
+          }
           if (valid_count>0) { u += ","; }
           //u += ',' + gr[z][y][x][ii].n + sfx;
           u += gr[z][y][x][ii].name + sfx;
@@ -3641,11 +3631,8 @@ function gen_simple_grid(pgr) {
   }
 
   for (let z=0; z<pgr.length; z++) {
-    //gr.push([]);
     for (let y=0; y<pgr[z].length; y++) {
-      //gr[z].push([]);
       for (let x=0; x<pgr[z][y].length; x++) {
-        //gr[z][y].push(".");
 
         let u = '.';
         for (let ii=0; ii<pgr[z][y][x].length; ii++) {
@@ -3812,10 +3799,12 @@ function grid_wfc_opt(gr) {
 
   grid_cull_boundary(gr);
 
-  console.log("BOUNDARY CULL GRID>>>");
-  console.log("grid:\n>>>>>>>>>>>>");
-  debug_print_gr(gr);
-  console.log(">>>>>>>>>>>>");
+  if (debug) {
+    console.log("BOUNDARY CULL GRID>>>");
+    console.log("grid:\n>>>>>>>>>>>>");
+    debug_print_gr(gr);
+    console.log(">>>>>>>>>>>>");
+  }
 
   let _r_c = {};
 
@@ -3843,28 +3832,11 @@ function grid_wfc_opt(gr) {
 
     grid_clear(gr);
 
-    console.log("========================");
-    console.log("iter", iter, "/", n_iter);
-    console.log("========================");
-
-    /*
-    let r = grid_cull_propagate_opt(gr, accessed, debug);
     if (debug) {
-      console.log("GOT>>>", r);
-      console.log("grid:\n>>>>>>>>>>>>");
-      debug_print_gr(gr);
-      console.log(">>>>>>>>>>>>");
+      console.log("========================");
+      console.log("iter", iter, "/", n_iter);
+      console.log("========================");
     }
-    if (r.state == "finished") {
-      console.log("0!!", r.status);
-      break;
-    }
-
-    if (check_consistency) {
-      _r_c = grid_consistency(gr);
-      console.log("CONSISTENCY.0:", _r_c.msg);
-    }
-    */
 
     r = grid_cull_collapse_one(gr, debug);
     if (r.state == "finished") {
@@ -3910,10 +3882,12 @@ function grid_wfc_opt(gr) {
     if (iter>=n_iter) { break; }
   }
 
-  console.log("grid_wfc ending>>>");
-  console.log("grid:\n>>>>>>>>>>>>");
-  debug_print_gr(gr);
-  console.log(">>>>>>>>>>>>");
+  if (debug) {
+    console.log("grid_wfc ending>>>");
+    console.log("grid:\n>>>>>>>>>>>>");
+    debug_print_gr(gr);
+    console.log(">>>>>>>>>>>>");
+  }
 
   let _rgr = grid_consistency(gr);
   console.log("consistency:", _rgr.msg);
@@ -4045,7 +4019,163 @@ function init_pgr(pgr_dim) {
   return pgr;
 }
 
+function _oob(gr, x,y,z) {
+  if ((z < 0) || (z >= gr.length) ||
+      (y < 0) || (y >= gr[z].length) ||
+      (x < 0) || (x >= gr[z][y].length)) {
+    return true;
+  }
+  return false;
+}
 
+function decorate_pgr_cgroup(pgr, x,y,z, cgroup, lvl) {
+  lvl = ((typeof lvl === "undefined") ? 0 : lvl);
+
+  if (_oob(pgr, x,y,z)){ return; }
+  if (pgr[z][y][x][0].processed) { return; }
+
+  pgr[z][y][x][0].cgroup = cgroup;
+  pgr[z][y][x][0].processed = true;
+
+  let key_anchor = pgr[z][y][x][0].name;
+
+  let admissible_nei = g_template.admissible_nei;
+  let dva = g_template.admissible_pos;
+  for (let dvidx=0; dvidx<dva.length; dvidx++) {
+
+    let dv_key = dva[dvidx].dv_key;
+    let dv = dva[dvidx].dv;
+
+    let ux = x + dv[0],
+        uy = y + dv[1],
+        uz = z + dv[2];
+
+    if (_oob(pgr, ux, uy, uz)) { continue; }
+
+    let key_nei = pgr[uz][uy][ux][0].name;
+    if (!(key_nei in admissible_nei[key_anchor][dv_key])) { continue; }
+    if (!admissible_nei[key_anchor][dv_key][key_nei].conn) { continue; }
+
+    decorate_pgr_cgroup(pgr, ux,uy,uz, cgroup, lvl+1);
+  }
+
+}
+
+function decorate_pgr(pgr) {
+
+  let admissible_nei = g_template.admissible_nei;
+
+  let cur_cgroup = 0;
+
+  for (let z=0; z<pgr.length; z++) {
+    for (let y=0; y<pgr[z].length; y++) {
+      for (let x=0; x<pgr[z][y].length; x++) {
+        pgr[z][y][x][0]["cgroup"] = -1;
+        pgr[z][y][x][0]["processed"] = false;
+      }
+    }
+  }
+
+  let dva = g_template.admissible_pos;
+
+  for (let z=0; z<pgr.length; z++) {
+    for (let y=0; y<pgr[z].length; y++) {
+      for (let x=0; x<pgr[z][y].length; x++) {
+        if (pgr[z][y][x][0].processed) { continue; }
+
+        pgr[z][y][x][0].processed = true;
+        pgr[z][y][x][0].cgroup = cur_cgroup;
+
+        let key_anchor = pgr[z][y][x][0].name;
+
+        for (let dvidx=0; dvidx<dva.length; dvidx++) {
+          let dv_key = dva[dvidx].dv_key;
+          let dv = dva[dvidx].dv;
+
+          let ux = x + dv[0],
+              uy = y + dv[1],
+              uz = z + dv[2];
+
+          if (_oob(pgr, ux,uy,uz)) { continue; }
+
+          let key_nei = pgr[uz][uy][ux][0].name;
+          if (!(key_nei in admissible_nei[key_anchor][dv_key])) { continue; }
+          if (!admissible_nei[key_anchor][dv_key][key_nei].conn) { continue; }
+
+          decorate_pgr_cgroup(pgr, ux,uy,uz, cur_cgroup);
+
+        }
+
+        cur_cgroup++;
+
+      }
+    }
+  }
+
+}
+
+function pgr_stat(pgr) {
+  let _stat = {
+    "group_size": {},
+    "tile_count": {}
+  };
+
+  for (let z=0; z<pgr.length; z++) {
+    for (let y=0; y<pgr[z].length; y++) {
+      for (let x=0; x<pgr[z][y].length; x++) {
+
+        for (let cidx=0; cidx<pgr[z][y][x].length; cidx++) {
+          let _name = pgr[z][y][x][cidx].name;
+          if (_name.length == 0) { continue; }
+
+          let cname = _name.charAt(0);
+          if (!(cname in _stat.tile_count)) {
+            _stat.tile_count[cname] = 0;
+          }
+          _stat.tile_count[cname]++;
+
+          if (cname == '.') { continue; }
+
+          if (!("cgroup"in pgr[z][y][x][cidx])) { continue; }
+          let cgroup = pgr[z][y][x][cidx].cgroup;
+          if (!(cgroup in _stat.group_size)) {
+            _stat.group_size[cgroup] = 0;
+          }
+          _stat.group_size[cgroup]++;
+        }
+
+      }
+    }
+  }
+
+  return _stat;
+}
+
+function pgr_filter(pgr, filt) {
+
+  for (let z=0; z<pgr.length; z++) {
+    for (let y=0; y<pgr[z].length; y++) {
+      for (let x=0; x<pgr[z][y].length; x++) {
+
+        for (let cidx=0; cidx<pgr[z][y][x].length; cidx++) {
+          if (!("cgroup" in pgr[z][y][x][cidx])) { continue; }
+          let _name = pgr[z][y][x][cidx].name;
+          if (_name.length == 0) { continue; }
+
+          let cgroup = pgr[z][y][x][cidx].cgroup;
+          if (cgroup in filt) {
+            pgr[z][y][x][cidx].name = ".000";
+          }
+
+
+        }
+
+      }
+    }
+  }
+
+
+}
 
 function _init() {
 
@@ -4059,26 +4189,58 @@ function _init() {
 
   //---
 
+  let N = 10;
 
   //let pgr = init_pgr([5,5,5]);
-  let pgr = init_pgr([8,8,8]);
+  //let pgr = init_pgr([8,8,8]);
   //let pgr = init_pgr([3,3,3]);
   //let pgr = init_pgr([10,10,10]);
+  let pgr = init_pgr([N,N,N]);
 
   //let _r = grid_wfc(pgr);
   let _r = grid_wfc_opt(pgr);
   console.log(">>", _r, pgr);
 
-  //debug_print_gr(pgr);
   g_template["debug"] = pgr;
+
+  decorate_pgr(pgr);
+
+  console.log("=============");
+  console.log("== BEFORE  ==");
+  console.log("=============");
+  debug_print_gr(pgr);
+  console.log("=============");
+
+  let _stat = pgr_stat(pgr);
+  g_info["_stat"] = _stat;
+
+
+  let filt_group = {};
+  //let thresh = 4;
+  let thresh = N;
+  for (let group_name in _stat.group_size) {
+    if (_stat.group_size[group_name] < thresh) {
+      filt_group[group_name] = true;
+    }
+  }
+
+  pgr_filter(pgr, filt_group);
+
+  console.log("=============");
+  console.log("== BEFORE  ==");
+  console.log("=============");
+  debug_print_gr(pgr);
+  console.log("=============");
+
 
   //realize_tri_from_sp_grid(pgr);
   //return;
 
   let fin_gr = gen_simple_grid(pgr);
 
+
   //console.log(fin_gr);
-  realize_tri_from_grid(fin_gr);
+  realize_tri_from_grid(fin_gr, pgr);
 
   return;
 
@@ -4537,10 +4699,11 @@ function _init() {
 
 }
 
-function realize_tri_from_grid(gr, show_debug) {
+function realize_tri_from_grid(gr, pgr, show_debug) {
   show_debug = ((typeof show_debug === "undefined") ? false : show_debug);
   g_info.debug = gr;
   g_info.data.tri = [];
+  g_info.data.tri_color_idx = [];
 
   let S = 60;
   let tx = g_info.cx,
@@ -4553,9 +4716,12 @@ function realize_tri_from_grid(gr, show_debug) {
   ty = -15*n+1;
   tz = -15*n+1;
 
+  color_idx=0;
+
   for (let zidx=0; zidx<gr.length; zidx++) {
     for (let yidx=0; yidx<gr[zidx].length; yidx++) {
       for (let xidx=0; xidx<gr[zidx][yidx].length; xidx++) {
+
         let u = gr[zidx][yidx][xidx];
         let template_u = u[0];
         if (template_u == '.') { continue; }
@@ -4573,6 +4739,18 @@ function realize_tri_from_grid(gr, show_debug) {
         let _tri = _template_rot_mov(g_template[template_u], _rx, _ry, _rz, xidx, yidx, zidx);
         _p_mul_mov(_tri, S, tx, ty, tz);
         g_info.data.tri.push(_tri);
+
+
+
+        if ("cgroup" in pgr[zidx][yidx][xidx][0]) {
+          g_info.data.tri_color_idx.push( pgr[zidx][yidx][xidx][0].cgroup );
+        }
+        else {
+          g_info.data.tri_color_idx.push(color_idx);
+          color_idx++;
+        }
+
+
 
 
         if (g_info.debug_level > 3) {
