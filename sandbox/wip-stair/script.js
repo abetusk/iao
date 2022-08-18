@@ -187,6 +187,11 @@ let _g_h = 1/8;
 //let _g_epd = 1/8;
 let _g_epd = 0;
 
+let _plat_del = -1/64;
+_plat_del = 0;
+
+let _p_w = _g_w + _plat_del;
+
 // template tiles.
 // These will be rotated to build the whole tile library.
 // The endpoints are there so that we can weed out duplicates
@@ -307,25 +312,11 @@ let g_template = {
       [  _g_w/2,  +_g_h/2,  1/2 ], [ -_g_w/2, +_g_h/2,  1/2 ],
       [  _g_w/2,  -_g_h/2,  1/2 ], [ -_g_w/2, -_g_h/2,  1/2 ]
 
-    ],
-
-    /*
-    "^": [
-      // front
-      //
-      [  _g_w/2,  0, -_g_h/2 ], [ -_g_w/2,  0, -_g_h/2 ],
-      [  _g_w/2,  0, +_g_h/2 ], [ -_g_w/2,  0, +_g_h/2 ],
-
-      // back top
-      //
-      [  _g_w/2,  +_g_h/2,  0 ], [ -_g_w/2, +_g_h/2,  0 ],
-      [  _g_w/2,  -_g_h/2,  0 ], [ -_g_w/2, -_g_h/2,  0 ]
-
-    ],
-    */
+    ]
 
   },
 
+  /*
   "force_empty" : {
     "." : [],
     //"d": [],
@@ -336,6 +327,7 @@ let g_template = {
     "T" : [],
     "^" : []
   },
+  */
 
   /*
   "force_empty" : {
@@ -401,6 +393,40 @@ let g_template = {
   ],
 
   "p" : [
+
+    // front panel
+    //
+    -_p_w/2,    0, -_g_h/2,  _p_w/2,    0, -_g_h/2,   -_g_w/2, -1/2, -_g_h/2,
+     _p_w/2,    0, -_g_h/2,  _g_w/2, -1/2, -_g_h/2,   -_g_w/2, -1/2, -_g_h/2,
+
+    // back panel
+    //
+    -_p_w/2,    0, +_g_h/2, -_g_w/2, -1/2, +_g_h/2,   _p_w/2,    0, +_g_h/2,
+     _p_w/2,    0, +_g_h/2, -_g_w/2, -1/2, +_g_h/2,   _g_w/2, -1/2, +_g_h/2,
+
+    // left side stripe
+    //
+    -_p_w/2,    0, -_g_h/2,   -_g_w/2, -1/2, -_g_h/2,  -_g_w/2, -1/2, +_g_h/2,
+    -_p_w/2,    0, -_g_h/2,   -_g_w/2, -1/2, +_g_h/2,  -_p_w/2,    0, +_g_h/2,
+
+    // right side stripe
+    //
+     _p_w/2,    0, -_g_h/2,   _g_w/2, -1/2, +_g_h/2,  _g_w/2, -1/2, -_g_h/2,
+     _p_w/2,    0, -_g_h/2,   _p_w/2,    0, +_g_h/2,  _g_w/2, -1/2, +_g_h/2,
+
+    // back cap (not optional anymore);
+    //
+    -_p_w/2,    0, -_g_h/2,   -_p_w/2,    0, +_g_h/2,   _p_w/2,    0, -_g_h/2,
+     _p_w/2,    0, -_g_h/2,   -_p_w/2,    0, +_g_h/2,   _p_w/2,    0, +_g_h/2,
+
+    // front cap (optional)
+    //
+    -_g_w/2, -1/2, -_g_h/2,   _g_w/2, -1/2, +_g_h/2,    -_g_w/2, -1/2, +_g_h/2,
+     _g_w/2, -1/2, -_g_h/2,   _g_w/2, -1/2, +_g_h/2,    -_g_w/2, -1/2, -_g_h/2
+
+  ],
+
+  "P" : [
 
     // front panel
     //
@@ -2499,8 +2525,8 @@ function _v_in(v, va, _eps) {
 // a 'tile_attach' list of tiles that can attach to each other (based off
 // of the endpoint)
 //
-function _build_tile_library( _endp_lib, _force_lib ) {
-  _force_lib = ((typeof _force_lib === "undefined") ? {} : _force_lib);
+function _build_tile_library( _endp_lib ) {
+  //_force_lib = ((typeof _force_lib === "undefined") ? {} : _force_lib);
 
   let raw_lib = {};
   let rot_lib = {};
@@ -2551,6 +2577,7 @@ function _build_tile_library( _endp_lib, _force_lib ) {
           _type_a.push( raw_lib[ukey] );
           _type_a_key.push(ukey);
 
+          /*
           // force tile has dv to be placed and a 'tile type' (just '.')
           // that must be placed after this tile is placed.
           // The location is held in the 'dv' array which is rotated
@@ -2562,8 +2589,10 @@ function _build_tile_library( _endp_lib, _force_lib ) {
             for (let ii=0; ii<v.length; ii++) { v[ii] = Math.floor(v[ii] + 0.5); }
             _force_list.push({"dv": v, "tile": _force_lib[pkey][fidx]["tile"]});
           }
+          */
 
-          rot_lib[ukey] = { "m": [mx, my, mz], "r": [xidx, yidx, zidx ], "f": _force_list };
+          //rot_lib[ukey] = { "m": [mx, my, mz], "r": [xidx, yidx, zidx ], "f": _force_list };
+          rot_lib[ukey] = { "m": [mx, my, mz], "r": [xidx, yidx, zidx ] };
 
         }
       }
@@ -2644,6 +2673,8 @@ function _build_tile_library( _endp_lib, _force_lib ) {
             //
             if ((dx==0) && (dy==0) && (dz==0)) { continue; }
 
+
+            /*
             // if the anchor tile has this position as a forced
             // area (of a blank tile), skip it
             // 
@@ -2675,6 +2706,7 @@ function _build_tile_library( _endp_lib, _force_lib ) {
               }
             }
             if (_skip_tile) { continue; }
+            */
 
             //---
 
@@ -3905,10 +3937,12 @@ function grid_wfc(gr) {
 
   grid_cull_boundary(gr);
 
-  console.log("BOUNDARY CULL GRID>>>");
-  console.log("grid:\n>>>>>>>>>>>>");
-  debug_print_gr(gr);
-  console.log(">>>>>>>>>>>>");
+  if (debug) {
+    console.log("BOUNDARY CULL GRID>>>");
+    console.log("grid:\n>>>>>>>>>>>>");
+    debug_print_gr(gr);
+    console.log(">>>>>>>>>>>>");
+  }
 
   let _r_c = {};
 
@@ -3983,10 +4017,12 @@ function grid_wfc(gr) {
     if (iter>=n_iter) { break; }
   }
 
-  console.log("grid_wfc ending>>>");
-  console.log("grid:\n>>>>>>>>>>>>");
-  debug_print_gr(gr);
-  console.log(">>>>>>>>>>>>");
+  if (debug) {
+    console.log("grid_wfc ending>>>");
+    console.log("grid:\n>>>>>>>>>>>>");
+    debug_print_gr(gr);
+    console.log(">>>>>>>>>>>>");
+  }
 
   let _rgr = grid_consistency(gr);
   console.log("consistency:", _rgr.msg);
@@ -4177,10 +4213,25 @@ function pgr_filter(pgr, filt) {
 
 }
 
+function pgr_blank(pgr, x0, y0, z0, dx, dy, dz) {
+
+  for (let z=z0; z<(z0+dz); z++) {
+    for (let y=y0; y<(y0+dy); y++) {
+      for (let x=x0; x<(x0+dx); x++) {
+
+        if (_oob(pgr, x,y,z)) { continue; }
+        pgr[z][y][x] = [{ "name": ".000", "valid": true, "processed": false }];
+      }
+    }
+  }
+}
+
 function _init() {
+  let debug = false;
 
   init_template();
-  _build_tile_library( g_template.endpoint, g_template.force_empty );
+  //_build_tile_library( g_template.endpoint, g_template.force_empty );
+  _build_tile_library( g_template.endpoint );
 
   //DEBUG
   let uniq_count = 0;
@@ -4189,13 +4240,20 @@ function _init() {
 
   //---
 
-  let N = 10;
+  let M = 12;
 
   //let pgr = init_pgr([5,5,5]);
   //let pgr = init_pgr([8,8,8]);
   //let pgr = init_pgr([3,3,3]);
   //let pgr = init_pgr([10,10,10]);
-  let pgr = init_pgr([N,N,N]);
+  let pgr = init_pgr([M,M,M]);
+
+  let S=4;
+  let T=5
+  pgr_blank(pgr, S, S, S, M-2*S, M-2*S, M-2*S);
+  pgr_blank(pgr, T, T, 0, M-2*T, M-2*T, M);
+  pgr_blank(pgr, T, 0, T, M-2*T, M, M-2*T);
+  pgr_blank(pgr, 0, T, T, M, M-2*T, M-2*T);
 
   //let _r = grid_wfc(pgr);
   let _r = grid_wfc_opt(pgr);
@@ -4205,11 +4263,13 @@ function _init() {
 
   decorate_pgr(pgr);
 
-  console.log("=============");
-  console.log("== BEFORE  ==");
-  console.log("=============");
-  debug_print_gr(pgr);
-  console.log("=============");
+  if (debug) {
+    console.log("=============");
+    console.log("== BEFORE  ==");
+    console.log("=============");
+    debug_print_gr(pgr);
+    console.log("=============");
+  }
 
   let _stat = pgr_stat(pgr);
   g_info["_stat"] = _stat;
@@ -4217,7 +4277,7 @@ function _init() {
 
   let filt_group = {};
   //let thresh = 4;
-  let thresh = N;
+  let thresh = M;
   for (let group_name in _stat.group_size) {
     if (_stat.group_size[group_name] < thresh) {
       filt_group[group_name] = true;
@@ -4226,12 +4286,13 @@ function _init() {
 
   pgr_filter(pgr, filt_group);
 
-  console.log("=============");
-  console.log("== BEFORE  ==");
-  console.log("=============");
-  debug_print_gr(pgr);
-  console.log("=============");
-
+  if (debug) {
+    console.log("=============");
+    console.log("== BEFORE  ==");
+    console.log("=============");
+    debug_print_gr(pgr);
+    console.log("=============");
+  }
 
   //realize_tri_from_sp_grid(pgr);
   //return;
@@ -4882,7 +4943,8 @@ function _ok() {
 function _main() {
 
   init_template();
-  _build_tile_library( g_template.endpoint, g_template.force_empty );
+  //_build_tile_library( g_template.endpoint, g_template.force_empty );
+  _build_tile_library( g_template.endpoint );
 
   //let pgr = init_pgr([4,4,4]);
   //let pgr = init_pgr([4,4,4]);
