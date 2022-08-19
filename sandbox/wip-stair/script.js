@@ -237,7 +237,7 @@ var g_info = {
     "15": 1,
     "16": 1
   },
-  "tile_height": 1/3,
+  "tile_height": 1/8,
 
   "view_counter" : 1,
   "view_counter_n" : 3,
@@ -261,15 +261,6 @@ var g_info = {
   "material_type" : "toon"
 
 };
-
-let _g_w = 1/4;
-
-let _g_h = 1/8;
-
-let _g_epd = 0;
-let _plat_del = 0;
-
-let _p_w = _g_w + _plat_del;
 
 // template tiles.
 // These will be rotated to build the whole tile library.
@@ -302,8 +293,8 @@ let g_template = {
   },
 
   "weight": {
-    ".": 1,
     //"d": 0,
+    ".": 1,
     "|": 100,
     "+": 1,
     "T": 1,
@@ -313,8 +304,8 @@ let g_template = {
   },
 
   "pdf":  {
-    ".": -1,
     //"d": -1,
+    ".": -1,
     "|": -1,
     "+": -1,
     "T": -1,
@@ -334,200 +325,8 @@ let g_template = {
   //
   "endpoint": {},
 
-  /*
-  "__endpoint": {
-    ".": [],
-
-    //"d": [],
-
-    "|": [
-      [ -_g_w/2, -1/2, -_g_h/2 ], [ _g_w/2, -1/2, -_g_h/2 ],
-      [ -_g_w/2, -1/2, +_g_h/2 ], [ _g_w/2, -1/2, +_g_h/2 ],
-
-      [ -_g_w/2,  1/2, -_g_h/2 ], [  _g_w/2,  1/2, -_g_h/2 ],
-      [ -_g_w/2,  1/2, +_g_h/2 ], [  _g_w/2,  1/2, +_g_h/2 ]
-    ],
-
-    "p": [
-      [ -_g_w/2, -1/2, -_g_h/2 ], [  _g_w/2, -1/2, -_g_h/2 ],
-      [ -_g_w/2, -1/2, +_g_h/2 ], [  _g_w/2, -1/2, +_g_h/2 ]
-    ],
-
-    "r": [
-      [ -_g_w/2, -1/2, -_g_h/2 ], [  _g_w/2, -1/2, -_g_h/2 ],
-      [ -_g_w/2, -1/2, +_g_h/2 ], [  _g_w/2, -1/2, +_g_h/2 ],
-
-      [  1/2,  _g_w/2, -_g_h/2 ], [  1/2, -_g_w/2, -_g_h/2 ],
-      [  1/2,  _g_w/2, +_g_h/2 ], [  1/2, -_g_w/2, +_g_h/2 ]
-    ],
-
-    "+": [
-      [ -_g_w/2,  1/2, -_g_h/2 ], [  _g_w/2,  1/2, -_g_h/2 ],
-      [ -_g_w/2,  1/2, +_g_h/2 ], [  _g_w/2,  1/2, +_g_h/2 ],
-
-      [ -_g_w/2, -1/2, -_g_h/2 ], [  _g_w/2, -1/2, -_g_h/2 ],
-      [ -_g_w/2, -1/2, +_g_h/2 ], [  _g_w/2, -1/2, +_g_h/2 ],
-
-      [  1/2,  _g_w/2, -_g_h/2 ], [  1/2, -_g_w/2, -_g_h/2 ],
-      [  1/2,  _g_w/2, +_g_h/2 ], [  1/2, -_g_w/2, +_g_h/2 ],
-
-      [ -1/2,  _g_w/2, -_g_h/2 ], [ -1/2, -_g_w/2, -_g_h/2 ],
-      [ -1/2,  _g_w/2, +_g_h/2 ], [ -1/2, -_g_w/2, +_g_h/2 ]
-    ],
-
-    "T": [
-      [  _g_w/2, -1/2, -_g_h/2 ], [ -_g_w/2, -1/2, -_g_h/2 ],
-      [  _g_w/2, -1/2, +_g_h/2 ], [ -_g_w/2, -1/2, +_g_h/2 ],
-
-      [ -1/2,  _g_w/2, -_g_h/2 ], [ -1/2, -_g_w/2, -_g_h/2 ],
-      [ -1/2,  _g_w/2, +_g_h/2 ], [ -1/2, -_g_w/2, +_g_h/2 ],
-
-      [  1/2,  _g_w/2, -_g_h/2 ], [  1/2, -_g_w/2, -_g_h/2 ],
-      [  1/2,  _g_w/2, +_g_h/2 ], [  1/2, -_g_w/2, +_g_h/2 ]
-    ],
-
-    "^": [
-      [  _g_w/2, -1/2, -_g_h/2 ], [ -_g_w/2, -1/2, -_g_h/2 ],
-      [  _g_w/2, -1/2, +_g_h/2 ], [ -_g_w/2, -1/2, +_g_h/2 ],
-
-      [  _g_w/2,  +_g_h/2,  1/2 ], [ -_g_w/2, +_g_h/2,  1/2 ],
-      [  _g_w/2,  -_g_h/2,  1/2 ], [ -_g_w/2, -_g_h/2,  1/2 ]
-
-    ]
-
-  },
-  */
-
-  /*
-  // simple plane for debuging
-  //
-  "d": [
-
-    -1/2,  1/2, 0,  -1/2, -1/2, 0,    1/2,  1/2, 0,
-    -1/2, -1/2, 0,   1/2, -1/2, 0,    1/2,  1/2, 0,
-
-
-    -1/2,  1/2, 0,   1/2,  1/2, 0,   -1/2, -1/2, 0,
-    -1/2, -1/2, 0,   1/2,  1/2, 0,    1/2, -1/2, 0
-  ],
-  */
-
   "|" : [],
-
-  /*
-  "__|" : [
-
-    // front panel
-    //
-    -_g_w/2,  1/2, -_g_h/2,  _g_w/2,  1/2, -_g_h/2,   -_g_w/2, -1/2, -_g_h/2,
-     _g_w/2,  1/2, -_g_h/2,  _g_w/2, -1/2, -_g_h/2,   -_g_w/2, -1/2, -_g_h/2,
-
-    // back panel
-    //
-    -_g_w/2,  1/2, +_g_h/2, -_g_w/2, -1/2, +_g_h/2,   _g_w/2,  1/2, +_g_h/2,
-     _g_w/2,  1/2, +_g_h/2, -_g_w/2, -1/2, +_g_h/2,   _g_w/2, -1/2, +_g_h/2,
-
-    // left side stripe
-    //
-    -_g_w/2,  1/2, -_g_h/2,   -_g_w/2, -1/2, -_g_h/2,  -_g_w/2, -1/2, +_g_h/2,
-    -_g_w/2,  1/2, -_g_h/2,   -_g_w/2, -1/2, +_g_h/2,  -_g_w/2,  1/2, +_g_h/2,
-
-    // right side stripe
-    //
-     _g_w/2,  1/2, -_g_h/2,   _g_w/2, -1/2, +_g_h/2,  _g_w/2, -1/2, -_g_h/2,
-     _g_w/2,  1/2, -_g_h/2,   _g_w/2,  1/2, +_g_h/2,  _g_w/2, -1/2, +_g_h/2,
-
-    // back cap (optional)
-    //
-    -_g_w/2,  1/2, -_g_h/2,   -_g_w/2,  1/2, +_g_h/2,   _g_w/2,  1/2, -_g_h/2,
-     _g_w/2,  1/2, -_g_h/2,   -_g_w/2,  1/2, +_g_h/2,   _g_w/2,  1/2, +_g_h/2,
-
-    // front cap (optional)
-    //
-    -_g_w/2, -1/2, -_g_h/2,   _g_w/2, -1/2, +_g_h/2,    -_g_w/2, -1/2, +_g_h/2,
-     _g_w/2, -1/2, -_g_h/2,   _g_w/2, -1/2, +_g_h/2,    -_g_w/2, -1/2, -_g_h/2
-
-  ],
-  */
-
   "p" : [],
-
-  /*
-  "__p": [
-
-    // front panel
-    //
-    -_p_w/2,    0, -_g_h/2,  _p_w/2,    0, -_g_h/2,   -_g_w/2, -1/2, -_g_h/2,
-     _p_w/2,    0, -_g_h/2,  _g_w/2, -1/2, -_g_h/2,   -_g_w/2, -1/2, -_g_h/2,
-
-    // back panel
-    //
-    -_p_w/2,    0, +_g_h/2, -_g_w/2, -1/2, +_g_h/2,   _p_w/2,    0, +_g_h/2,
-     _p_w/2,    0, +_g_h/2, -_g_w/2, -1/2, +_g_h/2,   _g_w/2, -1/2, +_g_h/2,
-
-    // left side stripe
-    //
-    -_p_w/2,    0, -_g_h/2,   -_g_w/2, -1/2, -_g_h/2,  -_g_w/2, -1/2, +_g_h/2,
-    -_p_w/2,    0, -_g_h/2,   -_g_w/2, -1/2, +_g_h/2,  -_p_w/2,    0, +_g_h/2,
-
-    // right side stripe
-    //
-     _p_w/2,    0, -_g_h/2,   _g_w/2, -1/2, +_g_h/2,  _g_w/2, -1/2, -_g_h/2,
-     _p_w/2,    0, -_g_h/2,   _p_w/2,    0, +_g_h/2,  _g_w/2, -1/2, +_g_h/2,
-
-    // back cap (not optional anymore);
-    //
-    -_p_w/2,    0, -_g_h/2,   -_p_w/2,    0, +_g_h/2,   _p_w/2,    0, -_g_h/2,
-     _p_w/2,    0, -_g_h/2,   -_p_w/2,    0, +_g_h/2,   _p_w/2,    0, +_g_h/2,
-
-    // front cap (optional)
-    //
-    -_g_w/2, -1/2, -_g_h/2,   _g_w/2, -1/2, +_g_h/2,    -_g_w/2, -1/2, +_g_h/2,
-     _g_w/2, -1/2, -_g_h/2,   _g_w/2, -1/2, +_g_h/2,    -_g_w/2, -1/2, -_g_h/2
-
-  ],
-  */
-
-  /*
-  "P" : [
-
-    // front panel
-    //
-    -_g_w/2,    0, -_g_h/2,  _g_w/2,    0, -_g_h/2,   -_g_w/2, -1/2, -_g_h/2,
-     _g_w/2,    0, -_g_h/2,  _g_w/2, -1/2, -_g_h/2,   -_g_w/2, -1/2, -_g_h/2,
-
-    // back panel
-    //
-    -_g_w/2,    0, +_g_h/2, -_g_w/2, -1/2, +_g_h/2,   _g_w/2,    0, +_g_h/2,
-     _g_w/2,    0, +_g_h/2, -_g_w/2, -1/2, +_g_h/2,   _g_w/2, -1/2, +_g_h/2,
-
-    // left side stripe
-    //
-    -_g_w/2,    0, -_g_h/2,   -_g_w/2, -1/2, -_g_h/2,  -_g_w/2, -1/2, +_g_h/2,
-    -_g_w/2,    0, -_g_h/2,   -_g_w/2, -1/2, +_g_h/2,  -_g_w/2,    0, +_g_h/2,
-
-    // right side stripe
-    //
-     _g_w/2,    0, -_g_h/2,   _g_w/2, -1/2, +_g_h/2,  _g_w/2, -1/2, -_g_h/2,
-     _g_w/2,    0, -_g_h/2,   _g_w/2,    0, +_g_h/2,  _g_w/2, -1/2, +_g_h/2,
-
-    // back cap (not optional anymore);
-    //
-    -_g_w/2,    0, -_g_h/2,   -_g_w/2,    0, +_g_h/2,   _g_w/2,    0, -_g_h/2,
-     _g_w/2,    0, -_g_h/2,   -_g_w/2,    0, +_g_h/2,   _g_w/2,    0, +_g_h/2,
-
-    // front cap (optional)
-    //
-    -_g_w/2, -1/2, -_g_h/2,   _g_w/2, -1/2, +_g_h/2,    -_g_w/2, -1/2, +_g_h/2,
-     _g_w/2, -1/2, -_g_h/2,   _g_w/2, -1/2, +_g_h/2,    -_g_w/2, -1/2, -_g_h/2
-
-  ],
-  */
-
-  // by hand is too much, these will be done via init_template()
-  //
-  //"%" : [],
-
   "r" : [],
   "^" : [],
   "+" : [],
@@ -539,6 +338,14 @@ let g_template = {
 // too involved to list out statically so do it here.
 //
 function init_template() {
+
+  let _g_w = g_info.tile_width;
+  let _g_h = g_info.tile_height;
+
+  let _g_epd = 0;
+  let _plat_del = 0;
+  let _p_w = _g_w + _plat_del;
+
 
   let S = 0;
   for (let _tsn in g_template.weight) {
@@ -553,6 +360,13 @@ function init_template() {
   }
   g_template.cdf[ g_template.cdf.length-1 ].s = 1.01;
 
+  // enpoints tell how we can connect to the other tiles
+  //
+  // these are flush with the interface plane but in a rectangular pattern, so
+  // four points to an interface.
+  //
+  // The null ('.') and debug ('d') tiles don't have any interfaces
+  //
   g_template["endpoint"] = {
 
     ".": [],
@@ -616,6 +430,17 @@ function init_template() {
 
   };
 
+  // simple plane for debuging
+  //
+  let debug_plane = false;
+  if (debug_plane) {
+    g_template["d"] = [
+      -1/2,  1/2, 0,  -1/2, -1/2, 0,    1/2,  1/2, 0,
+      -1/2, -1/2, 0,   1/2, -1/2, 0,    1/2,  1/2, 0,
+      -1/2,  1/2, 0,   1/2,  1/2, 0,   -1/2, -1/2, 0,
+      -1/2, -1/2, 0,   1/2,  1/2, 0,    1/2, -1/2, 0
+    ];
+  }
 
   g_template["|"] = [
 
