@@ -37,6 +37,8 @@
 // color palette
 // size
 // symmetry
+// light placement
+//
 
 var g_info = {
   "PROJECT" : "like go up",
@@ -47,7 +49,7 @@ var g_info = {
   "ds": 5,
 
   "quiet":false,
-  "grid_size": 12,
+  "grid_size": 7,
 
   "download_filename":"like_go_up.png",
 
@@ -241,14 +243,14 @@ let g_template = {
   },
 
   "weight": {
-    ".": 100,
+    ".": 1,
     //"d": 0,
     "|": 1,
     "+": 1,
     "T": 1,
     "r": 1,
     "p": 1,
-    "^": 1000
+    "^": 1
   },
 
   "pdf":  {
@@ -332,34 +334,6 @@ let g_template = {
     ]
 
   },
-
-  /*
-  "force_empty" : {
-    "." : [],
-    //"d": [],
-    "p" : [],
-    "|" : [],
-    "r" : [],
-    "+" : [],
-    "T" : [],
-    "^" : []
-  },
-  */
-
-  /*
-  "force_empty" : {
-    "." : [],
-    "d": [],
-    "|" : [ { "dv" : [0, 0, -1], "tile": "." } ],
-    "r" : [ { "dv" : [0, 0, -1], "tile": "." } ],
-    "+" : [ { "dv" : [0, 0, -1], "tile": "." } ],
-    "T" : [ { "dv" : [0, 0, -1], "tile": "." } ],
-    //"%" : [ { "dv" : [0, 0, -1], "tile": "." }, { "dv": [0,1,0], "tile":"." } ],
-    "^" : [ { "dv" : [0, 0, -1], "tile": "." }, { "dv": [0,0,1], "tile":"." } ]
-  },
-  */
-
-  //":" : [],
 
   /*
   // simple plane for debuging
@@ -1963,7 +1937,8 @@ function threejs_init() {
 
   g_info.scene.background = new THREE.Color( bg );
   //g_info.scene.fog = new THREE.Fog( 0x050505, 2000, 3500 );
-  g_info.scene.fog = new THREE.Fog( 0x7a7a7a , 16, 1024);
+  //g_info.scene.fog = new THREE.Fog( 0x7a7a7a , 16, 1024);
+  g_info.scene.fog = new THREE.Fog( bg, 16, 1024);
 
 
   //---
@@ -2273,6 +2248,10 @@ function threejs_init() {
 
   //let composer = new POSTPROCESSING.EffectComposer(g_info.renderer);
   let composer = new POSTPROCESSING.EffectComposer(g_info.renderer, _b);
+
+  //let clearpass = new POSTPROCESSING.ClearPass();
+  //composer.addPass(clearpass);
+
   let renderpass = new POSTPROCESSING.RenderPass(g_info.scene, g_info.camera);
   //let bloomeffect = new POSTPROCESSING.EffectPass(g_info.camera, new POSTPROCESSING.BloomEffect());
 
@@ -2284,9 +2263,19 @@ function threejs_init() {
   let fxaapass = new POSTPROCESSING.EffectPass(g_info.camera, fxaaeffect);
 
 
+
   composer.addPass(renderpass);
   composer.addPass(bloompass);
   composer.addPass(fxaapass);
+
+  //g_info.renderer.autoClear = false;
+
+  //let outpass = new POSTPROCESSING.ShaderPass( THREE.CopyShader );
+  //outpass.renderToScreen = true;
+  //composer.addPass(outpass);
+  //g_info.out_pass = outpass;
+
+
   //let composer = new THREE.EffectComposer(g_info.renderer);
   //composer.addPass(new RenderPass(g_info.scene, g_info.camera ));
   //composer.addPass(new EffectPass(camera, new BloomEffect()));
@@ -2300,6 +2289,7 @@ function threejs_init() {
 
 
 
+
   g_info.container.appendChild( g_info.renderer.domElement );
 
   window.addEventListener( 'resize', onWindowResize );
@@ -2308,16 +2298,23 @@ function threejs_init() {
 function onWindowResize() {
 
   g_info.aspect = window.innerWidth / window.innerHeight;
-  g_info.camera = new THREE.OrthographicCamera(-g_info.frustumSize * g_info.aspect/2,
-                                                g_info.frustumSize * g_info.aspect/2,
-                                                g_info.frustumSize/2,
-                                               -g_info.frustumSize/2,
-                                                -8000,
-                                                8000);
-  g_info.camera.updateProjectionMatrix();
-  g_info.renderer.setSize( window.innerWidth, window.innerHeight );
 
+  g_info.camera.left    = -g_info.frustumSize * g_info.aspect/2;
+  g_info.camera.right   =  g_info.frustumSize * g_info.aspect/2;
+  g_info.camera.top     =  g_info.frustumSize /2;
+  g_info.camera.bottom  = -g_info.frustumSize /2;
+  g_info.camera.near    = -8000;
+  g_info.camera.far     =  8000;
+
+  g_info.camera.updateProjectionMatrix();
   g_info.camera.position.z = 0;
+
+  g_info.renderer.setSize( window.innerWidth, window.innerHeight );
+  if ("composer" in g_info) {
+    g_info.composer.setSize( window.innerWidth, window.innerHeight );
+  }
+
+
 }
 
 //---
@@ -2680,7 +2677,7 @@ function _v_in(v, va, _eps) {
   return -1;
 }
 
-// by using the endpoint library and the 'forced' library,
+// by using the endpoint library,
 // build a list of all rotations of the endpoints (raw_lib),
 // a map of equivalent representations (equiv_lib),
 // a map that has the representative of each rotational class (repr_map),
@@ -2688,8 +2685,6 @@ function _v_in(v, va, _eps) {
 // of the endpoint)
 //
 function _build_tile_library( _endp_lib ) {
-  //_force_lib = ((typeof _force_lib === "undefined") ? {} : _force_lib);
-
   let raw_lib = {};
   let rot_lib = {};
 
@@ -2739,21 +2734,6 @@ function _build_tile_library( _endp_lib ) {
           _type_a.push( raw_lib[ukey] );
           _type_a_key.push(ukey);
 
-          /*
-          // force tile has dv to be placed and a 'tile type' (just '.')
-          // that must be placed after this tile is placed.
-          // The location is held in the 'dv' array which is rotated
-          // with the rotation of the tile.
-          //
-          let _force_list = [];
-          for (let fidx=0; fidx<_force_lib[pkey].length; fidx++) {
-            let v = _m_v_mul(mr, _force_lib[pkey][fidx].dv);
-            for (let ii=0; ii<v.length; ii++) { v[ii] = Math.floor(v[ii] + 0.5); }
-            _force_list.push({"dv": v, "tile": _force_lib[pkey][fidx]["tile"]});
-          }
-          */
-
-          //rot_lib[ukey] = { "m": [mx, my, mz], "r": [xidx, yidx, zidx ], "f": _force_list };
           rot_lib[ukey] = { "m": [mx, my, mz], "r": [xidx, yidx, zidx ] };
 
         }
@@ -2771,7 +2751,6 @@ function _build_tile_library( _endp_lib ) {
 
         let k=0;
         for (k=0; k<_type_a[i].length; k++) {
-          //if (!(_v_in(_type_a[i][k], _type_a[j]))) { break; }
           if (_v_in(_type_a[i][k], _type_a[j])<0) { break; }
         }
 
@@ -2823,8 +2802,7 @@ function _build_tile_library( _endp_lib ) {
 
       // anchor_key is at the 'center' where test_key
       // is shifted around the 3x3x3 cube, excluding the
-      // center point and any tiles that are forced to
-      // be empty
+      // center point.
       //
       for (let dx=-1; dx<2; dx++) {
         for (let dy=-1; dy<2; dy++) {
@@ -2834,41 +2812,6 @@ function _build_tile_library( _endp_lib ) {
             // anchor_key is
             //
             if ((dx==0) && (dy==0) && (dz==0)) { continue; }
-
-
-            /*
-            // if the anchor tile has this position as a forced
-            // area (of a blank tile), skip it
-            // 
-            let _skip_tile = false;
-            let _anchor_force = rot_lib[anchor_key].f;
-            for (let ii=0; ii<_anchor_force.length; ii++) {
-              if ((_anchor_force[ii].dv[0] == dx) &&
-                  (_anchor_force[ii].dv[1] == dy) &&
-                  (_anchor_force[ii].dv[2] == dz)) {
-                _skip_tile = true;
-                break;
-              }
-            }
-            if (_skip_tile) { continue; }
-
-            // if the test tile has a blank tile forced in
-            // the (0,0,0) (dv) position (our current center
-            // where the anchor is), skip it
-            //
-            _skip_tile = false;
-            let _test_force = rot_lib[test_key].f;
-            for (let ii=0; ii<_test_force.length; ii++) {
-              if ((_test_force[ii].dv[0] == -dx) &&
-                  (_test_force[ii].dv[1] == -dy) &&
-                  (_test_force[ii].dv[2] == -dz)) {
-
-                _skip_tile = true;
-                break;
-              }
-            }
-            if (_skip_tile) { continue; }
-            */
 
             //---
 
@@ -4398,7 +4341,7 @@ function pgr_blank(pgr, x0, y0, z0, dx, dy, dz) {
   }
 }
 
-function _init() {
+function realize_grid() {
   let debug = false;
 
   init_template();
@@ -4677,7 +4620,7 @@ function loadjson(fn, cb) {
 function init_fin() {
 
   let _H = window.innerHeight;
-  g_info.tri_scale = 1 + Math.ceil( 1.5*_H / g_info.grid_size );
+  g_info.tri_scale = 1 + Math.ceil( 2*_H / g_info.grid_size );
 
   init_param();
 
@@ -4700,7 +4643,7 @@ function init_fin() {
     }
   });
 
-  _init();
+  realize_grid();
   threejs_init();
   animate();
 }
@@ -4730,7 +4673,6 @@ function _ok() {
 function _main() {
 
   init_template();
-  //_build_tile_library( g_template.endpoint, g_template.force_empty );
   _build_tile_library( g_template.endpoint );
 
   //let pgr = init_pgr([4,4,4]);
