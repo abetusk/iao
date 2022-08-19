@@ -96,9 +96,9 @@ var g_info = {
   "ds": 5,
 
   "quiet":false,
-  "grid_size": 7,
+  "grid_size": 6,
 
-  "boundary_condition": "n",
+  "boundary_condition": "z",
 
   "download_filename":"like_go_up.png",
 
@@ -117,7 +117,7 @@ var g_info = {
   "mesh": {},
 
   "mesha" : [],
-  "meshN" : 0,
+  "meshN" : 5,
 
   "radius" : 500,
   "frustumSize" : 1500,
@@ -140,6 +140,10 @@ var g_info = {
   "tri_scale" : 100,
 
   "save_count": 0,
+
+  "iter": 0,
+  "iter_update": 10,
+  "max_iter" : -1,
 
   "fudge": 1/1024,
 
@@ -295,12 +299,12 @@ let g_template = {
   "weight": {
     //"d": 0,
     ".": 1,
-    "|": 100,
+    "|": 1,
     "+": 1,
     "T": 1,
     "r": 1,
     "p": 1,
-    "^": 1
+    "^": 100
   },
 
   "pdf":  {
@@ -2309,9 +2313,14 @@ function render() {
     g_info.mesh.applyMatrix4(m);
 
     for (let ii=0; ii<g_info.mesha.length; ii++) {
-      let _sz = 6;
+
+      //EXPERIMENTAL
+      //
+      let _di = ( ((ii%2) == 0) ? ((ii/2)+1) : ( -((ii-1)/2) - 1) );
+      let _sz = 12.7;
       let _scale = 100;
-      let mmov = m4.t2(0, 0, ii*(_sz*_scale));
+      //let mmov = m4.t2(0, 0, (ii+1)*(_sz*_scale));
+      let mmov = m4.t2(0, 0, _di*(_sz*_scale));
       let mm = m4.multiply( mmov, mr );
       let _m = new THREE.Matrix4();
       _m.set( mm[ 0], mm[ 1], mm[ 2], mm[ 3],
@@ -2924,40 +2933,11 @@ function grid_cull_boundary(gr) {
   let admissible_pos = g_template.admissible_pos;
   let oppo = g_template.oppo;
 
-  /*
-  let admissible_pos = [
-    { "dv_key" : "-1:0:0" , "dv": [-1,  0,  0] },
-    { "dv_key" : "1:0:0"  , "dv": [ 1,  0,  0] },
-
-    { "dv_key" : "0:-1:0" , "dv": [ 0, -1,  0] },
-    { "dv_key" : "0:1:0"  , "dv": [ 0,  1,  0] },
-
-    { "dv_key" : "0:0:-1" , "dv": [ 0,  0, -1] },
-    { "dv_key" : "0:0:1"  , "dv": [ 0,  0,  1] }
-  ];
-
-  let oppo = {
-    "-1:0:0" :  "1:0:0",
-    "1:0:0"  : "-1:0:0",
-
-    "0:-1:0" :  "0:1:0",
-    "0:1:0"  : "0:-1:0",
-
-    "0:0:-1" : "0:0:1",
-    "0:0:1"  : "0:0:-1"
-  }
-  */
-
-
   for (let z=0; z<gr.length; z++) {
     for (let y=0; y<gr[z].length; y++) {
       for (let x=0; x<gr[z][y].length; x++) {
 
-        if ((x>0) && (x<(gr[z][y].length-1)) &&
-            (y>0) && (y<(gr[z].length-1)) &&
-            (z>0) && (z<(gr.length-1))) {
-          continue;
-        }
+        if (_oob(gr, x,y,z)) { continue; }
 
         if (gr[z][y][x].length==0) {
           return {"status":"error", "state":"finished", "msg":"found 0 entries at " + _pos_keystr(x,y,z) };
@@ -2980,18 +2960,12 @@ function grid_cull_boundary(gr) {
             let dv_key = admissible_pos[apos_idx].dv_key;
             let dv = admissible_pos[apos_idx].dv;
 
-            let ux = dv[0] + x;
-            let uy = dv[1] + y;
-            let uz = dv[2] + z;
+            let _p = _posbc(gr, x+dv[0], y+dv[1], z+dv[2]);
+            let ux = _p[0],
+                uy = _p[1],
+                uz = _p[2];
 
-            let nei_oob = false;
-            if ((ux < 0) || (ux >= gr[z][y].length) ||
-                (uy < 0) || (uy >= gr[z].length) ||
-                (uz < 0) || (uz >= gr.length)) {
-              nei_oob = true;
-            }
-            if (!nei_oob) { continue; }
-
+            if (!_oob(gr, ux,uy,uz)) { continue; }
 
             if (!(dv_key in admissible_nei[key_anchor])) { continue; }
 
@@ -3025,9 +2999,6 @@ function grid_cull_boundary(gr) {
     }
   }
 
-  //DEBUG
-  console.log("edge cull done");
-
   return {"status":"success",
           "state":"processing",
           "msg":"boundary cull"};
@@ -3040,10 +3011,12 @@ function grid_cull_collapse_one(gr) {
 
   // create candidate to 'collapse' list...
   //
-  // First generate whole list with all neighbors,
-  // recording the minimum possible neighbor count.
+  // go through each grid cell (that isn't
+  // already fixed) and calculate
+  // the entropy given the remaining tile choices.
   //
-  // primitive entropy (just take min neighbors > 1)
+  // record the minimul entropy (in `min_val`)
+  // so we can filter it after the fact.
   //
 
   let min_val = -1;
@@ -3077,17 +3050,15 @@ function grid_cull_collapse_one(gr) {
   }
 
   if (min_val==-1) {
-    console.log("FINISHED");
     return { "status":"success", "state":"finished", "msg":"no more candidates found"};
   }
 
-  // remove entries in candidate list that don't match the
-  // threshold value
+  // remove entries in candidate list that aren't close
+  // enough to the minimum entropy calculate from above
   //
   let idx=0;
   while (idx < candidate_coord.length) {
 
-    //if (candidate_coord[idx].n != min_val) {
     if (Math.abs(candidate_coord[idx].s - min_val) >= _eps) {
       candidate_coord[idx] = candidate_coord[ candidate_coord.length-1 ];
       candidate_coord.pop();
@@ -3097,19 +3068,18 @@ function grid_cull_collapse_one(gr) {
     idx++;
   }
 
-  //console.log("#candidates:", candidate_coord.length, candidate_coord);
-
   let r_idx = Math.floor(fxrand()*candidate_coord.length);
   let r_ele = candidate_coord[r_idx];
 
-  //console.log("grid_cull_one: min_val:", min_val, "::", r_ele.x, r_ele.y, r_ele.z, "... (r_idx:", r_idx, ")", candidate_coord);
-
-  // now that we have a candidate, choose it and go through forced
-  // implication
+  // Now that we have a candidate list,
+  // choose one based on the probability of each tile type.
+  // This only maks tiles in the cell as invalid, save
+  // for the kept tile, with the assumption that
+  // the function that called it will clean up
+  // the cell and go through the implications.
   //
 
   let cand_coord = gr[ r_ele.z ][ r_ele.y ][ r_ele.x ];
-  //let cand_coord_idx = Math.floor(fxrand()*cand_coord.length);
 
   let R = 0.0;
   let _cdf = [];
@@ -3134,7 +3104,12 @@ function grid_cull_collapse_one(gr) {
     }
   }
 
-  // remove all other tiles in the position where we've forced the pick
+  // Sweep through, mark each as invalid.
+  // After the fact, mark the chosen tile as valid.
+  //
+  // Again, the higher level function will remove the
+  // invalid entries in this cell and will propagate
+  // implications.
   //
   let _n = gr[r_ele.z][r_ele.y][r_ele.x].length;
   for (let i=0; i<_n; i++) {
@@ -3143,8 +3118,6 @@ function grid_cull_collapse_one(gr) {
   gr[r_ele.z][r_ele.y][r_ele.x][ cand_coord_idx ].valid = true;
 
   let tile_name = gr[r_ele.z][r_ele.y][r_ele.x][ cand_coord_idx ].name;
-
-  //console.log("!!!! choosing", gr[r_ele.z][r_ele.y][r_ele.x][ cand_coord_idx ].name, "@(", r_ele.x, r_ele.y, r_ele.z, ")");
 
   return { "status":"success", "state":"processing", "msg":"...", "data":{ "pos": [ r_ele.x, r_ele.y, r_ele.z ], "tile": tile_name }};
 }
@@ -3186,15 +3159,12 @@ function _fill_accessed(gr, accessed, x,y,z) {
   for (let posidx=0; posidx<admissible_pos.length; posidx++) {
     let dv = admissible_pos[posidx].dv;
 
-    let ux = x + dv[0],
-        uy = y + dv[1],
-        uz = z + dv[2];
+    let _p = _posbc(gr, x+dv[0], y+dv[1], z+dv[2]);
+    let ux = _p[0],
+        uy = _p[1],
+        uz = _p[2];
 
-    if ((uz < 0) || (uz >= gr.length) ||
-        (uy < 0) || (uy >= gr[z].length) ||
-        (ux < 0) || (ux >= gr[z][y].length)) {
-      continue;
-    }
+    if (_oob(gr, ux, uy, uz)) { continue; }
 
     accessed[ _pos_keystr(ux, uy, uz) ] = [ ux, uy, uz ];
   }
@@ -3250,9 +3220,15 @@ function grid_cull_propagate_opt(gr, accessed, debug) {
           let dv_key = admissible_pos[posidx].dv_key;
           let dv = admissible_pos[posidx].dv;
 
+          /*
           let ux = x + dv[0],
               uy = y + dv[1],
               uz = z + dv[2];
+              */
+          let _p = _posbc(gr, x+dv[0], y+dv[1], z+dv[2]);
+          let ux = _p[0],
+              uy = _p[1],
+              uz = _p[2];
 
           if (!(dv_key in admissible_nei[key_anchor])) { continue; }
 
@@ -3260,9 +3236,14 @@ function grid_cull_propagate_opt(gr, accessed, debug) {
           //
           for (let key_nei in admissible_nei[key_anchor][dv_key]) {
             if (admissible_nei[key_anchor][dv_key][key_nei].conn) {
+
+              /*
               if ((uz < 0) || (uz >= gr.length) ||
                   (uy < 0) || (uy >= gr[z].length) ||
                   (ux < 0) || (ux >= gr[z][y].length)) {
+                  */
+
+              if (_oob(gr, ux, uy, uz)) {
                 tile_valid = false;
 
                 _fill_accessed(gr, new_accessed, x,y,z);
@@ -3284,9 +3265,12 @@ function grid_cull_propagate_opt(gr, accessed, debug) {
             break;;
           }
 
+          /*
           if ((uz < 0) || (uz >= gr.length) ||
               (uy < 0) || (uy >= gr[z].length) ||
               (ux < 0) || (ux >= gr[z][y].length)) {
+          */
+          if (_oob(gr, ux,uy,uz)) {
             continue;
           }
 
@@ -3372,9 +3356,15 @@ function grid_cull_propagate(gr, debug) {
               let dv_key = admissible_pos[posidx].dv_key;
               let dv = admissible_pos[posidx].dv;
 
+              /*
               let ux = x + dv[0],
                   uy = y + dv[1],
                   uz = z + dv[2];
+                  */
+              let _p = _posbc(gr, x+dv[0], y+dv[1], z+dv[2]);
+              let ux = _p[0],
+                  uy = _p[1],
+                  uz = _p[2];
 
               if (!(dv_key in admissible_nei[key_anchor])) { continue; }
 
@@ -3382,14 +3372,17 @@ function grid_cull_propagate(gr, debug) {
               //
               for (let key_nei in admissible_nei[key_anchor][dv_key]) {
                 if (admissible_nei[key_anchor][dv_key][key_nei].conn) {
+
+                  /*
                   if ((uz < 0) || (uz >= gr.length) ||
                       (uy < 0) || (uy >= gr[z].length) ||
                       (ux < 0) || (ux >= gr[z][y].length)) {
+                  */
+
+                  if (_oob(gr, ux,uy,uz)) {
                     tile_valid = false;
 
-                    if (debug) {
-                      console.log("CULL.oob: anch:", key_anchor, "@(", x,y,z, ") has connecting outside of boundary");
-                    }
+                    //if (debug) { console.log("CULL.oob: anch:", key_anchor, "@(", x,y,z, ") has connecting outside of boundary"); }
 
                     break;
                   }
@@ -3402,9 +3395,12 @@ function grid_cull_propagate(gr, debug) {
                 break;;
               }
 
+              /*
               if ((uz < 0) || (uz >= gr.length) ||
                   (uy < 0) || (uy >= gr[z].length) ||
                   (ux < 0) || (ux >= gr[z][y].length)) {
+              */
+              if (_oob(gr, ux,uy,uz)) {
                 continue;
               }
 
@@ -3434,9 +3430,7 @@ function grid_cull_propagate(gr, debug) {
               if (!anchor_has_valid_conn) {
                 tile_valid = false;
 
-                if (debug) {
-                  console.log("CULL.c: anch:", key_anchor, "@(", x,y,z, ") has no possible connections to neighbors");
-                }
+                //if (debug) { console.log("CULL.c: anch:", key_anchor, "@(", x,y,z, ") has no possible connections to neighbors"); }
 
                 gr_cell[cidx].valid = false;
                 still_processing = true;
@@ -3733,9 +3727,12 @@ function processing_update(iter) {
 
 function grid_wfc_opt(gr) {
 
+
   let debug = false;
-  let n_iter = 10000;
+  let n_iter = g_info.max_iter;
   let iter = 0;
+
+  if (g_info.debug_level > 0) { debug = true; }
 
   let check_consistency = false;
 
@@ -3765,10 +3762,15 @@ function grid_wfc_opt(gr) {
 
   g_info["iter"] = 0;
 
+  let _rgr = { "state":"finished", "status": "error", "msg":"error occured" };
+
   let culling = true;
   while (culling) {
 
-    if ((g_info.iter%10)==0) {
+    // we want to give the potential to show pgoress at a higher level,
+    // so provide this 'callback' to allow for screen updates
+    //
+    if ((g_info.iter%g_info.iter_update)==0) {
       processing_update(g_info.iter);
     }
     g_info.iter++;
@@ -3788,7 +3790,7 @@ function grid_wfc_opt(gr) {
 
     r = grid_cull_collapse_one(gr, debug);
     if (r.state == "finished") {
-      console.log("1!!", r.status, r.msg);
+      _rgr = r;
       break;
     }
     else {
@@ -3811,7 +3813,7 @@ function grid_wfc_opt(gr) {
 
     r = grid_cull_propagate_opt(gr, accessed, debug);
     if (r.state == "finished") {
-      console.log("2!!", r.status, r.msg);
+      _rgr = r;
       break;
     }
 
@@ -3827,7 +3829,9 @@ function grid_wfc_opt(gr) {
     }
 
     iter++;
-    if (iter>=n_iter) { break; }
+    if (n_iter > 0) {
+      if (iter>=n_iter) { break; }
+    }
   }
 
   if (debug) {
@@ -3837,8 +3841,11 @@ function grid_wfc_opt(gr) {
     console.log(">>>>>>>>>>>>");
   }
 
-  let _rgr = grid_consistency(gr);
-  console.log("consistency:", _rgr.msg);
+
+  if (check_consistency) {
+    let _rgr = grid_consistency(gr);
+    console.log("consistency:", _rgr.msg);
+  }
 
   return _rgr;
 }
@@ -3971,6 +3978,13 @@ function init_pgr(pgr_dim) {
   return pgr;
 }
 
+// pos boundary conditions:
+//
+// Position of x,y,z after boundary conditions are imposed.
+// That is, loop z if we have 'z' boundary conditions,
+// loop 'y' also if we have 'zy' boundary condition.
+// Otherwise, just return the x,y,z position
+//
 function _posbc(gr, x,y,z) {
   if (g_info.boundary_condition == "z") {
     z = (z + gr.length)%gr.length;
@@ -3982,6 +3996,10 @@ function _posbc(gr, x,y,z) {
   return [x, y, z];
 }
 
+// out of bounds:
+// true - x,y,z out of bounds (subject to bounary conditions
+// false - in bounds (subject to boundary conditions)
+//
 function _oob(gr, x,y,z) {
   if (g_info.boundary_condition == "z") {
     let p = _posbc(gr, x,y,z);
@@ -4024,11 +4042,6 @@ function decorate_pgr_cgroup(pgr, x,y,z, cgroup, lvl) {
     let dv_key = dva[dvidx].dv_key;
     let dv = dva[dvidx].dv;
 
-    /*
-    let ux = x + dv[0],
-        uy = y + dv[1],
-        uz = z + dv[2];
-    */
     let _p = _posbc(pgr, x+dv[0], y+dv[1], z+dv[2]);
     let ux = _p[0],
         uy = _p[1],
@@ -4209,13 +4222,16 @@ function realize_grid() {
   }
 
   let _r = grid_wfc_opt(pgr);
-  console.log(">>", _r, pgr);
+
+  if (g_info.debug_level>2) {
+    console.log(">>", _r, pgr);
+  }
 
   g_template["debug"] = pgr;
 
   decorate_pgr(pgr);
 
-  if (debug) {
+  if (g_info.debug_level>0) {
     console.log("=============");
     console.log("== BEFORE  ==");
     console.log("=============");
@@ -4237,7 +4253,7 @@ function realize_grid() {
 
   pgr_filter(pgr, filt_group);
 
-  if (debug) {
+  if (g_info.debug_level>0) {
     console.log("=============");
     console.log("== BEFORE  ==");
     console.log("=============");
@@ -4334,9 +4350,11 @@ function realize_tri_from_grid(gr, pgr, show_debug) {
   }
 
 
-  console.log("X:", mM[0], mM[1]);
-  console.log("Y:", mM[2], mM[3]);
-  console.log("Z:", mM[4], mM[5]);
+  if (g_info.debug_level>2) {
+    console.log("tri xX:", mM[0], mM[1]);
+    console.log("tri yY:", mM[2], mM[3]);
+    console.log("tri zZ:", mM[4], mM[5]);
+  }
 
 }
 
