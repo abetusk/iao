@@ -39,6 +39,53 @@
 // symmetry
 // light placement
 //
+// mouse interaction (point light)
+
+// palette candidates:
+// * dt01
+// * dt02
+// * dt11
+// * dt12
+// * dt13
+// * jung_wolf
+// * rohlfs_1G
+// * rohlfs_1R
+// * system.#02
+// * system.#05
+// * exposito
+// * exposito_sub3
+// * tundra1
+// * tundra3
+// * jud_playground (?)
+// * verena (colorful, pastel)
+// * ducci_d
+// * iiso_zeitung
+// * nowak (maybe with darker background)
+// * rag-virupaksha
+// * butterfly
+// * sprague
+// * spatial01
+// * spatial02i
+// * spatial03i
+// * yuma_punk
+// * cc232
+// * present-correct
+//
+// on the fence about:
+// * exposito_sub3
+// * iiso_daily
+// * floratopia
+// * book
+// * one-dress
+// * ducci_i
+// * ducci_x
+// * olympia
+// * cako2_sub1
+// * hersche
+// * dt03 (with a modified black)
+//
+
+
 
 var g_info = {
   "PROJECT" : "like go up",
@@ -50,6 +97,8 @@ var g_info = {
 
   "quiet":false,
   "grid_size": 7,
+
+  "boundary_condition": "n",
 
   "download_filename":"like_go_up.png",
 
@@ -163,6 +212,33 @@ var g_info = {
   //"view_counter" : 18,
   //"view_counter_n" : 20,
 
+  "tile_width_denom_weight": {
+    "2": 1,
+    "3": 2,
+    "4": 3,
+    "5": 2,
+    "6": 1
+  },
+  "tile_width": 1/4,
+
+  "tile_height_denom_weight": {
+    "3": 1,
+    "4": 2,
+    "5": 3,
+    "6": 4,
+    "7": 5,
+    "8": 6,
+    "9": 5,
+    "10": 4,
+    "11": 3,
+    "12": 2,
+    "13": 1,
+    "14": 1,
+    "15": 1,
+    "16": 1
+  },
+  "tile_height": 1/3,
+
   "view_counter" : 1,
   "view_counter_n" : 3,
 
@@ -171,6 +247,7 @@ var g_info = {
   "time_prv": -1,
 
   "data": {
+    "grid": [],
     "info": [],
     "tri": {}
   },
@@ -179,36 +256,18 @@ var g_info = {
   "debug_cube": [],
   "debug_cube_pos": [],
 
-  "debug_level": 2,
+  "debug_level": 0,
 
   "material_type" : "toon"
 
 };
 
-//let _g_w = 1/2;
 let _g_w = 1/4;
-//_g_w = 1/2;
-//_g_w=1/3;
-//_g_w=1/4;
-//_g_w = 1/6;
 
-//let _g_h = 2/8;
 let _g_h = 1/8;
-//_g_h = 1/16;
-//_g_h = 1/12;
-//_g_h = 1/4;
-//_g_h = 1/6;
-//_g_h = 1/5;
 
-//DEBUG
-//_g_h = 0.25;
-//_g_h = 0.5;
-
-//let _g_epd = 1/8;
 let _g_epd = 0;
-
-let _plat_del = -1/64;
-_plat_del = 0;
+let _plat_del = 0;
 
 let _p_w = _g_w + _plat_del;
 
@@ -245,7 +304,7 @@ let g_template = {
   "weight": {
     ".": 1,
     //"d": 0,
-    "|": 1,
+    "|": 100,
     "+": 1,
     "T": 1,
     "r": 1,
@@ -273,7 +332,10 @@ let g_template = {
   //
   // The null ('.') and debug ('d') tiles don't have any interfaces
   //
-  "endpoint": {
+  "endpoint": {},
+
+  /*
+  "__endpoint": {
     ".": [],
 
     //"d": [],
@@ -334,6 +396,7 @@ let g_template = {
     ]
 
   },
+  */
 
   /*
   // simple plane for debuging
@@ -349,7 +412,10 @@ let g_template = {
   ],
   */
 
-  "|" : [
+  "|" : [],
+
+  /*
+  "__|" : [
 
     // front panel
     //
@@ -382,8 +448,12 @@ let g_template = {
      _g_w/2, -1/2, -_g_h/2,   _g_w/2, -1/2, +_g_h/2,    -_g_w/2, -1/2, -_g_h/2
 
   ],
+  */
 
-  "p" : [
+  "p" : [],
+
+  /*
+  "__p": [
 
     // front panel
     //
@@ -416,7 +486,9 @@ let g_template = {
      _g_w/2, -1/2, -_g_h/2,   _g_w/2, -1/2, +_g_h/2,    -_g_w/2, -1/2, -_g_h/2
 
   ],
+  */
 
+  /*
   "P" : [
 
     // front panel
@@ -450,6 +522,7 @@ let g_template = {
      _g_w/2, -1/2, -_g_h/2,   _g_w/2, -1/2, +_g_h/2,    -_g_w/2, -1/2, -_g_h/2
 
   ],
+  */
 
   // by hand is too much, these will be done via init_template()
   //
@@ -480,7 +553,138 @@ function init_template() {
   }
   g_template.cdf[ g_template.cdf.length-1 ].s = 1.01;
 
+  g_template["endpoint"] = {
 
+    ".": [],
+
+    //"d": [],
+
+    "|": [
+      [ -_g_w/2, -1/2, -_g_h/2 ], [ _g_w/2, -1/2, -_g_h/2 ],
+      [ -_g_w/2, -1/2, +_g_h/2 ], [ _g_w/2, -1/2, +_g_h/2 ],
+
+      [ -_g_w/2,  1/2, -_g_h/2 ], [  _g_w/2,  1/2, -_g_h/2 ],
+      [ -_g_w/2,  1/2, +_g_h/2 ], [  _g_w/2,  1/2, +_g_h/2 ]
+    ],
+
+    "p": [
+      [ -_g_w/2, -1/2, -_g_h/2 ], [  _g_w/2, -1/2, -_g_h/2 ],
+      [ -_g_w/2, -1/2, +_g_h/2 ], [  _g_w/2, -1/2, +_g_h/2 ]
+    ],
+
+    "r": [
+      [ -_g_w/2, -1/2, -_g_h/2 ], [  _g_w/2, -1/2, -_g_h/2 ],
+      [ -_g_w/2, -1/2, +_g_h/2 ], [  _g_w/2, -1/2, +_g_h/2 ],
+
+      [  1/2,  _g_w/2, -_g_h/2 ], [  1/2, -_g_w/2, -_g_h/2 ],
+      [  1/2,  _g_w/2, +_g_h/2 ], [  1/2, -_g_w/2, +_g_h/2 ]
+    ],
+
+    "+": [
+      [ -_g_w/2,  1/2, -_g_h/2 ], [  _g_w/2,  1/2, -_g_h/2 ],
+      [ -_g_w/2,  1/2, +_g_h/2 ], [  _g_w/2,  1/2, +_g_h/2 ],
+
+      [ -_g_w/2, -1/2, -_g_h/2 ], [  _g_w/2, -1/2, -_g_h/2 ],
+      [ -_g_w/2, -1/2, +_g_h/2 ], [  _g_w/2, -1/2, +_g_h/2 ],
+
+      [  1/2,  _g_w/2, -_g_h/2 ], [  1/2, -_g_w/2, -_g_h/2 ],
+      [  1/2,  _g_w/2, +_g_h/2 ], [  1/2, -_g_w/2, +_g_h/2 ],
+
+      [ -1/2,  _g_w/2, -_g_h/2 ], [ -1/2, -_g_w/2, -_g_h/2 ],
+      [ -1/2,  _g_w/2, +_g_h/2 ], [ -1/2, -_g_w/2, +_g_h/2 ]
+    ],
+
+    "T": [
+      [  _g_w/2, -1/2, -_g_h/2 ], [ -_g_w/2, -1/2, -_g_h/2 ],
+      [  _g_w/2, -1/2, +_g_h/2 ], [ -_g_w/2, -1/2, +_g_h/2 ],
+
+      [ -1/2,  _g_w/2, -_g_h/2 ], [ -1/2, -_g_w/2, -_g_h/2 ],
+      [ -1/2,  _g_w/2, +_g_h/2 ], [ -1/2, -_g_w/2, +_g_h/2 ],
+
+      [  1/2,  _g_w/2, -_g_h/2 ], [  1/2, -_g_w/2, -_g_h/2 ],
+      [  1/2,  _g_w/2, +_g_h/2 ], [  1/2, -_g_w/2, +_g_h/2 ]
+    ],
+
+    "^": [
+      [  _g_w/2, -1/2, -_g_h/2 ], [ -_g_w/2, -1/2, -_g_h/2 ],
+      [  _g_w/2, -1/2, +_g_h/2 ], [ -_g_w/2, -1/2, +_g_h/2 ],
+
+      [  _g_w/2,  +_g_h/2,  1/2 ], [ -_g_w/2, +_g_h/2,  1/2 ],
+      [  _g_w/2,  -_g_h/2,  1/2 ], [ -_g_w/2, -_g_h/2,  1/2 ]
+
+    ]
+
+  };
+
+
+  g_template["|"] = [
+
+    // front panel
+    //
+    -_g_w/2,  1/2, -_g_h/2,  _g_w/2,  1/2, -_g_h/2,   -_g_w/2, -1/2, -_g_h/2,
+     _g_w/2,  1/2, -_g_h/2,  _g_w/2, -1/2, -_g_h/2,   -_g_w/2, -1/2, -_g_h/2,
+
+    // back panel
+    //
+    -_g_w/2,  1/2, +_g_h/2, -_g_w/2, -1/2, +_g_h/2,   _g_w/2,  1/2, +_g_h/2,
+     _g_w/2,  1/2, +_g_h/2, -_g_w/2, -1/2, +_g_h/2,   _g_w/2, -1/2, +_g_h/2,
+
+    // left side stripe
+    //
+    -_g_w/2,  1/2, -_g_h/2,   -_g_w/2, -1/2, -_g_h/2,  -_g_w/2, -1/2, +_g_h/2,
+    -_g_w/2,  1/2, -_g_h/2,   -_g_w/2, -1/2, +_g_h/2,  -_g_w/2,  1/2, +_g_h/2,
+
+    // right side stripe
+    //
+     _g_w/2,  1/2, -_g_h/2,   _g_w/2, -1/2, +_g_h/2,  _g_w/2, -1/2, -_g_h/2,
+     _g_w/2,  1/2, -_g_h/2,   _g_w/2,  1/2, +_g_h/2,  _g_w/2, -1/2, +_g_h/2,
+
+    // back cap (optional)
+    //
+    -_g_w/2,  1/2, -_g_h/2,   -_g_w/2,  1/2, +_g_h/2,   _g_w/2,  1/2, -_g_h/2,
+     _g_w/2,  1/2, -_g_h/2,   -_g_w/2,  1/2, +_g_h/2,   _g_w/2,  1/2, +_g_h/2,
+
+    // front cap (optional)
+    //
+    -_g_w/2, -1/2, -_g_h/2,   _g_w/2, -1/2, +_g_h/2,    -_g_w/2, -1/2, +_g_h/2,
+     _g_w/2, -1/2, -_g_h/2,   _g_w/2, -1/2, +_g_h/2,    -_g_w/2, -1/2, -_g_h/2
+
+  ];
+
+
+  g_template["p"] =  [
+
+    // front panel
+    //
+    -_p_w/2,    0, -_g_h/2,  _p_w/2,    0, -_g_h/2,   -_g_w/2, -1/2, -_g_h/2,
+     _p_w/2,    0, -_g_h/2,  _g_w/2, -1/2, -_g_h/2,   -_g_w/2, -1/2, -_g_h/2,
+
+    // back panel
+    //
+    -_p_w/2,    0, +_g_h/2, -_g_w/2, -1/2, +_g_h/2,   _p_w/2,    0, +_g_h/2,
+     _p_w/2,    0, +_g_h/2, -_g_w/2, -1/2, +_g_h/2,   _g_w/2, -1/2, +_g_h/2,
+
+    // left side stripe
+    //
+    -_p_w/2,    0, -_g_h/2,   -_g_w/2, -1/2, -_g_h/2,  -_g_w/2, -1/2, +_g_h/2,
+    -_p_w/2,    0, -_g_h/2,   -_g_w/2, -1/2, +_g_h/2,  -_p_w/2,    0, +_g_h/2,
+
+    // right side stripe
+    //
+     _p_w/2,    0, -_g_h/2,   _g_w/2, -1/2, +_g_h/2,  _g_w/2, -1/2, -_g_h/2,
+     _p_w/2,    0, -_g_h/2,   _p_w/2,    0, +_g_h/2,  _g_w/2, -1/2, +_g_h/2,
+
+    // back cap (not optional anymore);
+    //
+    -_p_w/2,    0, -_g_h/2,   -_p_w/2,    0, +_g_h/2,   _p_w/2,    0, -_g_h/2,
+     _p_w/2,    0, -_g_h/2,   -_p_w/2,    0, +_g_h/2,   _p_w/2,    0, +_g_h/2,
+
+    // front cap (optional)
+    //
+    -_g_w/2, -1/2, -_g_h/2,   _g_w/2, -1/2, +_g_h/2,    -_g_w/2, -1/2, +_g_h/2,
+     _g_w/2, -1/2, -_g_h/2,   _g_w/2, -1/2, +_g_h/2,    -_g_w/2, -1/2, -_g_h/2
+
+  ];
 
 
 
@@ -850,209 +1054,6 @@ function init_template() {
 
 
   //---
-  //
-  // 90 degree stair bridge (%)
-  //
-  //     ^
-  //     |           ||
-  //     z         .xxx
-  //     |         xxx
-  //     ._y_>    -xx.
-  //    /         -x
-  //   x
-  //  /
-  // L
-
-  //        tfs
-  // ffs   .xx
-  //       xxx  bfs
-  //        bfs
-  //
-
-  /*
-  let bent = [];
-  let _bent_n = Math.floor( 2/_g_h );
-
-  let _bent_ds = 1/_bent_n;
-  let _bent_dy = 1/_bent_n;
-  let _bent_dz = 1/_bent_n;
-
-  for (let i=0; i<_bent_n; i++) {
-
-    let _r = {};
-    let dx=0, dy=0, dz=0;
-
-    let _hh = 3;
-
-    // front facing step
-    //
-    if (i<(_bent_n-1)) {
-      dx = 0;
-      dy = -0.5 + (i*_bent_ds);
-      dz = -0.5 + ((3/2)*_bent_ds) + (i*_bent_ds);
-      _r = _3rect_xz( _g_w, _bent_ds,
-        dx, dy, dz, 1-parity);
-      for (let j=0; j<_r.length; j++) { bent.push(_r[j]); }
-    }
-
-    // back facing step
-    // (need extra at end)
-    //
-    dx = 0;
-    dy = -0.5 + _bent_ds + (i*_bent_ds);
-    dz = -0.5 - ((1/2)*_bent_ds) + (i*_bent_ds);
-    _r = _3rect_xz( _g_w, _bent_ds,
-      dx, dy, dz, parity);
-    for (let j=0; j<_r.length; j++) { bent.push(_r[j]); }
-
-    // up facing top step
-    //
-    if (i<(_bent_n-1)) {
-      dx = 0;
-      dy = -0.5 + ((1/2)*_bent_ds) + (i*_bent_ds);
-      dz = -0.5 + (2*_bent_ds) + (i*_bent_ds);
-      _r = _3rect_xy( _g_w, _bent_ds,
-        dx, dy, dz, 1-parity);
-      for (let j=0; j<_r.length; j++) { bent.push(_r[j]); }
-    }
-
-    // bottom facing bottom step
-    // (needs extra)
-    //
-    dx = 0;
-    dy = -0.5 + ((1/2)*_bent_ds) + (i*_bent_ds);
-    dz = -0.5 - (_bent_ds) + (i*_bent_ds);
-    _r = _3rect_xy( _g_w, _bent_ds,
-      dx, dy, dz, parity);
-    for (let j=0; j<_r.length; j++) { bent.push(_r[j]); }
-
-    // right side stair
-    //
-    if (i<(_bent_n-1)) {
-      dx = _g_w/2;
-      dy = -0.5 + _bent_ds/2 + i*_bent_ds;
-      dz = -0.5 + _bent_ds/2 + i*_bent_ds;
-      _r = _3rect_zy(
-        3*_bent_ds, _bent_ds,
-        dx, dy, dz,
-        parity);
-      for (let j=0; j<_r.length; j++) { bent.push(_r[j]); }
-    }
-
-    // left side stair 
-    //
-    if (i<(_bent_n-1)) {
-      dx = -_g_w/2;
-      dy = -0.5 + _bent_ds/2 + i*_bent_ds;
-      dz = -0.5 + _bent_ds/2 + i*_bent_ds;
-      _r = _3rect_zy(
-        3*_bent_ds, _bent_ds,
-        dx, dy, dz,
-        1-parity);
-      for (let j=0; j<_r.length; j++) { bent.push(_r[j]); }
-    }
-
-  }
-
-  // end fixups
-  //
-  {
-    let _r = {};
-    let dx=0, dy=0, dz=0;
-
-    // extra back facing step
-    //
-    dx = 0;
-    dy = 0.5 + _bent_ds;
-    dz = 0.5 - ((1/2)*_bent_ds);
-    _r = _3rect_xz( _g_w, _bent_ds,
-      dx, dy, dz, parity);
-    for (let j=0; j<_r.length; j++) { bent.push(_r[j]); }
-
-    // extra bottom facing bottom step
-    //
-    dx = 0;
-    dy = 0.5 + ((1/2)*_bent_ds);
-    dz = 0.5 - (_bent_ds);
-    _r = _3rect_xy( _g_w, _bent_ds,
-      dx, dy, dz, parity);
-    for (let j=0; j<_r.length; j++) { bent.push(_r[j]); }
-
-    // right side stair
-    //
-    dx = _g_w/2;
-    dy = 0.5 - (_bent_ds/2);
-    dz = 0.5 - _bent_ds;
-    _r = _3rect_zy(
-      2*_bent_ds, _bent_ds,
-      dx, dy, dz,
-      parity);
-    for (let j=0; j<_r.length; j++) { bent.push(_r[j]); }
-
-    dx = _g_w/2;
-    dy = 0.5 + (_bent_ds/2);
-    dz = 0.5 - (_bent_ds/2);
-    _r = _3rect_zy(
-      1*_bent_ds, _bent_ds,
-      dx, dy, dz,
-      parity);
-    for (let j=0; j<_r.length; j++) { bent.push(_r[j]); }
-
-    // left side stair
-    //
-    dx = -_g_w/2;
-    dy = 0.5 - (_bent_ds/2);
-    dz = 0.5 - _bent_ds;
-    _r = _3rect_zy(
-      2*_bent_ds, _bent_ds,
-      dx, dy, dz,
-      1-parity);
-    for (let j=0; j<_r.length; j++) { bent.push(_r[j]); }
-
-    dx = -_g_w/2;
-    dy = 0.5 + (_bent_ds/2);
-    dz = 0.5 - (_bent_ds/2);
-    _r = _3rect_zy(
-      1*_bent_ds, _bent_ds,
-      dx, dy, dz,
-      1-parity);
-    for (let j=0; j<_r.length; j++) { bent.push(_r[j]); }
-  }
-
-  // optional end caps
-  //
-  let _bent_endcap = true;
-  if (_bent_endcap) {
-    let _r = {};
-    let dx=0, dy=0, dz=0;
-
-    // front endcap
-    //
-    _r = _3rect_xz( _g_w, _g_h,
-      0, -0.5, -0.5, 0);
-    for (let j=0; j<_r.length; j++) { bent.push(_r[j]); }
-
-    // back endcap
-    //
-    _r = _3rect_xy( _g_w, _g_h,
-      0, 0.5, 0.5, 0);
-    for (let j=0; j<_r.length; j++) { bent.push(_r[j]); }
-  }
-
-
-  let flat_bent = [];
-  for (let i=0; i<bent.length; i++) {
-    for (let j=0; j<bent[i].length; j++) {
-      for (let k=0; k<bent[i][j].length; k++) {
-        flat_bent.push( bent[i][j][k] );
-      }
-    }
-  }
-
-  g_template["%"] = flat_bent;
-  */
-
-  //---
   // T
   //
 
@@ -1074,37 +1075,29 @@ function init_template() {
   // optional...
   // bottom and top
   //
-  //_r = _3rect_xz( _g_w, _g_h, 0, -1/2, -1/2 + _g_h/2, 0);
   _r = _3rect_xz( _g_w, _g_h, 0, -1/2, 0, 0);
   for (let j=0; j<_r.length; j++) { T.push(_r[j]); }
-  //_r = _3rect_xz( 1, _g_h, 0, _g_w/2, -1/2 + _g_h/2, 1);
   _r = _3rect_xz( 1, _g_h, 0, _g_w/2, 0, 1);
   for (let j=0; j<_r.length; j++) { T.push(_r[j]); }
 
   // optional...
   // left and right
   //
-  //_r = _3rect_zy( _g_h, _g_w, 1/2, 0, -1/2 + _g_h/2, 1);
   _r = _3rect_zy( _g_h, _g_w, 1/2, 0, 0, 1);
   for (let j=0; j<_r.length; j++) { T.push(_r[j]); }
-  //_r = _3rect_zy( _g_h, _g_w,-1/2, 0, -1/2 + _g_h/2, 0);
   _r = _3rect_zy( _g_h, _g_w,-1/2, 0, 0, 0);
   for (let j=0; j<_r.length; j++) { T.push(_r[j]); }
 
   // inner caps
   //
-  //_r = _3rect_zy( _g_h, (1-_g_w)/2, -_g_w/2, -1/2+(1-_g_w)/4, -1/2+_g_h/2, 0);
   _r = _3rect_zy( _g_h, (1-_g_w)/2, -_g_w/2, -1/2+(1-_g_w)/4, 0, 0);
   for (let j=0; j<_r.length; j++) { T.push(_r[j]); }
-  //_r = _3rect_zy( _g_h, (1-_g_w)/2,  _g_w/2, -1/2+(1-_g_w)/4, -1/2+_g_h/2, 1);
   _r = _3rect_zy( _g_h, (1-_g_w)/2,  _g_w/2, -1/2+(1-_g_w)/4, 0, 1);
   for (let j=0; j<_r.length; j++) { T.push(_r[j]); }
 
-  //_r = _3rect_xz( (1-_g_w)/2, _g_h, -1/2+(1-_g_w)/4, -_g_w/2, -1/2 + _g_h/2, 0);
   _r = _3rect_xz( (1-_g_w)/2, _g_h, -1/2+(1-_g_w)/4, -_g_w/2, 0, 0);
   for (let j=0; j<_r.length; j++) { T.push(_r[j]); }
 
-  //_r = _3rect_xz( (1-_g_w)/2, _g_h,  1/2-(1-_g_w)/4, -_g_w/2, -1/2 + _g_h/2, 0);
   _r = _3rect_xz( (1-_g_w)/2, _g_h,  1/2-(1-_g_w)/4, -_g_w/2, 0, 0);
   for (let j=0; j<_r.length; j++) { T.push(_r[j]); }
 
@@ -2243,42 +2236,22 @@ function threejs_init() {
   //WIP
   //
   let sz = g_info.renderer.getDrawingBufferSize( new THREE.Vector2() );
-  let _b = new THREE.WebGLRenderTarget( sz.width, sz.height, { "samples":2 } );
+  let _wglrt = new THREE.WebGLRenderTarget( sz.width, sz.height, { "samples":2 } );
 
 
-  //let composer = new POSTPROCESSING.EffectComposer(g_info.renderer);
-  let composer = new POSTPROCESSING.EffectComposer(g_info.renderer, _b);
-
-  //let clearpass = new POSTPROCESSING.ClearPass();
-  //composer.addPass(clearpass);
+  let composer = new POSTPROCESSING.EffectComposer(g_info.renderer, _wglrt);
 
   let renderpass = new POSTPROCESSING.RenderPass(g_info.scene, g_info.camera);
-  //let bloomeffect = new POSTPROCESSING.EffectPass(g_info.camera, new POSTPROCESSING.BloomEffect());
 
-  //                                           strength , kern, sigma, blur
   let bloomeffect = new POSTPROCESSING.BloomEffect(100, 205, 40, 2056);
   let bloompass = new POSTPROCESSING.EffectPass(g_info.camera, bloomeffect);
 
   let fxaaeffect = new POSTPROCESSING.FXAAEffect();
   let fxaapass = new POSTPROCESSING.EffectPass(g_info.camera, fxaaeffect);
 
-
-
   composer.addPass(renderpass);
   composer.addPass(bloompass);
   composer.addPass(fxaapass);
-
-  //g_info.renderer.autoClear = false;
-
-  //let outpass = new POSTPROCESSING.ShaderPass( THREE.CopyShader );
-  //outpass.renderToScreen = true;
-  //composer.addPass(outpass);
-  //g_info.out_pass = outpass;
-
-
-  //let composer = new THREE.EffectComposer(g_info.renderer);
-  //composer.addPass(new RenderPass(g_info.scene, g_info.camera ));
-  //composer.addPass(new EffectPass(camera, new BloomEffect()));
 
   g_info.composer = composer;
   g_info.render_pass = renderpass;
@@ -2286,9 +2259,6 @@ function threejs_init() {
   g_info.bloom_pass = bloompass;
   g_info.fxaa_effect = fxaaeffect;
   g_info.fxaa_pass = fxaapass;
-
-
-
 
   g_info.container.appendChild( g_info.renderer.domElement );
 
@@ -3126,7 +3096,10 @@ function grid_cull_boundary(gr) {
   //
 
   let admissible_nei = g_template.admissible_nei;
+  let admissible_pos = g_template.admissible_pos;
+  let oppo = g_template.oppo;
 
+  /*
   let admissible_pos = [
     { "dv_key" : "-1:0:0" , "dv": [-1,  0,  0] },
     { "dv_key" : "1:0:0"  , "dv": [ 1,  0,  0] },
@@ -3148,6 +3121,7 @@ function grid_cull_boundary(gr) {
     "0:0:-1" : "0:0:1",
     "0:0:1"  : "0:0:-1"
   }
+  */
 
 
   for (let z=0; z<gr.length; z++) {
@@ -3927,7 +3901,9 @@ function grid_consistency(gr) {
 }
 
 function processing_update(iter) {
-  console.log(">>>iter:", iter);
+  if (g_info.debug_level > 0) {
+    console.log(">>>iter:", iter);
+  }
 }
 
 function grid_wfc_opt(gr) {
@@ -4170,11 +4146,37 @@ function init_pgr(pgr_dim) {
   return pgr;
 }
 
+function _posbc(gr, x,y,z) {
+  if (g_info.boundary_condition == "z") {
+    z = (z + gr.length)%gr.length;
+  }
+  if (g_info.boundary_condition == "zy") {
+    z = (z + gr.length)%gr.length;
+    y = (y + gr[0].length)%gr.length[0];
+  }
+  return [x, y, z];
+}
+
 function _oob(gr, x,y,z) {
-  if ((z < 0) || (z >= gr.length) ||
-      (y < 0) || (y >= gr[z].length) ||
-      (x < 0) || (x >= gr[z][y].length)) {
-    return true;
+  if (g_info.boundary_condition == "z") {
+    let p = _posbc(gr, x,y,z);
+    if ((y < 0) || (y >= gr[p[2]].length) ||
+        (x < 0) || (x >= gr[p[2]][y].length)) {
+      return true;
+    }
+  }
+  else if (g_info.boundary_condition == "zy") {
+    let p = _posbc(gr, x,y,z);
+    if ((x < 0) || (x >= gr[p[2]][p[1]].length)) {
+      return true;
+    }
+  }
+  else {
+    if ((z < 0) || (z >= gr.length) ||
+        (y < 0) || (y >= gr[z].length) ||
+        (x < 0) || (x >= gr[z][y].length)) {
+      return true;
+    }
   }
   return false;
 }
@@ -4197,9 +4199,15 @@ function decorate_pgr_cgroup(pgr, x,y,z, cgroup, lvl) {
     let dv_key = dva[dvidx].dv_key;
     let dv = dva[dvidx].dv;
 
+    /*
     let ux = x + dv[0],
         uy = y + dv[1],
         uz = z + dv[2];
+    */
+    let _p = _posbc(pgr, x+dv[0], y+dv[1], z+dv[2]);
+    let ux = _p[0],
+        uy = _p[1],
+        uz = _p[2];
 
     if (_oob(pgr, ux, uy, uz)) { continue; }
 
@@ -4243,9 +4251,15 @@ function decorate_pgr(pgr) {
           let dv_key = dva[dvidx].dv_key;
           let dv = dva[dvidx].dv;
 
+          /*
           let ux = x + dv[0],
               uy = y + dv[1],
               uz = z + dv[2];
+          */
+          let _p = _posbc(pgr, x+dv[0], y+dv[1], z+dv[2]);
+          let ux = _p[0],
+              uy = _p[1],
+              uz = _p[2];
 
           if (_oob(pgr, ux,uy,uz)) { continue; }
 
@@ -4411,6 +4425,8 @@ function realize_grid() {
 
   let fin_gr = gen_simple_grid(pgr);
   realize_tri_from_grid(fin_gr, pgr);
+
+  g_info.data["grid"] = fin_gr;
 
 }
 
