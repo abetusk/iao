@@ -47,6 +47,7 @@ var g_info = {
   "ds": 5,
 
   "quiet":false,
+  "grid_size": 12,
 
   "download_filename":"like_go_up.png",
 
@@ -63,6 +64,10 @@ var g_info = {
   "scene": {},
   "renderer": {},
   "mesh": {},
+
+  "mesha" : [],
+  "meshN" : 0,
+
   "radius" : 500,
   "frustumSize" : 1500,
   "aspect": 1,
@@ -81,9 +86,19 @@ var g_info = {
   "roty": 0,
   "rotz": 0,
 
+  "tri_scale" : 100,
+
   "save_count": 0,
 
   "fudge": 1/1024,
+
+  "_palette": [
+    { 
+      "name" : "monochrome",
+      "colors" : [ "#111111", "#eeeeee" ],
+      "background": "#777777"
+    }
+  ],
 
   "palette": [
     { 
@@ -137,8 +152,11 @@ var g_info = {
   "distribution_type": 0,
   "place_type" : 0,
   "place_size": 64,
-  "speed_factor":  0.00075,
-  "light_speed_factor":  1/4,
+
+  //"speed_factor":  0.00075,
+  "speed_factor" : 1/(2*4096),
+
+  //"speed_factor":  1/4,
 
   //"view_counter" : 18,
   //"view_counter_n" : 20,
@@ -223,14 +241,14 @@ let g_template = {
   },
 
   "weight": {
-    ".": 1,
+    ".": 100,
     //"d": 0,
     "|": 1,
     "+": 1,
     "T": 1,
     "r": 1,
     "p": 1,
-    "^": 1
+    "^": 1000
   },
 
   "pdf":  {
@@ -245,7 +263,6 @@ let g_template = {
   },
 
   "cdf": [],
-
 
   // enpoints tell how we can connect to the other tiles
   //
@@ -1910,6 +1927,9 @@ function tri_bound() {
   console.log(xx,yy,zz);
 }
 
+function trivf_() {
+}
+
 function threejs_init() {
 
   g_info.container = document.getElementById( 'container' );
@@ -1928,35 +1948,95 @@ function threejs_init() {
 
   g_info.scene = new THREE.Scene();
 
-  let bg = parseInt(g_info.palette[ g_info.palette_idx ].background.slice(1), 16);
+  let bg = parseInt('7a7a7a', 16);
+  if ("background" in g_info.palette[ g_info.palette_idx ]) {
+    bg = parseInt(g_info.palette[ g_info.palette_idx ].background.slice(1), 16);
+  }
+
+  // DEBUG
+  //
+  //bg = parseInt( '7a7a7a', 16 );
+
+
+  //DEBUG
+  //bg = 
 
   g_info.scene.background = new THREE.Color( bg );
-  g_info.scene.fog = new THREE.Fog( 0x050505, 2000, 3500 );
+  //g_info.scene.fog = new THREE.Fog( 0x050505, 2000, 3500 );
+  g_info.scene.fog = new THREE.Fog( 0x7a7a7a , 16, 1024);
+
 
   //---
 
+  //g_info.light.push(new THREE.DirectionalLight( 0xffffff, 1.5 ));
   g_info.light.push(new THREE.DirectionalLight( 0xffffff, 1.5 ));
   g_info.light[0].position.set( 1, 1, 1 ).normalize();
 
-  //SHADOW
+  // SHADOW
+  //
+  let shadow = false;
+  if (shadow) {
+    g_info.light[0].castShadow = true;
+    g_info.light[0].shadow.camera.near  = -1000;
+    g_info.light[0].shadow.camera.far   =  1000;
+    g_info.light[0].shadow.camera.left  = -2500;
+    g_info.light[0].shadow.camera.right =  2500;
+
+    g_info.light[0].shadow.camera.top    =  2500;
+    g_info.light[0].shadow.camera.bottom = -2500;
+
+    g_info.light[0].shadow.mapSize.width = 512;
+    g_info.light[0].shadow.mapSize.height = 512;
+
+    g_info.light[0].shadow.radius = 4;
+    g_info.light[0].shadow.bias = -0.0005;
+  }
+
+  //g_info.scene.add( g_info.light[0] );
+
+  //---
+
+  let point_light = [];
+
+  let ds = 1600;
+  let pld = [];
+  for (let ii=0; ii<3; ii++) {
+    pld.push( [ (fxrand()-0.5)*ds, (fxrand()-0.5)*ds, (fxrand()-0.5)*ds ] );
+  }
+  //pld.push([0,0,0]);
+
+  let dl = 1800;
+  //let pld = [ [ds, 0, 0], [0, ds, 0], [0, 0, ds], [0.25, 1.5,1.5] ];
+  //let plc = [ 0xff0000, 0x00ff00, 0x0000ff, 0xffffff ];
+  //let plc = [ 0x20357e, 0xf44242, 0xffffff, 0xffffff ]
+  let plc = [ 0xffffff, 0xffffff, 0xffffff, 0xffffff ]
+  //let pli = [ 8, 8, 1, 1 ];
+  let pli = [ 2, 2, 2, 1 ];
+  let pll = [ dl, dl, dl, 100 ];
+
+
+  for (let ii=0; ii<pld.length; ii++) {
+    point_light.push(new THREE.PointLight( plc[ii], pli[ii], pll[ii], 2));
+    point_light[ii].position.set( pld[ii][0], pld[ii][1], pld[ii][2] );
+    g_info.scene.add( point_light[ii] );
+  }
+
   /*
-  g_info.light[0].castShadow = true;
-  g_info.light[0].shadow.camera.near  = -1000;
-  g_info.light[0].shadow.camera.far   =  1000;
-  g_info.light[0].shadow.camera.left  = -2500;
-  g_info.light[0].shadow.camera.right =  2500;
+  point_light[0].position.set( ds, 0, 0 );
+  g_info.scene.add( point_light[0] );
 
-  g_info.light[0].shadow.camera.top    =  2500;
-  g_info.light[0].shadow.camera.bottom = -2500;
+  point_light.push(new THREE.PointLight( 0x00ff00, 4, 1000 ));
+  point_light[1].position.set( 0, ds, 0 );
+  g_info.scene.add( point_light[1] );
 
-  g_info.light[0].shadow.mapSize.width = 512;
-  g_info.light[0].shadow.mapSize.height = 512;
+  point_light.push(new THREE.PointLight( 0x0000ff, 4, 1000 ));
+  point_light[2].position.set( 0, 0, ds );
+  g_info.scene.add( point_light[2] );
 
-  g_info.light[0].shadow.radius = 4;
-  g_info.light[0].shadow.bias = -0.0005;
+  point_light.push(new THREE.PointLight( 0xffffff, 1, 1000 ));
+  point_light[3].position.set( 0, 0, 0 );
+  g_info.scene.add( point_light[3] );
   */
-
-  g_info.scene.add( g_info.light[0] );
 
   //---
 
@@ -2040,16 +2120,20 @@ function threejs_init() {
   let color_idx = _irnd(pal.colors.length);
 
   //const d = 12,
-  const d = 2,
-        d2 = d/2;
+  const d = g_info.tri_scale,
+        d2 = 0;
+        //d2 = d/2;
   for (let idx=0; idx<tri_vf.length; idx++) {
 
     //let pal = g_info.palette[ g_info.palette_idx ];
     //let color_hex = pal.colors[ _irnd(pal.colors.length) ];
 
     color_idx = g_info.data.tri_color_idx[idx] % pal.colors.length;
-
     let color_hex = pal.colors[ color_idx ];
+
+    //DEBUG
+    //color_hex = '#ffffff';
+
     let rgb = _hex2rgb(color_hex );
     color.setRGB( rgb.r/255, rgb.g/255, rgb.b/255 );
 
@@ -2057,9 +2141,14 @@ function threejs_init() {
 
     for ( let i = 0; i < tri_vf[idx].length; i += 9 ) {
 
-      const x = -200;
-      const y = -200;
-      const z = -200;
+      //const x = -200;
+      //const y = -200;
+      //const z = -200;
+
+      const x = 0;
+      const y = 0;
+      const z = 0;
+
 
       let ax = x + tri_vf[idx][i + 0]*d - d2;
       let ay = y + tri_vf[idx][i + 1]*d - d2;
@@ -2168,6 +2257,49 @@ function threejs_init() {
 
   g_info.scene.add( g_info.mesh );
 
+
+  // wip
+  for (let ii=0; ii<g_info.meshN; ii++) {
+    g_info.mesha.push( new THREE.Mesh( g_info.geometry, g_info.material ) );
+    g_info.scene.add( g_info.mesha[ii] );
+  }
+
+
+  //WIP
+  //
+  let sz = g_info.renderer.getDrawingBufferSize( new THREE.Vector2() );
+  let _b = new THREE.WebGLRenderTarget( sz.width, sz.height, { "samples":2 } );
+
+
+  //let composer = new POSTPROCESSING.EffectComposer(g_info.renderer);
+  let composer = new POSTPROCESSING.EffectComposer(g_info.renderer, _b);
+  let renderpass = new POSTPROCESSING.RenderPass(g_info.scene, g_info.camera);
+  //let bloomeffect = new POSTPROCESSING.EffectPass(g_info.camera, new POSTPROCESSING.BloomEffect());
+
+  //                                           strength , kern, sigma, blur
+  let bloomeffect = new POSTPROCESSING.BloomEffect(100, 205, 40, 2056);
+  let bloompass = new POSTPROCESSING.EffectPass(g_info.camera, bloomeffect);
+
+  let fxaaeffect = new POSTPROCESSING.FXAAEffect();
+  let fxaapass = new POSTPROCESSING.EffectPass(g_info.camera, fxaaeffect);
+
+
+  composer.addPass(renderpass);
+  composer.addPass(bloompass);
+  composer.addPass(fxaapass);
+  //let composer = new THREE.EffectComposer(g_info.renderer);
+  //composer.addPass(new RenderPass(g_info.scene, g_info.camera ));
+  //composer.addPass(new EffectPass(camera, new BloomEffect()));
+
+  g_info.composer = composer;
+  g_info.render_pass = renderpass;
+  g_info.bloom_effect = bloomeffect;
+  g_info.bloom_pass = bloompass;
+  g_info.fxaa_effect = fxaaeffect;
+  g_info.fxaa_pass = fxaapass;
+
+
+
   g_info.container.appendChild( g_info.renderer.domElement );
 
   window.addEventListener( 'resize', onWindowResize );
@@ -2191,8 +2323,8 @@ function onWindowResize() {
 //---
 
 function animate() {
-  requestAnimationFrame( animate );
   render();
+  requestAnimationFrame( animate );
 
   if (g_info.animation_capture) {
     g_info.capturer.capture( g_info.renderer.domElement );
@@ -2314,10 +2446,13 @@ function render() {
         mp0 = m4.xRotation((1-_t_rem)*Math.PI/D);
         mp1 = m4.yRotation((1-_t_rem)*Math.PI/D);
       }
+
+    //!!!!
       else if (view_prv == 1) {
         mp0 = m4.xRotation((1-_t_rem)*Math.PI/D);
         mp1 = m4.zRotation((1-_t_rem)*Math.PI/D);
       }
+
       else if (view_prv == 2) {
         mp0 = m4.yRotation((1-_t_rem)*Math.PI/D);
         mp1 = m4.zRotation((1-_t_rem)*Math.PI/D);
@@ -2381,6 +2516,27 @@ function render() {
     g_info.mesh.rotation.z = 0;
     g_info.mesh.applyMatrix4(m);
 
+    for (let ii=0; ii<g_info.mesha.length; ii++) {
+      let _sz = 6;
+      let _scale = 100;
+      let mmov = m4.t2(0, 0, ii*(_sz*_scale));
+      let mm = m4.multiply( mmov, mr );
+      let _m = new THREE.Matrix4();
+      _m.set( mm[ 0], mm[ 1], mm[ 2], mm[ 3],
+              mm[ 4], mm[ 5], mm[ 6], mm[ 7],
+              mm[ 8], mm[ 9], mm[10], mm[11],
+              mm[12], mm[13], mm[14], mm[15] );
+
+      g_info.mesha[ii].position.x = 0;
+      g_info.mesha[ii].position.y = 0;
+      g_info.mesha[ii].position.z = 0;
+      g_info.mesha[ii].rotation.x = 0;
+      g_info.mesha[ii].rotation.y = 0;
+      g_info.mesha[ii].rotation.z = 0;
+      g_info.mesha[ii].applyMatrix4(_m);
+
+    }
+
     for (let i=0; i<g_info.debug_cube.length; i++) {
       g_info.debug_cube[i].position.x = g_info.debug_cube_pos[i][0];
       g_info.debug_cube[i].position.y = g_info.debug_cube_pos[i][1];
@@ -2407,11 +2563,16 @@ function render() {
     let _y = Math.sin(_a);
     let _z = Math.cos(_a)*Math.sin(_a);
 
-    g_info.light[0].position.set( _x, _y, _z ).normalize();
+    g_info.light[i].position.set( _x, _y, _z ).normalize();
   }
 
 
-  g_info.renderer.render( g_info.scene, g_info.camera );
+  if ("composer" in g_info) {
+    g_info.composer.render();
+  }
+  else {
+    g_info.renderer.render( g_info.scene, g_info.camera );
+  }
 
   if (g_info.take_screenshot_flag) {
     let imgdata = g_info.renderer.domElement.toDataURL();
@@ -2434,10 +2595,11 @@ function init_param() {
 
   // speed factor
   //
-  g_info.speed_factor  = _rnd(1/2048, 1/512); //0.00075,
+  //g_info.speed_factor  = _rnd(1/2048, 1/512); //0.00075,
 
   //DEBUG
-  g_info.speed_factor = 1/2048;
+  //g_info.speed_factor = 1/2048;
+  //g_info.speed_factor = 1/(2*4096);
 
   g_info.features["Speed Factor"] = g_info.speed_factor;
 
@@ -3821,10 +3983,14 @@ function grid_consistency(gr) {
   return _ret;
 }
 
+function processing_update(iter) {
+  console.log(">>>iter:", iter);
+}
+
 function grid_wfc_opt(gr) {
 
   let debug = false;
-  let n_iter = 1000;
+  let n_iter = 10000;
   let iter = 0;
 
   let check_consistency = false;
@@ -3853,9 +4019,15 @@ function grid_wfc_opt(gr) {
     return r;
   }
 
+  g_info["iter"] = 0;
 
   let culling = true;
   while (culling) {
+
+    if ((g_info.iter%10)==0) {
+      processing_update(g_info.iter);
+    }
+    g_info.iter++;
 
     if (check_consistency) {
       let _rgr = grid_consistency(gr);
@@ -4044,7 +4216,7 @@ function init_pgr(pgr_dim) {
           // valid - still a candidate
           // processed - processed or not
           //
-          pgr[z][y][x].push( {"name":tile_name, "valid": true, "processed":false });
+          pgr[z][y][x].push( {"name":tile_name, "valid": true, "processed":false, "cgroup":-1});
         }
 
       }
@@ -4230,32 +4402,30 @@ function _init() {
   let debug = false;
 
   init_template();
-  //_build_tile_library( g_template.endpoint, g_template.force_empty );
   _build_tile_library( g_template.endpoint );
 
   //DEBUG
   let uniq_count = 0;
   for (let key in g_template.tile_attach) { uniq_count++; }
-  console.log(">>>> uniq_count:", uniq_count);
+  g_info["uniq_tile_count"] = uniq_count;
 
   //---
 
-  let M = 12;
-
-  //let pgr = init_pgr([5,5,5]);
-  //let pgr = init_pgr([8,8,8]);
-  //let pgr = init_pgr([3,3,3]);
-  //let pgr = init_pgr([10,10,10]);
+  let M = g_info.grid_size;
   let pgr = init_pgr([M,M,M]);
 
   let S=4;
-  let T=5
-  pgr_blank(pgr, S, S, S, M-2*S, M-2*S, M-2*S);
-  pgr_blank(pgr, T, T, 0, M-2*T, M-2*T, M);
-  pgr_blank(pgr, T, 0, T, M-2*T, M, M-2*T);
-  pgr_blank(pgr, 0, T, T, M, M-2*T, M-2*T);
+  let T=4;
+  S=T=0;
+  if (S>0) {
+    pgr_blank(pgr, S, S, S, M-2*S, M-2*S, M-2*S);
+  }
+  if (T>0) {
+    pgr_blank(pgr, T, T, 0, M-2*T, M-2*T, M);
+    pgr_blank(pgr, T, 0, T, M-2*T, M, M-2*T);
+    pgr_blank(pgr, 0, T, T, M, M-2*T, M-2*T);
+  }
 
-  //let _r = grid_wfc(pgr);
   let _r = grid_wfc_opt(pgr);
   console.log(">>", _r, pgr);
 
@@ -4276,7 +4446,6 @@ function _init() {
 
 
   let filt_group = {};
-  //let thresh = 4;
   let thresh = M;
   for (let group_name in _stat.group_size) {
     if (_stat.group_size[group_name] < thresh) {
@@ -4298,465 +4467,7 @@ function _init() {
   //return;
 
   let fin_gr = gen_simple_grid(pgr);
-
-
-  //console.log(fin_gr);
   realize_tri_from_grid(fin_gr, pgr);
-
-  return;
-
-
-  let gr = [
-    [
-      [ ".",   ".", "." ],
-      [ ".","^000", "." ],
-      [ ".",".", "." ]
-    ],
-    [
-      [ ".", ".", "." ],
-      [ ".","^020", "." ],
-      [ ".",".", "." ]
-    ]
-  ];
-  realize_tri_from_grid(gr);
-  return;
-
-
-
-  gr = [
-    [
-      [ ".", "." ],
-      [ ".", "." ],
-      [ ".", "." ],
-      [ ".", "." ],
-      [ ".", "." ]
-    ],
-    [
-      [ ".", "." ],
-      [ "^100", "." ],
-      [ "+000", "T001" ],
-      [ "^102", "." ],
-      [ ".", "." ]
-    ],
-    [
-      [ "|000", "." ],
-      [ ".", "." ],
-      [ ".", "." ],
-      [ ".", "." ],
-      [ "|000", "." ]
-    ],
-  ];
-
-  gr = [
-    [
-      [ "r003", "T002", "r002" ],
-      [ "r000", "T000", "r001" ]
-    ]
-  ];
-
-  gr = [
-    [
-      [ "r003", "|011", "r002" ],
-      [ "r000", "|011", "r001" ]
-    ]
-  ];
-
-  gr = [
-
-    /*
-    [
-      [ "|000", "|001", "|002", "|003" ],
-      [ "|010", "|011", "|012", "|013" ],
-      [ "|020", "|021", "|022", "|023" ],
-      [ "|030", "|031", "|032", "|033" ]
-    ],
-
-    [
-      [ "|100", "|101", "|102", "|103" ],
-      [ "|110", "|111", "|112", "|113" ],
-      [ "|120", "|121", "|122", "|123" ],
-      [ "|130", "|131", "|132", "|133" ]
-    ],
-
-    [
-      [ "|200", "|201", "|202", "|203" ],
-      [ "|210", "|211", "|212", "|213" ],
-      [ "|220", "|221", "|222", "|223" ],
-      [ "|230", "|231", "|232", "|233" ]
-    ],
-
-    [
-      [ "|300", "|301", "|302", "|303" ],
-      [ "|310", "|311", "|312", "|313" ],
-      [ "|320", "|321", "|322", "|323" ],
-      [ "|330", "|331", "|332", "|333" ]
-    ],
-
-    //--
-
-    [
-      [ "d000", "r000", "r001", "r002", "r003", "d000" ],
-      [ "d000", "r010", "r011", "r012", "r013", "d000" ],
-      [ "d000", "r020", "r021", "r022", "r023", "d000" ],
-      [ "d000", "r030", "r031", "r032", "r033", "d000" ]
-    ],
-
-    [
-      [ "d000", "r100", "r101", "r102", "r103", "d000" ],
-      [ "d000", "r110", "r111", "r112", "r113", "d000" ],
-      [ "d000", "r120", "r121", "r122", "r123", "d000" ],
-      [ "d000", "r130", "r131", "r132", "r133", "d000" ]
-    ],
-
-    [
-      [ "d000", "r200", "r201", "r202", "r203", "d000" ],
-      [ "d000", "r210", "r211", "r212", "r213", "d000" ],
-      [ "d000", "r220", "r221", "r222", "r223", "d000" ],
-      [ "d000", "r230", "r231", "r232", "r233", "d000" ]
-    ],
-
-    [
-      [ "d000", "r300", "r301", "r302", "r303", "d000" ],
-      [ "d000", "r310", "r311", "r312", "r313", "d000" ],
-      [ "d000", "r320", "r321", "r322", "r323", "d000" ],
-      [ "d000", "r330", "r331", "r332", "r333", "d000" ]
-    ],
-    */
-
-    /*
-    //--
-
-    [
-      [ "d000", "T000", "T001", "T002", "T003", "d000" ],
-      [ "d000", "T010", "T011", "T012", "T013", "d000" ],
-      [ "d000", "T020", "T021", "T022", "T023", "d000" ],
-      [ "d000", "T030", "T031", "T032", "T033", "d000" ]
-    ],
-
-    [
-      [ "d000", "T100", "T101", "T102", "T103", "d000" ],
-      [ "d000", "T110", "T111", "T112", "T113", "d000" ],
-      [ "d000", "T120", "T121", "T122", "T123", "d000" ],
-      [ "d000", "T130", "T131", "T132", "T133", "d000" ]
-    ],
-
-    [
-      [ "d000", "T200", "T201", "T202", "T203", "d000" ],
-      [ "d000", "T210", "T211", "T212", "T213", "d000" ],
-      [ "d000", "T220", "T221", "T222", "T223", "d000" ],
-      [ "d000", "T230", "T231", "T232", "T233", "d000" ]
-    ],
-
-    [
-      [ "d000", "T300", "T301", "T302", "T303", "d000" ],
-      [ "d000", "T310", "T311", "T312", "T313", "d000" ],
-      [ "d000", "T320", "T321", "T322", "T323", "d000" ],
-      [ "d000", "T330", "T331", "T332", "T333", "d000" ]
-    ],
-    */
-
-    //--
-
-
-    [
-      [ "d000", "^000", "^001", "^002", "^003", "d000" ],
-      [ "d000", "^010", "^011", "^012", "^013", "d000" ],
-      [ "d000", "^020", "^021", "^022", "^023", "d000" ],
-      [ "d000", "^030", "^031", "^032", "^033", "d000" ]
-    ],
-
-    [
-      [ "d000", "^100", "^101", "^102", "^103", "d000" ],
-      [ "d000", "^110", "^111", "^112", "^113", "d000" ],
-      [ "d000", "^120", "^121", "^122", "^123", "d000" ],
-      [ "d000", "^130", "^131", "^132", "^133", "d000" ]
-    ],
-
-    [
-      [ "d000", "^200", "^201", "^202", "^203", "d000" ],
-      [ "d000", "^210", "^211", "^212", "^213", "d000" ],
-      [ "d000", "^220", "^221", "^222", "^223", "d000" ],
-      [ "d000", "^230", "^231", "^232", "^233", "d000" ]
-    ],
-
-    [
-      [ "d000", "^300", "^301", "^302", "^303", "d000" ],
-      [ "d000", "^310", "^311", "^312", "^313", "d000" ],
-      [ "d000", "^320", "^321", "^322", "^323", "d000" ],
-      [ "d000", "^330", "^331", "^332", "^333", "d000" ]
-    ],
-
-
-    /*
-    [
-      [ "d000", "+000", "+001", "+002", "+003", "d000" ],
-      [ "d000", "+010", "+011", "+012", "+013", "d000" ],
-      [ "d000", "+020", "+021", "+022", "+023", "d000" ],
-      [ "d000", "+030", "+031", "+032", "+033", "d000" ]
-    ],
-
-    [
-      [ "d000", "+100", "+101", "+102", "+103", "d000" ],
-      [ "d000", "+110", "+111", "+112", "+113", "d000" ],
-      [ "d000", "+120", "+121", "+122", "+123", "d000" ],
-      [ "d000", "+130", "+131", "+132", "+133", "d000" ]
-    ],
-
-    [
-      [ "d000", "+200", "+201", "+202", "+203", "d000" ],
-      [ "d000", "+210", "+211", "+212", "+213", "d000" ],
-      [ "d000", "+220", "+221", "+222", "+223", "d000" ],
-      [ "d000", "+230", "+231", "+232", "+233", "d000" ]
-    ],
-
-    [
-      [ "d000", "+300", "+301", "+302", "+303", "d000" ],
-      [ "d000", "+310", "+311", "+312", "+313", "d000" ],
-      [ "d000", "+320", "+321", "+322", "+323", "d000" ],
-      [ "d000", "+330", "+331", "+332", "+333", "d000" ]
-    ]
-    */
-
-  ];
-
-  //gr = gen_simple_grid(pgr);
-  console.log("??", gr);
-
-
-  /*
-  gr = [
-    [
-      [ "d000", "d001", "d002", "d003" ],
-      [ "d010", "d011", "d012", "d013" ],
-      [ "d020", "d021", "d022", "d023" ],
-      [ "d030", "d031", "d032", "d033" ]
-    ],
-
-    [
-      [ ".000", ".001", ".002", ".003" ],
-      [ ".010", ".011", ".012", ".013" ],
-      [ ".020", ".021", ".022", ".023" ],
-      [ ".030", ".031", ".032", ".033" ]
-    ],
-
-    [
-      [ "^000", "^001", "^002", "^003" ],
-      [ "^010", "^011", "^012", "^013" ],
-      [ "^020", "^021", "^022", "^023" ],
-      [ "^030", "^031", "^032", "^033" ]
-    ],
-
-    [
-      [ ".000", ".001", ".002", ".003" ],
-      [ ".010", ".011", ".012", ".013" ],
-      [ ".020", ".021", ".022", ".023" ],
-      [ ".030", ".031", ".032", ".033" ]
-    ],
-
-    [
-      [ "%000", "%001", "%002", "%003" ],
-      [ "%010", "%011", "%012", "%013" ],
-      [ "%020", "%021", "%022", "%023" ],
-      [ "%030", "%031", "%032", "%033" ]
-    ],
-
-    [
-      [ ".000", ".001", ".002", ".003" ],
-      [ ".010", ".011", ".012", ".013" ],
-      [ ".020", ".021", ".022", ".023" ],
-      [ ".030", ".031", ".032", ".033" ]
-    ],
-
-    [
-      [ "|000", "|001", "|002", "|003" ],
-      [ "|010", "|011", "|012", "|013" ],
-      [ "|020", "|021", "|022", "|023" ],
-      [ "|030", "|031", "|032", "|033" ]
-    ],
-
-    [
-      [ ".000", ".001", ".002", ".003" ],
-      [ ".010", ".011", ".012", ".013" ],
-      [ ".020", ".021", ".022", ".023" ],
-      [ ".030", ".031", ".032", ".033" ]
-    ],
-
-
-    [
-      [ "+000", "+001", "+002", "+003" ],
-      [ "+010", "+011", "+012", "+013" ],
-      [ "+020", "+021", "+022", "+023" ],
-      [ "+030", "+031", "+032", "+033" ]
-    ],
-
-    [
-      [ ".000", ".001", ".002", ".003" ],
-      [ ".010", ".011", ".012", ".013" ],
-      [ ".020", ".021", ".022", ".023" ],
-      [ ".030", ".031", ".032", ".033" ]
-    ],
-
-
-    [
-      [ "r000", "r001", "r002", "r003" ],
-      [ "r010", "r011", "r012", "r013" ],
-      [ "r020", "r021", "r022", "r023" ],
-      [ "r030", "r031", "r032", "r033" ]
-    ],
-
-    [
-      [ ".000", ".001", ".002", ".003" ],
-      [ ".010", ".011", ".012", ".013" ],
-      [ ".020", ".021", ".022", ".023" ],
-      [ ".030", ".031", ".032", ".033" ]
-    ],
-
-
-    [
-      [ "T000", "T001", "T002", "T003" ],
-      [ "T010", "T011", "T012", "T013" ],
-      [ "T020", "T021", "T022", "T023" ],
-      [ "T030", "T031", "T032", "T033" ]
-    ]
-  ];
-  */
-
-
-  /*
-    "|": [  [ -_g_w/2,  1/2 + _g_epd, -1/2 ], [  _g_w/2,  1/2 + _g_epd, -1/2 ],
-            [ -_g_w/2, -1/2 - _g_epd, -1/2 ], [  _g_w/2, -1/2 - _g_epd, -1/2 ] ],
-
-    "r": [  [ -_g_w/2, -1/2 - _g_epd, -1/2 ], [  _g_w/2, -1/2 - _g_epd, -1/2 ],
-            [ 1/2 + _g_epd,  _g_w/2, -1/2 ], [ 1/2 + _g_epd, -_g_w/2, -1/2 ] ],
-
-    "+": [  [ -_g_w/2,  1/2 + _g_epd, -1/2 ], [  _g_w/2,  1/2 + _g_epd, -1/2 ],
-            [ -_g_w/2, -1/2 - _g_epd, -1/2 ], [  _g_w/2, -1/2 - _g_epd, -1/2 ],
-            [ -1/2 - _g_epd,  _g_w/2, -1/2 ], [ -1/2 - _g_epd, -_g_w/2, -1/2 ],
-            [  1/2 + _g_epd,  _g_w/2, -1/2 ], [  1/2 + _g_epd, -_g_w/2, -1/2 ] ],
-
-    "T": [  [  _g_w/2, -1/2 - _g_epd, -1/2 ], [ -_g_w/2, -1/2 - _g_epd, -1/2 ],
-            [ -1/2 - _g_epd,  _g_w/2, -1/2 ], [ -1/2 - _g_epd, -_g_w/2, -1/2 ],
-            [  1/2 + _g_epd,  _g_w/2, -1/2 ], [  1/2 + _g_epd, -_g_w/2, -1/2 ] ],
-
-    "^": [  [  _g_w/2, -1/2 , -1/2 - _g_epd ], [ -_g_w/2, -1/2 , -1/2 - _g_epd ],
-            [  _g_w/2,  1/2 ,  1/2 + _g_epd ], [ -_g_w/2,  1/2 ,  1/2 + _g_epd ] ]
-  },
-  */
-
-
-
-  /*
-  gr = [
-    [
-      [ ".", "d000", ".", "d000" ],
-      [ ".", "%000", ".", ".000" ],
-      [ ".", "d000", ".", "d000"],
-      [ ".", ".", "." , "." ]
-    ],
-    [
-      [ ".", "d000", ".", "." ],
-      [ ".", ".000", ".", "d100" ],
-      [ ".", "d011", ".", "." ],
-      [ ".", ".", ".", "."  ]
-    ],
-  ];
-  */
-
-  /*
-  gr = [
-    [
-      [ ".", "|000", ".", "d000" ],
-      [ ".", "%000", ".", ".000" ],
-      [ ".", "d000", ".", "d000"],
-      [ ".", ".", "." , "." ]
-    ],
-    [
-      [ ".", "d000", ".", "." ],
-      [ ".", ".000", ".", "d100" ],
-      [ ".", "|100", ".", "." ],
-      [ ".", ".", ".", "."  ]
-    ],
-  ];
-  */
-
-
-  gr = [
-    [
-      [ "d000", "d000", "." ],
-      [ "d000", "^000", "."  ],
-      [ "d000", "d000", "." ]
-    ],
-    [
-      [ ".", ".", "." ],
-      [ ".", ".", "."  ],
-      [ ".", ".", "." ]
-    ],
-  ];
-
-  //??
-  //Array(3)]
-  //0: Array(3)
-  //0: (3) ['r003', 'T022', 'r021']
-  //1: (3) ['T003', '+020', 'T021']
-  //2: (3) ['r023', 'T020', 'r001']
-  //length: 3
-
-  //gr = [ [ [ "r003", "T022", "r021" ] ] ];
-
-  realize_tri_from_grid(gr);
-  //realize_tri_from_sp_grid(pgr);
-
-  /*
-  g_info.debug = gr;
-  g_info.data.tri = [];
-
-  let S = 60;
-  let tx = g_info.cx,
-      ty = g_info.cy,
-      tz = g_info.cz;
-
-  for (let zidx=0; zidx<gr.length; zidx++) {
-    for (let yidx=0; yidx<gr[zidx].length; yidx++) {
-      for (let xidx=0; xidx<gr[zidx][yidx].length; xidx++) {
-        let u = gr[zidx][yidx][xidx];
-        let template_u = u[0];
-        if (template_u == '.') { continue; }
-
-        let ent = g_template.rot_lib[u];
-
-        //rot_lib[ukey] = { "m": [mx, my, mz], "r": [xidx, yidx, zidx ] };
-
-        let _rx = Math.PI*ent.r[0]/2;
-        let _ry = Math.PI*ent.r[1]/2;
-        let _rz = Math.PI*ent.r[2]/2;
-
-        let _tri = _template_rot_mov(g_template[template_u], _rx, _ry, _rz, xidx, yidx, zidx);
-        _p_mul_mov(_tri, S, tx, ty, tz);
-        g_info.data.tri.push(_tri);
-
-
-        if (g_info.debug_level > 3) {
-          console.log(u, template_u);
-        }
-      }
-    }
-  }
-  */
-
-  /*
-  let ok = _template_rot_mov(g_template["|"], 0, 0, 0, 0, 0, 0);
-  let ok1 = _template_rot_mov(g_template["|"], 0, 0, 0, 0, 1, 0);
-  let ok2 = _template_rot_mov(g_template["|"], Math.PI, 0, Math.PI/2, 0, 2, 0);
-
-  _p_mul_mov(ok, 40, tx, ty, tz);
-  _p_mul_mov(ok1, 40, tx, ty, tz);
-  _p_mul_mov(ok2, 40, tx, ty, tz);
-
-  g_info.data.tri = [ ok, ok1, ok2 ];
-  */
-
-  //---
-
 
 }
 
@@ -4766,18 +4477,21 @@ function realize_tri_from_grid(gr, pgr, show_debug) {
   g_info.data.tri = [];
   g_info.data.tri_color_idx = [];
 
-  let S = 60;
+  let M = gr.length;
+  let S = 1;
   let tx = g_info.cx,
       ty = g_info.cy,
       tz = g_info.cz;
 
   let n = gr.length;
 
-  tx = -15*n+1;
-  ty = -15*n+1;
-  tz = -15*n+1;
+  tx = -S*((M-1)/2);
+  ty = -S*((M-1)/2);
+  tz = -S*((M-1)/2);
 
   color_idx=0;
+
+  let mM = [];
 
   for (let zidx=0; zidx<gr.length; zidx++) {
     for (let yidx=0; yidx<gr[zidx].length; yidx++) {
@@ -4791,8 +4505,6 @@ function realize_tri_from_grid(gr, pgr, show_debug) {
 
         let ent = g_template.rot_lib[u];
 
-        //rot_lib[ukey] = { "m": [mx, my, mz], "r": [xidx, yidx, zidx ] };
-
         let _rx = Math.PI*ent.r[0]/2;
         let _ry = Math.PI*ent.r[1]/2;
         let _rz = Math.PI*ent.r[2]/2;
@@ -4801,7 +4513,26 @@ function realize_tri_from_grid(gr, pgr, show_debug) {
         _p_mul_mov(_tri, S, tx, ty, tz);
         g_info.data.tri.push(_tri);
 
+        for (let ii=0; ii<_tri.length; ii+=3) {
+          if (mM.length==0) {
+            mM.push(_tri[ii]);
+            mM.push(_tri[ii]);
+            mM.push(_tri[ii+1]);
+            mM.push(_tri[ii+1]);
+            mM.push(_tri[ii+2]);
+            mM.push(_tri[ii+2]);
+          }
 
+          if (mM[0] > _tri[ii+0]) { mM[0] = _tri[ii+0]; }
+          if (mM[1] < _tri[ii+0]) { mM[1] = _tri[ii+0]; }
+
+          if (mM[2] > _tri[ii+1]) { mM[2] = _tri[ii+1]; }
+          if (mM[3] < _tri[ii+1]) { mM[3] = _tri[ii+1]; }
+
+          if (mM[4] > _tri[ii+2]) { mM[4] = _tri[ii+2]; }
+          if (mM[5] < _tri[ii+2]) { mM[5] = _tri[ii+2]; }
+
+        }
 
         if ("cgroup" in pgr[zidx][yidx][xidx][0]) {
           g_info.data.tri_color_idx.push( pgr[zidx][yidx][xidx][0].cgroup );
@@ -4811,9 +4542,6 @@ function realize_tri_from_grid(gr, pgr, show_debug) {
           color_idx++;
         }
 
-
-
-
         if (g_info.debug_level > 3) {
           console.log(u, template_u);
         }
@@ -4821,6 +4549,10 @@ function realize_tri_from_grid(gr, pgr, show_debug) {
     }
   }
 
+
+  console.log("X:", mM[0], mM[1]);
+  console.log("Y:", mM[2], mM[3]);
+  console.log("Z:", mM[4], mM[5]);
 
 }
 
@@ -4895,7 +4627,57 @@ function realize_tri_from_sp_grid(gr, restrict_tile_h) {
 
 }
 
-function init() {
+
+function palette_load_json(txt) {
+  let dat = JSON.parse(txt);
+  g_info.palette = dat.pal;
+
+  palette_load();
+}
+
+function palette_load() {
+  g_info.palette_choice = _arnd( g_info.palette );
+
+  if ("background" in g_info.palette_choice) {
+    let n = g_info.palette_choice.colors.length;
+
+    let distinct = true;
+    for (let i=0; i<n; i++) {
+      if (g_info.palette_choice.colors[i] == g_info.palette_choice.background) {
+        distinct = false;
+        break;
+      }
+    }
+
+    if (distinct) {
+      g_info.bg_color = g_info.palette_choice.background;
+    }
+
+  }
+
+  //g_info.bg_color = '#fefefe';
+
+  init_fin();
+}
+
+
+function loadjson(fn, cb) {
+  var xhr = new XMLHttpRequest();
+  xhr.overrideMimeType("application/json");
+  xhr.open("GET", fn, true);
+  xhr.onreadystatechange = function() {
+    if ((xhr.readyState === 4) && (xhr.status === 200)) {
+      cb(xhr.responseText);
+    }
+  }
+  xhr.send(null);
+}
+
+
+function init_fin() {
+
+  let _H = window.innerHeight;
+  g_info.tri_scale = 1 + Math.ceil( 1.5*_H / g_info.grid_size );
 
   init_param();
 
@@ -4921,6 +4703,11 @@ function init() {
   _init();
   threejs_init();
   animate();
+}
+
+function init() {
+  loadjson("./chromotome.json", palette_load_json);
+  //init_fin();
 }
 
 //-----------------------------------
@@ -4952,11 +4739,7 @@ function _main() {
 
   let _ret = grid_cull_boundary(pgr);
   if (_ret.status != "success") { console.log("error"); return; }
-
   debug_print_gr(pgr);
-
-  return;
-
 
   let _r = grid_wfc_opt(pgr);
   console.log("got>>", _r);

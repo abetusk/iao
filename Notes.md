@@ -11,6 +11,8 @@ General
 * [Tyler Hobbs - Essays](https://tylerxhobbs.com/essays)
 * [Decon Batch](https://www.deconbatch.com/)
 * [How to Make Generative Art Feel Natural](https://www.generativehut.com/post/how-to-make-generative-art-feel-natural)
+* [Morphogenesis Resources](https://github.com/jasonwebb/morphogenesis-resources)
+* [Gorilla Sun](https://gorillasun.de/posts/)
 
 
 Libraries
@@ -64,6 +66,26 @@ Ideas
 
 Discussion
 ---
+
+### Techniques
+
+
+* Flow fields
+* Circle Packing
+* Voroni diagrams 
+* Flocking techniques 
+* Cellular Automata
+* Noise algorithms 
+* Brownian motion
+* GAN
+* Raymarching 
+* L-tree systems
+* Physarum simulation
+* Fractal systems
+* Asemic Writing
+* Recursive subdivision
+* Wave Function Collapse
+* Markov Chains
 
 ### Color
 

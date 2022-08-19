@@ -71,6 +71,15 @@ var m4 = {
     ];
   },
 
+  t2: function(tx, ty, tz) {
+    return [
+       1,  0,  0, tx,
+       0,  1,  0, ty,
+       0,  0,  1, tz,
+       0,  0,  0,  1,
+    ];
+  },
+
   translation: function(tx, ty, tz) {
     return [
        1,  0,  0,  0,
@@ -79,6 +88,7 @@ var m4 = {
        tx, ty, tz, 1,
     ];
   },
+
   xRotation: function(angleInRadians) {
     var c = Math.cos(angleInRadians);
     var s = Math.sin(angleInRadians);
