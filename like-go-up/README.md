@@ -39,7 +39,7 @@ This work hopes to add to the conversation about examining the reality of the ec
 Tags
 ---
 
-minimal, generative, wave function collapse, isographic, three.js, voxel
+minimal, generative, wave function collapse, wfc, isographic, three.js, voxel
 
 Statement
 ---
