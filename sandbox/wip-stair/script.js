@@ -70,6 +70,8 @@
 // * yuma_punk
 // * cc232
 // * present-correct
+// * tsu_akasaka
+// * florida_citrus
 //
 // on the fence about:
 // * exposito_sub3
@@ -96,7 +98,7 @@ var g_info = {
   "ds": 5,
 
   "quiet":false,
-  "grid_size": 6,
+  "grid_size": 7,
 
   "boundary_condition": "z",
 
@@ -136,6 +138,8 @@ var g_info = {
   "rotx": 0,
   "roty": 0,
   "rotz": 0,
+
+  "t_rot": 0,
 
   "tri_scale" : 100,
 
@@ -299,12 +303,12 @@ let g_template = {
   "weight": {
     //"d": 0,
     ".": 1,
-    "|": 1,
+    "|": 100,
     "+": 1,
     "T": 1,
     "r": 1,
     "p": 1,
-    "^": 100
+    "^": 1
   },
 
   "pdf":  {
@@ -1793,23 +1797,38 @@ function threejs_init() {
 
   //---
 
+  let intensity_range = 0.7;
+  let intensity_max = 0.75
+  let intensity_min = intensity_max - intensity_range;
+
   let point_light = [];
 
-  let ds = 1600;
-  let pld = [];
-  for (let ii=0; ii<3; ii++) {
-    pld.push( [ (fxrand()-0.5)*ds, (fxrand()-0.5)*ds, (fxrand()-0.5)*ds ] );
+  let n_point_light = 16;
+  let dl = 2800;
+  //let ds = [1600,1600,3200];
+  //let ds = [800,800,800];
+  let ds = [1000,1000,1000];
+  //let ds = [8000, 8000, 8000];
+  let pld = [],
+      pli = [],
+      plc = [],
+      pll = [];
+  for (let ii=0; ii<n_point_light; ii++) {
+    pld.push( [ (fxrand()-0.5)*ds[0], (fxrand()-0.5)*ds[1], (fxrand()-0.5)*ds[2] ] );
+    //pli.push( (3/n_point_light) - (fxrand()/n_point_light) );
+    pli.push( intensity_min + fxrand()*intensity_range );
+    pll.push(dl);
+    plc.push(0xffffff);
   }
   //pld.push([0,0,0]);
 
-  let dl = 1800;
   //let pld = [ [ds, 0, 0], [0, ds, 0], [0, 0, ds], [0.25, 1.5,1.5] ];
   //let plc = [ 0xff0000, 0x00ff00, 0x0000ff, 0xffffff ];
   //let plc = [ 0x20357e, 0xf44242, 0xffffff, 0xffffff ]
-  let plc = [ 0xffffff, 0xffffff, 0xffffff, 0xffffff ]
+  //let plc = [ 0xffffff, 0xffffff, 0xffffff, 0xffffff ]
   //let pli = [ 8, 8, 1, 1 ];
-  let pli = [ 2, 2, 2, 1 ];
-  let pll = [ dl, dl, dl, 100 ];
+  //let pli = [ 2, 2, 2, 1 ];
+  //let pll = [ dl, dl, dl, 100 ];
 
 
   for (let ii=0; ii<pld.length; ii++) {
@@ -1817,6 +1836,9 @@ function threejs_init() {
     point_light[ii].position.set( pld[ii][0], pld[ii][1], pld[ii][2] );
     g_info.scene.add( point_light[ii] );
   }
+
+  g_info["point_light"] = point_light;
+  g_info["point_light_info"]  = { "pos": pld, "intensity": pli, "color": plc, "dist": pll };
 
   /*
   point_light[0].position.set( ds, 0, 0 );
@@ -2299,7 +2321,18 @@ function render() {
     let mrp = m4.multiply(mp1, mp0);
     let mrn = m4.multiply(mn1, mn0);
 
-    let mr = m4.multiply(mrp, mrn);
+
+    //let mr = m4.multiply(mrp, mrn);
+
+    g_info.t_rot += (1/256)*Math.PI;
+    if (g_info.t_rot > (2*Math.PI)) { g_info.t_rot -= 2*Math.PI; }
+
+    let mZ = m4.zRotation( g_info.t_rot );
+    let mZs = m4.t2( 0, 0, g_info.t_rot*100 );
+    //mZs = m4.t2(0,0,0);
+    //let mZs = m4.translation( 0, 0, g_info.t_rot*30);
+    let mr = m4.multiply( mZs, m4.multiply( mZ, m4.multiply(mrp, mrn) ) );
+
     let m = new THREE.Matrix4();
     m.set( mr[ 0], mr[ 1], mr[ 2], mr[ 3],
            mr[ 4], mr[ 5], mr[ 6], mr[ 7],
@@ -2307,6 +2340,9 @@ function render() {
            mr[12], mr[13], mr[14], mr[15] );
 
 
+    g_info.mesh.position.x = 0;
+    g_info.mesh.position.y = 0;
+    g_info.mesh.position.z = 0;
     g_info.mesh.rotation.x = 0;
     g_info.mesh.rotation.y = 0;
     g_info.mesh.rotation.z = 0;
@@ -2317,7 +2353,9 @@ function render() {
       //EXPERIMENTAL
       //
       let _di = ( ((ii%2) == 0) ? ((ii/2)+1) : ( -((ii-1)/2) - 1) );
-      let _sz = 12.7;
+      //let _sz = 12.7;
+      let _sz = 15.6;
+      //let _sz = 17;
       let _scale = 100;
       //let mmov = m4.t2(0, 0, (ii+1)*(_sz*_scale));
       let mmov = m4.t2(0, 0, _di*(_sz*_scale));
@@ -3726,7 +3764,6 @@ function processing_update(iter) {
 }
 
 function grid_wfc_opt(gr) {
-
 
   let debug = false;
   let n_iter = g_info.max_iter;
