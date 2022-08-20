@@ -69,9 +69,12 @@
 // * spatial03i
 // * yuma_punk
 // * cc232
+// * cc245
 // * present-correct
 // * tsu_akasaka
 // * florida_citrus
+// * winter.night
+// * rag-mysore
 //
 // on the fence about:
 // * exposito_sub3
@@ -97,8 +100,10 @@ var g_info = {
   "rnd": [],
   "ds": 5,
 
+  "paused":false,
+
   "quiet":false,
-  "grid_size": 7,
+  "grid_size": 8,
 
   "boundary_condition": "z",
 
@@ -140,6 +145,7 @@ var g_info = {
   "rotz": 0,
 
   "t_rot": 0,
+  "t_mov": 0,
 
   "tri_scale" : 100,
 
@@ -150,6 +156,9 @@ var g_info = {
   "max_iter" : -1,
 
   "fudge": 1/1024,
+
+  "mouse_x": -1000,
+  "mouse_y": -1000,
 
   "_palette": [
     { 
@@ -212,20 +221,16 @@ var g_info = {
   "place_type" : 0,
   "place_size": 64,
 
-  //"speed_factor":  0.00075,
   "speed_factor" : 1/(2*4096),
 
-  //"speed_factor":  1/4,
-
-  //"view_counter" : 18,
-  //"view_counter_n" : 20,
-
   "tile_width_denom_weight": {
-    "2": 1,
+    //"2": 1,
     "3": 2,
-    "4": 3,
-    "5": 2,
-    "6": 1
+    "4": 4,
+    "5": 3,
+    "6": 2,
+    "7": 1,
+    "8": 1
   },
   "tile_width": 1/4,
 
@@ -259,6 +264,8 @@ var g_info = {
     "info": [],
     "tri": {}
   },
+
+  "n_point_light": 4,
 
   "debug_line": false,
   "debug_cube": [],
@@ -341,6 +348,34 @@ let g_template = {
   "T" : []
 
 };
+
+function weight2pd(w) {
+  let S = 0.0;
+  let pdf = {};
+  let cdf = [];
+
+  for (key in w) { S += w[key]; }
+
+  let cdf_s = 0.0;
+  for (key in w) {
+    pdf[key] = w[key] / S;
+
+    cdf_s += pdf[key];
+    cdf.push( {"key": key, "s": cdf_s} );
+  }
+
+  return { "pdf": pdf, "cdf": cdf, "w": w };
+}
+
+function rnd_cdf(cdf, p) {
+  p = ((typeof p === "undefined") ? fxrand() : p);
+  for (let ii=0; ii<cdf.length; ii++) {
+    if (p<cdf[ii].s) {
+      return cdf[ii].key;
+    }
+  }
+  return cdf[ cdf.length-1 ].key;
+}
 
 // the geometry for some of the more copmlex shapes is a little
 // too involved to list out statically so do it here.
@@ -1750,7 +1785,10 @@ function threejs_init() {
 
   let bg = parseInt('7a7a7a', 16);
   if ("background" in g_info.palette[ g_info.palette_idx ]) {
-    bg = parseInt(g_info.palette[ g_info.palette_idx ].background.slice(1), 16);
+    if ((g_info.palette[ g_info.palette_idx].background != '#fff') &&
+        (g_info.palette[ g_info.palette_idx].background != '#ffffff')) {
+      bg = parseInt(g_info.palette[ g_info.palette_idx ].background.slice(1), 16);
+    }
   }
 
   // DEBUG
@@ -1797,17 +1835,29 @@ function threejs_init() {
 
   //---
 
-  let intensity_range = 0.7;
-  let intensity_max = 0.75
-  let intensity_min = intensity_max - intensity_range;
+  //let intensity_range = 3.75;
+  //let intensity_max = 4;
+
+  let intensity_max_val = [
+    4,4,4,4,
+    4,3,2,2,1.5];
+
+  //let intensity_max = 2;
+  let intensity_max = intensity_max_val[ g_info.n_point_light ];
+  let intensity_min = 0.25;
+  let intensity_range = intensity_max - intensity_min;
 
   let point_light = [];
 
-  let n_point_light = 16;
+  //let n_point_light = 8;
+  //let n_point_light = _irnd(4,8);
+  let n_point_light = g_info.n_point_light;
   let dl = 2800;
   //let ds = [1600,1600,3200];
   //let ds = [800,800,800];
-  let ds = [1000,1000,1000];
+  //let ds = [200,200,1000];
+  let _B = g_info.tri_scale * g_info.grid_size;
+  let ds = [ 2*_B, 2*_B, 2*_B ];
   //let ds = [8000, 8000, 8000];
   let pld = [],
       pli = [],
@@ -1820,6 +1870,7 @@ function threejs_init() {
     pll.push(dl);
     plc.push(0xffffff);
   }
+  //pli[0] = 3;
   //pld.push([0,0,0]);
 
   //let pld = [ [ds, 0, 0], [0, ds, 0], [0, 0, ds], [0.25, 1.5,1.5] ];
@@ -2076,18 +2127,21 @@ function threejs_init() {
 
   g_info.scene.add( g_info.mesh );
 
-
   // wip
-  for (let ii=0; ii<g_info.meshN; ii++) {
-    g_info.mesha.push( new THREE.Mesh( g_info.geometry, g_info.material ) );
-    g_info.scene.add( g_info.mesha[ii] );
+  //
+  if (g_info.boundary_condition != 'n') {
+    for (let ii=0; ii<g_info.meshN; ii++) {
+      g_info.mesha.push( new THREE.Mesh( g_info.geometry, g_info.material ) );
+      g_info.scene.add( g_info.mesha[ii] );
+    }
   }
 
 
   //WIP
   //
   let sz = g_info.renderer.getDrawingBufferSize( new THREE.Vector2() );
-  let _wglrt = new THREE.WebGLRenderTarget( sz.width, sz.height, { "samples":2 } );
+  //let _wglrt = new THREE.WebGLRenderTarget( sz.width, sz.height, { "samples":2 } );
+  let _wglrt = new THREE.WebGLRenderTarget( sz.width, sz.height, { "samples":4 } );
 
 
   let composer = new POSTPROCESSING.EffectComposer(g_info.renderer, _wglrt);
@@ -2113,10 +2167,51 @@ function threejs_init() {
 
   g_info.container.appendChild( g_info.renderer.domElement );
 
-  window.addEventListener( 'resize', onWindowResize );
+  window.addEventListener( 'resize', window_resize );
+  window.addEventListener( 'mousemove', mouse_move );
+  window.addEventListener( 'wheel', mouse_wheel );
 }
 
-function onWindowResize() {
+// mouse_x and mouse_y renomarlized to be +-1 of each
+// dimension.
+//
+//          1
+//  -1            1
+//         -1
+//  
+function mouse_move(ev) {
+  ev.preventDefault();
+
+  g_info.mouse_x =  ((ev.clientX / window.innerWidth)  * 2) - 1;
+  g_info.mouse_y = -((ev.clientY / window.innerHeight) * 2) + 1;
+
+  if (g_info.point_light.length>0) {
+    g_info.point_light[0].position.x = g_info.mouse_x *1000;
+    g_info.point_light[0].position.y = g_info.mouse_y *1000;
+    g_info.point_light[0].position.z = 400;
+  }
+}
+
+function mouse_wheel(ev) {
+  //ev.preventDefault();
+
+  if (g_info.point_light.length>0) {
+    let _del_i = -ev.deltaY/500;
+    let _intensity = g_info.point_light[0].intensity;
+    let min_intensity = 0.125;
+    let max_intensity = 4;
+    _intensity += _del_i;
+    if ((_intensity > min_intensity) &&
+        (_intensity < max_intensity)) {
+      g_info.point_light[0].intensity = _intensity;
+
+    }
+  }
+
+
+}
+
+function window_resize() {
 
   g_info.aspect = window.innerWidth / window.innerHeight;
 
@@ -2186,7 +2281,7 @@ function easeInOutQuart(x) {
 //
 //----
 
-function render() {
+function render_n() {
 
   const time = Date.now() * g_info.speed_factor;
   let _t_rem_orig = time - Math.floor(time);
@@ -2201,21 +2296,24 @@ function render() {
     g_info.view_nxt = (_irnd(2) + g_info.view_prv + 1)%N;
   }
 
-  if ( Math.floor(g_info.time_prv) != Math.floor(time)) {
-    g_info.time_prv = time;
+  //fiddling
+  if (!g_info.paused) {
+    if ( Math.floor(g_info.time_prv) != Math.floor(time)) {
+      g_info.time_prv = time;
 
-    if (g_info.view_counter == 0) {
-      g_info.view_prv = g_info.view_nxt;
-      g_info.view_nxt = _irnd(N);
+      if (g_info.view_counter == 0) {
+        g_info.view_prv = g_info.view_nxt;
+        g_info.view_nxt = _irnd(N);
 
-      if (g_info.view_nxt == g_info.view_prv) {
-        g_info.view_nxt = (g_info.view_prv+1)%N;
+        if (g_info.view_nxt == g_info.view_prv) {
+          g_info.view_nxt = (g_info.view_prv+1)%N;
+        }
+
       }
 
+      g_info.view_counter ++;
+      g_info.view_counter %= g_info.view_counter_n;
     }
-
-    g_info.view_counter ++;
-    g_info.view_counter %= g_info.view_counter_n;
   }
 
   //----
@@ -2324,12 +2422,16 @@ function render() {
 
     //let mr = m4.multiply(mrp, mrn);
 
-    g_info.t_rot += (1/256)*Math.PI;
+    if (!g_info.paused) {
+      g_info.t_mov += (1/2048);
+      g_info.t_rot += (1/8192)*Math.PI;
+    }
+
     if (g_info.t_rot > (2*Math.PI)) { g_info.t_rot -= 2*Math.PI; }
 
     let mZ = m4.zRotation( g_info.t_rot );
-    let mZs = m4.t2( 0, 0, g_info.t_rot*100 );
-    //mZs = m4.t2(0,0,0);
+    //let mZs = m4.t2( 0, 0, g_info.t_rot*1000 );
+    let mZs = m4.t2(0,0,0);
     //let mZs = m4.translation( 0, 0, g_info.t_rot*30);
     let mr = m4.multiply( mZs, m4.multiply( mZ, m4.multiply(mrp, mrn) ) );
 
@@ -2421,6 +2523,270 @@ function render() {
 
 }
 
+function render_zy() {
+  render_z();
+}
+
+function render_z() {
+
+  const time = Date.now() * g_info.speed_factor;
+  let _t_rem_orig = time - Math.floor(time);
+
+  let N = 3;
+
+  // init
+  //
+  if (g_info.time_prv < 0) {
+    g_info.time_prv = time;
+    g_info.view_prv = _irnd(N);
+    g_info.view_nxt = (_irnd(2) + g_info.view_prv + 1)%N;
+  }
+
+  if (!g_info.paused) {
+    if ( Math.floor(g_info.time_prv) != Math.floor(time)) {
+      g_info.time_prv = time;
+
+      if (g_info.view_counter == 0) {
+        g_info.view_prv = g_info.view_nxt;
+        g_info.view_nxt = _irnd(N);
+
+        if (g_info.view_nxt == g_info.view_prv) {
+          g_info.view_nxt = (g_info.view_prv+1)%N;
+        }
+
+      }
+
+      g_info.view_counter ++;
+      g_info.view_counter %= g_info.view_counter_n;
+    }
+  }
+
+  //----
+  //----
+  //----
+
+
+  let theta_x = Math.sin(time*0.5)*0.125;
+  let theta_y = time*0.5;
+
+  theta_x = 0;
+  theta_y = 0;
+
+  let view_prv = g_info.view_prv;
+  let view_nxt = g_info.view_nxt;
+  let view_counter = g_info.view_counter;
+
+  let _euler = false;
+  if (_euler) {
+    g_info.mesh.rotation.x = g_info.rotx + theta_x;
+    g_info.mesh.rotation.y = g_info.roty + theta_y;
+    g_info.mesh.rotation.z = g_info.rotz;
+  }
+  else {
+
+
+    let mp0 = m4.xRotation(0);
+    let mp1 = m4.yRotation(0);
+
+    let mn0 = m4.xRotation(0);
+    let mn1 = m4.yRotation(0);
+
+    let _t_rem = easeInOutSine(_t_rem_orig);
+
+    if (view_counter != 0) {
+      _t_rem = 0;
+    }
+    else {
+    }
+
+      let D = 4;
+      //D = 1.75;
+      //D = 1.387;
+
+      if (view_prv == 0) {
+        mp0 = m4.xRotation((1-_t_rem)*Math.PI/D);
+        mp1 = m4.yRotation((1-_t_rem)*Math.PI/D);
+      }
+
+      else if (view_prv == 1) {
+        mp0 = m4.xRotation((1-_t_rem)*Math.PI/D);
+        mp1 = m4.zRotation((1-_t_rem)*Math.PI/D);
+      }
+
+      else if (view_prv == 2) {
+        mp0 = m4.yRotation((1-_t_rem)*Math.PI/D);
+        mp1 = m4.zRotation((1-_t_rem)*Math.PI/D);
+      }
+
+      else if (view_prv == 3) {
+        mp0 = m4.xRotation((_t_rem)*Math.PI/D);
+        mp1 = m4.yRotation((1-_t_rem)*Math.PI/D);
+      }
+      else if (view_prv == 4) {
+        mp0 = m4.xRotation((_t_rem)*Math.PI/D);
+        mp1 = m4.zRotation((1-_t_rem)*Math.PI/D);
+      }
+      else if (view_prv == 5) {
+        mp0 = m4.yRotation((_t_rem)*Math.PI/D);
+        mp1 = m4.zRotation((1-_t_rem)*Math.PI/D);
+      }
+
+      
+      if (view_nxt == 0 ) {
+        mn0 = m4.xRotation(_t_rem*Math.PI/D);
+        mn1 = m4.yRotation(_t_rem*Math.PI/D);
+      }
+      else if (view_nxt == 1) {
+        mn0 = m4.xRotation((_t_rem)*Math.PI/D);
+        mn1 = m4.zRotation((_t_rem)*Math.PI/D);
+      }
+      else if (view_nxt == 2) {
+        mn0 = m4.yRotation((_t_rem)*Math.PI/D);
+        mn1 = m4.zRotation((_t_rem)*Math.PI/D);
+      }
+
+      else if (view_nxt == 3) {
+        mp0 = m4.xRotation((1-_t_rem)*Math.PI/D);
+        mp1 = m4.yRotation((_t_rem)*Math.PI/D);
+      }
+      else if (view_nxt == 4) {
+        mp0 = m4.xRotation((1-_t_rem)*Math.PI/D);
+        mp1 = m4.zRotation((_t_rem)*Math.PI/D);
+      }
+      else if (view_nxt == 5) {
+        mp0 = m4.yRotation((1-_t_rem)*Math.PI/D);
+        mp1 = m4.zRotation((_t_rem)*Math.PI/D);
+      }
+
+    //}
+
+    let mrp = m4.multiply(mp1, mp0);
+    let mrn = m4.multiply(mn1, mn0);
+
+
+    //let mr = m4.multiply(mrp, mrn);
+
+    if (!g_info.paused) {
+      g_info.t_mov += (1/2);
+    }
+    if (g_info.t_mov > (g_info.grid_size*g_info.tri_scale)) {
+      g_info.t_mov -= (g_info.grid_size*g_info.tri_scale);
+    }
+
+    if (!g_info.paused) {
+      g_info.t_rot += (1/8192)*Math.PI;
+    }
+
+    if (g_info.t_rot > (2*Math.PI)) {
+      g_info.t_rot -= 2*Math.PI;
+    }
+
+    let mZ = m4.zRotation( g_info.t_rot );
+    let mZs = m4.t2( 0, 0, g_info.t_mov);
+    let mr = m4.multiply( mZs, m4.multiply( mZ, m4.multiply(mrp, mrn) ) );
+
+    let m = new THREE.Matrix4();
+    m.set( mr[ 0], mr[ 1], mr[ 2], mr[ 3],
+           mr[ 4], mr[ 5], mr[ 6], mr[ 7],
+           mr[ 8], mr[ 9], mr[10], mr[11],
+           mr[12], mr[13], mr[14], mr[15] );
+
+
+    g_info.mesh.position.x = 0;
+    g_info.mesh.position.y = 0;
+    g_info.mesh.position.z = 0;
+    g_info.mesh.rotation.x = 0;
+    g_info.mesh.rotation.y = 0;
+    g_info.mesh.rotation.z = 0;
+    g_info.mesh.applyMatrix4(m);
+
+    for (let ii=0; ii<g_info.mesha.length; ii++) {
+
+      //EXPERIMENTAL
+      //
+      let _di = ( ((ii%2) == 0) ? ((ii/2)+1) : ( -((ii-1)/2) - 1) );
+      //let _sz = 12.7;
+      let _sz = g_info.grid_size;
+      //let _sz = 17;
+      let _scale = g_info.tri_scale;
+      //let _scale = 100;
+      //let mmov = m4.t2(0, 0, (ii+1)*(_sz*_scale));
+      let mmov = m4.t2(0, 0, _di*(_sz*_scale));
+      let mm = m4.multiply( mmov, mr );
+      let _m = new THREE.Matrix4();
+      _m.set( mm[ 0], mm[ 1], mm[ 2], mm[ 3],
+              mm[ 4], mm[ 5], mm[ 6], mm[ 7],
+              mm[ 8], mm[ 9], mm[10], mm[11],
+              mm[12], mm[13], mm[14], mm[15] );
+
+      g_info.mesha[ii].position.x = 0;
+      g_info.mesha[ii].position.y = 0;
+      g_info.mesha[ii].position.z = 0;
+      g_info.mesha[ii].rotation.x = 0;
+      g_info.mesha[ii].rotation.y = 0;
+      g_info.mesha[ii].rotation.z = 0;
+      g_info.mesha[ii].applyMatrix4(_m);
+
+    }
+
+    for (let i=0; i<g_info.debug_cube.length; i++) {
+      g_info.debug_cube[i].position.x = g_info.debug_cube_pos[i][0];
+      g_info.debug_cube[i].position.y = g_info.debug_cube_pos[i][1];
+      g_info.debug_cube[i].position.z = g_info.debug_cube_pos[i][2];
+
+      g_info.debug_cube[i].rotation.x = 0;
+      g_info.debug_cube[i].rotation.y = 0;
+      g_info.debug_cube[i].rotation.z = 0;
+      g_info.debug_cube[i].applyMatrix4(m);
+
+    }
+  }
+
+  g_info.tjs_line.rotation.x = g_info.rotx + theta_x;
+  g_info.tjs_line.rotation.y = g_info.roty + theta_y;
+  g_info.tjs_line.rotation.z = g_info.rotz;
+
+  theta_x = Math.sin(time*0.5)*0.125;
+  theta_y = time*0.5;
+
+  for (let i=0; i<g_info.light.length; i++) {
+    let _a = time*g_info.light_speed_factor + i*Math.PI/2;
+    let _x = Math.cos(_a);
+    let _y = Math.sin(_a);
+    let _z = Math.cos(_a)*Math.sin(_a);
+
+    g_info.light[i].position.set( _x, _y, _z ).normalize();
+  }
+
+
+  if ("composer" in g_info) {
+    g_info.composer.render();
+  }
+  else {
+    g_info.renderer.render( g_info.scene, g_info.camera );
+  }
+
+  if (g_info.take_screenshot_flag) {
+    let imgdata = g_info.renderer.domElement.toDataURL();
+    screenshot_data(imgdata);
+    g_info.take_screenshot_flag = false;
+  }
+
+}
+
+function render() {
+  if (g_info.boundary_condition == 'z') {
+    render_z();
+  }
+  else if (g_info.boundary_condition == 'zy') {
+    render_zy();
+  }
+  else {
+    render_n();
+  }
+
+}
+
 //---
 
 function init_param() {
@@ -2432,17 +2798,103 @@ function init_param() {
 
   g_info.features["Palette"] = g_info.palette[pidx].name;
 
-  // speed factor
-  //
-  //g_info.speed_factor  = _rnd(1/2048, 1/512); //0.00075,
 
-  //DEBUG
-  //g_info.speed_factor = 1/2048;
-  //g_info.speed_factor = 1/(2*4096);
+  //--
+
+  let grid_weight = {
+    "6":30, "7":30, "8":30, "9":25, "10":20, "11":10, "12":9,
+    "13":8, "14":7, "15":6, "16":5, "17":4, "18":3, "19":2,
+    "20": 1
+  };
+  let grid_pd = weight2pd(grid_weight);
+
+  g_info.grid_size = rnd_cdf(grid_pd.cdf);
+  g_info.features["Grid Size"] = g_info.grid_size;
+
+  //--
+
+  let boundary_condition = ["n", "z"];
+  g_info.boundary_condition = boundary_condition[ _irnd(2) ];
+
+  if (g_info.boundary_condition == 'n') {
+    g_info.features["Boundary Condition"] = "None";
+  }
+  else {
+    g_info.features["Boundary Condition"] = "Z";
+  }
+
+  //---
+
+  g_info.n_point_light = _irnd(4,8);
+  g_info.features["Light Count"] = g_info.n_point_light;
+
+  //---
+
+  let _sf_d = _irnd(1,16);
+  g_info.speed_factor = 1/(_sf_d*4096);
+
+  //DEBUG 
+  g_info.speed_factor = 1/2048;
 
   g_info.features["Speed Factor"] = g_info.speed_factor;
 
   //---
+
+  let width_pd = weight2pd( g_info.tile_width_denom_weight );
+  let width_d = rnd_cdf(width_pd.cdf);
+  g_info.tile_width = 1 / width_d;
+  g_info.features["Tile Width"] = g_info.tile_width;
+
+  let _gh_weight = {};
+  for (let key in g_info.tile_height_denom_weight) {
+    if (parseInt(key) <= width_d) { continue; }
+    _gh_weight[key] = g_info.tile_height_denom_weight[key];
+  }
+  let height_pd = weight2pd( _gh_weight );
+  let height_d = rnd_cdf(height_pd.cdf);
+  g_info.tile_height = 1/height_d;
+  g_info.features["Tile Height"] = g_info.tile_height;
+
+  //--
+
+  let tile_weight_profile_info = {
+    "0": { "tile": { "|" : 100 } },
+    "1": { "tile": { "+" : 100 } },
+    "2": { "tile": { "T" : 100 } },
+    "3": { "tile": { "r" : 100 } },
+    "4": { "tile": { "^" : 100 } },
+
+    "5": { "tile": { "|": 100, "+": 100 } },
+    "6": { "tile": { "|": 100, "T": 100 } },
+    "7": { "tile": { "|": 100, "r": 100 } },
+    "8": { "tile": { "|": 100, "^": 100 } },
+
+    "9": { "tile": { "+": 100, "T": 100 } },
+    "10": { "tile": { "+": 100, "r": 100 } },
+    "11": { "tile": { "+": 100, "^": 100 } },
+
+    "12": { "tile": { "T": 100, "r": 100 } },
+    "13": { "tile": { "T": 100, "^": 100 } },
+
+    "14": { "tile": { "r": 100, "^": 100 } },
+
+    "15": { "tile": {} }
+  };
+
+  let twpi_idx = _irnd(16);
+
+  let profile_desc = ((twpi_idx == 15) ? "Uniform": "");
+
+  let tile_w = tile_weight_profile_info[twpi_idx].tile;
+  for (let tile_type in tile_w) {
+    g_template.weight[tile_type] = tile_w[tile_type]; 
+    if (profile_desc.length > 0) { profile_desc += ","; }
+    profile_desc += tile_type;
+  }
+
+  g_info.features["Tile Weight Profile"] = profile_desc;
+
+  //--
 
   window.$fxhashFeatures = g_info.features;
 }
@@ -4515,10 +4967,13 @@ function loadjson(fn, cb) {
 
 function init_fin() {
 
-  let _H = window.innerHeight;
-  g_info.tri_scale = 1 + Math.ceil( 2*_H / g_info.grid_size );
-
   init_param();
+
+  let _wh = window.innerHeight;
+  let _ww = window.innerWidth;
+  let _F = ((_wh < _ww) ? _wh : _ww);
+  g_info.tri_scale = 1 + Math.ceil( 1.5*_F / g_info.grid_size );
+
 
   welcome();
 
@@ -4536,6 +4991,9 @@ function init_fin() {
       g_info.capture_end = g_info.capture_start + g_info.capture_dt;
 
       console.log(">>>", g_info.capture_start, g_info.capture_end, g_info.capture_dt);
+    }
+    else if (ev.key == 'p') {
+      g_info.paused = !g_info.paused;
     }
   });
 

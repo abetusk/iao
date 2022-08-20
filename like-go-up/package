@@ -8,7 +8,7 @@
 # work.  If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 #
 
-outfn=wip_stair.zip
+outfn=like_go_up.zip
 rm -f $outfn
 
 zip $outfn CCapture.js download.js webm-writer-0.2.0.js script.js index.html style.css m4.js three.js postprocessing.js quadtree.js LICENSE LICENSE-three-js README.md
