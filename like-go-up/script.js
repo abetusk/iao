@@ -124,7 +124,7 @@ var g_info = {
   "mesh": {},
 
   "mesha" : [],
-  "meshN" : 5,
+  "meshN" : 8,
 
   "radius" : 500,
   "frustumSize" : 1500,
