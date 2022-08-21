@@ -100,6 +100,8 @@ var g_info = {
   "rnd": [],
   "ds": 5,
 
+  "ready": false,
+
   "paused":false,
 
   "quiet":false,
@@ -124,7 +126,7 @@ var g_info = {
   "mesh": {},
 
   "mesha" : [],
-  "meshN" : 8,
+  "meshN" : 6,
 
   "radius" : 500,
   "frustumSize" : 1500,
@@ -1468,7 +1470,7 @@ function welcome() {
   console.log("");
   console.log(" s   - save screenshot (PNG)");
   console.log(" a   - save animation (5s webm) (advanced usage)");
-  console.log(" p   - pause");
+  //console.log(" p   - pause");
   console.log("");
 
   console.log("Features:");
@@ -1762,9 +1764,6 @@ function tri_bound() {
   console.log(xx,yy,zz);
 }
 
-function trivf_() {
-}
-
 function threejs_init() {
 
   g_info.container = document.getElementById( 'container' );
@@ -1791,6 +1790,80 @@ function threejs_init() {
     }
   }
 
+  g_info.scene.background = new THREE.Color( bg );
+  g_info.scene.fog = new THREE.Fog( bg, 16, 1024);
+
+  g_info.renderer = new THREE.WebGLRenderer({ "antialias": true });
+  g_info.renderer.setPixelRatio( window.devicePixelRatio );
+  g_info.renderer.setSize( window.innerWidth, window.innerHeight );
+  g_info.renderer.outputEncoding = THREE.sRGBEncoding;
+
+  let directional_light = false;
+  if (directional_light) {
+    //g_info.light.push(new THREE.DirectionalLight( 0xffffff, 1.5 ));
+    g_info.light.push(new THREE.DirectionalLight( 0xffffff, 1.5 ));
+    g_info.light[0].position.set( 1, 1, 1 ).normalize();
+
+    // SHADOW
+    //
+    let shadow = false;
+    if (shadow) {
+      g_info.light[0].castShadow = true;
+      g_info.light[0].shadow.camera.near  = -1000;
+      g_info.light[0].shadow.camera.far   =  1000;
+      g_info.light[0].shadow.camera.left  = -2500;
+      g_info.light[0].shadow.camera.right =  2500;
+
+      g_info.light[0].shadow.camera.top    =  2500;
+      g_info.light[0].shadow.camera.bottom = -2500;
+
+      g_info.light[0].shadow.mapSize.width = 512;
+      g_info.light[0].shadow.mapSize.height = 512;
+
+      g_info.light[0].shadow.radius = 4;
+      g_info.light[0].shadow.bias = -0.0005;
+    }
+
+    g_info.scene.add( g_info.light[0] );
+  }
+
+  //
+  let sz = g_info.renderer.getDrawingBufferSize( new THREE.Vector2() );
+  //let _wglrt = new THREE.WebGLRenderTarget( sz.width, sz.height, { "samples":2 } );
+  let _wglrt = new THREE.WebGLRenderTarget( sz.width, sz.height, { "samples":4 } );
+
+
+  let composer = new POSTPROCESSING.EffectComposer(g_info.renderer, _wglrt);
+
+  let renderpass = new POSTPROCESSING.RenderPass(g_info.scene, g_info.camera);
+
+  let bloomeffect = new POSTPROCESSING.BloomEffect(100, 205, 40, 2056);
+  let bloompass = new POSTPROCESSING.EffectPass(g_info.camera, bloomeffect);
+
+  let fxaaeffect = new POSTPROCESSING.FXAAEffect();
+  let fxaapass = new POSTPROCESSING.EffectPass(g_info.camera, fxaaeffect);
+
+  composer.addPass(renderpass);
+  composer.addPass(bloompass);
+  composer.addPass(fxaapass);
+
+  g_info.composer = composer;
+  g_info.render_pass = renderpass;
+  g_info.bloom_effect = bloomeffect;
+  g_info.bloom_pass = bloompass;
+  g_info.fxaa_effect = fxaaeffect;
+  g_info.fxaa_pass = fxaapass;
+
+  g_info.container.appendChild( g_info.renderer.domElement );
+
+  window.addEventListener( 'resize', window_resize );
+  window.addEventListener( 'mousemove', mouse_move );
+  window.addEventListener( 'wheel', mouse_wheel );
+
+}
+
+function threejs_scene_init() {
+
   // DEBUG
   //
   //bg = parseInt( '7a7a7a', 16 );
@@ -1799,39 +1872,15 @@ function threejs_init() {
   //DEBUG
   //bg = 
 
+  /*
   g_info.scene.background = new THREE.Color( bg );
   //g_info.scene.fog = new THREE.Fog( 0x050505, 2000, 3500 );
   //g_info.scene.fog = new THREE.Fog( 0x7a7a7a , 16, 1024);
   g_info.scene.fog = new THREE.Fog( bg, 16, 1024);
+  */
 
 
   //---
-
-  //g_info.light.push(new THREE.DirectionalLight( 0xffffff, 1.5 ));
-  g_info.light.push(new THREE.DirectionalLight( 0xffffff, 1.5 ));
-  g_info.light[0].position.set( 1, 1, 1 ).normalize();
-
-  // SHADOW
-  //
-  let shadow = false;
-  if (shadow) {
-    g_info.light[0].castShadow = true;
-    g_info.light[0].shadow.camera.near  = -1000;
-    g_info.light[0].shadow.camera.far   =  1000;
-    g_info.light[0].shadow.camera.left  = -2500;
-    g_info.light[0].shadow.camera.right =  2500;
-
-    g_info.light[0].shadow.camera.top    =  2500;
-    g_info.light[0].shadow.camera.bottom = -2500;
-
-    g_info.light[0].shadow.mapSize.width = 512;
-    g_info.light[0].shadow.mapSize.height = 512;
-
-    g_info.light[0].shadow.radius = 4;
-    g_info.light[0].shadow.bias = -0.0005;
-  }
-
-  //g_info.scene.add( g_info.light[0] );
 
   //---
 
@@ -2074,10 +2123,12 @@ function threejs_init() {
 
   //---
 
+  /*
   g_info.renderer = new THREE.WebGLRenderer({ "antialias": true });
   g_info.renderer.setPixelRatio( window.devicePixelRatio );
   g_info.renderer.setSize( window.innerWidth, window.innerHeight );
   g_info.renderer.outputEncoding = THREE.sRGBEncoding;
+  */
 
   //SHADOW
   //g_info.renderer.shadowMap.enabled = true;
@@ -2136,6 +2187,7 @@ function threejs_init() {
     }
   }
 
+  /*
 
   //WIP
   //
@@ -2170,6 +2222,7 @@ function threejs_init() {
   window.addEventListener( 'resize', window_resize );
   window.addEventListener( 'mousemove', mouse_move );
   window.addEventListener( 'wheel', mouse_wheel );
+  */
 }
 
 // mouse_x and mouse_y renomarlized to be +-1 of each
@@ -2236,6 +2289,7 @@ function window_resize() {
 //---
 
 function animate() {
+
   render();
   requestAnimationFrame( animate );
 
@@ -2283,6 +2337,8 @@ function easeInOutQuart(x) {
 
 function render_n() {
 
+
+
   const time = Date.now() * g_info.speed_factor;
   let _t_rem_orig = time - Math.floor(time);
 
@@ -2297,23 +2353,21 @@ function render_n() {
   }
 
   //fiddling
-  if (!g_info.paused) {
-    if ( Math.floor(g_info.time_prv) != Math.floor(time)) {
-      g_info.time_prv = time;
+  if ( Math.floor(g_info.time_prv) != Math.floor(time)) {
+    g_info.time_prv = time;
 
-      if (g_info.view_counter == 0) {
-        g_info.view_prv = g_info.view_nxt;
-        g_info.view_nxt = _irnd(N);
+    if (g_info.view_counter == 0) {
+      g_info.view_prv = g_info.view_nxt;
+      g_info.view_nxt = _irnd(N);
 
-        if (g_info.view_nxt == g_info.view_prv) {
-          g_info.view_nxt = (g_info.view_prv+1)%N;
-        }
-
+      if (g_info.view_nxt == g_info.view_prv) {
+        g_info.view_nxt = (g_info.view_prv+1)%N;
       }
 
-      g_info.view_counter ++;
-      g_info.view_counter %= g_info.view_counter_n;
     }
+
+    g_info.view_counter ++;
+    g_info.view_counter %= g_info.view_counter_n;
   }
 
   //----
@@ -2422,10 +2476,8 @@ function render_n() {
 
     //let mr = m4.multiply(mrp, mrn);
 
-    if (!g_info.paused) {
-      g_info.t_mov += (1/2048);
-      g_info.t_rot += (1/8192)*Math.PI;
-    }
+    g_info.t_mov += (1/2048);
+    g_info.t_rot += (1/8192)*Math.PI;
 
     if (g_info.t_rot > (2*Math.PI)) { g_info.t_rot -= 2*Math.PI; }
 
@@ -2542,23 +2594,21 @@ function render_z() {
     g_info.view_nxt = (_irnd(2) + g_info.view_prv + 1)%N;
   }
 
-  if (!g_info.paused) {
-    if ( Math.floor(g_info.time_prv) != Math.floor(time)) {
-      g_info.time_prv = time;
+  if ( Math.floor(g_info.time_prv) != Math.floor(time)) {
+    g_info.time_prv = time;
 
-      if (g_info.view_counter == 0) {
-        g_info.view_prv = g_info.view_nxt;
-        g_info.view_nxt = _irnd(N);
+    if (g_info.view_counter == 0) {
+      g_info.view_prv = g_info.view_nxt;
+      g_info.view_nxt = _irnd(N);
 
-        if (g_info.view_nxt == g_info.view_prv) {
-          g_info.view_nxt = (g_info.view_prv+1)%N;
-        }
-
+      if (g_info.view_nxt == g_info.view_prv) {
+        g_info.view_nxt = (g_info.view_prv+1)%N;
       }
 
-      g_info.view_counter ++;
-      g_info.view_counter %= g_info.view_counter_n;
     }
+
+    g_info.view_counter ++;
+    g_info.view_counter %= g_info.view_counter_n;
   }
 
   //----
@@ -2666,17 +2716,12 @@ function render_z() {
 
     //let mr = m4.multiply(mrp, mrn);
 
-    if (!g_info.paused) {
-      g_info.t_mov += (1/2);
-    }
+    g_info.t_mov += (1/2);
     if (g_info.t_mov > (g_info.grid_size*g_info.tri_scale)) {
       g_info.t_mov -= (g_info.grid_size*g_info.tri_scale);
     }
 
-    if (!g_info.paused) {
-      g_info.t_rot += (1/8192)*Math.PI;
-    }
-
+    g_info.t_rot += (1/8192)*Math.PI;
     if (g_info.t_rot > (2*Math.PI)) {
       g_info.t_rot -= 2*Math.PI;
     }
@@ -2775,6 +2820,13 @@ function render_z() {
 }
 
 function render() {
+
+  if (!g_info.ready) {
+    g_info.renderer.render( g_info.scene, g_info.camera );
+    return;
+  }
+
+
   if (g_info.boundary_condition == 'z') {
     render_z();
   }
@@ -2802,7 +2854,7 @@ function init_param() {
   //--
 
   let grid_weight = {
-    "6":30, "7":30, "8":30, "9":25, "10":20, "11":10, "12":9,
+    "4": 2, "5": 10, "6":30, "7":30, "8":30, "9":25, "10":20, "11":10, "12":9,
     "13":8, "14":7, "15":6, "16":5, "17":4, "18":3, "19":2,
     "20": 1
   };
@@ -4209,9 +4261,27 @@ function grid_consistency(gr) {
   return _ret;
 }
 
+function grid_occupancy_count(pgr) {
+  let c_gr = [];
+  for (let z=0; pgr.length; z++) {
+    c_gr.push([]);
+    for (let y = 0; z<pgr[z].length; y++) {
+      c_gr[z].push([]);
+      for (let x=0; x<pgr[z][y].length; x++) {
+        c_gr[z][y].push( pgr[z][y][x].length );
+      }
+    }
+  }
+  return c_gr;
+}
+
 function processing_update(iter) {
   if (g_info.debug_level > 0) {
     console.log(">>>iter:", iter);
+  }
+
+  if ((iter%100)==0) {
+    console.log("...");
   }
 }
 
@@ -4710,6 +4780,8 @@ function realize_grid() {
     pgr_blank(pgr, 0, T, T, M, M-2*T, M-2*T);
   }
 
+  g_info.data["pgr"] = pgr;
+
   let _r = grid_wfc_opt(pgr);
 
   if (g_info.debug_level>2) {
@@ -4992,17 +5064,25 @@ function init_fin() {
 
       console.log(">>>", g_info.capture_start, g_info.capture_end, g_info.capture_dt);
     }
-    else if (ev.key == 'p') {
-      g_info.paused = !g_info.paused;
-    }
+    //else if (ev.key == 'p') {
+    //  g_info.paused = !g_info.paused;
+    //}
   });
 
   realize_grid();
-  threejs_init();
+
+  g_info.ready = true;
+
+  threejs_scene_init();
   animate();
 }
 
 function init() {
+
+  threejs_init();
+
+  animate();
+
   loadjson("./chromotome.json", palette_load_json);
   //init_fin();
 }
