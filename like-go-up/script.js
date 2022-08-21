@@ -254,6 +254,15 @@ var g_info = {
   },
   "tile_height": 1/8,
 
+  "grid_weight" : {
+     //"4":  1, "5":  1,
+     "6": 30,  "7": 30,
+     "8": 30,  "9": 25, "10": 20, "11": 10,
+    "12":  9, "13":  8, "14":  7, "15":  6,
+    "16":  5, "17":  4, "18":  3, "19":  2,
+    "20":  1
+  },
+
   "view_counter" : 1,
   "view_counter_n" : 3,
 
@@ -1837,12 +1846,14 @@ function threejs_init() {
 
   let renderpass = new POSTPROCESSING.RenderPass(g_info.scene, g_info.camera);
 
-  let bloom_filter = false;
+  let bloomeffect = {}, bloompass = {}, fxaaeffect = {}, fxaapass = {};
+
+  let bloom_filter = true;
   if (bloom_filter) {
-    let bloomeffect = new POSTPROCESSING.BloomEffect(100, 205, 40, 2056);
-    let bloompass = new POSTPROCESSING.EffectPass(g_info.camera, bloomeffect);
-    let fxaaeffect = new POSTPROCESSING.FXAAEffect();
-    let fxaapass = new POSTPROCESSING.EffectPass(g_info.camera, fxaaeffect);
+    bloomeffect = new POSTPROCESSING.BloomEffect(100, 205, 40, 2056);
+    bloompass = new POSTPROCESSING.EffectPass(g_info.camera, bloomeffect);
+    fxaaeffect = new POSTPROCESSING.FXAAEffect();
+    fxaapass = new POSTPROCESSING.EffectPass(g_info.camera, fxaaeffect);
   }
 
   composer.addPass(renderpass);
@@ -2243,6 +2254,8 @@ function threejs_scene_init() {
 function mouse_move(ev) {
   ev.preventDefault();
 
+  if (!g_info.ready) { return; }
+
   g_info.mouse_x =  ((ev.clientX / window.innerWidth)  * 2) - 1;
   g_info.mouse_y = -((ev.clientY / window.innerHeight) * 2) + 1;
 
@@ -2255,6 +2268,8 @@ function mouse_move(ev) {
 
 function mouse_wheel(ev) {
   //ev.preventDefault();
+
+  if (!g_info.ready) { return; }
 
   if (g_info.point_light.length>0) {
     let _del_i = -ev.deltaY/500;
@@ -2861,11 +2876,14 @@ function init_param() {
 
   //--
 
+  let grid_weight = g_info.grid_weight;
+  /*
   let grid_weight = {
     "4": 2, "5": 10, "6":30, "7":30, "8":30, "9":25, "10":20, "11":10, "12":9,
     "13":8, "14":7, "15":6, "16":5, "17":4, "18":3, "19":2,
     "20": 1
   };
+  */
   let grid_pd = weight2pd(grid_weight);
 
   g_info.grid_size = rnd_cdf(grid_pd.cdf);
@@ -5052,7 +5070,7 @@ function init_fin() {
   let _wh = window.innerHeight;
   let _ww = window.innerWidth;
   let _F = ((_wh < _ww) ? _wh : _ww);
-  g_info.tri_scale = 1 + Math.ceil( 1.5*_F / g_info.grid_size );
+  g_info.tri_scale = 1 + Math.ceil( 0.5*_F / g_info.grid_size );
 
 
   welcome();
