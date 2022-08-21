@@ -1799,6 +1799,9 @@ function threejs_init() {
     }
   }
 
+  //DEBUG
+  bg = parseInt('1a1a1a', 16);
+
   g_info.scene.background = new THREE.Color( bg );
   g_info.scene.fog = new THREE.Fog( bg, 16, 1024);
 
@@ -1846,60 +1849,31 @@ function threejs_init() {
 
   let renderpass = new POSTPROCESSING.RenderPass(g_info.scene, g_info.camera);
 
-  let bloomeffect = {}, bloompass = {}, fxaaeffect = {}, fxaapass = {};
-
-  let bloom_filter = true;
-  if (bloom_filter) {
-    bloomeffect = new POSTPROCESSING.BloomEffect(100, 205, 40, 2056);
-    bloompass = new POSTPROCESSING.EffectPass(g_info.camera, bloomeffect);
-    fxaaeffect = new POSTPROCESSING.FXAAEffect();
-    fxaapass = new POSTPROCESSING.EffectPass(g_info.camera, fxaaeffect);
-  }
+  let bloomeffect = new POSTPROCESSING.BloomEffect(100, 205, 40, 2056);
+  let bloompass = new POSTPROCESSING.EffectPass(g_info.camera, bloomeffect);
+  let fxaaeffect = new POSTPROCESSING.FXAAEffect();
+  let fxaapass = new POSTPROCESSING.EffectPass(g_info.camera, fxaaeffect);
 
   composer.addPass(renderpass);
-
-  if (bloom_filter) {
-    composer.addPass(bloompass);
-    composer.addPass(fxaapass);
-  }
+  composer.addPass(bloompass);
+  composer.addPass(fxaapass);
 
   g_info.composer = composer;
   g_info.render_pass = renderpass;
-
-  if (bloom_filter) {
-    g_info.bloom_effect = bloomeffect;
-    g_info.bloom_pass = bloompass;
-    g_info.fxaa_effect = fxaaeffect;
-    g_info.fxaa_pass = fxaapass;
-  }
+  g_info.bloom_effect = bloomeffect;
+  g_info.bloom_pass = bloompass;
+  g_info.fxaa_effect = fxaaeffect;
+  g_info.fxaa_pass = fxaapass;
 
   g_info.container.appendChild( g_info.renderer.domElement );
 
   window.addEventListener( 'resize', window_resize );
   window.addEventListener( 'mousemove', mouse_move );
   window.addEventListener( 'wheel', mouse_wheel );
-
 }
 
 function threejs_scene_init() {
 
-  // DEBUG
-  //
-  //bg = parseInt( '7a7a7a', 16 );
-
-
-  //DEBUG
-  //bg = 
-
-  /*
-  g_info.scene.background = new THREE.Color( bg );
-  //g_info.scene.fog = new THREE.Fog( 0x050505, 2000, 3500 );
-  //g_info.scene.fog = new THREE.Fog( 0x7a7a7a , 16, 1024);
-  g_info.scene.fog = new THREE.Fog( bg, 16, 1024);
-  */
-
-
-  //---
 
   //---
 
@@ -2051,8 +2025,6 @@ function threejs_scene_init() {
   const ab = new THREE.Vector3();
 
   let tri_vf = g_info.data.tri;
-
-  //SCALE
 
   let pal = g_info.palette[ g_info.palette_idx ];
   let color_idx = _irnd(pal.colors.length);
@@ -2869,9 +2841,7 @@ function init_param() {
   // palette choice
   //
   g_info.palette_idx = _irnd( g_info.palette.length );
-  let pidx = g_info.palette_idx;
-
-  g_info.features["Palette"] = g_info.palette[pidx].name;
+  g_info.features["Palette"] = g_info.palette[ g_info.palette_idx ].name;
 
 
   //--
@@ -2912,7 +2882,8 @@ function init_param() {
   g_info.speed_factor = 1/(_sf_d*4096);
 
   //DEBUG 
-  g_info.speed_factor = 1/2048;
+  //g_info.speed_factor = 1/8192;
+  g_info.speed_factor = 1/(32*1024);
 
   g_info.features["Speed Factor"] = g_info.speed_factor;
 
@@ -5067,10 +5038,13 @@ function init_fin() {
 
   init_param();
 
+  // SCALE
+
   let _wh = window.innerHeight;
   let _ww = window.innerWidth;
   let _F = ((_wh < _ww) ? _wh : _ww);
-  g_info.tri_scale = 1 + Math.ceil( 0.5*_F / g_info.grid_size );
+  //g_info.tri_scale = 1 + Math.ceil( 1.5*_F / g_info.grid_size );
+  g_info.tri_scale = 1 + Math.ceil( 2.25*_F / g_info.grid_size );
 
 
   welcome();
