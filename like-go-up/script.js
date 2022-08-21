@@ -266,8 +266,8 @@ var g_info = {
      //"6": 300000,
      "7": 30,
      //"7": 300000,
-     "8": 30,
-     //"8": 3000000,
+     //"8": 30,
+     "8": 3000000,
 
     "9": 25,
     "10": 20,
@@ -1811,8 +1811,11 @@ function threejs_init() {
   g_info.scene = new THREE.Scene();
 
   let bg = parseInt('070707', 16);
+
   if ("background" in g_info.palette_choice) {
-    bg = g_info.palette_choice.background;
+
+    //DEBUG
+    //bg = g_info.palette_choice.background;
     /*
     if ((g_info.palette[ g_info.palette_idx].background != '#fff') &&
         (g_info.palette[ g_info.palette_idx].background != '#ffffff')) {
@@ -1957,12 +1960,17 @@ function threejs_scene_init() {
   //let n_point_light = 8;
   //let n_point_light = _irnd(4,8);
   let n_point_light = g_info.n_point_light;
-  let _ldist = 4*g_info.tri_scale * g_info.grid_size;
+
+  //let _ldist = 4*g_info.tri_scale * g_info.grid_size;
+  let _ldist = 2*g_info.tri_scale * g_info.grid_size;
+
   //let ds = [1600,1600,3200];
   //let ds = [800,800,800];
   //let ds = [200,200,1000];
   let _B = g_info.tri_scale * g_info.grid_size;
-  let ds = [ 2*_B, 2*_B, 2*_B ];
+  //let ds = [ 2*_B, 2*_B, 2*_B ];
+  let ds = [ _B, _B, _B ];
+
   //let ds = [8000, 8000, 8000];
   let pld = [],
       pli = [],
@@ -2095,6 +2103,11 @@ function threejs_scene_init() {
   let tri_vf = g_info.data.tri;
 
   let pal = g_info.palette[ g_info.palette_idx ];
+
+  //DEBUG
+  //pal.colors = [ '#524582', '#367bc3', '#38bfa7', '#8fe1a2' ];
+  //pal.colors = ['#FB938F', '#F2CAC8', '#C36B85', '#FDBB75' ];
+
   let color_idx = _irnd(pal.colors.length);
 
   //const d = 12,
@@ -2904,6 +2917,9 @@ function render() {
 }
 
 //---
+
+//pal
+// 524582, 367bc3, 38bfa7, 8fe1a2
 
 function init_param() {
 
@@ -5088,6 +5104,8 @@ function palette_load() {
     }
 
   }
+
+  g_info.palette_choice.colors = [ '#524582', '#367bc3', '#38bfa7', '#8fe1a2' ];
 
   // EXPERIMENT
   /*
