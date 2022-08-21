@@ -1800,7 +1800,7 @@ function threejs_init() {
   }
 
   //DEBUG
-  bg = parseInt('1a1a1a', 16);
+  bg = parseInt('0a0a0a', 16);
 
   g_info.scene.background = new THREE.Color( bg );
   g_info.scene.fog = new THREE.Fog( bg, 16, 1024);
