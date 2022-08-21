@@ -1837,22 +1837,30 @@ function threejs_init() {
 
   let renderpass = new POSTPROCESSING.RenderPass(g_info.scene, g_info.camera);
 
-  let bloomeffect = new POSTPROCESSING.BloomEffect(100, 205, 40, 2056);
-  let bloompass = new POSTPROCESSING.EffectPass(g_info.camera, bloomeffect);
-
-  let fxaaeffect = new POSTPROCESSING.FXAAEffect();
-  let fxaapass = new POSTPROCESSING.EffectPass(g_info.camera, fxaaeffect);
+  let bloom_filter = false;
+  if (bloom_filter) {
+    let bloomeffect = new POSTPROCESSING.BloomEffect(100, 205, 40, 2056);
+    let bloompass = new POSTPROCESSING.EffectPass(g_info.camera, bloomeffect);
+    let fxaaeffect = new POSTPROCESSING.FXAAEffect();
+    let fxaapass = new POSTPROCESSING.EffectPass(g_info.camera, fxaaeffect);
+  }
 
   composer.addPass(renderpass);
-  composer.addPass(bloompass);
-  composer.addPass(fxaapass);
+
+  if (bloom_filter) {
+    composer.addPass(bloompass);
+    composer.addPass(fxaapass);
+  }
 
   g_info.composer = composer;
   g_info.render_pass = renderpass;
-  g_info.bloom_effect = bloomeffect;
-  g_info.bloom_pass = bloompass;
-  g_info.fxaa_effect = fxaaeffect;
-  g_info.fxaa_pass = fxaapass;
+
+  if (bloom_filter) {
+    g_info.bloom_effect = bloomeffect;
+    g_info.bloom_pass = bloompass;
+    g_info.fxaa_effect = fxaaeffect;
+    g_info.fxaa_pass = fxaapass;
+  }
 
   g_info.container.appendChild( g_info.renderer.domElement );
 
