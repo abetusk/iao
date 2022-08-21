@@ -68,15 +68,16 @@
 // * spatial02i
 // * spatial03i
 // * yuma_punk
-// * cc232
 // * cc245
 // * present-correct
 // * tsu_akasaka
 // * florida_citrus
 // * winter.night
 // * rag-mysore
+// * kov_07
 //
 // on the fence about:
+// * cc232
 // * exposito_sub3
 // * iiso_daily
 // * floratopia
@@ -217,7 +218,9 @@ var g_info = {
 
   ],
 
-  "palette_idx": 1,
+  "palette_idx": -1,
+  "inverted_bg": false,
+  "background_color": 0,
 
   "distribution_type": 0,
   "place_type" : 0,
@@ -227,7 +230,7 @@ var g_info = {
 
   "tile_width_denom_weight": {
     //"2": 1,
-    "3": 2,
+    //"3": 2,
     "4": 4,
     "5": 3,
     "6": 2,
@@ -246,18 +249,30 @@ var g_info = {
     "9": 5,
     "10": 4,
     "11": 3,
-    "12": 2,
-    "13": 1,
-    "14": 1,
-    "15": 1,
-    "16": 1
+    "12": 2
+    //"13": 1,
+    //"14": 1,
+    //"15": 1,
+    //"16": 1
   },
   "tile_height": 1/8,
 
   "grid_weight" : {
+    //DEBUG
      //"4":  1, "5":  1,
-     "6": 30,  "7": 30,
-     "8": 30,  "9": 25, "10": 20, "11": 10,
+
+
+     "6": 30,
+     //"6": 300000,
+     "7": 30,
+     //"7": 300000,
+     "8": 30,
+     //"8": 3000000,
+
+    "9": 25,
+    "10": 20,
+    //"10": 20000,
+    "11": 10,
     "12":  9, "13":  8, "14":  7, "15":  6,
     "16":  5, "17":  4, "18":  3, "19":  2,
     "20":  1
@@ -321,7 +336,7 @@ let g_template = {
   "weight": {
     //"d": 0,
     ".": 1,
-    "|": 100,
+    "|": 1,
     "+": 1,
     "T": 1,
     "r": 1,
@@ -1224,7 +1239,11 @@ function __rndpow(s) {
 // from https://stackoverflow.com/questions/918736/random-number-generator-that-produces-a-power-law-distribution
 // CC-BY-SA gnovice (https://stackoverflow.com/users/52738/gnovice
 //
-function _rndpow(s, x1) {
+function _rndpow(s, x0, x1) {
+  if ((typeof x0 !== "undefined") && (typeof x1 === "undefined")) {
+    x1 = x0;
+    x0 = 0;
+  }
   x0 = ((typeof x0 === "undefined") ? 0 : x0 );
   x1 = ((typeof x1 === "undefined") ? 1 : x1 );
   let y = fxrand();
@@ -1791,16 +1810,27 @@ function threejs_init() {
 
   g_info.scene = new THREE.Scene();
 
-  let bg = parseInt('7a7a7a', 16);
-  if ("background" in g_info.palette[ g_info.palette_idx ]) {
+  let bg = parseInt('070707', 16);
+  if ("background" in g_info.palette_choice) {
+    bg = g_info.palette_choice.background;
+    /*
     if ((g_info.palette[ g_info.palette_idx].background != '#fff') &&
         (g_info.palette[ g_info.palette_idx].background != '#ffffff')) {
       bg = parseInt(g_info.palette[ g_info.palette_idx ].background.slice(1), 16);
     }
+    */
+  }
+  if (fxrand() < 0.5) {
+    //let pal = g_info.palette[ g_info.palette_idx
+    //let bg_pal_idx _irnd( g_info.pal
+    //bg = 
   }
 
+  //if (g_info.inverted_bg) { bg = parseInt('ffffff', 16) - bg; }
+  g_info.background_color = bg;
+
   //DEBUG
-  bg = parseInt('0a0a0a', 16);
+  //bg = parseInt('0a0a0a', 16);
 
   g_info.scene.background = new THREE.Color( bg );
   g_info.scene.fog = new THREE.Fog( bg, 16, 1024);
@@ -1842,28 +1872,61 @@ function threejs_init() {
   //
   let sz = g_info.renderer.getDrawingBufferSize( new THREE.Vector2() );
   //let _wglrt = new THREE.WebGLRenderTarget( sz.width, sz.height, { "samples":2 } );
-  let _wglrt = new THREE.WebGLRenderTarget( sz.width, sz.height, { "samples":4 } );
+  let _wglrt = new THREE.WebGLRenderTarget( sz.width, sz.height, { "samples": 2} );
 
 
   let composer = new POSTPROCESSING.EffectComposer(g_info.renderer, _wglrt);
 
   let renderpass = new POSTPROCESSING.RenderPass(g_info.scene, g_info.camera);
 
-  let bloomeffect = new POSTPROCESSING.BloomEffect(100, 205, 40, 2056);
+  let bloom_opt = {
+    //"height": h/2,
+    //"width": w/2,
+    "intensity": 1,
+    "kernelSize": 2
+  };
+
+  let fxaa_opt = {
+    //"subpixelQuality": 1,
+    //"samples": 4
+  }
+
+  let vignette_opt = {
+
+    // how sharp the falloff is (1 hard cutoff, 0 no cutoff)
+    //
+    "offset": 0.5,
+
+    // how dark it gets at edges (1 full, 0 none);
+    //
+    "darkness": 0.5
+  }
+
+                                              // strength, kernel size, sigma, blur rendertarget resolution
+  //let bloomeffect = new POSTPROCESSING.BloomEffect(100, 205, 40, 2056);
+  let bloomeffect = new POSTPROCESSING.BloomEffect(bloom_opt);
   let bloompass = new POSTPROCESSING.EffectPass(g_info.camera, bloomeffect);
-  let fxaaeffect = new POSTPROCESSING.FXAAEffect();
+  g_info.bloom_effect = bloomeffect;
+  g_info.bloom_pass = bloompass;
+
+  let fxaaeffect = new POSTPROCESSING.FXAAEffect(fxaa_opt);
   let fxaapass = new POSTPROCESSING.EffectPass(g_info.camera, fxaaeffect);
+  g_info.fxaa_effect = fxaaeffect;
+  g_info.fxaa_pass = fxaapass;
+
+  let vignette_effect = new POSTPROCESSING.VignetteEffect(vignette_opt);
+  let vignette_pass = new POSTPROCESSING.EffectPass(g_info.camera, vignette_effect);
+  g_info.vignette_effect = vignette_effect;
+  g_info.vignette_pass = vignette_pass;
 
   composer.addPass(renderpass);
   composer.addPass(bloompass);
   composer.addPass(fxaapass);
 
+  composer.addPass(vignette_pass);
+
   g_info.composer = composer;
   g_info.render_pass = renderpass;
-  g_info.bloom_effect = bloomeffect;
-  g_info.bloom_pass = bloompass;
-  g_info.fxaa_effect = fxaaeffect;
-  g_info.fxaa_pass = fxaapass;
 
   g_info.container.appendChild( g_info.renderer.domElement );
 
@@ -1886,7 +1949,7 @@ function threejs_scene_init() {
 
   //let intensity_max = 2;
   let intensity_max = intensity_max_val[ g_info.n_point_light ];
-  let intensity_min = 0.25;
+  let intensity_min = 0.75;
   let intensity_range = intensity_max - intensity_min;
 
   let point_light = [];
@@ -1894,7 +1957,7 @@ function threejs_scene_init() {
   //let n_point_light = 8;
   //let n_point_light = _irnd(4,8);
   let n_point_light = g_info.n_point_light;
-  let dl = 2800;
+  let _ldist = 4*g_info.tri_scale * g_info.grid_size;
   //let ds = [1600,1600,3200];
   //let ds = [800,800,800];
   //let ds = [200,200,1000];
@@ -1904,12 +1967,17 @@ function threejs_scene_init() {
   let pld = [],
       pli = [],
       plc = [],
-      pll = [];
+      plld = [];
   for (let ii=0; ii<n_point_light; ii++) {
     pld.push( [ (fxrand()-0.5)*ds[0], (fxrand()-0.5)*ds[1], (fxrand()-0.5)*ds[2] ] );
     //pli.push( (3/n_point_light) - (fxrand()/n_point_light) );
-    pli.push( intensity_min + fxrand()*intensity_range );
-    pll.push(dl);
+
+    //WIP
+    //pli.push( intensity_min + fxrand()*intensity_range );
+    //pli.push( _rndpow(0.5, intensity_min, intensity_min + intensity_range) );
+    pli.push( __rndpow(3)*intensity_range + intensity_min );
+
+    plld.push(_ldist);
     plc.push(0xffffff);
   }
   //pli[0] = 3;
@@ -1925,13 +1993,13 @@ function threejs_scene_init() {
 
 
   for (let ii=0; ii<pld.length; ii++) {
-    point_light.push(new THREE.PointLight( plc[ii], pli[ii], pll[ii], 2));
+    point_light.push(new THREE.PointLight( plc[ii], pli[ii], plld[ii], 2));
     point_light[ii].position.set( pld[ii][0], pld[ii][1], pld[ii][2] );
     g_info.scene.add( point_light[ii] );
   }
 
   g_info["point_light"] = point_light;
-  g_info["point_light_info"]  = { "pos": pld, "intensity": pli, "color": plc, "dist": pll };
+  g_info["point_light_info"]  = { "pos": pld, "intensity": pli, "color": plc, "dist": plld };
 
   /*
   point_light[0].position.set( ds, 0, 0 );
@@ -2817,7 +2885,8 @@ function render_z() {
 function render() {
 
   if (!g_info.ready) {
-    g_info.renderer.render( g_info.scene, g_info.camera );
+    if ("composer" in g_info) { g_info.composer.render(); }
+    else { g_info.renderer.render( g_info.scene, g_info.camera ); }
     return;
   }
 
@@ -2843,6 +2912,8 @@ function init_param() {
   g_info.palette_idx = _irnd( g_info.palette.length );
   g_info.features["Palette"] = g_info.palette[ g_info.palette_idx ].name;
 
+  //g_info.inverted_bg = (fxrand() < 0.5);
+  //g_info.features["Inverted Background"] = (g_info.inverted_bg ? "True" : "False" );
 
   //--
 
@@ -2873,7 +2944,8 @@ function init_param() {
 
   //---
 
-  g_info.n_point_light = _irnd(4,8);
+  //g_info.n_point_light = _irnd(4,8);
+  g_info.n_point_light = _irnd(4,4);
   g_info.features["Light Count"] = g_info.n_point_light;
 
   //---
@@ -2896,7 +2968,8 @@ function init_param() {
 
   let _gh_weight = {};
   for (let key in g_info.tile_height_denom_weight) {
-    if (parseInt(key) <= width_d) { continue; }
+    //if (parseInt(key) <= width_d) { continue; }
+    if (parseInt(key) <= (parseInt(width_d)+2)) { continue; }
     _gh_weight[key] = g_info.tile_height_denom_weight[key];
   }
   let height_pd = weight2pd( _gh_weight );
@@ -4277,9 +4350,10 @@ function processing_update(iter) {
     console.log(">>>iter:", iter);
   }
 
-  if ((iter%100)==0) {
-    console.log("...");
-  }
+  //if ((iter%100)==0) {
+    render();
+  //  console.log("...");
+  //}
 }
 
 function grid_wfc_opt(gr) {
@@ -5015,9 +5089,23 @@ function palette_load() {
 
   }
 
+  // EXPERIMENT
+  /*
+  let pal = g_info.palette_choice.colors;
+  for (let ii=0; ii<pal.length; ii++) {
+    let _rgb = _hex2rgb( pal[ii] );
+    let b = _brightness( _rgb.r, _rgb.g, _rgb.b );
+    let rgb = [ _rgb.r, _rgb.g, _rgb.b ];
+    if ( _brightness( rgb[0], rgb[1], rgb[2]) < 0.015) {
+      let dc = 10;
+      pal[ii] = _rgb2hex( rgb[0]+dc, rgb[1]+dc, rgb[2]+dc );
+    }
+  }
+  */
+
   //g_info.bg_color = '#fefefe';
 
-  init_fin();
+  //init_fin();
 }
 
 
@@ -5036,15 +5124,19 @@ function loadjson(fn, cb) {
 
 function init_fin() {
 
-  init_param();
+  //init_param();
 
   // SCALE
 
   let _wh = window.innerHeight;
   let _ww = window.innerWidth;
   let _F = ((_wh < _ww) ? _wh : _ww);
+  //_F = _wh;
+
   //g_info.tri_scale = 1 + Math.ceil( 1.5*_F / g_info.grid_size );
-  g_info.tri_scale = 1 + Math.ceil( 2.25*_F / g_info.grid_size );
+  //g_info.tri_scale = 1 + Math.ceil( 1.25*_F / g_info.grid_size );
+  //g_info.tri_scale = Math.ceil( 1.25*_F / g_info.grid_size );
+  g_info.tri_scale = Math.ceil( 2*_F / g_info.grid_size );
 
 
   welcome();
@@ -5077,13 +5169,15 @@ function init_fin() {
   animate();
 }
 
-function init() {
-
+function pre_init() {
+  init_param();
   threejs_init();
+  //animate();
+  render();
+}
 
-  animate();
-
-  loadjson("./chromotome.json", palette_load_json);
+function init() {
+  loadjson("./chromotome.json", function(dat) { palette_load_json(dat); pre_init(); init_fin(); } );
   //init_fin();
 }
 
