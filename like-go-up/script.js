@@ -127,6 +127,7 @@ var g_info = {
   "mesh": {},
 
   "mesha" : [],
+  //"meshN" : 10,
   "meshN" : 6,
 
   "radius" : 500,
@@ -149,6 +150,7 @@ var g_info = {
 
   "t_rot": 0,
   "t_mov": 0,
+  "t_mov_ds": 1/2,
 
   "tri_scale" : 100,
 
@@ -2817,9 +2819,13 @@ function render_z() {
 
     //let mr = m4.multiply(mrp, mrn);
 
-    g_info.t_mov += (1/2);
-    if (g_info.t_mov > (g_info.grid_size*g_info.tri_scale)) {
-      g_info.t_mov -= (g_info.grid_size*g_info.tri_scale);
+    //g_info.t_mov += (1/2);
+    g_info.t_mov += g_info.t_mov_ds;
+    if (Math.abs(g_info.t_mov) > (g_info.grid_size*g_info.tri_scale)) {
+      let _df = ((g_info.t_mov_ds < 0) ? -1 : 1);
+      g_info.t_mov -= (_df*g_info.grid_size*g_info.tri_scale);
+
+      console.log("bang");
     }
 
     g_info.t_rot += (1/8192)*Math.PI;
@@ -3015,6 +3021,9 @@ function init_param() {
   }
   else {
     g_info.features["Boundary Condition"] = "Z";
+
+    g_info.t_mov_ds = ((fxrand() < 0.5) ? (-0.5) : 0.5);
+    g_info.features["Direction"] = ((g_info.t_mov_ds < 0) ? "Falling" : "Rising");
   }
 
   //---
