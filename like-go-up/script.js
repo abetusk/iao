@@ -163,6 +163,8 @@ var g_info = {
   "mouse_x": -1000,
   "mouse_y": -1000,
 
+  "mouse_pressed": false,
+
   "_palette": [
     { 
       "name" : "monochrome",
@@ -266,8 +268,8 @@ var g_info = {
      //"6": 300000,
      "7": 30,
      //"7": 300000,
-     //"8": 30,
-     "8": 3000000,
+     "8": 30,
+     //"8": 3000000,
 
     "9": 25,
     "10": 20,
@@ -1815,7 +1817,7 @@ function threejs_init() {
   if ("background" in g_info.palette_choice) {
 
     //DEBUG
-    //bg = g_info.palette_choice.background;
+    bg = g_info.palette_choice.background;
     /*
     if ((g_info.palette[ g_info.palette_idx].background != '#fff') &&
         (g_info.palette[ g_info.palette_idx].background != '#ffffff')) {
@@ -1936,10 +1938,8 @@ function threejs_init() {
   window.addEventListener( 'resize', window_resize );
   window.addEventListener( 'mousemove', mouse_move );
   window.addEventListener( 'wheel', mouse_wheel );
-}
 
-function threejs_scene_init() {
-
+  console.log("ok, 3js init");
 
   //---
 
@@ -2027,6 +2027,10 @@ function threejs_scene_init() {
   */
 
   //---
+}
+
+function threejs_scene_init() {
+
 
   let cx = g_info.cx;
   let cy = g_info.cy;
@@ -2102,7 +2106,8 @@ function threejs_scene_init() {
 
   let tri_vf = g_info.data.tri;
 
-  let pal = g_info.palette[ g_info.palette_idx ];
+  //let pal = g_info.palette[ g_info.palette_idx ];
+  let pal = g_info.palette_choice;
 
   //DEBUG
   //pal.colors = [ '#524582', '#367bc3', '#38bfa7', '#8fe1a2' ];
@@ -2560,8 +2565,23 @@ function render_n() {
     let mZ = m4.zRotation( g_info.t_rot );
     //let mZs = m4.t2( 0, 0, g_info.t_rot*1000 );
     let mZs = m4.t2(0,0,0);
+
+    let mZoom = m4.scaling(1,1,1);
+
+    /*
+    if (g_info.mouse_pressed) {
+      let _s = g_info.tri_scale * g_info.grid_size * 8;
+      let _mdx = g_info.mouse_y * _s,
+          _mdy = -g_info.mouse_x * _s;
+      let _mdz = 1000;
+      mZs = m4.t2( _mdx, _mdy, _mdz );
+      mZoom = m4.scaling(2,2,2);
+    }
+    */
+
     //let mZs = m4.translation( 0, 0, g_info.t_rot*30);
-    let mr = m4.multiply( mZs, m4.multiply( mZ, m4.multiply(mrp, mrn) ) );
+    //let mr = m4.multiply( mZs, m4.multiply( mZ, m4.multiply(mrp, mrn) ) );
+    let mr = m4.multiply( mZoom, m4.multiply( mZs, m4.multiply( mZ, m4.multiply(mrp, mrn) ) ) );
 
     let m = new THREE.Matrix4();
     m.set( mr[ 0], mr[ 1], mr[ 2], mr[ 3],
@@ -2570,6 +2590,9 @@ function render_n() {
            mr[12], mr[13], mr[14], mr[15] );
 
 
+    g_info.mesh.scale.x = 1;
+    g_info.mesh.scale.y = 1;
+    g_info.mesh.scale.z = 1;
     g_info.mesh.position.x = 0;
     g_info.mesh.position.y = 0;
     g_info.mesh.position.z = 0;
@@ -2578,6 +2601,7 @@ function render_n() {
     g_info.mesh.rotation.z = 0;
     g_info.mesh.applyMatrix4(m);
 
+    /*
     for (let ii=0; ii<g_info.mesha.length; ii++) {
 
       //EXPERIMENTAL
@@ -2605,6 +2629,7 @@ function render_n() {
       g_info.mesha[ii].applyMatrix4(_m);
 
     }
+    */
 
     for (let i=0; i<g_info.debug_cube.length; i++) {
       g_info.debug_cube[i].position.x = g_info.debug_cube_pos[i][0];
@@ -2898,11 +2923,41 @@ function render_z() {
 function render() {
 
   if (!g_info.ready) {
-    if ("composer" in g_info) { g_info.composer.render(); }
-    else { g_info.renderer.render( g_info.scene, g_info.camera ); }
+    console.log("???");
+      g_info.renderer.render( g_info.scene, g_info.camera );
+    return;
+    if ("composer" in g_info) {
+      g_info.composer.render();
+    }
+    else {
+      g_info.renderer.render( g_info.scene, g_info.camera );
+    }
     return;
   }
 
+  // WIP
+  //
+  if (g_info.mouse_pressed) {
+    g_info.camera.scale.x = 0.5;
+    g_info.camera.scale.y = 0.5;
+
+    let _s = g_info.tri_scale * g_info.grid_size ;
+    let _mdx = -g_info.mouse_x * _s,
+        _mdy = -g_info.mouse_y * _s;
+
+    g_info.camera.position.x = _mdx;
+    g_info.camera.position.y = _mdy;
+    g_info.camera.position.z = 0;
+
+  }
+  else {
+    g_info.camera.scale.x = 1;
+    g_info.camera.scale.y = 1;
+
+    g_info.camera.position.x = 0;
+    g_info.camera.position.y = 0;
+    g_info.camera.position.z = 0;
+  }
 
   if (g_info.boundary_condition == 'z') {
     render_z();
@@ -2926,7 +2981,11 @@ function init_param() {
   // palette choice
   //
   g_info.palette_idx = _irnd( g_info.palette.length );
+
+  palette_load(g_info.palette_idx);
+
   g_info.features["Palette"] = g_info.palette[ g_info.palette_idx ].name;
+  g_info.palette_choice = g_info.palette[ g_info.palette_idx ];
 
   //g_info.inverted_bg = (fxrand() < 0.5);
   //g_info.features["Inverted Background"] = (g_info.inverted_bg ? "True" : "False" );
@@ -4367,9 +4426,16 @@ function processing_update(iter) {
   }
 
   //if ((iter%100)==0) {
-    render();
+   // render();
+    //animate();
   //  console.log("...");
   //}
+}
+
+function grid_wfc_opt_async() {
+  while (g_info.culling) {
+
+  }
 }
 
 function grid_wfc_opt(gr) {
@@ -5082,11 +5148,14 @@ function palette_load_json(txt) {
   let dat = JSON.parse(txt);
   g_info.palette = dat.pal;
 
-  palette_load();
+  //palette_load();
 }
 
-function palette_load() {
-  g_info.palette_choice = _arnd( g_info.palette );
+function palette_load(pal_idx) {
+  pal_idx = ((typeof pal_idx === "undefined") ? _irnd(g_info.palette.length) : pal_idx );
+  g_info.palette_idx = pal_idx;
+  g_info.palette_choice = g_info.palette[ pal_idx ];
+  //g_info.palette_choice = _arnd( g_info.palette );
 
   if ("background" in g_info.palette_choice) {
     let n = g_info.palette_choice.colors.length;
@@ -5105,7 +5174,7 @@ function palette_load() {
 
   }
 
-  g_info.palette_choice.colors = [ '#524582', '#367bc3', '#38bfa7', '#8fe1a2' ];
+  //g_info.palette_choice.colors = [ '#524582', '#367bc3', '#38bfa7', '#8fe1a2' ];
 
   // EXPERIMENT
   /*
@@ -5179,6 +5248,20 @@ function init_fin() {
     //}
   });
 
+  document.addEventListener('dblclick', function() {
+    console.log("bang");
+  });
+
+  document.addEventListener('mousedown', function() {
+    console.log("mousedown");
+    g_info.mouse_pressed = true;
+  });
+
+  document.addEventListener('mouseup', function() {
+    console.log("mouseup");
+    g_info.mouse_pressed = false;
+  });
+
   realize_grid();
 
   g_info.ready = true;
@@ -5190,8 +5273,9 @@ function init_fin() {
 function pre_init() {
   init_param();
   threejs_init();
+
   //animate();
-  render();
+  //render();
 }
 
 function init() {
