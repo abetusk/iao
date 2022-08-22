@@ -128,7 +128,7 @@ var g_info = {
 
   "mesha" : [],
   //"meshN" : 10,
-  "meshN" : 6,
+  "meshN" : 10,
 
   "radius" : 500,
   "frustumSize" : 1500,
@@ -290,6 +290,7 @@ var g_info = {
   "time_prv": -1,
 
   "data": {
+    "wfc_grid": [],
     "grid": [],
     "info": [],
     "tri": {}
@@ -1404,6 +1405,12 @@ function _brightness(r, g, b) {
   return ((r/255.0)*0.299) + (0.587*(g/255.0)) + (0.114*(b/255.0));
 }
 
+function _hex_brightness(hexstr) {
+  let rgb = _hex2rgb(hexstr.toString());
+  return _brightness(rgb.r, rgb.g, rgb.b);
+}
+
+
 //  https://stackoverflow.com/a/17243070
 // From user Paul S. (https://stackoverflow.com/users/1615483/paul-s)
 //
@@ -1478,6 +1485,8 @@ function HSLtoHSV(h, s, l) {
   _s = (2 * s) / (l + s);
   return { h: _h, s: _s, v: _v };
 }
+
+//---
 
 function welcome() {
   let lines = [
@@ -1732,9 +1741,13 @@ function debug_ok() {
 function debug_add(x,y,z,s){
   let cube_geom = new THREE.BoxGeometry( s, s, s );
   let cube_mat = new THREE.MeshPhongMaterial( {
-     color: 0xaaaaaa, specular: 0xffffff, shininess: 0,
-     side: THREE.DoubleSide, vertexColors: true, transparent: false
-    });
+    color: 0xaaaaaa,
+    specular: 0xffffff,
+    shininess: 0,
+    side: THREE.DoubleSide,
+    vertexColors: true,
+    transparent: false
+  });
 
   let cube = new THREE.Mesh( cube_geom, cube_mat);
 
@@ -1814,30 +1827,12 @@ function threejs_init() {
 
   g_info.scene = new THREE.Scene();
 
-  let bg = parseInt('070707', 16);
-
+  let bg = '#070707';
   if ("background" in g_info.palette_choice) {
-
-    //DEBUG
     bg = g_info.palette_choice.background;
-    /*
-    if ((g_info.palette[ g_info.palette_idx].background != '#fff') &&
-        (g_info.palette[ g_info.palette_idx].background != '#ffffff')) {
-      bg = parseInt(g_info.palette[ g_info.palette_idx ].background.slice(1), 16);
-    }
-    */
   }
-  if (fxrand() < 0.5) {
-    //let pal = g_info.palette[ g_info.palette_idx
-    //let bg_pal_idx _irnd( g_info.pal
-    //bg = 
-  }
-
-  //if (g_info.inverted_bg) { bg = parseInt('ffffff', 16) - bg; }
   g_info.background_color = bg;
-
-  //DEBUG
-  //bg = parseInt('0a0a0a', 16);
+  g_info.background_brightness = _hex_brightness(bg);
 
   g_info.scene.background = new THREE.Color( bg );
   g_info.scene.fog = new THREE.Fog( bg, 16, 1024);
@@ -1889,7 +1884,8 @@ function threejs_init() {
   let bloom_opt = {
     //"height": h/2,
     //"width": w/2,
-    "intensity": 1,
+    //"intensity": 1,
+    "intensity": 0.65,
     "kernelSize": 2
   };
 
@@ -1941,21 +1937,26 @@ function threejs_init() {
   window.addEventListener( 'mousemove', mouse_move );
   window.addEventListener( 'wheel', mouse_wheel );
 
-  console.log("ok, 3js init");
-
   //---
 
   //let intensity_range = 3.75;
   //let intensity_max = 4;
 
-  let intensity_max_val = [
-    4,4,4,4,
-    4,3,2,2,1.5];
+  let intensity_max_val = [ 4,4,4,4, 4,3,2,2,1.5];
 
   //let intensity_max = 2;
-  let intensity_max = intensity_max_val[ g_info.n_point_light ];
+  let intensity_max = intensity_max_val[ g_info.n_point_light-1 ];
   let intensity_min = 0.75;
   let intensity_range = intensity_max - intensity_min;
+
+  if (g_info.background_brightness > 0.9) {
+    intensity_max_val = [ 2,2,2,2, 2,1.6,1,1,0.75];
+    intensity_max = intensity_max_val[ g_info.n_point_light-1 ];
+    intensity_min = 0.5;
+    intensity_range = intensity_max - intensity_min;
+  }
+
+
 
   let point_light = [];
 
@@ -2028,6 +2029,87 @@ function threejs_init() {
   g_info.scene.add( point_light[3] );
   */
 
+  //------
+  //------
+  //------
+  //
+  let cx = g_info.cx;
+  let cy = g_info.cy;
+  let cz = g_info.cz;
+
+  g_info.loading_line_geom = new THREE.BufferGeometry();
+
+  let loading_line_range = 1000;
+
+  let loading_line_material = new THREE.LineBasicMaterial({
+    "transparent": true,
+    "opacity": 1,
+    "linewidth": 4,
+    "vertexColors": true
+  });
+  let loading_line_pos = [];
+  let loading_line_color = [];
+
+
+  let _lr = 250;
+
+  let _c = 1.0;
+
+  let bg_rgb = _hex2rgb(bg.toString());
+  if (_brightness(bg_rgb.r, bg_rgb.g, bg_rgb.b) > 0.5) {
+    _c = 0.0;
+  }
+
+  let _llS = (1/16)*250;
+  let _lld = 16;
+  let _lln = _lld*_lld;
+
+  let _llc = [-_lld*_llS/2, -_lld*_llS/2, 0];
+  for (let ii=0; ii<_lln; ii++) {
+    let xy = hilbert_curve_d2xy(_lln, ii);
+
+    loading_line_pos.push( _llc[0]+(xy[0]*_llS), _llc[1]+(xy[1]*_llS), cz );
+
+    loading_line_color.push(_c);
+    loading_line_color.push(_c);
+    loading_line_color.push(_c);
+  }
+
+  /*
+  loading_line_pos.push(cx,cy,cz);
+  loading_line_pos.push(cx+_lr,cy+_lr,cz+_lr);
+
+  loading_line_pos.push(cx-_lr,cy+_lr,cz+_lr);
+  loading_line_pos.push(cx-_lr,cy-_lr,cz+_lr);
+  loading_line_pos.push(cx+_lr,cy-_lr,cz+_lr);
+  loading_line_pos.push(cx+_lr,cy+_lr,cz+_lr);
+
+  loading_line_pos.push(cx+_lr,cy+_lr,cz-_lr);
+  loading_line_pos.push(cx-_lr,cy+_lr,cz-_lr);
+  loading_line_pos.push(cx-_lr,cy-_lr,cz-_lr);
+  loading_line_pos.push(cx+_lr,cy-_lr,cz-_lr);
+  loading_line_pos.push(cx+_lr,cy+_lr,cz-_lr);
+
+  for (let i=0; i<11; i++) {
+    loading_line_color.push(_c);
+    loading_line_color.push(_c);
+    loading_line_color.push(_c);
+  }
+  */
+
+  g_info.loading_line_material = loading_line_material;
+  g_info.loading_line_geom.setAttribute( 'position', new THREE.Float32BufferAttribute( loading_line_pos, 3 ) );
+  g_info.loading_line_geom.setAttribute( 'color', new THREE.Float32BufferAttribute( loading_line_color, 3 ) );
+
+  g_info.loading_line_geom.computeBoundingSphere();
+  g_info.loading_line = new THREE.Line( g_info.loading_line_geom, loading_line_material );
+
+  g_info.scene.add( g_info.loading_line );
+
+  g_info.loading_line_active = true;
+  g_info.loading_line_fg = _c;
+  g_info.loading_line_bg = 1-_c;
+
   //---
 }
 
@@ -2037,52 +2119,6 @@ function threejs_scene_init() {
   let cx = g_info.cx;
   let cy = g_info.cy;
   let cz = g_info.cz;
-
-  //------
-  //------
-  //------
-  //
-  g_info.line_geom = new THREE.BufferGeometry();
-
-  let line_range = 1000;
-
-  let line_material = new THREE.LineBasicMaterial( { "vertexColors": true } );
-  let line_pos = [];
-  let line_color = [];
-
-  let _lr = 250;
-
-  let _c = 0.75;
-
-  line_pos.push(cx,cy,cz);
-  line_pos.push(cx+_lr,cy+_lr,cz+_lr);
-
-  line_pos.push(cx-_lr,cy+_lr,cz+_lr);
-  line_pos.push(cx-_lr,cy-_lr,cz+_lr);
-  line_pos.push(cx+_lr,cy-_lr,cz+_lr);
-  line_pos.push(cx+_lr,cy+_lr,cz+_lr);
-
-  line_pos.push(cx+_lr,cy+_lr,cz-_lr);
-  line_pos.push(cx-_lr,cy+_lr,cz-_lr);
-  line_pos.push(cx-_lr,cy-_lr,cz-_lr);
-  line_pos.push(cx+_lr,cy-_lr,cz-_lr);
-  line_pos.push(cx+_lr,cy+_lr,cz-_lr);
-
-  for (let i=0; i<11; i++) {
-    line_color.push(_c);
-    line_color.push(_c);
-    line_color.push(_c);
-  }
-
-  g_info.line_geom.setAttribute( 'position', new THREE.Float32BufferAttribute( line_pos, 3 ) );
-  g_info.line_geom.setAttribute( 'color', new THREE.Float32BufferAttribute( line_color, 3 ) );
-
-  g_info.line_geom.computeBoundingSphere();
-  g_info.tjs_line = new THREE.Line( g_info.line_geom, line_material );
-
-  if (g_info.debug_line) {
-    g_info.scene.add( g_info.tjs_line );
-  }
 
   //
   //------
@@ -2244,7 +2280,9 @@ function threejs_scene_init() {
     g_info.material = new THREE.MeshToonMaterial({
       vertexColors: true,
       color: diffuseColor,
-      gradientMap: gradientMap
+      gradientMap: gradientMap,
+      transparent: true,
+      opacity: 0
     });
 
   }
@@ -2646,9 +2684,9 @@ function render_n() {
     }
   }
 
-  g_info.tjs_line.rotation.x = g_info.rotx + theta_x;
-  g_info.tjs_line.rotation.y = g_info.roty + theta_y;
-  g_info.tjs_line.rotation.z = g_info.rotz;
+  //g_info.tjs_line.rotation.x = g_info.rotx + theta_x;
+  //g_info.tjs_line.rotation.y = g_info.roty + theta_y;
+  //g_info.tjs_line.rotation.z = g_info.rotz;
 
   theta_x = Math.sin(time*0.5)*0.125;
   theta_y = time*0.5;
@@ -2824,8 +2862,6 @@ function render_z() {
     if (Math.abs(g_info.t_mov) > (g_info.grid_size*g_info.tri_scale)) {
       let _df = ((g_info.t_mov_ds < 0) ? -1 : 1);
       g_info.t_mov -= (_df*g_info.grid_size*g_info.tri_scale);
-
-      console.log("bang");
     }
 
     g_info.t_rot += (1/8192)*Math.PI;
@@ -2894,9 +2930,9 @@ function render_z() {
     }
   }
 
-  g_info.tjs_line.rotation.x = g_info.rotx + theta_x;
-  g_info.tjs_line.rotation.y = g_info.roty + theta_y;
-  g_info.tjs_line.rotation.z = g_info.rotz;
+  //g_info.tjs_line.rotation.x = g_info.rotx + theta_x;
+  //g_info.tjs_line.rotation.y = g_info.roty + theta_y;
+  //g_info.tjs_line.rotation.z = g_info.rotz;
 
   theta_x = Math.sin(time*0.5)*0.125;
   theta_y = time*0.5;
@@ -2926,22 +2962,73 @@ function render_z() {
 
 }
 
+function render_loading() {
+
+  if ("attributes" in g_info.loading_line_geom) {
+    let line_color = g_info.loading_line_geom.attributes.color.array;
+
+    let lfg = g_info.loading_line_fg;
+    let lbg = g_info.loading_line_bg;
+
+    let n = line_color.length/3;
+    let alpha = 2*g_info.data.wfc_iter / (g_info.grid_size*g_info.grid_size*g_info.grid_size);
+    let m = Math.floor(alpha*n);
+    if (m>n) { m=n; }
+    if (m<0) { m=0; }
+
+    for (let ii=0; ii<(3*m); ii+=3) {
+      line_color[ii+0] = lbg;
+      line_color[ii+1] = lbg;
+      line_color[ii+2] = lbg;
+    }
+
+    g_info.loading_line_geom.attributes.color.needsUpdate = true;
+
+  }
+
+
+  if ("composer" in g_info) {
+    g_info.composer.render();
+  }
+  else {
+    g_info.renderer.render( g_info.scene, g_info.camera );
+  }
+}
+
 function render() {
 
   if (!g_info.ready) {
-    console.log("???");
-      g_info.renderer.render( g_info.scene, g_info.camera );
-    return;
-    if ("composer" in g_info) {
-      g_info.composer.render();
-    }
-    else {
-      g_info.renderer.render( g_info.scene, g_info.camera );
-    }
+    render_loading();
     return;
   }
 
-  // WIP
+
+  // fade in transition of main object and
+  // fade out transition of loading animation 
+  //
+  if (g_info.material.opacity < (1-(1/1024))) {
+    g_info.material.opacity += 1/32;
+    g_info.loading_line_material.opacity -= 1/32;
+    let s = g_info.loading_line_material.opacity;
+    g_info.loading_line.position.z = -100000*s;
+  }
+  else {
+    if (g_info.loading_line_active) {
+      g_info.scene.remove( g_info.loading_line );
+      g_info.loading_line_active = false;
+    }
+  }
+  if (g_info.material.opacity > 1) {
+    g_info.material.opacity = 1;
+    g_info.loading_line_material.opacity = 0;
+  }
+  if (g_info.loading_line_material.opacity < 0) {
+    g_info.loading_line_material.opacity = 0;
+  }
+
+  //---
+
+  // 'zoom' and 'pan' feature for mouse presses
   //
   if (g_info.mouse_pressed) {
     g_info.camera.scale.x = 0.5;
@@ -2965,6 +3052,9 @@ function render() {
     g_info.camera.position.z = 0;
   }
 
+  // finally, conditionally render depending
+  // on our boundary conditions
+  //
   if (g_info.boundary_condition == 'z') {
     render_z();
   }
@@ -2978,9 +3068,6 @@ function render() {
 }
 
 //---
-
-//pal
-// 524582, 367bc3, 38bfa7, 8fe1a2
 
 function init_param() {
 
@@ -2999,13 +3086,6 @@ function init_param() {
   //--
 
   let grid_weight = g_info.grid_weight;
-  /*
-  let grid_weight = {
-    "4": 2, "5": 10, "6":30, "7":30, "8":30, "9":25, "10":20, "11":10, "12":9,
-    "13":8, "14":7, "15":6, "16":5, "17":4, "18":3, "19":2,
-    "20": 1
-  };
-  */
   let grid_pd = weight2pd(grid_weight);
 
   g_info.grid_size = rnd_cdf(grid_pd.cdf);
@@ -3037,11 +3117,12 @@ function init_param() {
   let _sf_d = _irnd(1,16);
   g_info.speed_factor = 1/(_sf_d*4096);
 
-  //DEBUG 
+  //spped is consistent so don't expose it as an option
+  //
   //g_info.speed_factor = 1/8192;
   g_info.speed_factor = 1/(32*1024);
 
-  g_info.features["Speed Factor"] = g_info.speed_factor;
+  //g_info.features["Speed Factor"] = g_info.speed_factor;
 
   //---
 
@@ -4441,13 +4522,9 @@ function processing_update(iter) {
   //}
 }
 
-function grid_wfc_opt_async() {
-  while (g_info.culling) {
-
-  }
-}
-
 function grid_wfc_opt(gr) {
+
+  console.log("grid_wfc_opt");
 
   let debug = false;
   let n_iter = g_info.max_iter;
@@ -4914,7 +4991,130 @@ function pgr_blank(pgr, x0, y0, z0, dx, dy, dz) {
   }
 }
 
-function realize_grid() {
+//--------------------------
+//            __      
+// __      __/ _| ___ 
+// \ \ /\ / / |_ / __|
+//  \ V  V /|  _| (__ 
+//   \_/\_/ |_|  \___|
+//                    
+//
+//--------------------------
+
+function grid_wfc_opt_async() {
+  let r = {};
+  let gr = g_info.data.wfc_grid;
+
+  let async_rate = 100;
+  if (g_info.data.wfc_iter < 100) {
+    async_rate = 2;
+  }
+  else if (g_info.data.wfc_iter < 1000) {
+    async_rate = 10;
+  }
+
+  while (g_info.data.wfc_culling) {
+    g_info.iter++;
+    g_info.data.wfc_iter++;
+
+    if ((g_info.data.wfc_iter%async_rate)==0) {
+      setTimeout(grid_wfc_opt_async, 1);
+      return;
+    }
+
+    grid_clear(gr);
+    r = grid_cull_collapse_one(gr, debug);
+    if (r.state == "finished") {
+      g_info.data.wfc_ret = r;
+      break;
+    }
+
+
+    let ix = r.data.pos[0]
+        iy = r.data.pos[1],
+        iz = r.data.pos[2];
+
+    let accessed = {};
+    _fill_accessed(gr, accessed, ix, iy, iz);
+
+    r = grid_cull_propagate_opt(gr, accessed);
+    if (r.state == "finished") {
+      g_info.data.wfc_ret = r;
+      break;
+    }
+
+  }
+
+  g_info.data_wfc_culling = false;
+
+  realize_grid_defer_fin();
+}
+
+function realize_grid_defer(cb, data) {
+  let _ret = {};
+
+  init_template();
+  _build_tile_library( g_template.endpoint );
+
+  let M = g_info.grid_size;
+  let pgr = init_pgr([M,M,M]);
+
+  g_info.data["pgr"] = pgr;
+  _ret = grid_cull_boundary(pgr);
+  _ret = grid_cull_propagate(pgr);
+
+  g_info.data.iter = 0;
+
+  g_info.data.wfc_iter = 0;
+  g_info.data.wfc_culling = true;
+  g_info.data.wfc_grid = pgr;
+  g_info.data.wfc_ret = {};
+
+  g_info.data["cb"] = cb;
+
+  grid_wfc_opt_async();
+}
+
+function realize_grid_defer_fin() {
+
+  let pgr = g_info.data.wfc_grid;
+
+  decorate_pgr(pgr);
+
+  let _stat = pgr_stat(pgr);
+  g_info["_stat"] = _stat;
+
+  let filt_group = {};
+  let thresh = g_info.grid_size;
+  for (let group_name in _stat.group_size) {
+    if (_stat.group_size[group_name] < thresh) {
+      filt_group[group_name] = true;
+    }
+  }
+
+  pgr_filter(pgr, filt_group);
+
+  let fin_gr = gen_simple_grid(pgr);
+  realize_tri_from_grid(fin_gr, pgr);
+
+  g_info.data["grid"] = fin_gr;
+
+  if ("cb" in g_info.data) {
+    g_info.data.cb();
+  }
+}
+
+//--------------------------
+//            __      
+// __      __/ _| ___ 
+// \ \ /\ / / |_ / __|
+//  \ V  V /|  _| (__ 
+//   \_/\_/ |_|  \___|
+//                    
+//
+//--------------------------
+
+function _realize_grid() {
   let debug = false;
 
   init_template();
@@ -4943,6 +5143,7 @@ function realize_grid() {
   }
 
   g_info.data["pgr"] = pgr;
+  g_info.data.wfc_grid = pgr;
 
   let _r = grid_wfc_opt(pgr);
 
@@ -5218,21 +5419,23 @@ function loadjson(fn, cb) {
 }
 
 
-function init_fin() {
+function init_beg() {
+  init_param();
+  threejs_init();
 
-  //init_param();
 
   // SCALE
+  //
 
   let _wh = window.innerHeight;
   let _ww = window.innerWidth;
-  let _F = ((_wh < _ww) ? _wh : _ww);
+  let _F = ((_wh < _ww) ? (1.25*_wh) : (2*_ww));
   //_F = _wh;
 
   //g_info.tri_scale = 1 + Math.ceil( 1.5*_F / g_info.grid_size );
   //g_info.tri_scale = 1 + Math.ceil( 1.25*_F / g_info.grid_size );
   //g_info.tri_scale = Math.ceil( 1.25*_F / g_info.grid_size );
-  g_info.tri_scale = Math.ceil( 2*_F / g_info.grid_size );
+  g_info.tri_scale = Math.ceil( _F / g_info.grid_size );
 
 
   welcome();
@@ -5271,15 +5474,30 @@ function init_fin() {
     g_info.mouse_pressed = false;
   });
 
-  realize_grid();
 
-  g_info.ready = true;
-
-  threejs_scene_init();
+  //realize_grid();
+  start_grid_calculation();
   animate();
 }
 
-function pre_init() {
+function start_grid_calculation() {
+  //realize_grid();
+  //setTimeout( init_fin, 10000 );
+
+  realize_grid_defer(init_fin);
+
+  //init_fin();
+}
+
+function init_fin() {
+
+  console.log("init_fin");
+
+  g_info.ready = true;
+  threejs_scene_init();
+}
+
+function _pre_init() {
   init_param();
   threejs_init();
 
@@ -5288,7 +5506,8 @@ function pre_init() {
 }
 
 function init() {
-  loadjson("./chromotome.json", function(dat) { palette_load_json(dat); pre_init(); init_fin(); } );
+  //loadjson("./chromotome.json", function(dat) { palette_load_json(dat); pre_init(); init_fin(); } );
+  loadjson("./chromotome.json", function(dat) { palette_load_json(dat); init_beg(); } );
   //init_fin();
 }
 

@@ -160,3 +160,60 @@ if (typeof module !== "undefined") {
     module.exports[x] = m4[x];
   }
 }
+
+//----------
+//
+
+//----
+// CC-BY-SA from Wikipedia
+// https://en.wikipedia.org/wiki/Hilbert_curve
+//
+
+// rotate/flip a quadrant appropriately
+//
+function hilbert_curve_rot(n, x, y, rx, ry) {
+  if (ry == 0) {
+    if (rx == 1) {
+      x = (n-1) - x;
+      y = (n-1) - y;
+    }
+
+    let t = x;
+    x = y;
+    y = t;
+  }
+  return [x,y];
+}
+
+function hilbert_curve_d2xy(n, d) {
+  let rx=0, ry=0, s=0, t=d;
+  let cx = 0;
+  let cy = 0;
+
+  let x = cx, y = cy;
+
+  for (s=1; s<n; s*=2) {
+    rx = 1 & Math.floor(t/2);
+    ry = 1 & (t ^ rx);
+    let xy = hilbert_curve_rot(s, x, y, rx, ry);
+    x = xy[0];
+    y = xy[1];
+    x += s * rx;
+    y += s * ry;
+    t = Math.floor(t/4);
+  }
+
+  return [x,y];
+}
+
+if (typeof module !== "undefined") {
+  let n = 4096;
+  for (let ii=0; ii<n; ii++)  {
+    let xy = hilbert_curve_d2xy(n, ii);
+    console.log(xy[0], xy[1]);
+  }
+}
+
+//
+//----
+
