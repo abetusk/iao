@@ -39,6 +39,7 @@ var g_info = {
   "ds": 5,
 
   "ready": false,
+  "preview_available": false,
 
   "paused":false,
 
@@ -1835,7 +1836,8 @@ function threejs_init() {
   let directional_light = false;
   if (directional_light) {
     //g_info.light.push(new THREE.DirectionalLight( 0xffffff, 1.5 ));
-    g_info.light.push(new THREE.DirectionalLight( 0xffffff, 1.5 ));
+    //g_info.light.push(new THREE.DirectionalLight( 0xffffff, 1.5 ));
+    g_info.light.push(new THREE.DirectionalLight( 0xffffff, 9.5 ));
     g_info.light[0].position.set( 1, 1, 1 ).normalize();
 
     // SHADOW
@@ -1905,16 +1907,19 @@ function threejs_init() {
   g_info.fxaa_effect = fxaaeffect;
   g_info.fxaa_pass = fxaapass;
 
-  let vignette_effect = new POSTPROCESSING.VignetteEffect(vignette_opt);
-  let vignette_pass = new POSTPROCESSING.EffectPass(g_info.camera, vignette_effect);
-  g_info.vignette_effect = vignette_effect;
-  g_info.vignette_pass = vignette_pass;
-
   composer.addPass(renderpass);
   composer.addPass(bloompass);
   composer.addPass(fxaapass);
 
-  composer.addPass(vignette_pass);
+  let use_vignette = false;
+  if (use_vignette) {
+    let vignette_effect = new POSTPROCESSING.VignetteEffect(vignette_opt);
+    let vignette_pass = new POSTPROCESSING.EffectPass(g_info.camera, vignette_effect);
+    g_info.vignette_effect = vignette_effect;
+    g_info.vignette_pass = vignette_pass;
+
+    composer.addPass(vignette_pass);
+  }
 
   g_info.composer = composer;
   g_info.render_pass = renderpass;
@@ -1951,6 +1956,8 @@ function threejs_init() {
   //let n_point_light = 8;
   //let n_point_light = _irnd(4,8);
   let n_point_light = g_info.n_point_light;
+
+  //n_point_light = 0;
 
   //let _ldist = 4*g_info.tri_scale * g_info.grid_size;
   let _ldist = 2*g_info.tri_scale * g_info.grid_size;
@@ -3002,10 +3009,21 @@ function render() {
       g_info.scene.remove( g_info.loading_line );
       g_info.loading_line_active = false;
     }
+
+    if (!g_info.preview_available) {
+      g_info.preview_available = true;
+      if (typeof fxpreview !== "undefined") {
+        setTimeout( fxpreview, 1000 );
+      }
+    }
+
+
   }
+
   if (g_info.material.opacity > 1) {
     g_info.material.opacity = 1;
     g_info.loading_line_material.opacity = 0;
+
   }
   if (g_info.loading_line_material.opacity < 0) {
     g_info.loading_line_material.opacity = 0;
@@ -5490,9 +5508,6 @@ function init_fin() {
   g_info.ready = true;
   threejs_scene_init();
 
-  if (typeof fxpreview !== "undefined") {
-    fxpreview();
-  }
 }
 
 function _pre_init() {
