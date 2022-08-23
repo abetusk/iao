@@ -30,69 +30,6 @@
 // commercial purposes.
 //
 
-// NOTE (to self):
-//
-// can play with _g_h param (denom from 2 to 16)
-// can play with _g_w param (denom from 2 to 8);
-// color palette
-// size
-// symmetry
-// light placement
-//
-// mouse interaction (point light)
-
-// palette candidates:
-// * dt01
-// * dt02
-// * dt11
-// * dt12
-// * dt13
-// * jung_wolf
-// * rohlfs_1G
-// * rohlfs_1R
-// * system.#02
-// * system.#05
-// * exposito
-// * exposito_sub3
-// * tundra1
-// * tundra3
-// * jud_playground (?)
-// * verena (colorful, pastel)
-// * ducci_d
-// * iiso_zeitung
-// * nowak (maybe with darker background)
-// * rag-virupaksha
-// * butterfly
-// * sprague
-// * spatial01
-// * spatial02i
-// * spatial03i
-// * yuma_punk
-// * cc245
-// * present-correct
-// * tsu_akasaka
-// * florida_citrus
-// * winter.night
-// * rag-mysore
-// * kov_07
-//
-// on the fence about:
-// * cc232
-// * exposito_sub3
-// * iiso_daily
-// * floratopia
-// * book
-// * one-dress
-// * ducci_i
-// * ducci_x
-// * olympia
-// * cako2_sub1
-// * hersche
-// * dt03 (with a modified black)
-//
-
-
-
 var g_info = {
   "PROJECT" : "like go up",
   "VERSION" : "0.1.0",
@@ -167,6 +104,60 @@ var g_info = {
 
   "mouse_pressed": false,
 
+  "palette": [
+    {"name":"monochrome","colors":["#111111","#eeeeee"],"background":"#777777"},
+
+    {"name":"book","colors":["#be1c24","#d1a082","#037b68","#d8b1a5","#1c2738","#c95a3f"],"stroke":"#0e0f27","background":"#f5b28a"},
+    {"name":"butterfly","colors":["#f40104","#f6c0b3","#99673a","#f0f1f4"],"stroke":"#191e36","background":"#191e36"},
+    {"name":"kov_03","colors":["#e3937b","#d93f1d","#090d15","#e6cca7"],"stroke":"#090d15","background":"#558947"},
+    {"name":"kov_06b","colors":["#d57846","#dfe0cc","#de442f","#e7d3c5","#5ec227","#302f35","#63bdb3"],"stroke":"#292319","background":"#dfd4c1"},
+    {"name":"mayo1","colors":["#ea510e","#ffd203","#0255a3","#039177","#111111"],"stroke":"#111111","background":"#fff"},
+    {"name":"tundra1","colors":["#40708c","#8e998c","#5d3f37","#ed6954","#f2e9e2"]},
+    {"name":"tundra4","colors":["#d53939","#b6754d","#a88d5f","#524643","#3c5a53","#7d8c7c","#dad6cd"]},
+    {"name":"dt01","colors":["#172a89","#f7f7f3"],"stroke":"#172a89","background":"#f3abb0"},
+    {"name":"dt02","colors":["#302956","#f3c507"],"stroke":"#302956","background":"#eee3d3"},
+    {"name":"dt02b","colors":["#eee3d3"],"stroke":"#302956","background":"#f3c507"},
+    {"name":"dt02b","colors":["#eee3d3"],"stroke":"#302956","background":"#f3c507"},
+    {"name":"dt05","colors":["#ee5d65","#f0e5cb"],"stroke":"#080708","background":"#f0e5cb"},
+    {"name":"dt06","colors":["#271f47","#e7ceb5"],"stroke":"#271f47","background":"#cc2b1c"},
+    {"name":"dt08","colors":["#5d9d88","#ebb43b"],"stroke":"#efebda","background":"#efebda"},
+    {"name":"dt12","colors":["#f5f2d3"],"stroke":"#073c5c","background":"#c0d0c3"},
+    {"name":"dt13","colors":["#f5f2d3","#f5f2d3","#fbd6b8"],"stroke":"#ec5525","background":"#ec5525"},
+    {"name":"ducci_b","colors":["#ecddc5","#79b27b","#000000","#ac6548"],"stroke":"#ac6548","background":"#d5c08e"},
+    {"name":"ducci_g","colors":["#c75669","#000000","#11706a"],"stroke":"#11706a","background":"#ecddc5"},
+    {"name":"ducci_q","colors":["#4bae8c","#d0c1a0","#2d3538"],"stroke":"#2d3538","background":"#d06440"},
+    {"name":"exposito","colors":["#8bc9c3","#ffae43","#ea432c","#228345","#d1d7d3","#524e9c","#9dc35e","#f0a1a1"],"stroke":"#fff","background":"#000000"},
+    {"name":"exposito_sub1","colors":["#8bc9c3","#ffae43","#ea432c","#524e9c"],"stroke":"#fff","background":"#000000"},
+    {"name":"exposito_sub2","colors":["#8bc9c3","#ffae43","#ea432c","#524e9c","#f0a1a1","#228345"],"stroke":"#fff","background":"#000000"},
+    {"name":"exposito_sub3","colors":["#ffae43","#ea432c","#524e9c","#f0a1a1"],"stroke":"#fff","background":"#000000"},
+    {"name":"exposito_sub2","colors":["#8bc9c3","#ffae43","#ea432c","#524e9c","#f0a1a1","#228345"],"stroke":"#fff","background":"#000000"},
+    {"name":"hermes","colors":["#253852","#51222f","#b53435","#ecbb51"],"background":"#eeccc2"},
+    {"name":"honey","colors":["#f14d42","#f4fdec","#4fbe5d","#265487","#f6e916","#f9a087","#2e99d6"],"stroke":"#141414","background":"#f4fdec"},
+    {"name":"hurdles","colors":["#e16503","#dc9a0f","#dfe2b4","#66a7a6"],"stroke":"#3c1c03","background":"#3c1c03"},
+    {"name":"jrmy","colors":["#df456c","#ea6a82","#270b32","#471e43"],"stroke":"#270b32","background":"#ef9198"},
+    {"name":"jud_mural","colors":["#ca3122","#e5af16","#4a93a2","#0e7e39","#e2b9bd"],"stroke":"#1c1616","background":"#e3ded8"},
+    {"name":"juxtapoz","colors":["#20357e","#f44242","#ffffff"],"stroke":"#000000","background":"#cfc398"},
+    {"name":"kaffeprat","colors":["#BCAA8C","#D8CDBE","#484A42","#746B58","#9A8C73"],"stroke":"#000","background":"#fff"},
+    {"name":"rag-virupaksha","colors":["#f5736a","#925951","#feba4c","#9d9b9d"],"background":"#eedfa2"},
+    {"name":"rohlfs_1G","colors":["#004996","#567bae","#60bf3c","#d2deb1"],"stroke":"#004996","background":"#fff8e7"},
+    {"name":"rohlfs_3","colors":["#abdfdf","#fde500","#58bdbc","#eff0dd"],"stroke":"#211029","background":"#f76975"},
+    {"name":"spatial02","colors":["#ff5937","#f6f6f4","#f6f6f4"],"stroke":"#ff5937","background":"#f6f6f4"},
+    {"name":"spatial02i","colors":["#f6f6f4","#ff5937","#ff5937"],"stroke":"#f6f6f4","background":"#ff5937"},
+    {"name":"spatial03","colors":["#4169ff","#f6f6f4","#f6f6f4"],"stroke":"#4169ff","background":"#f6f6f4"},
+    {"name":"spatial03i","colors":["#f6f6f4","#4169ff","#4169ff"],"stroke":"#f6f6f4","background":"#4169ff"},
+    {"name":"sprague","colors":["#ec2f28","#f8cd28","#1e95bb","#fbaab3","#fcefdf"],"stroke":"#221e1f","background":"#fcefdf"},
+    {"name":"system.#02","colors":["#ff4242","#ffd480","#1e365d","#edb14c","#418dcd"],"stroke":"#000","background":"#fff"},
+    {"name":"system.#03","colors":["#f73f4a","#d3e5eb","#002c3e","#1aa1b1","#ec6675"],"stroke":"#110b09","background":"#fff"},
+    {"name":"system.#04","colors":["#e31f4f","#f0ac3f","#18acab","#26265a","#ea7d81","#dcd9d0"],"stroke":"#26265a","background":"#dcd9d0"},
+    {"name":"system.#05","colors":["#db4549","#d1e1e1","#3e6a90","#2e3853","#a3c9d3"],"stroke":"#000","background":"#fff"},
+    {"name":"system.#08","colors":["#f6625a","#92b29f","#272c3f"],"stroke":"#000","background":"#fff"},
+    {"name":"rag-taj","colors":["#ce565e","#8e1752","#f8a100","#3ac1a6"],"background":"#efdea2"},
+    {"name":"tsu_arcade","colors":["#4aad8b","#e15147","#f3b551","#cec8b8","#d1af84","#544e47"],"stroke":"#251c12","background":"#cfc7b9"},
+    {"name":"tsu_harutan","colors":["#75974a","#c83e3c","#f39140","#e4ded2","#f8c5a4","#434f55"],"stroke":"#251c12","background":"#cfc7b9"},
+    {"name":"verena","colors":["#f1594a","#f5b50e","#14a160","#2969de","#885fa4"],"stroke":"#1a1a1a","background":"#e2e6e8"}
+  ],
+
+
   "_palette": [
     { 
       "name" : "monochrome",
@@ -175,7 +166,7 @@ var g_info = {
     }
   ],
 
-  "palette": [
+  "__palette": [
     { 
       "name": "yuma_punk",
       "colors": ["#f05e3b", "#ebdec4", "#ffdb00"],
@@ -1882,8 +1873,6 @@ function threejs_init() {
   let renderpass = new POSTPROCESSING.RenderPass(g_info.scene, g_info.camera);
 
   let bloom_opt = {
-    //"height": h/2,
-    //"width": w/2,
     //"intensity": 1,
     "intensity": 0.65,
     "kernelSize": 2
@@ -2756,7 +2745,6 @@ function render_z() {
   //----
   //----
 
-
   let theta_x = Math.sin(time*0.5)*0.125;
   let theta_y = time*0.5;
 
@@ -2784,80 +2772,78 @@ function render_z() {
 
     let _t_rem = easeInOutSine(_t_rem_orig);
 
-    if (view_counter != 0) {
-      _t_rem = 0;
+    if (view_counter != 0) { _t_rem = 0; }
+    else { }
+
+    // just override the 'toppling'
+    // effect
+    //
+    _t_rem = 0;
+    g_info.view_nxt = 1;
+    g_info.view_prv = 1;
+
+    let D = 4;
+    //D = 1.75;
+    //D = 1.387;
+
+    if (view_prv == 0) {
+      mp0 = m4.xRotation((1-_t_rem)*Math.PI/D);
+      mp1 = m4.yRotation((1-_t_rem)*Math.PI/D);
     }
-    else {
+
+    else if (view_prv == 1) {
+      mp0 = m4.xRotation((1-_t_rem)*Math.PI/D);
+      mp1 = m4.zRotation((1-_t_rem)*Math.PI/D);
     }
 
-      let D = 4;
-      //D = 1.75;
-      //D = 1.387;
+    else if (view_prv == 2) {
+      mp0 = m4.yRotation((1-_t_rem)*Math.PI/D);
+      mp1 = m4.zRotation((1-_t_rem)*Math.PI/D);
+    }
 
-      if (view_prv == 0) {
-        mp0 = m4.xRotation((1-_t_rem)*Math.PI/D);
-        mp1 = m4.yRotation((1-_t_rem)*Math.PI/D);
-      }
+    else if (view_prv == 3) {
+      mp0 = m4.xRotation((_t_rem)*Math.PI/D);
+      mp1 = m4.yRotation((1-_t_rem)*Math.PI/D);
+    }
+    else if (view_prv == 4) {
+      mp0 = m4.xRotation((_t_rem)*Math.PI/D);
+      mp1 = m4.zRotation((1-_t_rem)*Math.PI/D);
+    }
+    else if (view_prv == 5) {
+      mp0 = m4.yRotation((_t_rem)*Math.PI/D);
+      mp1 = m4.zRotation((1-_t_rem)*Math.PI/D);
+    }
 
-      else if (view_prv == 1) {
-        mp0 = m4.xRotation((1-_t_rem)*Math.PI/D);
-        mp1 = m4.zRotation((1-_t_rem)*Math.PI/D);
-      }
+    
+    if (view_nxt == 0 ) {
+      mn0 = m4.xRotation(_t_rem*Math.PI/D);
+      mn1 = m4.yRotation(_t_rem*Math.PI/D);
+    }
+    else if (view_nxt == 1) {
+      mn0 = m4.xRotation((_t_rem)*Math.PI/D);
+      mn1 = m4.zRotation((_t_rem)*Math.PI/D);
+    }
+    else if (view_nxt == 2) {
+      mn0 = m4.yRotation((_t_rem)*Math.PI/D);
+      mn1 = m4.zRotation((_t_rem)*Math.PI/D);
+    }
 
-      else if (view_prv == 2) {
-        mp0 = m4.yRotation((1-_t_rem)*Math.PI/D);
-        mp1 = m4.zRotation((1-_t_rem)*Math.PI/D);
-      }
-
-      else if (view_prv == 3) {
-        mp0 = m4.xRotation((_t_rem)*Math.PI/D);
-        mp1 = m4.yRotation((1-_t_rem)*Math.PI/D);
-      }
-      else if (view_prv == 4) {
-        mp0 = m4.xRotation((_t_rem)*Math.PI/D);
-        mp1 = m4.zRotation((1-_t_rem)*Math.PI/D);
-      }
-      else if (view_prv == 5) {
-        mp0 = m4.yRotation((_t_rem)*Math.PI/D);
-        mp1 = m4.zRotation((1-_t_rem)*Math.PI/D);
-      }
-
-      
-      if (view_nxt == 0 ) {
-        mn0 = m4.xRotation(_t_rem*Math.PI/D);
-        mn1 = m4.yRotation(_t_rem*Math.PI/D);
-      }
-      else if (view_nxt == 1) {
-        mn0 = m4.xRotation((_t_rem)*Math.PI/D);
-        mn1 = m4.zRotation((_t_rem)*Math.PI/D);
-      }
-      else if (view_nxt == 2) {
-        mn0 = m4.yRotation((_t_rem)*Math.PI/D);
-        mn1 = m4.zRotation((_t_rem)*Math.PI/D);
-      }
-
-      else if (view_nxt == 3) {
-        mp0 = m4.xRotation((1-_t_rem)*Math.PI/D);
-        mp1 = m4.yRotation((_t_rem)*Math.PI/D);
-      }
-      else if (view_nxt == 4) {
-        mp0 = m4.xRotation((1-_t_rem)*Math.PI/D);
-        mp1 = m4.zRotation((_t_rem)*Math.PI/D);
-      }
-      else if (view_nxt == 5) {
-        mp0 = m4.yRotation((1-_t_rem)*Math.PI/D);
-        mp1 = m4.zRotation((_t_rem)*Math.PI/D);
-      }
-
-    //}
+    else if (view_nxt == 3) {
+      mp0 = m4.xRotation((1-_t_rem)*Math.PI/D);
+      mp1 = m4.yRotation((_t_rem)*Math.PI/D);
+    }
+    else if (view_nxt == 4) {
+      mp0 = m4.xRotation((1-_t_rem)*Math.PI/D);
+      mp1 = m4.zRotation((_t_rem)*Math.PI/D);
+    }
+    else if (view_nxt == 5) {
+      mp0 = m4.yRotation((1-_t_rem)*Math.PI/D);
+      mp1 = m4.zRotation((_t_rem)*Math.PI/D);
+    }
 
     let mrp = m4.multiply(mp1, mp0);
     let mrn = m4.multiply(mn1, mn0);
 
-
-    //let mr = m4.multiply(mrp, mrn);
-
-    //g_info.t_mov += (1/2);
     g_info.t_mov += g_info.t_mov_ds;
     if (Math.abs(g_info.t_mov) > (g_info.grid_size*g_info.tri_scale)) {
       let _df = ((g_info.t_mov_ds < 0) ? -1 : 1);
@@ -3080,6 +3066,18 @@ function init_param() {
   g_info.features["Palette"] = g_info.palette[ g_info.palette_idx ].name;
   g_info.palette_choice = g_info.palette[ g_info.palette_idx ];
 
+  // take out black?
+  //
+  let new_pal = [];
+  for (let ii=0; ii<g_info.palette_choice.colors.length; ii++) {
+    if (g_info.palette_choice.colors[ii] == '#000000') {
+      console.log("REMOVING:", ii, g_info.palette_choice.name);
+      continue;
+    }
+    new_pal.push(g_info.palette_choice.colors[ii]);
+  }
+  g_info.palette_choice.colors = new_pal;
+
   //g_info.inverted_bg = (fxrand() < 0.5);
   //g_info.features["Inverted Background"] = (g_info.inverted_bg ? "True" : "False" );
 
@@ -3110,7 +3108,7 @@ function init_param() {
 
   //g_info.n_point_light = _irnd(4,8);
   g_info.n_point_light = _irnd(4,4);
-  g_info.features["Light Count"] = g_info.n_point_light;
+  //g_info.features["Light Count"] = g_info.n_point_light;
 
   //---
 
@@ -3179,7 +3177,7 @@ function init_param() {
     profile_desc += tile_type;
   }
 
-  g_info.features["Tile Weight Profile"] = profile_desc;
+  g_info.features["Tile Preference"] = profile_desc;
 
   //--
 
@@ -5461,16 +5459,13 @@ function init_beg() {
   });
 
   document.addEventListener('dblclick', function() {
-    console.log("bang");
   });
 
   document.addEventListener('mousedown', function() {
-    console.log("mousedown");
     g_info.mouse_pressed = true;
   });
 
   document.addEventListener('mouseup', function() {
-    console.log("mouseup");
     g_info.mouse_pressed = false;
   });
 
@@ -5491,10 +5486,12 @@ function start_grid_calculation() {
 
 function init_fin() {
 
-  console.log("init_fin");
-
   g_info.ready = true;
   threejs_scene_init();
+
+  if (typeof fxpreview !== "undefined") {
+    fxpreview();
+  }
 }
 
 function _pre_init() {
@@ -5507,7 +5504,9 @@ function _pre_init() {
 
 function init() {
   //loadjson("./chromotome.json", function(dat) { palette_load_json(dat); pre_init(); init_fin(); } );
-  loadjson("./chromotome.json", function(dat) { palette_load_json(dat); init_beg(); } );
+  //loadjson("./chromotome.json", function(dat) { palette_load_json(dat); init_beg(); } );
+  //g_info.palette = CHROMOTOME.pal;
+  init_beg();
   //init_fin();
 }
 

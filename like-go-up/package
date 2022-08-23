@@ -11,5 +11,18 @@
 outfn=like_go_up.zip
 rm -f $outfn
 
-zip $outfn CCapture.js download.js webm-writer-0.2.0.js script.js index.html style.css m4.js three.js postprocessing.js quadtree.js LICENSE LICENSE-three-js README.md
+zip $outfn CCapture.js \
+  download.js \
+  webm-writer-0.2.0.js \
+  script.js \
+  index.html \
+  m4.js \
+  three.js \
+  postprocessing.js \
+  quadtree.js \
+  LICENSE \
+  LICENSE-three-js \
+  README.md \
+  chromotome.json
+
 
