@@ -44,8 +44,7 @@ var g_info = {
   "paused":false,
 
   "quiet":false,
-  "grid_size": [8,8,8],
-  "max_grid_size": 8,
+  "grid_size": 8,
 
   "boundary_condition": "z",
 
@@ -222,11 +221,7 @@ var g_info = {
   "place_type" : 0,
   "place_size": 64,
 
-  "move_direction": 0,
-
   "speed_factor" : 1/(2*4096),
-  //"light_speed_factor" : 1/(32),
-  "light_speed_factor" : 4,
 
   "tile_width_denom_weight": {
     //"2": 1,
@@ -266,7 +261,6 @@ var g_info = {
      //"6": 300000,
      "7": 30,
      //"7": 300000,
-
      "8": 30,
      //"8": 3000000,
 
@@ -1831,14 +1825,6 @@ function threejs_init() {
   g_info.background_color = bg;
   g_info.background_brightness = _hex_brightness(bg);
 
-  g_info.max_color_brightness = 0.0;
-  for (let ii=0; ii<g_info.palette_choice.colors.length; ii++) {
-    let b = _hex_brightness( g_info.palette_choice.colors[ii] );
-    if (b > g_info.max_color_brightness) {
-      g_info.max_color_brightness = b;
-    }
-  }
-
   g_info.scene.background = new THREE.Color( bg );
   g_info.scene.fog = new THREE.Fog( bg, 16, 1024);
 
@@ -1847,11 +1833,11 @@ function threejs_init() {
   g_info.renderer.setSize( window.innerWidth, window.innerHeight );
   g_info.renderer.outputEncoding = THREE.sRGBEncoding;
 
-  let directional_light = true;
+  let directional_light = false;
   if (directional_light) {
     //g_info.light.push(new THREE.DirectionalLight( 0xffffff, 1.5 ));
     //g_info.light.push(new THREE.DirectionalLight( 0xffffff, 1.5 ));
-    g_info.light.push(new THREE.DirectionalLight( 0xffffff, 1.5 ));
+    g_info.light.push(new THREE.DirectionalLight( 0xffffff, 9.5 ));
     g_info.light[0].position.set( 1, 1, 1 ).normalize();
 
     // SHADOW
@@ -1877,100 +1863,66 @@ function threejs_init() {
     g_info.scene.add( g_info.light[0] );
   }
 
-  //-------------
-  //-------------
-  //-------------
   //
-  // effects
-  //
-  //-------------
-  //-------------
-
-  let use_composer = true;
-  if (use_composer) {
-
-    //let depthtexture = new THREE.DepthTexture();
-    //g_info.depth_texture = depthtexture;
-
-    let webgl_opt = {
-      //"depthTexture" : depthtexture,
-      //"depthBuffer": true,
-      "samples": 2
-    };
-
-    let sz = g_info.renderer.getDrawingBufferSize( new THREE.Vector2() );
-    let _wglrt = new THREE.WebGLRenderTarget( sz.width, sz.height, { "samples": 2} );
-
-    let composer = new POSTPROCESSING.EffectComposer(g_info.renderer, _wglrt);
-    g_info.composer = composer;
+  let sz = g_info.renderer.getDrawingBufferSize( new THREE.Vector2() );
+  //let _wglrt = new THREE.WebGLRenderTarget( sz.width, sz.height, { "samples":2 } );
+  let _wglrt = new THREE.WebGLRenderTarget( sz.width, sz.height, { "samples": 2} );
 
 
+  let composer = new POSTPROCESSING.EffectComposer(g_info.renderer, _wglrt);
 
-    let renderpass = new POSTPROCESSING.RenderPass(g_info.scene, g_info.camera);
-    composer.addPass(renderpass);
-    g_info.render_pass = renderpass;
+  let renderpass = new POSTPROCESSING.RenderPass(g_info.scene, g_info.camera);
 
-    let use_bloom = true;
-    if (use_bloom) {
-      let bloom_opt = {
-        "intensity": 0.5,
-        "kernelSize": 2
-      };
+  let bloom_opt = {
+    //"intensity": 1,
+    "intensity": 0.65,
+    "kernelSize": 2
+  };
 
-      if (g_info.background_brightness > 0.85) {
-        bloom_opt.intensity = 0.25;
-      }
-
-      let bloomeffect = new POSTPROCESSING.BloomEffect(bloom_opt);
-      let bloompass = new POSTPROCESSING.EffectPass(g_info.camera, bloomeffect);
-      g_info.bloom_effect = bloomeffect;
-      g_info.bloom_pass = bloompass;
-      composer.addPass(bloompass);
-    }
-
-    let use_fxaa = true;
-    if (use_fxaa) {
-      let fxaa_opt = {
-        "subpixelQuality": 4,
-        "samples": 4
-      }
-
-      let fxaaeffect = new POSTPROCESSING.FXAAEffect(fxaa_opt);
-      let fxaapass = new POSTPROCESSING.EffectPass(g_info.camera, fxaaeffect);
-      g_info.fxaa_effect = fxaaeffect;
-      g_info.fxaa_pass = fxaapass;
-      composer.addPass(fxaapass);
-    }
-
-
-    let use_vignette = false;
-    if (use_vignette) {
-      let vignette_opt = {
-        "offset": 0.5,
-        "darkness": 0.5
-      }
-
-      let vignette_effect = new POSTPROCESSING.VignetteEffect(vignette_opt);
-      let vignette_pass = new POSTPROCESSING.EffectPass(g_info.camera, vignette_effect);
-      g_info.vignette_effect = vignette_effect;
-      g_info.vignette_pass = vignette_pass;
-
-      composer.addPass(vignette_pass);
-    }
-
-    /*
-    let use_outline = false;
-    if (use_outline) {
-      let outline_effect = new POSTPROCESSING.OutlineEffect();
-      let outline_pass = new POSTPROCESSING.EffectPass(g_info.camera, outline_effect);
-      g_info.outline_effect = outline_effect;
-      g_info.outline_pass = outline_pass;
-
-      composer.addPass(outline_effect);
-    }
-    */
-
+  let fxaa_opt = {
+    //"subpixelQuality": 1,
+    //"samples": 4
   }
+
+  let vignette_opt = {
+
+    // how sharp the falloff is (1 hard cutoff, 0 no cutoff)
+    //
+    "offset": 0.5,
+
+    // how dark it gets at edges (1 full, 0 none);
+    //
+    "darkness": 0.5
+  }
+
+                                              // strength, kernel size, sigma, blur rendertarget resolution
+  //let bloomeffect = new POSTPROCESSING.BloomEffect(100, 205, 40, 2056);
+  let bloomeffect = new POSTPROCESSING.BloomEffect(bloom_opt);
+  let bloompass = new POSTPROCESSING.EffectPass(g_info.camera, bloomeffect);
+  g_info.bloom_effect = bloomeffect;
+  g_info.bloom_pass = bloompass;
+
+  let fxaaeffect = new POSTPROCESSING.FXAAEffect(fxaa_opt);
+  let fxaapass = new POSTPROCESSING.EffectPass(g_info.camera, fxaaeffect);
+  g_info.fxaa_effect = fxaaeffect;
+  g_info.fxaa_pass = fxaapass;
+
+  composer.addPass(renderpass);
+  composer.addPass(bloompass);
+  composer.addPass(fxaapass);
+
+  let use_vignette = false;
+  if (use_vignette) {
+    let vignette_effect = new POSTPROCESSING.VignetteEffect(vignette_opt);
+    let vignette_pass = new POSTPROCESSING.EffectPass(g_info.camera, vignette_effect);
+    g_info.vignette_effect = vignette_effect;
+    g_info.vignette_pass = vignette_pass;
+
+    composer.addPass(vignette_pass);
+  }
+
+  g_info.composer = composer;
+  g_info.render_pass = renderpass;
 
   g_info.container.appendChild( g_info.renderer.domElement );
 
@@ -1983,41 +1935,19 @@ function threejs_init() {
   //let intensity_range = 3.75;
   //let intensity_max = 4;
 
-  let I = 0.125;
   let intensity_max_val = [ 4,4,4,4, 4,3,2,2,1.5];
-  intensity_max_val = [ I,I,I,I ];
 
   //let intensity_max = 2;
   let intensity_max = intensity_max_val[ g_info.n_point_light-1 ];
   let intensity_min = 0.75;
   let intensity_range = intensity_max - intensity_min;
 
-  if (g_info.background_brightness > 0.75) {
-    I /= 2;
-    intensity_min /= 2;
-  }
-
-  if (g_info.max_color_brightness > 0.7) {
-    I /= 2;
-    intensity_min /= 2;
-  }
-
-
-  intensity_max = I;
-  intensity_range = intensity_max - intensity_min;
-
-  console.log("I:", I, "m:", intensity_min, "r:", intensity_range);
-
-  /*
-  if ((g_info.background_brightness > 0.75) ||
-      (g_info.max_color_brightness > 0.75)) {
+  if (g_info.background_brightness > 0.9) {
     intensity_max_val = [ 2,2,2,2, 2,1.6,1,1,0.75];
-    intensity_max_val = [ I/2, I/2, I/2, I/2 ];
     intensity_max = intensity_max_val[ g_info.n_point_light-1 ];
     intensity_min = 0.5;
     intensity_range = intensity_max - intensity_min;
   }
-  */
 
 
 
@@ -2027,17 +1957,15 @@ function threejs_init() {
   //let n_point_light = _irnd(4,8);
   let n_point_light = g_info.n_point_light;
 
-  //n_point_light = 4;
+  //n_point_light = 0;
 
   //let _ldist = 4*g_info.tri_scale * g_info.grid_size;
-  //let _ldist = 2*g_info.tri_scale * g_info.grid_size;
-  let _ldist = 2*g_info.tri_scale * g_info.max_grid_size;
+  let _ldist = 2*g_info.tri_scale * g_info.grid_size;
 
   //let ds = [1600,1600,3200];
   //let ds = [800,800,800];
   //let ds = [200,200,1000];
-  //let _B = g_info.tri_scale * g_info.grid_size;
-  let _B = g_info.tri_scale * g_info.max_grid_size;
+  let _B = g_info.tri_scale * g_info.grid_size;
   //let ds = [ 2*_B, 2*_B, 2*_B ];
   let ds = [ _B, _B, _B ];
 
@@ -2235,20 +2163,8 @@ function threejs_scene_init() {
     //DEBUG
     //color_hex = '#ffffff';
 
-    let rgb = _hex2rgb(color_hex);
-    //color.setRGB( rgb.r/255, rgb.g/255, rgb.b/255 );
-
-    let hsv = RGBtoHSV(rgb.r, rgb.g, rgb.b);
-
-    hsv.s += (fxrand()-0.5)/12;
-    hsv.v += (fxrand()-0.5)/12;
-    if (hsv.s<0){ hsv.s = 0; }
-    if (hsv.s>1){ hsv.s = 1; }
-    if (hsv.v<0){ hsv.v = 0; }
-    if (hsv.v>1){ hsv.v = 1; }
-    rgb = HSVtoRGB(hsv.h, hsv.s, hsv.v);
+    let rgb = _hex2rgb(color_hex );
     color.setRGB( rgb.r/255, rgb.g/255, rgb.b/255 );
-
 
     let alpha = 1;
 
@@ -2720,6 +2636,36 @@ function render_n() {
     g_info.mesh.rotation.z = 0;
     g_info.mesh.applyMatrix4(m);
 
+    /*
+    for (let ii=0; ii<g_info.mesha.length; ii++) {
+
+      //EXPERIMENTAL
+      //
+      let _di = ( ((ii%2) == 0) ? ((ii/2)+1) : ( -((ii-1)/2) - 1) );
+      //let _sz = 12.7;
+      let _sz = 15.6;
+      //let _sz = 17;
+      let _scale = 100;
+      //let mmov = m4.t2(0, 0, (ii+1)*(_sz*_scale));
+      let mmov = m4.t2(0, 0, _di*(_sz*_scale));
+      let mm = m4.multiply( mmov, mr );
+      let _m = new THREE.Matrix4();
+      _m.set( mm[ 0], mm[ 1], mm[ 2], mm[ 3],
+              mm[ 4], mm[ 5], mm[ 6], mm[ 7],
+              mm[ 8], mm[ 9], mm[10], mm[11],
+              mm[12], mm[13], mm[14], mm[15] );
+
+      g_info.mesha[ii].position.x = 0;
+      g_info.mesha[ii].position.y = 0;
+      g_info.mesha[ii].position.z = 0;
+      g_info.mesha[ii].rotation.x = 0;
+      g_info.mesha[ii].rotation.y = 0;
+      g_info.mesha[ii].rotation.z = 0;
+      g_info.mesha[ii].applyMatrix4(_m);
+
+    }
+    */
+
     for (let i=0; i<g_info.debug_cube.length; i++) {
       g_info.debug_cube[i].position.x = g_info.debug_cube_pos[i][0];
       g_info.debug_cube[i].position.y = g_info.debug_cube_pos[i][1];
@@ -2732,6 +2678,10 @@ function render_n() {
 
     }
   }
+
+  //g_info.tjs_line.rotation.x = g_info.rotx + theta_x;
+  //g_info.tjs_line.rotation.y = g_info.roty + theta_y;
+  //g_info.tjs_line.rotation.z = g_info.rotz;
 
   theta_x = Math.sin(time*0.5)*0.125;
   theta_y = time*0.5;
@@ -2835,8 +2785,8 @@ function render_z() {
     // effect
     //
     _t_rem = 0;
-    g_info.view_nxt = g_info.move_direction;
-    g_info.view_prv = g_info.move_direction;
+    g_info.view_nxt = 1;
+    g_info.view_prv = 1;
 
     let D = 4;
     //D = 1.75;
@@ -2900,21 +2850,10 @@ function render_z() {
     let mrp = m4.multiply(mp1, mp0);
     let mrn = m4.multiply(mn1, mn0);
 
-    //let _sz_z = g_info.grid_size;
-    let _sz_z = g_info.data.grid.length;
-
     g_info.t_mov += g_info.t_mov_ds;
-
-    // take mesh falling off of one size and reposition at the other
-    //
-
-    //if (Math.abs(g_info.t_mov) > (g_info.grid_size*g_info.tri_scale)) {
-    if (Math.abs(g_info.t_mov) > (_sz_z*g_info.tri_scale)) {
+    if (Math.abs(g_info.t_mov) > (g_info.grid_size*g_info.tri_scale)) {
       let _df = ((g_info.t_mov_ds < 0) ? -1 : 1);
-      //g_info.t_mov -= (_df*g_info.grid_size*g_info.tri_scale);
-      g_info.t_mov -= (_df*_sz_z*g_info.tri_scale);
-
-      console.log("BANG");
+      g_info.t_mov -= (_df*g_info.grid_size*g_info.tri_scale);
     }
 
     g_info.t_rot += (1/8192)*Math.PI;
@@ -2943,12 +2882,16 @@ function render_z() {
 
     for (let ii=0; ii<g_info.mesha.length; ii++) {
 
-      // map whole numbers to Z / {0}
+      //EXPERIMENTAL
       //
       let _di = ( ((ii%2) == 0) ? ((ii/2)+1) : ( -((ii-1)/2) - 1) );
-
+      //let _sz = 12.7;
+      let _sz = g_info.grid_size;
+      //let _sz = 17;
       let _scale = g_info.tri_scale;
-      let mmov = m4.t2(0, 0, _di*(_sz_z*_scale));
+      //let _scale = 100;
+      //let mmov = m4.t2(0, 0, (ii+1)*(_sz*_scale));
+      let mmov = m4.t2(0, 0, _di*(_sz*_scale));
       let mm = m4.multiply( mmov, mr );
       let _m = new THREE.Matrix4();
       _m.set( mm[ 0], mm[ 1], mm[ 2], mm[ 3],
@@ -3020,8 +2963,7 @@ function render_loading() {
     let lbg = g_info.loading_line_bg;
 
     let n = line_color.length/3;
-    //let alpha = 2*g_info.data.wfc_iter / (g_info.grid_size*g_info.grid_size*g_info.grid_size);
-    let alpha = 2*g_info.data.wfc_iter / (g_info.grid_size[0]*g_info.grid_size[1]*g_info.grid_size[2]);
+    let alpha = 2*g_info.data.wfc_iter / (g_info.grid_size*g_info.grid_size*g_info.grid_size);
     let m = Math.floor(alpha*n);
     if (m>n) { m=n; }
     if (m<0) { m=0; }
@@ -3095,8 +3037,7 @@ function render() {
     g_info.camera.scale.x = 0.5;
     g_info.camera.scale.y = 0.5;
 
-    //let _s = g_info.tri_scale * g_info.grid_size ;
-    let _s = g_info.tri_scale * g_info.max_grid_size ;
+    let _s = g_info.tri_scale * g_info.grid_size ;
     let _mdx = -g_info.mouse_x * _s,
         _mdy = -g_info.mouse_y * _s;
 
@@ -3133,9 +3074,6 @@ function render() {
 
 function init_param() {
 
-  g_info.move_direction = _irnd(3);
-  g_info.features["Orientation"] = g_info.move_direction;
-
   // palette choice
   //
   g_info.palette_idx = _irnd( g_info.palette.length );
@@ -3165,12 +3103,8 @@ function init_param() {
   let grid_weight = g_info.grid_weight;
   let grid_pd = weight2pd(grid_weight);
 
-  g_info.grid_size = [
-    parseInt(rnd_cdf(grid_pd.cdf)),
-    parseInt(rnd_cdf(grid_pd.cdf)),
-    parseInt(rnd_cdf(grid_pd.cdf))
-  ];
-  g_info.features["Grid Size"] = g_info.grid_size.toString();
+  g_info.grid_size = rnd_cdf(grid_pd.cdf);
+  g_info.features["Grid Size"] = g_info.grid_size;
 
   //--
 
@@ -3267,15 +3201,6 @@ function init_param() {
   //--
 
   window.$fxhashFeatures = g_info.features;
-
-
-
-  // EXPERIMENT
-
-  //g_info.move_direction = 1;
-  //g_info.boundary_condition = 'n';
-
-
 }
 
 function _template_rot_mov(tplate, rx, ry, rz, tx, ty, tz) {
@@ -5148,19 +5073,8 @@ function realize_grid_defer(cb, data) {
   init_template();
   _build_tile_library( g_template.endpoint );
 
-  //let M = g_info.grid_size;
-  //let pgr = init_pgr([M,M,M]);
-  let pgr = init_pgr(g_info.grid_size);
-
-  // EXPERIMENT
-  //
-  //pgr = init_pgr([8,16,16]);
-  //pgr_blank(pgr, 0, 3, 3, 9, 3, 3);
-  //pgr_blank(pgr, 3, 0, 9, 3, 9, 3);
-  //pgr_blank(pgr, 0, 0, 0, 4, 4, 4);
-  //pgr_blank(pgr, 0, 12, 8, 4, 4, 4);
-  //
-  // EXPERIMENT
+  let M = g_info.grid_size;
+  let pgr = init_pgr([M,M,M]);
 
   g_info.data["pgr"] = pgr;
   _ret = grid_cull_boundary(pgr);
@@ -5188,8 +5102,7 @@ function realize_grid_defer_fin() {
   g_info["_stat"] = _stat;
 
   let filt_group = {};
-  //let thresh = g_info.grid_size;
-  let thresh = g_info.grid_size[0];
+  let thresh = g_info.grid_size;
   for (let group_name in _stat.group_size) {
     if (_stat.group_size[group_name] < thresh) {
       filt_group[group_name] = true;
@@ -5231,11 +5144,9 @@ function _realize_grid() {
 
   //---
 
-  //let M = g_info.grid_size;
-  //let pgr = init_pgr([M,M,M]);
-  let pgr = init_pgr(g_info.grid_ize);
+  let M = g_info.grid_size;
+  let pgr = init_pgr([M,M,M]);
 
-  /*
   let S=4;
   let T=4;
   S=T=0;
@@ -5247,7 +5158,6 @@ function _realize_grid() {
     pgr_blank(pgr, T, 0, T, M-2*T, M, M-2*T);
     pgr_blank(pgr, 0, T, T, M, M-2*T, M-2*T);
   }
-  */
 
   g_info.data["pgr"] = pgr;
   g_info.data.wfc_grid = pgr;
@@ -5275,8 +5185,7 @@ function _realize_grid() {
 
 
   let filt_group = {};
-  //let thresh = M;
-  let thresh = g_info.grid_size[0];
+  let thresh = M;
   for (let group_name in _stat.group_size) {
     if (_stat.group_size[group_name] < thresh) {
       filt_group[group_name] = true;
@@ -5309,9 +5218,7 @@ function realize_tri_from_grid(gr, pgr, show_debug) {
   g_info.data.tri = [];
   g_info.data.tri_color_idx = [];
 
-  let Mz = gr.length,
-      My = gr[0].length,
-      Mx = gr[0][0].length;
+  let M = gr.length;
   let S = 1;
   let tx = g_info.cx,
       ty = g_info.cy,
@@ -5319,9 +5226,9 @@ function realize_tri_from_grid(gr, pgr, show_debug) {
 
   let n = gr.length;
 
-  tx = -S*((Mx-1)/2);
-  ty = -S*((My-1)/2);
-  tz = -S*((Mz-1)/2);
+  tx = -S*((M-1)/2);
+  ty = -S*((M-1)/2);
+  tz = -S*((M-1)/2);
 
   color_idx=0;
 
@@ -5494,6 +5401,25 @@ function palette_load(pal_idx) {
 
   }
 
+  //g_info.palette_choice.colors = [ '#524582', '#367bc3', '#38bfa7', '#8fe1a2' ];
+
+  // EXPERIMENT
+  /*
+  let pal = g_info.palette_choice.colors;
+  for (let ii=0; ii<pal.length; ii++) {
+    let _rgb = _hex2rgb( pal[ii] );
+    let b = _brightness( _rgb.r, _rgb.g, _rgb.b );
+    let rgb = [ _rgb.r, _rgb.g, _rgb.b ];
+    if ( _brightness( rgb[0], rgb[1], rgb[2]) < 0.015) {
+      let dc = 10;
+      pal[ii] = _rgb2hex( rgb[0]+dc, rgb[1]+dc, rgb[2]+dc );
+    }
+  }
+  */
+
+  //g_info.bg_color = '#fefefe';
+
+  //init_fin();
 }
 
 
@@ -5523,25 +5449,11 @@ function init_beg() {
   let _F = ((_wh < _ww) ? (1.25*_wh) : (2*_ww));
   //_F = _wh;
 
-  let maxdim = g_info.grid_size[0];
-  if (g_info.grid_size[1] > maxdim) { maxdim = g_info.grid_size[1]; }
-  if (g_info.grid_size[2] > maxdim) { maxdim = g_info.grid_size[2]; }
-
-  g_info.max_grid_size = maxdim;
-
-  let _a = g_info.grid_size[0],
-      _b = g_info.grid_size[1],
-      _c = g_info.grid_size[2];
-
-  g_info.max_grid_size = (_a+_b+_c)/3;
-  //g_info.max_grid_size = Math.pow(_a*_b*_c, 1/3);
-  maxdim = g_info.max_grid_size;
-
   //g_info.tri_scale = 1 + Math.ceil( 1.5*_F / g_info.grid_size );
   //g_info.tri_scale = 1 + Math.ceil( 1.25*_F / g_info.grid_size );
   //g_info.tri_scale = Math.ceil( 1.25*_F / g_info.grid_size );
-  //g_info.tri_scale = Math.ceil( _F / g_info.grid_size );
-  g_info.tri_scale = Math.ceil( _F / maxdim );
+  g_info.tri_scale = Math.ceil( _F / g_info.grid_size );
+
 
   welcome();
 
