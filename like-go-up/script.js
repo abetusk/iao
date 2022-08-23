@@ -45,7 +45,7 @@ var g_info = {
 
   "quiet":false,
   "grid_size": [8,8,8],
-  "max_grid_size": 8,
+  "avg_grid_size": 8,
 
   "boundary_condition": "z",
 
@@ -124,9 +124,17 @@ var g_info = {
     {"name":"dt08","colors":["#5d9d88","#ebb43b"],"stroke":"#efebda","background":"#efebda"},
     {"name":"dt12","colors":["#f5f2d3"],"stroke":"#073c5c","background":"#c0d0c3"},
     {"name":"dt13","colors":["#f5f2d3","#f5f2d3","#fbd6b8"],"stroke":"#ec5525","background":"#ec5525"},
+		{"name":"ducci_a","colors":["#809498","#d3990e","#000000","#ecddc5"],"stroke":"#ecddc5","background":"#863f52"},
     {"name":"ducci_b","colors":["#ecddc5","#79b27b","#000000","#ac6548"],"stroke":"#ac6548","background":"#d5c08e"},
+		{"name":"ducci_d","colors":["#f3cb4d","#f2f5e3","#20191b","#67875c"],"stroke":"#67875c","background":"#433d5f"},
+		{"name":"ducci_f","colors":["#596f7e","#eae6c7","#463c21","#f4cb4c"],"stroke":"#f4cb4c","background":"#e67300"},
     {"name":"ducci_g","colors":["#c75669","#000000","#11706a"],"stroke":"#11706a","background":"#ecddc5"},
+		{"name":"ducci_h","colors":["#6b5c6e","#4a2839","#d9574a"],"stroke":"#d9574a","background":"#ffc34b"},
+		{"name":"ducci_i","colors":["#e9dcad","#143331","#ffc000"],"stroke":"#ffc000","background":"#a74c02"},
+		{"name":"ducci_jb","colors":["#395e54","#e77b4d","#050006","#e55486"],"stroke":"#050006","background":"#efe0bc"},
     {"name":"ducci_q","colors":["#4bae8c","#d0c1a0","#2d3538"],"stroke":"#2d3538","background":"#d06440"},
+		{"name":"ducci_u","colors":["#f6d700","#f2d692","#000000","#5d3552"],"stroke":"#5d3552","background":"#ff7426"},
+		{"name":"ducci_x","colors":["#dd614a","#f5cedb","#1a1e4f"],"stroke":"#1a1e4f","background":"#fbb900"},
     {"name":"exposito","colors":["#8bc9c3","#ffae43","#ea432c","#228345","#d1d7d3","#524e9c","#9dc35e","#f0a1a1"],"stroke":"#fff","background":"#000000"},
     {"name":"exposito_sub1","colors":["#8bc9c3","#ffae43","#ea432c","#524e9c"],"stroke":"#fff","background":"#000000"},
     {"name":"exposito_sub2","colors":["#8bc9c3","#ffae43","#ea432c","#524e9c","#f0a1a1","#228345"],"stroke":"#fff","background":"#000000"},
@@ -159,60 +167,20 @@ var g_info = {
   ],
 
 
+  /*
   "_palette": [
-    { 
-      "name" : "monochrome",
-      "colors" : [ "#111111", "#eeeeee" ],
-      "background": "#777777"
-    }
+    { "name" : "monochrome", "colors" : [ "#111111", "#eeeeee" ], "background": "#777777" }
   ],
 
   "__palette": [
-    { 
-      "name": "yuma_punk",
-      "colors": ["#f05e3b", "#ebdec4", "#ffdb00"],
-      "stroke": "#ebdec4",
-      "background": "#161616"
-    },
-
-    { 
-      "name": "juxtapoz",
-      "colors": ["#20357e", "#f44242", "#ffffff"],
-      "stroke": "#000000",
-      "background": "#cfc398"
-    },
-
-
-    { 
-      "name": "ducci_i",
-      "colors": ["#e9dcad", "#143331", "#ffc000"],
-      "stroke": "#ffc000",
-      "background": "#a74c02"
-    },
-
-
-    { 
-      "name": "ducci_j",
-      //"colors": ["#c47c2b", "#5f5726", "#000000", "#7e8a84"],
-      "colors": ["#c47c2b", "#5f5726", "#1e1e1e", "#7e8a84"],
-      "stroke": "#7e8a84",
-      "background": "#ecddc5"
-    },
-    {  
-      "name": "dt03",
-      //"colors": ["#000000", "#a7a7a7"],
-      "colors": ["#222222", "#a7a7a7"],
-      "stroke": "#000000",
-      "background": "#0a5e78"
-    },
-
-    { 
-      "name" : "monochrome",
-      "colors" : [ "#111111", "#eeeeee" ],
-      "background": "#777777"
-    }
-
+    { "name": "yuma_punk", "colors": ["#f05e3b", "#ebdec4", "#ffdb00"], "stroke": "#ebdec4", "background": "#161616" },
+    { "name": "juxtapoz", "colors": ["#20357e", "#f44242", "#ffffff"], "stroke": "#000000", "background": "#cfc398" },
+    { "name": "ducci_i", "colors": ["#e9dcad", "#143331", "#ffc000"], "stroke": "#ffc000", "background": "#a74c02" },
+    { "name": "ducci_j", "colors": ["#c47c2b", "#5f5726", "#1e1e1e", "#7e8a84"], "stroke": "#7e8a84", "background": "#ecddc5" },
+    {  "name": "dt03", "colors": ["#222222", "#a7a7a7"], "stroke": "#000000", "background": "#0a5e78" },
+    { "name" : "monochrome", "colors" : [ "#111111", "#eeeeee" ], "background": "#777777" }
   ],
+  */
 
   "palette_idx": -1,
   "inverted_bg": false,
@@ -2031,13 +1999,13 @@ function threejs_init() {
 
   //let _ldist = 4*g_info.tri_scale * g_info.grid_size;
   //let _ldist = 2*g_info.tri_scale * g_info.grid_size;
-  let _ldist = 2*g_info.tri_scale * g_info.max_grid_size;
+  let _ldist = 2*g_info.tri_scale * g_info.avg_grid_size;
 
   //let ds = [1600,1600,3200];
   //let ds = [800,800,800];
   //let ds = [200,200,1000];
   //let _B = g_info.tri_scale * g_info.grid_size;
-  let _B = g_info.tri_scale * g_info.max_grid_size;
+  let _B = g_info.tri_scale * g_info.avg_grid_size;
   //let ds = [ 2*_B, 2*_B, 2*_B ];
   let ds = [ _B, _B, _B ];
 
@@ -2232,14 +2200,11 @@ function threejs_scene_init() {
     color_idx = g_info.data.tri_color_idx[idx] % pal.colors.length;
     let color_hex = pal.colors[ color_idx ];
 
-    //DEBUG
-    //color_hex = '#ffffff';
-
     let rgb = _hex2rgb(color_hex);
-    //color.setRGB( rgb.r/255, rgb.g/255, rgb.b/255 );
+    color.setRGB( rgb.r/255, rgb.g/255, rgb.b/255 );
 
+    /*
     let hsv = RGBtoHSV(rgb.r, rgb.g, rgb.b);
-
     hsv.s += (fxrand()-0.5)/12;
     hsv.v += (fxrand()-0.5)/12;
     if (hsv.s<0){ hsv.s = 0; }
@@ -2248,6 +2213,7 @@ function threejs_scene_init() {
     if (hsv.v>1){ hsv.v = 1; }
     rgb = HSVtoRGB(hsv.h, hsv.s, hsv.v);
     color.setRGB( rgb.r/255, rgb.g/255, rgb.b/255 );
+    */
 
 
     let alpha = 1;
@@ -3096,7 +3062,7 @@ function render() {
     g_info.camera.scale.y = 0.5;
 
     //let _s = g_info.tri_scale * g_info.grid_size ;
-    let _s = g_info.tri_scale * g_info.max_grid_size ;
+    let _s = g_info.tri_scale * g_info.avg_grid_size ;
     let _mdx = -g_info.mouse_x * _s,
         _mdy = -g_info.mouse_y * _s;
 
@@ -3133,9 +3099,6 @@ function render() {
 
 function init_param() {
 
-  g_info.move_direction = _irnd(3);
-  g_info.features["Orientation"] = g_info.move_direction;
-
   // palette choice
   //
   g_info.palette_idx = _irnd( g_info.palette.length );
@@ -3149,7 +3112,8 @@ function init_param() {
   //
   let new_pal = [];
   for (let ii=0; ii<g_info.palette_choice.colors.length; ii++) {
-    if (g_info.palette_choice.colors[ii] == '#000000') {
+    //if (g_info.palette_choice.colors[ii] == '#000000') {
+    if (_hex_brightness(g_info.palette_choice.colors[ii]) < 0.01) {
       console.log("REMOVING:", ii, g_info.palette_choice.name);
       continue;
     }
@@ -3185,6 +3149,10 @@ function init_param() {
 
     g_info.t_mov_ds = ((fxrand() < 0.5) ? (-0.5) : 0.5);
     g_info.features["Direction"] = ((g_info.t_mov_ds < 0) ? "Falling" : "Rising");
+
+		g_info.move_direction = _irnd(2);
+		g_info.features["Orientation"] = g_info.move_direction;
+
   }
 
   //---
@@ -5527,15 +5495,15 @@ function init_beg() {
   if (g_info.grid_size[1] > maxdim) { maxdim = g_info.grid_size[1]; }
   if (g_info.grid_size[2] > maxdim) { maxdim = g_info.grid_size[2]; }
 
-  g_info.max_grid_size = maxdim;
+  g_info.avg_grid_size = maxdim;
 
   let _a = g_info.grid_size[0],
       _b = g_info.grid_size[1],
       _c = g_info.grid_size[2];
 
-  g_info.max_grid_size = (_a+_b+_c)/3;
-  //g_info.max_grid_size = Math.pow(_a*_b*_c, 1/3);
-  maxdim = g_info.max_grid_size;
+  g_info.avg_grid_size = (_a+_b+_c)/3;
+  //g_info.avg_grid_size = Math.pow(_a*_b*_c, 1/3);
+  maxdim = g_info.avg_grid_size;
 
   //g_info.tri_scale = 1 + Math.ceil( 1.5*_F / g_info.grid_size );
   //g_info.tri_scale = 1 + Math.ceil( 1.25*_F / g_info.grid_size );
