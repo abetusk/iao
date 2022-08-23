@@ -2,7 +2,7 @@ Like Go Up
 ===
 
 
-[![Like Go Up](../img/....png)](https://abetusk.github.io/iao/like-go-up)
+[![Like Go Up](../img/like_go_up_0.png)](https://abetusk.github.io/iao/like-go-up)
 
 [Live](https://abetusk.github.io/iao/like-go-up/)
 
@@ -27,8 +27,6 @@ Short Statement
 s - Screenshot (PNG)
 
 a - Animation (5s, webm) (advanced use)
-
-p - Pause animation
 
 To the extent possible, the source code is dedicated to the public domain (CC0) and can be used for any purpose, even commercial, by anyone. All third party libraries used are libre/free. Please check individual files for their respective licenses.
 
