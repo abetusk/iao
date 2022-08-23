@@ -111,7 +111,6 @@ var g_info = {
     {"name":"butterfly","colors":["#f40104","#f6c0b3","#99673a","#f0f1f4"],"stroke":"#191e36","background":"#191e36"},
     {"name":"kov_03","colors":["#e3937b","#d93f1d","#090d15","#e6cca7"],"stroke":"#090d15","background":"#558947"},
     {"name":"kov_06b","colors":["#d57846","#dfe0cc","#de442f","#e7d3c5","#5ec227","#302f35","#63bdb3"],"stroke":"#292319","background":"#dfd4c1"},
-    {"name":"mayo1","colors":["#ea510e","#ffd203","#0255a3","#039177","#111111"],"stroke":"#111111","background":"#fff"},
     {"name":"tundra1","colors":["#40708c","#8e998c","#5d3f37","#ed6954","#f2e9e2"]},
     {"name":"tundra4","colors":["#d53939","#b6754d","#a88d5f","#524643","#3c5a53","#7d8c7c","#dad6cd"]},
     {"name":"dt01","colors":["#172a89","#f7f7f3"],"stroke":"#172a89","background":"#f3abb0"},
@@ -3127,7 +3126,8 @@ function init_param() {
   let width_pd = weight2pd( g_info.tile_width_denom_weight );
   let width_d = rnd_cdf(width_pd.cdf);
   g_info.tile_width = 1 / width_d;
-  g_info.features["Tile Width"] = g_info.tile_width;
+  //g_info.features["Tile Width"] = g_info.tile_width;
+  g_info.features["Tile Width"] = "1/" + width_d.toString();
 
   let _gh_weight = {};
   for (let key in g_info.tile_height_denom_weight) {
@@ -3138,7 +3138,8 @@ function init_param() {
   let height_pd = weight2pd( _gh_weight );
   let height_d = rnd_cdf(height_pd.cdf);
   g_info.tile_height = 1/height_d;
-  g_info.features["Tile Height"] = g_info.tile_height;
+  //g_info.features["Tile Height"] = g_info.tile_height;
+  g_info.features["Tile Height"] = "1/" + height_d.toString();
 
   //--
 
