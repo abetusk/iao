@@ -1833,8 +1833,8 @@ function threejs_init() {
 
     // SHADOW
     //
-    let shadow = true;
-    if (shadow) {
+    let use_shadow = true;
+    if (use_shadow) {
 
       let sdim = 1024;
 
@@ -1843,20 +1843,34 @@ function threejs_init() {
       g_info.light[0].shadow.camera.near  = -1000;
       g_info.light[0].shadow.camera.far   =  1000;
 
-      g_info.light[0].shadow.camera.near  = -1000;
-      g_info.light[0].shadow.camera.far   =  4000;
+      g_info.light[0].shadow.camera.near  = -2048;
+      g_info.light[0].shadow.camera.far   =  2048;
 
       g_info.light[0].shadow.camera.top    = -sdim;
       g_info.light[0].shadow.camera.bottom =  sdim;
-
       g_info.light[0].shadow.camera.left  = -sdim;
       g_info.light[0].shadow.camera.right =  sdim;
+
+      /*
+      g_info.light[0].shadow.camera.top    =  sdim;
+      g_info.light[0].shadow.camera.bottom = -sdim;
+      g_info.light[0].shadow.camera.left  =  sdim;
+      g_info.light[0].shadow.camera.right = -sdim;
+      */
 
       g_info.light[0].shadow.mapSize.width = 2048;
       g_info.light[0].shadow.mapSize.height = 2048;
 
-      g_info.light[0].shadow.radius = 4;
+      //g_info.light[0].shadow.mapSize.width = 4096;
+      //g_info.light[0].shadow.mapSize.height = 4096;
+
+      //g_info.light[0].shadow.radius = 4;
+      //g_info.light[0].shadow.radius = 8;
+      //g_info.light[0].shadow.radius = 16;
+      //g_info.light[0].shadow.radius = 16;
       g_info.light[0].shadow.bias = -0.0005;
+      g_info.light[0].shadow.bias = -0.05;
+      g_info.light[0].shadow.bias = -0.005;
 
       //g_info.light[0].shadow.bias = 1;
 
@@ -2061,10 +2075,6 @@ function threejs_init() {
   for (let ii=0; ii<pld.length; ii++) {
     point_light.push(new THREE.PointLight( plc[ii], pli[ii], plld[ii], 2));
     point_light[ii].position.set( pld[ii][0], pld[ii][1], pld[ii][2] );
-
-    //EXPERIMENT
-    //point_light[ii].castShadow = true;
-
     g_info.scene.add( point_light[ii] );
   }
 
@@ -2317,8 +2327,8 @@ function threejs_scene_init() {
   //SHADOW
   g_info.renderer.shadowMap.enabled = true;
   //g_info.renderer.shadowMap.type = THREE.VSMShadowMap;
-  //g_info.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-  g_info.renderer.shadowMap.type = THREE.PCFShadowMap;
+  g_info.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  //g_info.renderer.shadowMap.type = THREE.PCFShadowMap;
 
 
   //---
@@ -2371,8 +2381,14 @@ function threejs_scene_init() {
   //
   if (g_info.boundary_condition != 'n') {
     for (let ii=0; ii<g_info.meshN; ii++) {
-      g_info.mesha.push( new THREE.Mesh( g_info.geometry, g_info.material ) );
-      g_info.scene.add( g_info.mesha[ii] );
+      let _msh = new THREE.Mesh( g_info.geometry, g_info.material );
+
+      _msh.castShadow = true;
+      _msh.receiveShadow = true;
+
+      g_info.mesha.push( _msh );
+      g_info.scene.add( _msh );
+      //g_info.scene.add( g_info.mesha[ii] );
     }
   }
 
@@ -3259,8 +3275,8 @@ function init_param() {
 
 
   // VANITY
-  g_info.move_direction = 1;
-  g_info.boundary_condition = 'n';
+  //g_info.move_direction = 1;
+  //g_info.boundary_condition = 'n';
 }
 
 function _template_rot_mov(tplate, rx, ry, rz, tx, ty, tz) {
