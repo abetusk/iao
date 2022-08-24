@@ -1928,7 +1928,7 @@ function threejs_init() {
     let use_bloom = true;
     if (use_bloom) {
       let bloom_opt = {
-        "intensity": 0.5,
+        "intensity": 0.25,
         "kernelSize": 2
       };
 
@@ -1998,7 +1998,8 @@ function threejs_init() {
   //let intensity_range = 3.75;
   //let intensity_max = 4;
 
-  let I = 0.125;
+  //let I = 0.125;
+  let I = 1/16;
   let intensity_max_val = [ 4,4,4,4, 4,3,2,2,1.5];
   intensity_max_val = [ I,I,I,I ];
 
@@ -2771,8 +2772,8 @@ function render_n() {
     let _z = Math.cos(p2*_a)*Math.sin(p3*_a);
 
     //EXPERIMENTAL
-    _y -= 1;
-    _z += 2;
+    //_y -= 1;
+    //_z += 2;
 
     //_x = g_info.light_position_x;
     //_y = g_info.light_position_y;
@@ -3034,8 +3035,8 @@ function render_z() {
     let _z = Math.cos(p2*_a)*Math.sin(p3*_a);
 
     //EXPERIMENTAL
-    _y -= 1;
-    _z += 2;
+    //_y -= 1;
+    //_z += 2;
 
     //_x = g_info.light_position_x;
     //_y = g_info.light_position_y;
@@ -5548,7 +5549,13 @@ function init_beg() {
       _b = g_info.grid_size[1],
       _c = g_info.grid_size[2];
   g_info.avg_grid_size = p_norm( [_a,_b,_c], 0.125 );
+
+  //EXPERIMENTAL
+  //g_info.avg_grid_size *= .95;
+
   g_info.tri_scale = Math.ceil( _F / g_info.avg_grid_size );
+
+
 
   //---
 
