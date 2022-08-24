@@ -124,17 +124,17 @@ var g_info = {
     {"name":"dt08","colors":["#5d9d88","#ebb43b"],"stroke":"#efebda","background":"#efebda"},
     {"name":"dt12","colors":["#f5f2d3"],"stroke":"#073c5c","background":"#c0d0c3"},
     {"name":"dt13","colors":["#f5f2d3","#f5f2d3","#fbd6b8"],"stroke":"#ec5525","background":"#ec5525"},
-		{"name":"ducci_a","colors":["#809498","#d3990e","#000000","#ecddc5"],"stroke":"#ecddc5","background":"#863f52"},
+    {"name":"ducci_a","colors":["#809498","#d3990e","#000000","#ecddc5"],"stroke":"#ecddc5","background":"#863f52"},
     {"name":"ducci_b","colors":["#ecddc5","#79b27b","#000000","#ac6548"],"stroke":"#ac6548","background":"#d5c08e"},
-		{"name":"ducci_d","colors":["#f3cb4d","#f2f5e3","#20191b","#67875c"],"stroke":"#67875c","background":"#433d5f"},
-		{"name":"ducci_f","colors":["#596f7e","#eae6c7","#463c21","#f4cb4c"],"stroke":"#f4cb4c","background":"#e67300"},
+    {"name":"ducci_d","colors":["#f3cb4d","#f2f5e3","#20191b","#67875c"],"stroke":"#67875c","background":"#433d5f"},
+    {"name":"ducci_f","colors":["#596f7e","#eae6c7","#463c21","#f4cb4c"],"stroke":"#f4cb4c","background":"#e67300"},
     {"name":"ducci_g","colors":["#c75669","#000000","#11706a"],"stroke":"#11706a","background":"#ecddc5"},
-		{"name":"ducci_h","colors":["#6b5c6e","#4a2839","#d9574a"],"stroke":"#d9574a","background":"#ffc34b"},
-		{"name":"ducci_i","colors":["#e9dcad","#143331","#ffc000"],"stroke":"#ffc000","background":"#a74c02"},
-		{"name":"ducci_jb","colors":["#395e54","#e77b4d","#050006","#e55486"],"stroke":"#050006","background":"#efe0bc"},
+    {"name":"ducci_h","colors":["#6b5c6e","#4a2839","#d9574a"],"stroke":"#d9574a","background":"#ffc34b"},
+    {"name":"ducci_i","colors":["#e9dcad","#143331","#ffc000"],"stroke":"#ffc000","background":"#a74c02"},
+    {"name":"ducci_jb","colors":["#395e54","#e77b4d","#050006","#e55486"],"stroke":"#050006","background":"#efe0bc"},
     {"name":"ducci_q","colors":["#4bae8c","#d0c1a0","#2d3538"],"stroke":"#2d3538","background":"#d06440"},
-		{"name":"ducci_u","colors":["#f6d700","#f2d692","#000000","#5d3552"],"stroke":"#5d3552","background":"#ff7426"},
-		{"name":"ducci_x","colors":["#dd614a","#f5cedb","#1a1e4f"],"stroke":"#1a1e4f","background":"#fbb900"},
+    {"name":"ducci_u","colors":["#f6d700","#f2d692","#000000","#5d3552"],"stroke":"#5d3552","background":"#ff7426"},
+    {"name":"ducci_x","colors":["#dd614a","#f5cedb","#1a1e4f"],"stroke":"#1a1e4f","background":"#fbb900"},
     {"name":"exposito","colors":["#8bc9c3","#ffae43","#ea432c","#228345","#d1d7d3","#524e9c","#9dc35e","#f0a1a1"],"stroke":"#fff","background":"#000000"},
     {"name":"exposito_sub1","colors":["#8bc9c3","#ffae43","#ea432c","#524e9c"],"stroke":"#fff","background":"#000000"},
     {"name":"exposito_sub2","colors":["#8bc9c3","#ffae43","#ea432c","#524e9c","#f0a1a1","#228345"],"stroke":"#fff","background":"#000000"},
@@ -193,8 +193,8 @@ var g_info = {
   "move_direction": 0,
 
   "speed_factor" : 1/(2*4096),
-  //"light_speed_factor" : 1/(32),
-  "light_speed_factor" : 4,
+  "light_speed_factor" : 1,
+  //"light_speed_factor" : 32,
 
   "tile_width_denom_weight": {
     //"2": 1,
@@ -371,6 +371,15 @@ function rnd_cdf(cdf, p) {
     }
   }
   return cdf[ cdf.length-1 ].key;
+}
+
+function p_norm(a,p) {
+  let n = a.length;
+  let s =0;
+  for (let ii=0; ii<n; ii++) {
+    s += Math.pow(parseInt(a[ii]), p)
+  }
+  return Math.pow(s/n, 1/p);
 }
 
 // the geometry for some of the more copmlex shapes is a little
@@ -1824,22 +1833,33 @@ function threejs_init() {
 
     // SHADOW
     //
-    let shadow = false;
+    let shadow = true;
     if (shadow) {
+
+      let sdim = 1024;
+
       g_info.light[0].castShadow = true;
+
       g_info.light[0].shadow.camera.near  = -1000;
       g_info.light[0].shadow.camera.far   =  1000;
-      g_info.light[0].shadow.camera.left  = -2500;
-      g_info.light[0].shadow.camera.right =  2500;
 
-      g_info.light[0].shadow.camera.top    =  2500;
-      g_info.light[0].shadow.camera.bottom = -2500;
+      g_info.light[0].shadow.camera.near  = -1000;
+      g_info.light[0].shadow.camera.far   =  4000;
 
-      g_info.light[0].shadow.mapSize.width = 512;
-      g_info.light[0].shadow.mapSize.height = 512;
+      g_info.light[0].shadow.camera.top    = -sdim;
+      g_info.light[0].shadow.camera.bottom =  sdim;
+
+      g_info.light[0].shadow.camera.left  = -sdim;
+      g_info.light[0].shadow.camera.right =  sdim;
+
+      g_info.light[0].shadow.mapSize.width = 2048;
+      g_info.light[0].shadow.mapSize.height = 2048;
 
       g_info.light[0].shadow.radius = 4;
       g_info.light[0].shadow.bias = -0.0005;
+
+      //g_info.light[0].shadow.bias = 1;
+
     }
 
     g_info.scene.add( g_info.light[0] );
@@ -2041,6 +2061,10 @@ function threejs_init() {
   for (let ii=0; ii<pld.length; ii++) {
     point_light.push(new THREE.PointLight( plc[ii], pli[ii], plld[ii], 2));
     point_light[ii].position.set( pld[ii][0], pld[ii][1], pld[ii][2] );
+
+    //EXPERIMENT
+    //point_light[ii].castShadow = true;
+
     g_info.scene.add( point_light[ii] );
   }
 
@@ -2291,8 +2315,10 @@ function threejs_scene_init() {
   */
 
   //SHADOW
-  //g_info.renderer.shadowMap.enabled = true;
+  g_info.renderer.shadowMap.enabled = true;
   //g_info.renderer.shadowMap.type = THREE.VSMShadowMap;
+  //g_info.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  g_info.renderer.shadowMap.type = THREE.PCFShadowMap;
 
 
   //---
@@ -2335,8 +2361,9 @@ function threejs_scene_init() {
   g_info.mesh = new THREE.Mesh( g_info.geometry, g_info.material );
 
   //SHADOW
-  //g_info.mesh.castShadow = true;
-  //g_info.mesh.receiveShadow = true;
+  //EXPERIMENT
+  g_info.mesh.castShadow = true;
+  g_info.mesh.receiveShadow = true;
 
   g_info.scene.add( g_info.mesh );
 
@@ -2574,73 +2601,67 @@ function render_n() {
     else {
     }
 
-      let D = 4;
-      //D = 1.75;
-      //D = 1.387;
+    let D = 4;
+    //D = 1.75;
+    //D = 1.387;
 
-      if (view_prv == 0) {
-        mp0 = m4.xRotation((1-_t_rem)*Math.PI/D);
-        mp1 = m4.yRotation((1-_t_rem)*Math.PI/D);
-      }
+    if (view_prv == 0) {
+      mp0 = m4.xRotation((1-_t_rem)*Math.PI/D);
+      mp1 = m4.yRotation((1-_t_rem)*Math.PI/D);
+    }
 
-    //!!!!
-      else if (view_prv == 1) {
-        mp0 = m4.xRotation((1-_t_rem)*Math.PI/D);
-        mp1 = m4.zRotation((1-_t_rem)*Math.PI/D);
-      }
+    else if (view_prv == 1) {
+      mp0 = m4.xRotation((1-_t_rem)*Math.PI/D);
+      mp1 = m4.zRotation((1-_t_rem)*Math.PI/D);
+    }
 
-      else if (view_prv == 2) {
-        mp0 = m4.yRotation((1-_t_rem)*Math.PI/D);
-        mp1 = m4.zRotation((1-_t_rem)*Math.PI/D);
-      }
+    else if (view_prv == 2) {
+      mp0 = m4.yRotation((1-_t_rem)*Math.PI/D);
+      mp1 = m4.zRotation((1-_t_rem)*Math.PI/D);
+    }
 
-      else if (view_prv == 3) {
-        mp0 = m4.xRotation((_t_rem)*Math.PI/D);
-        mp1 = m4.yRotation((1-_t_rem)*Math.PI/D);
-      }
-      else if (view_prv == 4) {
-        mp0 = m4.xRotation((_t_rem)*Math.PI/D);
-        mp1 = m4.zRotation((1-_t_rem)*Math.PI/D);
-      }
-      else if (view_prv == 5) {
-        mp0 = m4.yRotation((_t_rem)*Math.PI/D);
-        mp1 = m4.zRotation((1-_t_rem)*Math.PI/D);
-      }
+    else if (view_prv == 3) {
+      mp0 = m4.xRotation((_t_rem)*Math.PI/D);
+      mp1 = m4.yRotation((1-_t_rem)*Math.PI/D);
+    }
+    else if (view_prv == 4) {
+      mp0 = m4.xRotation((_t_rem)*Math.PI/D);
+      mp1 = m4.zRotation((1-_t_rem)*Math.PI/D);
+    }
+    else if (view_prv == 5) {
+      mp0 = m4.yRotation((_t_rem)*Math.PI/D);
+      mp1 = m4.zRotation((1-_t_rem)*Math.PI/D);
+    }
 
-      
-      if (view_nxt == 0 ) {
-        mn0 = m4.xRotation(_t_rem*Math.PI/D);
-        mn1 = m4.yRotation(_t_rem*Math.PI/D);
-      }
-      else if (view_nxt == 1) {
-        mn0 = m4.xRotation((_t_rem)*Math.PI/D);
-        mn1 = m4.zRotation((_t_rem)*Math.PI/D);
-      }
-      else if (view_nxt == 2) {
-        mn0 = m4.yRotation((_t_rem)*Math.PI/D);
-        mn1 = m4.zRotation((_t_rem)*Math.PI/D);
-      }
+    
+    if (view_nxt == 0 ) {
+      mn0 = m4.xRotation(_t_rem*Math.PI/D);
+      mn1 = m4.yRotation(_t_rem*Math.PI/D);
+    }
+    else if (view_nxt == 1) {
+      mn0 = m4.xRotation((_t_rem)*Math.PI/D);
+      mn1 = m4.zRotation((_t_rem)*Math.PI/D);
+    }
+    else if (view_nxt == 2) {
+      mn0 = m4.yRotation((_t_rem)*Math.PI/D);
+      mn1 = m4.zRotation((_t_rem)*Math.PI/D);
+    }
 
-      else if (view_nxt == 3) {
-        mp0 = m4.xRotation((1-_t_rem)*Math.PI/D);
-        mp1 = m4.yRotation((_t_rem)*Math.PI/D);
-      }
-      else if (view_nxt == 4) {
-        mp0 = m4.xRotation((1-_t_rem)*Math.PI/D);
-        mp1 = m4.zRotation((_t_rem)*Math.PI/D);
-      }
-      else if (view_nxt == 5) {
-        mp0 = m4.yRotation((1-_t_rem)*Math.PI/D);
-        mp1 = m4.zRotation((_t_rem)*Math.PI/D);
-      }
-
-    //}
+    else if (view_nxt == 3) {
+      mp0 = m4.xRotation((1-_t_rem)*Math.PI/D);
+      mp1 = m4.yRotation((_t_rem)*Math.PI/D);
+    }
+    else if (view_nxt == 4) {
+      mp0 = m4.xRotation((1-_t_rem)*Math.PI/D);
+      mp1 = m4.zRotation((_t_rem)*Math.PI/D);
+    }
+    else if (view_nxt == 5) {
+      mp0 = m4.yRotation((1-_t_rem)*Math.PI/D);
+      mp1 = m4.zRotation((_t_rem)*Math.PI/D);
+    }
 
     let mrp = m4.multiply(mp1, mp0);
     let mrn = m4.multiply(mn1, mn0);
-
-
-    //let mr = m4.multiply(mrp, mrn);
 
     g_info.t_mov += (1/2048);
     g_info.t_rot += (1/8192)*Math.PI;
@@ -3150,8 +3171,8 @@ function init_param() {
     g_info.t_mov_ds = ((fxrand() < 0.5) ? (-0.5) : 0.5);
     g_info.features["Direction"] = ((g_info.t_mov_ds < 0) ? "Falling" : "Rising");
 
-		g_info.move_direction = _irnd(2);
-		g_info.features["Orientation"] = g_info.move_direction;
+    g_info.move_direction = _irnd(2);
+    g_info.features["Orientation"] = g_info.move_direction;
 
   }
 
@@ -3237,13 +3258,9 @@ function init_param() {
   window.$fxhashFeatures = g_info.features;
 
 
-
-  // EXPERIMENT
-
-  //g_info.move_direction = 1;
-  //g_info.boundary_condition = 'n';
-
-
+  // VANITY
+  g_info.move_direction = 1;
+  g_info.boundary_condition = 'n';
 }
 
 function _template_rot_mov(tplate, rx, ry, rz, tx, ty, tz) {
@@ -3505,30 +3522,6 @@ function _build_tile_library( _endp_lib ) {
     uniq_repr[key].n_endpoint_group = n_endpoint_group;
   }
 
-  /*
-  let admissible_pos = [
-    { "dv_key" : "-1:0:0" , "dv": [-1,  0,  0] },
-    { "dv_key" : "1:0:0"  , "dv": [ 1,  0,  0] },
-
-    { "dv_key" : "0:-1:0" , "dv": [ 0, -1,  0] },
-    { "dv_key" : "0:1:0"  , "dv": [ 0,  1,  0] },
-
-    { "dv_key" : "0:0:-1" , "dv": [ 0,  0, -1] },
-    { "dv_key" : "0:0:1"  , "dv": [ 0,  0,  1] }
-  ];
-
-  let oppo = {
-    "-1:0:0" :  "1:0:0",
-    "1:0:0"  : "-1:0:0",
-
-    "0:-1:0" :  "0:1:0",
-    "0:1:0"  : "0:-1:0",
-
-    "0:0:-1" : "0:0:1",
-    "0:0:1"  : "0:0:-1"
-  }
-  */
-
   let admissible_pos = g_template.admissible_pos;
   let oppo  = g_template.oppo;
 
@@ -3691,10 +3684,6 @@ function filter_steeple() {
           nei_p_repr[1] - 2*dv_nei[1],
           nei_p_repr[2] - 2*dv_nei[2]
         ];
-
-        //console.log(">>", key_anchor , "=>", key_nei,
-        //  "(a:", dv_anc_key, "::", anc_v.toString(), ")",
-        //  "(n:", dv_nei_key, "::", nei_v.toString(), ")");
 
         let de = Math.abs(nei_v[0] - anc_v[0] + nei_v[1] - anc_v[1] + nei_v[2] - anc_v[2]);
         if (de < _eps) {
@@ -5116,19 +5105,7 @@ function realize_grid_defer(cb, data) {
   init_template();
   _build_tile_library( g_template.endpoint );
 
-  //let M = g_info.grid_size;
-  //let pgr = init_pgr([M,M,M]);
   let pgr = init_pgr(g_info.grid_size);
-
-  // EXPERIMENT
-  //
-  //pgr = init_pgr([8,16,16]);
-  //pgr_blank(pgr, 0, 3, 3, 9, 3, 3);
-  //pgr_blank(pgr, 3, 0, 9, 3, 9, 3);
-  //pgr_blank(pgr, 0, 0, 0, 4, 4, 4);
-  //pgr_blank(pgr, 0, 12, 8, 4, 4, 4);
-  //
-  // EXPERIMENT
 
   g_info.data["pgr"] = pgr;
   _ret = grid_cull_boundary(pgr);
@@ -5489,27 +5466,14 @@ function init_beg() {
   let _wh = window.innerHeight;
   let _ww = window.innerWidth;
   let _F = ((_wh < _ww) ? (1.25*_wh) : (2*_ww));
-  //_F = _wh;
-
-  let maxdim = g_info.grid_size[0];
-  if (g_info.grid_size[1] > maxdim) { maxdim = g_info.grid_size[1]; }
-  if (g_info.grid_size[2] > maxdim) { maxdim = g_info.grid_size[2]; }
-
-  g_info.avg_grid_size = maxdim;
 
   let _a = g_info.grid_size[0],
       _b = g_info.grid_size[1],
       _c = g_info.grid_size[2];
+  g_info.avg_grid_size = p_norm( [_a,_b,_c], 0.125 );
+  g_info.tri_scale = Math.ceil( _F / g_info.avg_grid_size );
 
-  g_info.avg_grid_size = (_a+_b+_c)/3;
-  //g_info.avg_grid_size = Math.pow(_a*_b*_c, 1/3);
-  maxdim = g_info.avg_grid_size;
-
-  //g_info.tri_scale = 1 + Math.ceil( 1.5*_F / g_info.grid_size );
-  //g_info.tri_scale = 1 + Math.ceil( 1.25*_F / g_info.grid_size );
-  //g_info.tri_scale = Math.ceil( 1.25*_F / g_info.grid_size );
-  //g_info.tri_scale = Math.ceil( _F / g_info.grid_size );
-  g_info.tri_scale = Math.ceil( _F / maxdim );
+  //---
 
   welcome();
 
