@@ -193,8 +193,13 @@ var g_info = {
   "move_direction": 0,
 
   "speed_factor" : 1/(2*4096),
-  "light_speed_factor" : 1,
-  //"light_speed_factor" : 32,
+  //"light_speed_factor" : (1/4),
+  //"light_speed_factor" : 4,
+  "light_speed_factor" : (1/8192),
+
+  "light_position_x" : 1,
+  "light_position_y" : 1,
+  "light_position_z" : 1,
 
   "tile_width_denom_weight": {
     //"2": 1,
@@ -262,6 +267,8 @@ var g_info = {
   },
 
   "n_point_light": 4,
+
+  "use_shadow" : true,
 
   "debug_line": false,
   "debug_cube": [],
@@ -1833,18 +1840,22 @@ function threejs_init() {
 
     // SHADOW
     //
-    let use_shadow = true;
-    if (use_shadow) {
+    //let use_shadow = true;
+    if (g_info.use_shadow) {
 
       let sdim = 1024;
+      sdim = 2048;
 
       g_info.light[0].castShadow = true;
 
-      g_info.light[0].shadow.camera.near  = -1000;
-      g_info.light[0].shadow.camera.far   =  1000;
+      //g_info.light[0].shadow.camera.near  = -1000;
+      //g_info.light[0].shadow.camera.far   =  1000;
 
-      g_info.light[0].shadow.camera.near  = -2048;
-      g_info.light[0].shadow.camera.far   =  2048;
+      g_info.light[0].shadow.camera.near  = -4096;
+      g_info.light[0].shadow.camera.far   =  4096;
+
+      //g_info.light[0].shadow.camera.near  = -1024;
+      //g_info.light[0].shadow.camera.far   =  2048;
 
       g_info.light[0].shadow.camera.top    = -sdim;
       g_info.light[0].shadow.camera.bottom =  sdim;
@@ -1858,19 +1869,21 @@ function threejs_init() {
       g_info.light[0].shadow.camera.right = -sdim;
       */
 
-      g_info.light[0].shadow.mapSize.width = 2048;
-      g_info.light[0].shadow.mapSize.height = 2048;
+      g_info.light[0].shadow.mapSize.width = 1024*4;
+      g_info.light[0].shadow.mapSize.height = 1024*4;
 
       //g_info.light[0].shadow.mapSize.width = 4096;
       //g_info.light[0].shadow.mapSize.height = 4096;
 
-      //g_info.light[0].shadow.radius = 4;
+      g_info.light[0].shadow.radius = 4;
       //g_info.light[0].shadow.radius = 8;
       //g_info.light[0].shadow.radius = 16;
-      //g_info.light[0].shadow.radius = 16;
+      //g_info.light[0].shadow.radius = 2;
+      //g_info.light[0].shadow.radius = 1;
       g_info.light[0].shadow.bias = -0.0005;
-      g_info.light[0].shadow.bias = -0.05;
-      g_info.light[0].shadow.bias = -0.005;
+      //g_info.light[0].shadow.bias = -0.05;
+      //g_info.light[0].shadow.bias = -0.005;
+      //g_info.light[0].shadow.bias = -(0.5/2048);
 
       //g_info.light[0].shadow.bias = 1;
 
@@ -2008,7 +2021,7 @@ function threejs_init() {
   intensity_max = I;
   intensity_range = intensity_max - intensity_min;
 
-  console.log("I:", I, "m:", intensity_min, "r:", intensity_range);
+  //console.log("I:", I, "m:", intensity_min, "r:", intensity_range);
 
   /*
   if ((g_info.background_brightness > 0.75) ||
@@ -2325,10 +2338,13 @@ function threejs_scene_init() {
   */
 
   //SHADOW
-  g_info.renderer.shadowMap.enabled = true;
-  //g_info.renderer.shadowMap.type = THREE.VSMShadowMap;
-  g_info.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-  //g_info.renderer.shadowMap.type = THREE.PCFShadowMap;
+  if (g_info.use_shadow) {
+    g_info.renderer.shadowMap.enabled = true;
+    //g_info.renderer.shadowMap.type = THREE.BasicShadowMap;
+    //g_info.renderer.shadowMap.type = THREE.VSMShadowMap;
+    g_info.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    //g_info.renderer.shadowMap.type = THREE.PCFShadowMap;
+  }
 
 
   //---
@@ -2350,6 +2366,7 @@ function threejs_scene_init() {
     let format = ( g_info.renderer.capabilities.isWebGL2 ) ? THREE.RedFormat : THREE.LuminanceFormat;
 
     let alphaIndex = 256;
+    //alphaIndex = 2048;
     let colors = new Uint8Array( alphaIndex  );
     for ( let c = 0; c < colors.length; c ++ ) {
       colors[ c ] = ( c / (colors.length-1) ) * 255;
@@ -2372,8 +2389,10 @@ function threejs_scene_init() {
 
   //SHADOW
   //EXPERIMENT
-  g_info.mesh.castShadow = true;
-  g_info.mesh.receiveShadow = true;
+  if (g_info.use_shadow) {
+    g_info.mesh.castShadow = true;
+    g_info.mesh.receiveShadow = true;
+  }
 
   g_info.scene.add( g_info.mesh );
 
@@ -2383,8 +2402,10 @@ function threejs_scene_init() {
     for (let ii=0; ii<g_info.meshN; ii++) {
       let _msh = new THREE.Mesh( g_info.geometry, g_info.material );
 
-      _msh.castShadow = true;
-      _msh.receiveShadow = true;
+      if (g_info.use_shadow) {
+        _msh.castShadow = true;
+        _msh.receiveShadow = true;
+      }
 
       g_info.mesha.push( _msh );
       g_info.scene.add( _msh );
@@ -2741,9 +2762,22 @@ function render_n() {
 
   for (let i=0; i<g_info.light.length; i++) {
     let _a = time*g_info.light_speed_factor + i*Math.PI/2;
-    let _x = Math.cos(_a);
-    let _y = Math.sin(_a);
-    let _z = Math.cos(_a)*Math.sin(_a);
+    let p0 = 7753;
+    let p1 = 7789;
+    let p2 = 7841;
+    let p3 = 7879;
+    let _x = Math.cos(p0*_a);
+    let _y = Math.sin(p1*_a);
+    let _z = Math.cos(p2*_a)*Math.sin(p3*_a);
+
+    //EXPERIMENTAL
+    _y -= 1;
+    _z += 2;
+
+    //_x = g_info.light_position_x;
+    //_y = g_info.light_position_y;
+    //_z = g_info.light_position_z;
+
 
     g_info.light[i].position.set( _x, _y, _z ).normalize();
   }
@@ -2991,9 +3025,21 @@ function render_z() {
 
   for (let i=0; i<g_info.light.length; i++) {
     let _a = time*g_info.light_speed_factor + i*Math.PI/2;
-    let _x = Math.cos(_a);
-    let _y = Math.sin(_a);
-    let _z = Math.cos(_a)*Math.sin(_a);
+    let p0 = 7753;
+    let p1 = 7789;
+    let p2 = 7841;
+    let p3 = 7879;
+    let _x = Math.cos(p0*_a);
+    let _y = Math.sin(p1*_a);
+    let _z = Math.cos(p2*_a)*Math.sin(p3*_a);
+
+    //EXPERIMENTAL
+    _y -= 1;
+    _z += 2;
+
+    //_x = g_info.light_position_x;
+    //_y = g_info.light_position_y;
+    //_z = g_info.light_position_z;
 
     g_info.light[i].position.set( _x, _y, _z ).normalize();
   }
@@ -3277,6 +3323,21 @@ function init_param() {
   // VANITY
   //g_info.move_direction = 1;
   //g_info.boundary_condition = 'n';
+}
+
+function badbad() {
+  //BAD VECTOR
+  //{ x: -0.06350307074750981,
+  //  yi -0.9959673929270931,
+  //  z: 0.06337438150898185}
+  //﻿
+  //
+  let x = -0.06350307074750981;
+  let y = -0.9959673929270931;
+  let z = 0.06337438150898185;
+
+    g_info.light[0].position.set( x, y, z ).normalize();
+
 }
 
 function _template_rot_mov(tplate, rx, ry, rz, tx, ty, tz) {
