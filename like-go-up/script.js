@@ -32,7 +32,7 @@
 
 var g_info = {
   "PROJECT" : "like go up",
-  "VERSION" : "0.1.3",
+  "VERSION" : "0.1.4",
 
   "rnd_idx": 0,
   "rnd": [],
@@ -55,10 +55,7 @@ var g_info = {
   "animation_capture": false,
   "capture_start":-1,
   "capture_end":-1,
-  //"capture_dt":5000,
-
-  //VANITY
-  "capture_dt":20000,
+  "capture_dt":5000,
 
   "features": {},
 
@@ -69,7 +66,6 @@ var g_info = {
   "mesh": {},
 
   "mesha" : [],
-  //"meshN" : 10,
   "meshN" : 10,
 
   "radius" : 500,
@@ -169,22 +165,6 @@ var g_info = {
     {"name":"verena","colors":["#f1594a","#f5b50e","#14a160","#2969de","#885fa4"],"stroke":"#1a1a1a","background":"#e2e6e8"}
   ],
 
-
-  /*
-  "_palette": [
-    { "name" : "monochrome", "colors" : [ "#111111", "#eeeeee" ], "background": "#777777" }
-  ],
-
-  "__palette": [
-    { "name": "yuma_punk", "colors": ["#f05e3b", "#ebdec4", "#ffdb00"], "stroke": "#ebdec4", "background": "#161616" },
-    { "name": "juxtapoz", "colors": ["#20357e", "#f44242", "#ffffff"], "stroke": "#000000", "background": "#cfc398" },
-    { "name": "ducci_i", "colors": ["#e9dcad", "#143331", "#ffc000"], "stroke": "#ffc000", "background": "#a74c02" },
-    { "name": "ducci_j", "colors": ["#c47c2b", "#5f5726", "#1e1e1e", "#7e8a84"], "stroke": "#7e8a84", "background": "#ecddc5" },
-    {  "name": "dt03", "colors": ["#222222", "#a7a7a7"], "stroke": "#000000", "background": "#0a5e78" },
-    { "name" : "monochrome", "colors" : [ "#111111", "#eeeeee" ], "background": "#777777" }
-  ],
-  */
-
   "palette_idx": -1,
   "inverted_bg": false,
   "background_color": 0,
@@ -257,6 +237,32 @@ var g_info = {
     "20":  1
   },
 
+  "tile_weight_profile" : {
+    "0": { "tile": { "|" : 100 } },
+    "1": { "tile": { "+" : 100 } },
+    "2": { "tile": { "T" : 100 } },
+    "3": { "tile": { "r" : 100 } },
+    "4": { "tile": { "^" : 100 } },
+
+    "5": { "tile": { "|": 100, "+": 100 } },
+    "6": { "tile": { "|": 100, "T": 100 } },
+    "7": { "tile": { "|": 100, "r": 100 } },
+    "8": { "tile": { "|": 100, "^": 100 } },
+
+    "9": { "tile": { "+": 100, "T": 100 } },
+    "10": { "tile": { "+": 100, "r": 100 } },
+    "11": { "tile": { "+": 100, "^": 100 } },
+
+    "12": { "tile": { "T": 100, "r": 100 } },
+    "13": { "tile": { "T": 100, "^": 100 } },
+
+    "14": { "tile": { "r": 100, "^": 100 } },
+
+    "15": { "tile": {} }
+  },
+
+
+
   "view_counter" : 1,
   "view_counter_n" : 3,
 
@@ -274,6 +280,7 @@ var g_info = {
   "n_point_light": 4,
 
   "use_shadow" : true,
+  //"use_shadow" : false,
 
   "debug_line": false,
   "debug_cube": [],
@@ -1497,7 +1504,7 @@ function welcome() {
   console.log("");
   console.log(" s   - save screenshot (PNG)");
   console.log(" a   - save animation (5s webm) (advanced usage)");
-  //console.log(" p   - pause");
+  console.log(" o   - toggle shadows");
   console.log("");
 
   console.log("Features:");
@@ -2418,42 +2425,6 @@ function threejs_scene_init() {
     }
   }
 
-  /*
-
-  //WIP
-  //
-  let sz = g_info.renderer.getDrawingBufferSize( new THREE.Vector2() );
-  //let _wglrt = new THREE.WebGLRenderTarget( sz.width, sz.height, { "samples":2 } );
-  let _wglrt = new THREE.WebGLRenderTarget( sz.width, sz.height, { "samples":4 } );
-
-
-  let composer = new POSTPROCESSING.EffectComposer(g_info.renderer, _wglrt);
-
-  let renderpass = new POSTPROCESSING.RenderPass(g_info.scene, g_info.camera);
-
-  let bloomeffect = new POSTPROCESSING.BloomEffect(100, 205, 40, 2056);
-  let bloompass = new POSTPROCESSING.EffectPass(g_info.camera, bloomeffect);
-
-  let fxaaeffect = new POSTPROCESSING.FXAAEffect();
-  let fxaapass = new POSTPROCESSING.EffectPass(g_info.camera, fxaaeffect);
-
-  composer.addPass(renderpass);
-  composer.addPass(bloompass);
-  composer.addPass(fxaapass);
-
-  g_info.composer = composer;
-  g_info.render_pass = renderpass;
-  g_info.bloom_effect = bloomeffect;
-  g_info.bloom_pass = bloompass;
-  g_info.fxaa_effect = fxaaeffect;
-  g_info.fxaa_pass = fxaapass;
-
-  g_info.container.appendChild( g_info.renderer.domElement );
-
-  window.addEventListener( 'resize', window_resize );
-  window.addEventListener( 'mousemove', mouse_move );
-  window.addEventListener( 'wheel', mouse_wheel );
-  */
 }
 
 // mouse_x and mouse_y renomarlized to be +-1 of each
@@ -2933,7 +2904,6 @@ function render_z() {
     let mrp = m4.multiply(mp1, mp0);
     let mrn = m4.multiply(mn1, mn0);
 
-    //let _sz_z = g_info.grid_size;
     let _sz_z = g_info.data.grid.length;
 
     g_info.t_mov += g_info.t_mov_ds;
@@ -2941,13 +2911,9 @@ function render_z() {
     // take mesh falling off of one size and reposition at the other
     //
 
-    //if (Math.abs(g_info.t_mov) > (g_info.grid_size*g_info.tri_scale)) {
     if (Math.abs(g_info.t_mov) > (_sz_z*g_info.tri_scale)) {
       let _df = ((g_info.t_mov_ds < 0) ? -1 : 1);
-      //g_info.t_mov -= (_df*g_info.grid_size*g_info.tri_scale);
       g_info.t_mov -= (_df*_sz_z*g_info.tri_scale);
-
-      console.log("BANG");
     }
 
     g_info.t_rot += (1/8192)*Math.PI;
@@ -3266,29 +3232,7 @@ function init_param() {
 
   //--
 
-  let tile_weight_profile_info = {
-    "0": { "tile": { "|" : 100 } },
-    "1": { "tile": { "+" : 100 } },
-    "2": { "tile": { "T" : 100 } },
-    "3": { "tile": { "r" : 100 } },
-    "4": { "tile": { "^" : 100 } },
-
-    "5": { "tile": { "|": 100, "+": 100 } },
-    "6": { "tile": { "|": 100, "T": 100 } },
-    "7": { "tile": { "|": 100, "r": 100 } },
-    "8": { "tile": { "|": 100, "^": 100 } },
-
-    "9": { "tile": { "+": 100, "T": 100 } },
-    "10": { "tile": { "+": 100, "r": 100 } },
-    "11": { "tile": { "+": 100, "^": 100 } },
-
-    "12": { "tile": { "T": 100, "r": 100 } },
-    "13": { "tile": { "T": 100, "^": 100 } },
-
-    "14": { "tile": { "r": 100, "^": 100 } },
-
-    "15": { "tile": {} }
-  };
+  let tile_weight_profile_info = g_info.tile_weight_profile;
 
   let twpi_idx = _irnd(16);
 
@@ -3302,6 +3246,13 @@ function init_param() {
   }
 
   g_info.features["Tile Preference"] = profile_desc;
+
+  //--
+
+  //g_info.use_shadow = (fxrand() < 0.5);
+  //g_info.features["Shadows"] = g_info.use_shadow.toString();
+
+
 
   //--
 
@@ -4063,7 +4014,6 @@ function grid_cull_propagate_opt(gr, accessed, debug) {
 
     accessed = new_accessed;
     new_accessed = {};
-    //let new_accessed = {};
 
     still_processing = false;
 
@@ -4091,11 +4041,6 @@ function grid_cull_propagate_opt(gr, accessed, debug) {
           let dv_key = admissible_pos[posidx].dv_key;
           let dv = admissible_pos[posidx].dv;
 
-          /*
-          let ux = x + dv[0],
-              uy = y + dv[1],
-              uz = z + dv[2];
-              */
           let _p = _posbc(gr, x+dv[0], y+dv[1], z+dv[2]);
           let ux = _p[0],
               uy = _p[1],
@@ -4107,12 +4052,6 @@ function grid_cull_propagate_opt(gr, accessed, debug) {
           //
           for (let key_nei in admissible_nei[key_anchor][dv_key]) {
             if (admissible_nei[key_anchor][dv_key][key_nei].conn) {
-
-              /*
-              if ((uz < 0) || (uz >= gr.length) ||
-                  (uy < 0) || (uy >= gr[z].length) ||
-                  (ux < 0) || (ux >= gr[z][y].length)) {
-                  */
 
               if (_oob(gr, ux, uy, uz)) {
                 tile_valid = false;
@@ -4136,11 +4075,6 @@ function grid_cull_propagate_opt(gr, accessed, debug) {
             break;;
           }
 
-          /*
-          if ((uz < 0) || (uz >= gr.length) ||
-              (uy < 0) || (uy >= gr[z].length) ||
-              (ux < 0) || (ux >= gr[z][y].length)) {
-          */
           if (_oob(gr, ux,uy,uz)) {
             continue;
           }
@@ -4165,8 +4099,6 @@ function grid_cull_propagate_opt(gr, accessed, debug) {
             }
 
           }
-
-          //if (!tile_valid) {
 
           if (!anchor_has_valid_conn) {
             tile_valid = false;
@@ -4227,11 +4159,6 @@ function grid_cull_propagate(gr, debug) {
               let dv_key = admissible_pos[posidx].dv_key;
               let dv = admissible_pos[posidx].dv;
 
-              /*
-              let ux = x + dv[0],
-                  uy = y + dv[1],
-                  uz = z + dv[2];
-                  */
               let _p = _posbc(gr, x+dv[0], y+dv[1], z+dv[2]);
               let ux = _p[0],
                   uy = _p[1],
@@ -4244,17 +4171,8 @@ function grid_cull_propagate(gr, debug) {
               for (let key_nei in admissible_nei[key_anchor][dv_key]) {
                 if (admissible_nei[key_anchor][dv_key][key_nei].conn) {
 
-                  /*
-                  if ((uz < 0) || (uz >= gr.length) ||
-                      (uy < 0) || (uy >= gr[z].length) ||
-                      (ux < 0) || (ux >= gr[z][y].length)) {
-                  */
-
                   if (_oob(gr, ux,uy,uz)) {
                     tile_valid = false;
-
-                    //if (debug) { console.log("CULL.oob: anch:", key_anchor, "@(", x,y,z, ") has connecting outside of boundary"); }
-
                     break;
                   }
                 }
@@ -4266,11 +4184,6 @@ function grid_cull_propagate(gr, debug) {
                 break;;
               }
 
-              /*
-              if ((uz < 0) || (uz >= gr.length) ||
-                  (uy < 0) || (uy >= gr[z].length) ||
-                  (ux < 0) || (ux >= gr[z][y].length)) {
-              */
               if (_oob(gr, ux,uy,uz)) {
                 continue;
               }
@@ -4296,12 +4209,8 @@ function grid_cull_propagate(gr, debug) {
 
               }
 
-              //if (!tile_valid) {
-
               if (!anchor_has_valid_conn) {
                 tile_valid = false;
-
-                //if (debug) { console.log("CULL.c: anch:", key_anchor, "@(", x,y,z, ") has no possible connections to neighbors"); }
 
                 gr_cell[cidx].valid = false;
                 still_processing = true;
@@ -4400,7 +4309,6 @@ function debug_print_gr(gr) {
             sfx += "[g" + gr[z][y][x][ii].cgroup.toString() + "]";
           }
           if (valid_count>0) { u += ","; }
-          //u += ',' + gr[z][y][x][ii].n + sfx;
           u += gr[z][y][x][ii].name + sfx;
           valid_count++;
         }
@@ -4608,12 +4516,6 @@ function processing_update(iter) {
   if (g_info.debug_level > 0) {
     console.log(">>>iter:", iter);
   }
-
-  //if ((iter%100)==0) {
-   // render();
-    //animate();
-  //  console.log("...");
-  //}
 }
 
 function grid_wfc_opt(gr) {
@@ -4981,11 +4883,6 @@ function decorate_pgr(pgr) {
           let dv_key = dva[dvidx].dv_key;
           let dv = dva[dvidx].dv;
 
-          /*
-          let ux = x + dv[0],
-              uy = y + dv[1],
-              uz = z + dv[2];
-          */
           let _p = _posbc(pgr, x+dv[0], y+dv[1], z+dv[2]);
           let ux = _p[0],
               uy = _p[1],
@@ -5283,9 +5180,6 @@ function _realize_grid() {
     console.log("=============");
   }
 
-  //realize_tri_from_sp_grid(pgr);
-  //return;
-
   let fin_gr = gen_simple_grid(pgr);
   realize_tri_from_grid(fin_gr, pgr);
 
@@ -5413,7 +5307,6 @@ function realize_tri_from_sp_grid(gr, restrict_tile_h) {
           let __x = fxrand()*_f;
           let __y = fxrand()*_f;
           let __z = fxrand()*_f;
-          //__x = 0; __y = 0; __z = 0;
 
           let dx = _f*(cidx%3) + __x;
           let dy = _f*(Math.floor(cidx/3)%3) + __y;
@@ -5421,10 +5314,6 @@ function realize_tri_from_sp_grid(gr, restrict_tile_h) {
 
 
           let ent = g_template.rot_lib[u];
-
-          //console.log("u?", u, template_u, ent);
-
-          //rot_lib[ukey] = { "m": [mx, my, mz], "r": [xidx, yidx, zidx ] };
 
           let _rx = Math.PI*ent.r[0]/2;
           let _ry = Math.PI*ent.r[1]/2;
@@ -5436,7 +5325,6 @@ function realize_tri_from_sp_grid(gr, restrict_tile_h) {
           }
           let vv = _p_mul_mov(tu, _fac, dx, dy, dz);
 
-          //let _tri = _template_rot_mov(g_template[template_u], _rx, _ry, _rz, xidx, yidx, zidx);
           let _tri = _template_rot_mov(vv, _rx, _ry, _rz, xidx, yidx, zidx);
           _p_mul_mov(_tri, S, tx + dx, ty + dy, tz + dz);
           g_info.data.tri.push(_tri);
@@ -5537,6 +5425,11 @@ function init_beg() {
 
       console.log(">>>", g_info.capture_start, g_info.capture_end, g_info.capture_dt);
     }
+    else if (ev.key == 'o') {
+      if (("light" in g_info) && (g_info.light.length>0)) {
+        g_info.light[0].castShadow = !g_info.light[0].castShadow;
+      }
+    }
 
   });
 
@@ -5595,6 +5488,9 @@ function init() {
 //-----------------------------------
 //-----------------------------------
 //-----------------------------------
+
+// Command line code...
+//
 
 
 function _ok() {
