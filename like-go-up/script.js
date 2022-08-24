@@ -32,7 +32,7 @@
 
 var g_info = {
   "PROJECT" : "like go up",
-  "VERSION" : "0.1.1",
+  "VERSION" : "0.1.2",
 
   "rnd_idx": 0,
   "rnd": [],
