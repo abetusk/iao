@@ -32,7 +32,7 @@
 
 var g_info = {
   "PROJECT" : "like go up",
-  "VERSION" : "0.1.2",
+  "VERSION" : "0.1.3",
 
   "rnd_idx": 0,
   "rnd": [],
@@ -55,7 +55,10 @@ var g_info = {
   "animation_capture": false,
   "capture_start":-1,
   "capture_end":-1,
-  "capture_dt":5000,
+  //"capture_dt":5000,
+
+  //VANITY
+  "capture_dt":20000,
 
   "features": {},
 
@@ -197,6 +200,8 @@ var g_info = {
   //"light_speed_factor" : 4,
   "light_speed_factor" : (1/8192),
 
+  // for debugging
+  //
   "light_position_x" : 1,
   "light_position_y" : 1,
   "light_position_z" : 1,
@@ -2389,7 +2394,6 @@ function threejs_scene_init() {
   g_info.mesh = new THREE.Mesh( g_info.geometry, g_info.material );
 
   //SHADOW
-  //EXPERIMENT
   if (g_info.use_shadow) {
     g_info.mesh.castShadow = true;
     g_info.mesh.receiveShadow = true;
@@ -2771,15 +2775,6 @@ function render_n() {
     let _y = Math.sin(p1*_a);
     let _z = Math.cos(p2*_a)*Math.sin(p3*_a);
 
-    //EXPERIMENTAL
-    //_y -= 1;
-    //_z += 2;
-
-    //_x = g_info.light_position_x;
-    //_y = g_info.light_position_y;
-    //_z = g_info.light_position_z;
-
-
     g_info.light[i].position.set( _x, _y, _z ).normalize();
   }
 
@@ -3033,14 +3028,6 @@ function render_z() {
     let _x = Math.cos(p0*_a);
     let _y = Math.sin(p1*_a);
     let _z = Math.cos(p2*_a)*Math.sin(p3*_a);
-
-    //EXPERIMENTAL
-    //_y -= 1;
-    //_z += 2;
-
-    //_x = g_info.light_position_x;
-    //_y = g_info.light_position_y;
-    //_z = g_info.light_position_z;
 
     g_info.light[i].position.set( _x, _y, _z ).normalize();
   }
@@ -3319,26 +3306,6 @@ function init_param() {
   //--
 
   window.$fxhashFeatures = g_info.features;
-
-
-  // VANITY
-  //g_info.move_direction = 1;
-  //g_info.boundary_condition = 'n';
-}
-
-function badbad() {
-  //BAD VECTOR
-  //{ x: -0.06350307074750981,
-  //  yi -0.9959673929270931,
-  //  z: 0.06337438150898185}
-  //﻿
-  //
-  let x = -0.06350307074750981;
-  let y = -0.9959673929270931;
-  let z = 0.06337438150898185;
-
-    g_info.light[0].position.set( x, y, z ).normalize();
-
 }
 
 function _template_rot_mov(tplate, rx, ry, rz, tx, ty, tz) {
@@ -5549,13 +5516,7 @@ function init_beg() {
       _b = g_info.grid_size[1],
       _c = g_info.grid_size[2];
   g_info.avg_grid_size = p_norm( [_a,_b,_c], 0.125 );
-
-  //EXPERIMENTAL
-  //g_info.avg_grid_size *= .95;
-
   g_info.tri_scale = Math.ceil( _F / g_info.avg_grid_size );
-
-
 
   //---
 
@@ -5576,9 +5537,7 @@ function init_beg() {
 
       console.log(">>>", g_info.capture_start, g_info.capture_end, g_info.capture_dt);
     }
-    //else if (ev.key == 'p') {
-    //  g_info.paused = !g_info.paused;
-    //}
+
   });
 
   document.addEventListener('dblclick', function() {
