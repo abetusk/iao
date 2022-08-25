@@ -83,9 +83,9 @@ was overwhelming can be seen to be a localized phenomena, sometimes resulting in
 while other times resulting in paths to other parts of the structure.
 
 To the extent possible, the source code is dedicated to the public
-domain (CC0) and can be used for any purpose, even commercial, by anyone.
-All third party libraries used are libre/free. Please check individual files
-for their respective licenses.
+domain (CC0) and can be used or modified, even for commercial purposes, by anyone.
+All third party libraries used are libre/free.
+Please check individual files for their respective licenses.
 
 As all code is libre/free, artists and fans are encouraged to alter,
 experiment and publish, even for commercial gain, ideas expressed in this NFT.
