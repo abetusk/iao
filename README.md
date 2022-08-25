@@ -107,5 +107,5 @@ Works
 
 | |
 |---|
-| [![Like Go Up](img/like_go_up.png)](https://github.com/abetusk/iao/tree/main/like-go-up) |
+| [![Like Go Up](img/like_go_up_2.png)](https://github.com/abetusk/iao/tree/main/like-go-up) |
 
