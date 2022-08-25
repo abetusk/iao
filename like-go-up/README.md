@@ -2,7 +2,7 @@ Like Go Up
 ===
 
 
-[![Like Go Up](../img/like_go_up_0.png)](https://abetusk.github.io/iao/like-go-up)
+[![Like Go Up](../img/like_go_up.png)](https://abetusk.github.io/iao/like-go-up)
 
 [Live](https://abetusk.github.io/iao/like-go-up/)
 
