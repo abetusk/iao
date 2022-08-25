@@ -50,7 +50,7 @@ upwards of $7000 a month, or more, in recurring supporter subscription payments.
 
 The current ecosystem of social media incentivizes behavior for content creators to
 focus on attention metrics for fan engagement.
-Content creators that want to create a livelyhood from their work must keep producing
+Content creators that want to create a livelihood from their work must keep producing
 engaging content to get ad revenue, sponsorships and to drive fans to subscription services.
 
 There is a pressure for well researched, measured and fair critiques of social trends to be
