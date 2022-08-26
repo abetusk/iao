@@ -6,7 +6,7 @@ Like Go Up
 
 [Live](https://abetusk.github.io/iao/like-go-up/)
 
-(not) Available on [fxhash](https://www.fxhash.xyz/generative/slug/like-go-up)
+Available on [fxhash](https://www.fxhash.xyz/generative/slug/like-go-up)
 
 Quick Start
 ---
