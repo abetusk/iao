@@ -30,6 +30,10 @@ Palette
 * [How to Avoid Equidistant HSV Colors - blog post](https://www.vis4.net/blog/2011/12/avoid-equidistant-hsv-colors/)
 * [i want hue - interactive tool](https://medialab.github.io/iwanthue/)
 * [color pickter - interactive tool](http://tristen.ca/hcl-picker) ([src](https://github.com/tristen/hcl-picker/))
+* [Inigo Quilez (phase shifting)](https://iquilezles.org/articles/palettes/)
+* [ofxSwatch](https://github.com/sam-tsao/ofxSwatch) ([medium](https://sam-tsao.medium.com/3-levels-of-generative-colors-b43bd0d6d609))
+* [muesli/gamut](https://github.com/muesli/gamut)
+* [r-color-palettes](https://github.com/EmilHvitfeldt/r-color-palettes)
 
 Concepts
 ---

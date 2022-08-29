@@ -194,3 +194,4 @@ Other Resources
 ---
 
 * [fxtender.art](https://fxtender.art/mintables)
+
