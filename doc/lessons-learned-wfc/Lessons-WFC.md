@@ -68,10 +68,10 @@ The library of 3D tiles consists, conceptually, of 8 different types of tiles:
 
 | Name | Description  | Picture |
 |------|--------------|---------|
-| `.`  | Blank/Empty  | ::empty grid |
+| `.`  | Blank/Empty  | empty grid |
 | `|`  | Road         | ![Road Tile](img/road_tile.png) |
 | `+`  | Cross        | ![Cross Tile](img/cross_tile.png) |
-| `T`  | T (road)     | ![T Tile](img/t_tile.png)  |
+| `T`  | T            | ![T Tile](img/t_tile.png)  |
 | `r`  | Bend         | ![Bend Tile](img/r_tile.png) |
 | `^`  | Stair        | ![Stair Tile](img/stair_tile.png) |
 | `p`  | Dead End     | ![Dead End Tile](img/p_tile.png) |
