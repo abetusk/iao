@@ -1,7 +1,7 @@
 Lessons Learned from Implementing "Wave Function Collapse"
 ===
 
-::header
+![Like Go Up Splash](img/header.png)
 
 In the project "Like Go Up", a version
 of \[mxgmn\]'s "Wave Function Collapse" (WFC)
@@ -13,7 +13,7 @@ implementing a "Wave Function Collapse" (WFC) like algorithm.
 The aim is to provide a review of
 how the algorithm works and what some pitfalls were.
 
-::vanity shot
+![Like Go Up vanity](img/lgu_vanity.png)
 
 This article will go more in depth but as an overview,
 here are the succinct lessons learned:
@@ -29,7 +29,7 @@ here are the succinct lessons learned:
 Review
 ---
 
-::vanity
+![Like Go Up Vanity (1)](img/lgu_vanity_1.png)
 
 "Wave Function Collapse" (WFC) is a [generative art tool by
 project](https://github.com/mxgmn/WaveFunctionCollapse) by \[mxgmn\].
@@ -69,12 +69,12 @@ The library of 3D tiles consists, conceptually, of 8 different types of tiles:
 | Name | Description  | Picture |
 |------|--------------|---------|
 | `.`  | Blank/Empty  | ::empty grid |
-| `|`  | Road         | ::road |
-| `+`  | Cross        | ::cross |
-| `T`  | T (road)     | ::T |
-| `r`  | Bend         | ::bend |
-| `^`  | Stair        | ::stair |
-| `p`  | Dead End     | ::dead end |
+| `|`  | Road         | ![Road Tile](img/road_tile.png) |
+| `+`  | Cross        | ![Cross Tile](img/cross_tile.png) |
+| `T`  | T (road)     | ![T Tile](img/t_tile.png)  |
+| `r`  | Bend         | ![Bend Tile](img/r_tile.png) |
+| `^`  | Stair        | ![Stair Tile](img/stair_tile.png) |
+| `p`  | Dead End     | ![Dead End Tile](img/p_tile.png) |
 
 From the "base" tiles, the triangle display geometry is calculated and a set of "endpoints" is
 created as an indication of how it can be attached to other tiles in the library.
