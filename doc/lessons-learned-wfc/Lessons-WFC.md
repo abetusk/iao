@@ -160,12 +160,12 @@ wasting effort considering cells that are known to not need updating.
 Here is the pseudo-code to the algorithm:
 
 ```javascript
-function wfc(grid) {
+function WaveFunctionCollapse(grid) {
 
   initialCull(grid);
   propagateGridAll(grid);
 
-  while (stillCulling) {
+  while (true) {
 
     clearTileFlags(grid);
 
