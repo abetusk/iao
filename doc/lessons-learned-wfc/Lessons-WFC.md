@@ -69,12 +69,12 @@ The library of 3D tiles consists, conceptually, of 8 different types of tiles:
 | Name | Description  | Picture |
 |------|--------------|---------|
 | `.`  | Blank/Empty  | empty grid |
-| `\|`  | Road         | ![Road Tile](img/road_tile.png) |
-| `+`  | Cross        | ![Cross Tile](img/cross_tile.png) |
-| `T`  | T            | ![T Tile](img/t_tile.png)  |
-| `r`  | Bend         | ![Bend Tile](img/r_tile.png) |
-| `^`  | Stair        | ![Stair Tile](img/stair_tile.png) |
-| `p`  | Dead End     | ![Dead End Tile](img/p_tile.png) |
+| `\|`  | Road         | ![Road Tile](img/road_tile_s.png) |
+| `+`  | Cross        | ![Cross Tile](img/cross_tile_s.png) |
+| `T`  | T            | ![T Tile](img/t_tile_s.png)  |
+| `r`  | Bend         | ![Bend Tile](img/r_tile_s.png) |
+| `^`  | Stair        | ![Stair Tile](img/stair_tile_s.png) |
+| `p`  | Dead End     | ![Dead End Tile](img/p_tile_s.png) |
 
 From the "base" tiles, the triangle display geometry is calculated and a set of "endpoints" is
 created as an indication of how it can be attached to other tiles in the library.
