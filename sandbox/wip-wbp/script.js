@@ -1,52 +1,235 @@
+//
+// To the extent possible under law, the person who associated CC0 with
+// this code has waived all copyright and related or neighboring rights
+// to this code.
+//
+// You should have received a copy of the CC0 legalcode along with this
+// work.  If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
+//
 
-/*
-//---- do not edit the following code (you can indent as you wish)
-var alphabet = "123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ";
-var fxhash = "oo" + Array(49).fill(0).map(_=>alphabet[(Math.random()*alphabet.length)|0]).join('');
-var b58dec = str=>[...str].reduce((p,c)=>p*alphabet.length+alphabet.indexOf(c)|0, 0);
-var fxhashTrunc = fxhash.slice(2);
-var regex = new RegExp(".{" + ((fxhash.length/4)|0) + "}", 'g');
-var hashes = fxhashTrunc.match(regex).map(h => b58dec(h));
-var sfc32 = (a, b, c, d) => {
-  return () => {
-    a |= 0; b |= 0; c |= 0; d |= 0
-    var t = (a + b | 0) + d | 0
-    d = d + 1 | 0
-    a = b ^ b >>> 9
-    b = c + (c << 3) | 0
-    c = c << 21 | c >>> 11
-    c = c + t | 0
-    return (t >>> 0) / 4294967296
-  }
-};
-var fxrand = sfc32(...hashes);
-//var isFxpreview = new URLSearchParams(window.location.search).get('preview') === "1";
-function fxpreview() { console.log("fxhash: TRIGGER PREVIEW") }
-*/
+//
+// Parts of this program are based off of the three.js examples and
+// are used with permission under their MIT licensing terms. See
+// LICENSE-three-js.txt files for details on the license.
+// See https://github.com/mrdoob/three.js/ for further details.
+//
+
+//
+// Some portions have been copied from other sources, like StackOverflow.
+// and WebGL Fundamentals (https://webglfundamentals.org/,
+// https://github.com/gfxfundamentals/webgl-fundamentals).
+// Where appropriate, these have been laballed with their corresponding
+// license, attribution and link to the original source.
+//
+
+//
+// Care has been taken to make sure all third party libraries,
+// whether parts used in this source file or used in external source
+// files, are under a libre/free/open source license that allows
+// for their use, alteration and redistribution, even for
+// commercial purposes.
+//
+
 
 
 var g_info = {
   "PROJECT" : "like go up",
-  "VERSION" : "0.1.4",
+  "VERSION" : "1.0.1",
 
   "rnd_idx": 0,
   "rnd": [],
   "ds": 5,
-
-  "ready": false,
-  "preview_available": false,
-
-  "boundary_condition": 'n',
-
-
-  "paused":false,
 
   "quiet":false,
   "grid_size": [8,8,8],
   "avg_grid_size": 8,
 
   "tile_width" : 1/4,
-  "tile_height": 1/7
+  "tile_height": 1/7,
+
+  "ready": false,
+  "preview_available": false,
+
+  "boundary_condition": 'n',
+
+  "download_filename":"like_go_up_1gen.png",
+
+  "paused":false,
+
+  "capturer": {},
+  "animation_capture": false,
+  "capture_start":-1,
+  "capture_end":-1,
+  "capture_dt":5000,
+
+  "features": {},
+
+  "container": {},
+  "camera": {},
+  "scene": {},
+  "renderer": {},
+  "mesh": {},
+
+  "mesha" : [],
+  "meshN" : 0,
+
+  "radius" : 500,
+  "frustumSize" : 1500,
+  "aspect": 1,
+  "light": [],
+
+  "take_screenshot_flag" : false,
+
+  "geometry": {},
+  "material": {},
+
+  "cx": 35/2,
+  "cy": 35/2,
+  "cz": 35/2,
+
+  "rotx": 0,
+  "roty": 0,
+  "rotz": 0,
+
+  "t_rot": 0,
+  "t_mov": 0,
+  "t_mov_ds": 1/2,
+
+  "tri_scale" : 100,
+
+  "save_count": 0,
+
+  "iter": 0,
+  "iter_update": 10,
+  "max_iter" : -1,
+
+  "fudge": 1/1024,
+
+  "mouse_x": -1000,
+  "mouse_y": -1000,
+
+  "mouse_pressed": false,
+
+  "palette": [
+    {"name":"monochrome","colors":["#111111","#eeeeee"],"background":"#777777"},
+
+    {"name":"book","colors":["#be1c24","#d1a082","#037b68","#d8b1a5","#1c2738","#c95a3f"],"stroke":"#0e0f27","background":"#f5b28a"},
+    {"name":"butterfly","colors":["#f40104","#f6c0b3","#99673a","#f0f1f4"],"stroke":"#191e36","background":"#191e36"},
+    {"name":"kov_03","colors":["#e3937b","#d93f1d","#090d15","#e6cca7"],"stroke":"#090d15","background":"#558947"},
+    {"name":"kov_06b","colors":["#d57846","#dfe0cc","#de442f","#e7d3c5","#5ec227","#302f35","#63bdb3"],"stroke":"#292319","background":"#dfd4c1"}
+  ],
+  "palette_idx": -1,
+  "inverted_bg": false,
+  "background_color": 0,
+
+  "distribution_type": 0,
+  "place_type" : 0,
+  "place_size": 64,
+
+  "move_direction": 0,
+
+  "speed_factor" : 1/(2*4096),
+  //"light_speed_factor" : (1/4),
+  //"light_speed_factor" : 4,
+  "light_speed_factor" : (1/8192),
+
+  // for debugging
+  //
+  "light_position_x" : 1,
+  "light_position_y" : 1,
+  "light_position_z" : 1,
+    
+  "tile_width_denom_weight": {
+    //"2": 1,
+    //"3": 2,
+    "4": 4,
+    "5": 3,
+    "6": 2,
+    "7": 1,
+    "8": 1
+  },
+  "tile_width": 1/4,
+    
+  "tile_height_denom_weight": {
+    "3": 1,
+    "4": 2,
+    "5": 3,
+    "6": 4,
+    "7": 5,
+    "8": 6,
+    "9": 5,
+    "10": 4,
+    "11": 3,
+    "12": 2
+    //"13": 1,
+    //"14": 1,
+    //"15": 1,
+    //"16": 1
+  },
+  "tile_height": 1/8,
+    
+  "grid_weight" : {
+    "9": 25,
+    "10": 20,
+    //"10": 20000,
+    "11": 10,
+    "12":  9, "13":  8, "14":  7, "15":  6,
+    "16":  5, "17":  4, "18":  3, "19":  2,
+    "20":  1
+  },
+
+  "tile_weight_profile" : {
+    "0": { "tile": { "|" : 100 } },
+    "1": { "tile": { "+" : 100 } },
+    "2": { "tile": { "T" : 100 } },
+    "3": { "tile": { "r" : 100 } },
+    "4": { "tile": { "^" : 100 } },
+
+    "5": { "tile": { "|": 100, "+": 100 } },
+    "6": { "tile": { "|": 100, "T": 100 } },
+    "7": { "tile": { "|": 100, "r": 100 } },
+    "8": { "tile": { "|": 100, "^": 100 } },
+
+    "9": { "tile": { "+": 100, "T": 100 } },
+    "10": { "tile": { "+": 100, "r": 100 } },
+    "11": { "tile": { "+": 100, "^": 100 } },
+
+    "12": { "tile": { "T": 100, "r": 100 } },
+    "13": { "tile": { "T": 100, "^": 100 } },
+
+    "14": { "tile": { "r": 100, "^": 100 } },
+
+    "15": { "tile": {} }
+  },
+
+
+
+  "view_counter" : 1,
+  "view_counter_n" : 3,
+
+  "view_prv" : 0,
+  "view_nxt" : 1,
+  "time_prv": -1,
+
+  "data": {
+    "wfc_grid": [],
+    "grid": [],
+    "info": [],
+    "tri": {}
+  },
+
+  "n_point_light": 4,
+
+  "use_shadow" : true,
+  //"use_shadow" : false,
+
+  "debug_line": false,
+  "debug_cube": [],
+  "debug_cube_pos": [],
+
+  "debug_level": 0,
+
+  "material_type" : "toon"
 
 };
 
@@ -144,9 +327,382 @@ let g_template = {
 
 };
 
+function welcome() {
+  let lines = [
+    "  _           ",
+    " (_)__ _ ___  ",
+    " | / _` / _ \\ ",
+    " |_\\__,_\\___/ ",
+    "              "
+  ];
+
+  console.log(lines.join("\n"));
+  console.log("Welcome, gentle programmer.");
+  console.log("All code is libre/free. Please see individual files for license details.");
+  console.log("");
+  console.log("fxhash:", fxhash);
+  console.log("Project:", g_info.PROJECT);
+  console.log("Version", g_info.VERSION);
+
+
+  console.log("");
+  console.log("commands:");
+  console.log("");
+  console.log(" s   - save screenshot (PNG)");
+  console.log(" a   - save animation (5s webm) (advanced usage)");
+  console.log(" o   - toggle shadows");
+  console.log("");
+
+  console.log("Features:");
+  for (let key in g_info.features) {
+    console.log(key + ":", g_info.features[key]);
+  }
+
+}
+
+function screenshot_data(imguri) {
+  if (typeof imguri === "undefined") { return; }
+  let link = document.createElement("a");
+  link.download = g_info.download_filename;
+  link.href = imguri;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  delete link;
+}
+
+
+
+
 function _pos_keystr(x,y,z) {
   return x.toString() + ":" + y.toString() + ":" + z.toString();
 }
+
+
+function weight2pd(w) {
+  let S = 0.0;
+  let pdf = {};
+  let cdf = [];
+
+  for (key in w) { S += w[key]; }
+
+  let cdf_s = 0.0;
+  for (key in w) {
+    pdf[key] = w[key] / S;
+
+    cdf_s += pdf[key];
+    cdf.push( {"key": key, "s": cdf_s} );
+  }
+
+  return { "pdf": pdf, "cdf": cdf, "w": w };
+}
+
+function rnd_cdf(cdf, p) {
+  p = ((typeof p === "undefined") ? fxrand() : p);
+  for (let ii=0; ii<cdf.length; ii++) {
+    if (p<cdf[ii].s) {
+      return cdf[ii].key;
+    }
+  }
+  return cdf[ cdf.length-1 ].key;
+}
+
+
+function p_norm(a,p) {
+  let n = a.length;
+  let s =0;
+  for (let ii=0; ii<n; ii++) {
+    s += Math.pow(parseInt(a[ii]), p)
+  }
+  return Math.pow(s/n, 1/p);
+}
+
+
+
+function fisher_yates_shuffle(a) {
+  var t, n = a.length;
+  for (var i=0; i<(n-1); i++) {
+    var idx = i + Math.floor(fxrand()*(n-i));
+    t = a[i];
+    a[i] = a[idx];
+    a[idx] = t;
+  }
+}
+
+
+function _rnd(a,b) {
+  if (typeof a === "undefined") { a = 1; }
+  if (typeof b === "undefined") {
+    b = a;
+    a = 0;
+  }
+  return fxrand()*(b-a) + a;
+}
+
+function _irnd(a,b) {
+  if (typeof a === "undefined") { a = 2; }
+  if (typeof b === "undefined") {
+    b = a;
+    a = 0;
+  }
+  return Math.floor(fxrand()*(b-a) + a);
+}
+
+function _arnd(a) {
+  let idx = _irnd(a.length);
+  return a[idx];
+}
+
+function __rndpow(s) {
+  return Math.pow(fxrand(), s);
+}
+
+// from https://stackoverflow.com/questions/918736/random-number-generator-that-produces-a-power-law-distribution
+// CC-BY-SA gnovice (https://stackoverflow.com/users/52738/gnovice
+//
+function _rndpow(s, x0, x1) {
+  if ((typeof x0 !== "undefined") && (typeof x1 === "undefined")) {
+    x1 = x0;
+    x0 = 0;
+  }
+  x0 = ((typeof x0 === "undefined") ? 0 : x0 );
+  x1 = ((typeof x1 === "undefined") ? 1 : x1 );
+  let y = fxrand();
+
+  let x1p = Math.pow(x1, s+1);
+  let x0p = Math.pow(x0, s+1);
+
+  let x = Math.pow(((x1p - x0p)*y + x0p), 1/(s+1));
+  return x;
+}
+
+function _expow(s) {
+  return -Math.log(1 - fxrand()) / s;
+}
+
+// "memory" rand
+// allows a 'memoization' of random
+// for later re-use if need be.
+//
+function _mrnd() {
+  let _rn;
+  if (g_info.rnd_idx >= g_info.rnd.length) {
+    _rn = fxrand();
+    g_info.rnd.push( _rn );
+  }
+  else {
+    _rn = g_info.rnd[ g_info.rnd_idx ];
+  }
+
+  g_info.rnd_idx++;
+
+  return _rn;
+}
+
+// Choose from a 'probability distribution'
+// array.
+// array should have entries:
+//
+// v - value
+// s - cumulative distribution
+//
+// Inefficient but simple (uses linear scan to
+// find entry).
+//
+function _pdrnd(a, _rnf) {
+  _rnf = ((typeof _rnf === "undefined") ? _mrnd : _rnf);
+
+  let _x = _mrnd();
+
+  for (let i=0; i<a.length; i++) {
+    if (_x > a[i].s) { continue; }
+    return a[i].v;
+  }
+
+
+  return undefined;
+}
+
+
+// Choose from a 'probability distribution'
+// array with weights as values.
+// Probability distribution is derived
+// from weights (summed, renormalized).
+//
+// Array should have entries:
+//
+// v - value
+// w - weight
+//
+function _pwrnd(a, _rnf) {
+
+  let _N = 0;
+  let _pd = [];
+  for (let i=0; i<a.length; i++) {
+    if (!("v" in a[i])) { continue; }
+    let _w = 1;
+    if ("w" in a[i]) { _w = a[i].w; }
+
+    _N += _w;
+
+    _pd.push( { "v": a[i].v, "s": _N } );
+  }
+
+  for (let i=0; i<_pd.length; i++) {
+    _pd[i].s /= _N;
+  }
+
+  return _pdrnd(_pd, _rnf);
+}
+
+function loadjson(fn, cb) {
+  var xhr = new XMLHttpRequest();
+  xhr.overrideMimeType("application/json");
+  xhr.open("GET", fn, true);
+  xhr.onreadystatechange = function() {
+    if ((xhr.readyState === 4) && (xhr.status === 200)) {
+      cb(xhr.responseText);
+    }
+  }
+  xhr.send(null);
+}
+
+// https://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
+// https://stackoverflow.com/users/96100/tim-down
+//
+function _tohex(c) {
+  var hex = c.toString(16);
+  return hex.length == 1 ? "0" + hex : hex;
+}
+
+function _rgb2hex(r, g, b) {
+  if (typeof g === "undefined") {
+    return "#" + _tohex(r.r) + _tohex(r.g) + _tohex(r.b);
+  }
+  return "#" + _tohex(r) + _tohex(g) + _tohex(b);
+}
+
+
+function _hex2rgb(rgb) {
+  let s = 0;
+  let d = 2;
+  if (rgb[0] == '#') {
+    rgb = rgb.slice(1);
+  }
+  if (rgb.length==3) { d = 1; }
+  let hxr = rgb.slice(s,s+d);
+  if (hxr.length==1) { hxr += hxr; }
+  s += d;
+
+  let hxg = rgb.slice(s,s+d);
+  if (hxg.length==1) { hxg += hxg; }
+  s += d;
+  
+  let hxb = rgb.slice(s,s+d);
+  if (hxb.length==1) { hxb += hxb; }
+  s += d;
+
+  let v = { "r": parseInt(hxr,16), "g": parseInt(hxg,16), "b": parseInt(hxb,16) };
+  return v;
+}
+
+function _hex_dhsv(hexstr, dh, ds, dv) {
+  let hsv_c = _hex2hsv(hexstr);
+  hsv_c.h = _clamp(hsv_c.h + dh, 0, 1);
+  hsv_c.s = _clamp(hsv_c.s + ds, 0, 1);
+  hsv_c.v = _clamp(hsv_c.v + dv, 0, 1);
+  let rgb_c = HSVtoRGB(hsv_c.h, hsv_c.s, hsv_c.v);
+  return _rgb2hex(rgb_c.r, rgb_c.g, rgb_c.b);
+}
+
+// https://stackoverflow.com/a/596243 CC-BY-SA
+// https://stackoverflow.com/users/61574/anonymous
+//
+function _brightness(r, g, b) {
+  return ((r/255.0)*0.299) + (0.587*(g/255.0)) + (0.114*(b/255.0));
+}
+
+function _hex_brightness(hexstr) {
+  let rgb = _hex2rgb(hexstr.toString());
+  return _brightness(rgb.r, rgb.g, rgb.b);
+}
+
+//  https://stackoverflow.com/a/17243070
+// From user Paul S. (https://stackoverflow.com/users/1615483/paul-s)
+//
+/* accepts parameters
+ * h  Object = {h:x, s:y, v:z}
+ * OR 
+ * h, s, v
+ * 0 <= h,s,v, <=1
+*/
+function HSVtoRGB(h, s, v) {
+  var r, g, b, i, f, p, q, t;
+  if (arguments.length === 1) { s = h.s, v = h.v, h = h.h; }
+  i = Math.floor(h * 6);
+  f = h * 6 - i;
+  p = v * (1 - s);
+  q = v * (1 - f * s);
+  t = v * (1 - (1 - f) * s);
+  switch (i % 6) {
+    case 0: r = v, g = t, b = p; break;
+    case 1: r = q, g = v, b = p; break;
+    case 2: r = p, g = v, b = t; break;
+    case 3: r = p, g = q, b = v; break;
+    case 4: r = t, g = p, b = v; break;
+    case 5: r = v, g = p, b = q; break;
+  }
+  return {
+    r: Math.round(r * 255),
+    g: Math.round(g * 255),
+    b: Math.round(b * 255)
+  };
+}
+
+/* accepts parameters
+ * r  Object = {r:x, g:y, b:z}
+ * OR 
+ * r, g, b
+ *
+ * 0 <= r,g,b <= 255
+*/
+function RGBtoHSV(r, g, b) {
+  if (arguments.length === 1) { g = r.g, b = r.b, r = r.r; }
+  var max = Math.max(r, g, b), min = Math.min(r, g, b),
+    d = max - min,
+    h,
+    s = (max === 0 ? 0 : d / max),
+    v = max / 255;
+
+  switch (max) {
+    case min: h = 0; break;
+    case r: h = (g - b) + d * (g < b ? 6: 0); h /= 6 * d; break;
+    case g: h = (b - r) + d * 2; h /= 6 * d; break;
+    case b: h = (r - g) + d * 4; h /= 6 * d; break;
+  }
+
+  return { h: h, s: s, v: v };
+}
+
+function HSVtoHSL(h, s, v) {
+  if (arguments.length === 1) { s = h.s, v = h.v, h = h.h; }
+  var _h = h,
+    _s = s * v, _l = (2 - s) * v;
+  _s /= (_l <= 1) ? _l : 2 - _l;
+  _l /= 2;
+  return { h: _h, s: _s, l: _l };
+}
+
+function HSLtoHSV(h, s, l) {
+  if (arguments.length === 1) { s = h.s, l = h.l, h = h.h; }
+  var _h = h, _s, _v; l *= 2;
+  s *= (l <= 1) ? l : 2 - l;
+  _v = (l + s) / 2;
+  _s = (2 * s) / (l + s);
+  return { h: _h, s: _s, v: _v };
+}
+
+
 
 
 // pos boundary conditions:
@@ -1459,6 +2015,349 @@ function _v_in(v, va, _eps) {
   return -1;
 }
 
+
+function decorate_pgr_cgroup(pgr, x,y,z, cgroup, lvl) {
+  lvl = ((typeof lvl === "undefined") ? 0 : lvl);
+
+  if (_oob(pgr, x,y,z)){ return; }
+  if (pgr[z][y][x][0].processed) { return; }
+
+  pgr[z][y][x][0].cgroup = cgroup;
+  pgr[z][y][x][0].processed = true;
+
+  let key_anchor = pgr[z][y][x][0].name;
+
+  let admissible_nei = g_template.admissible_nei;
+  let dva = g_template.admissible_pos;
+  for (let dvidx=0; dvidx<dva.length; dvidx++) {
+
+    let dv_key = dva[dvidx].dv_key;
+    let dv = dva[dvidx].dv;
+
+    let _p = _posbc(pgr, x+dv[0], y+dv[1], z+dv[2]);
+    let ux = _p[0],
+        uy = _p[1],
+        uz = _p[2];
+
+    if (_oob(pgr, ux, uy, uz)) { continue; }
+
+    let key_nei = pgr[uz][uy][ux][0].name;
+    if (!(key_nei in admissible_nei[key_anchor][dv_key])) { continue; }
+    if (!admissible_nei[key_anchor][dv_key][key_nei].conn) { continue; }
+
+    decorate_pgr_cgroup(pgr, ux,uy,uz, cgroup, lvl+1);
+  }
+
+}
+function decorate_pgr(pgr) {
+
+  let admissible_nei = g_template.admissible_nei;
+
+  let cur_cgroup = 0;
+
+  for (let z=0; z<pgr.length; z++) {
+    for (let y=0; y<pgr[z].length; y++) {
+      for (let x=0; x<pgr[z][y].length; x++) {
+        pgr[z][y][x][0]["cgroup"] = -1;
+        pgr[z][y][x][0]["processed"] = false;
+      }
+    }
+  }
+
+  let dva = g_template.admissible_pos;
+
+  for (let z=0; z<pgr.length; z++) {
+    for (let y=0; y<pgr[z].length; y++) {
+      for (let x=0; x<pgr[z][y].length; x++) {
+        if (pgr[z][y][x][0].processed) { continue; }
+
+        pgr[z][y][x][0].processed = true;
+        pgr[z][y][x][0].cgroup = cur_cgroup;
+
+        let key_anchor = pgr[z][y][x][0].name;
+
+        for (let dvidx=0; dvidx<dva.length; dvidx++) {
+          let dv_key = dva[dvidx].dv_key;
+          let dv = dva[dvidx].dv;
+
+          let _p = _posbc(pgr, x+dv[0], y+dv[1], z+dv[2]);
+          let ux = _p[0],
+              uy = _p[1],
+              uz = _p[2];
+
+          if (_oob(pgr, ux,uy,uz)) { continue; }
+
+          let key_nei = pgr[uz][uy][ux][0].name;
+          if (!(key_nei in admissible_nei[key_anchor][dv_key])) { continue; }
+          if (!admissible_nei[key_anchor][dv_key][key_nei].conn) { continue; }
+
+          decorate_pgr_cgroup(pgr, ux,uy,uz, cur_cgroup);
+
+        }
+
+        cur_cgroup++;
+
+      }
+    }
+  }
+
+}
+
+function pgr_stat(pgr) {
+  let _stat = {
+    "group_size": {},
+    "tile_count": {}
+  };
+
+  for (let z=0; z<pgr.length; z++) {
+    for (let y=0; y<pgr[z].length; y++) {
+      for (let x=0; x<pgr[z][y].length; x++) {
+
+        for (let cidx=0; cidx<pgr[z][y][x].length; cidx++) {
+          let _name = pgr[z][y][x][cidx].name;
+          if (_name.length == 0) { continue; }
+
+          let cname = _name.charAt(0);
+          if (!(cname in _stat.tile_count)) {
+            _stat.tile_count[cname] = 0;
+          }
+          _stat.tile_count[cname]++;
+
+          if (cname == '.') { continue; }
+
+          if (!("cgroup"in pgr[z][y][x][cidx])) { continue; }
+          let cgroup = pgr[z][y][x][cidx].cgroup;
+          if (!(cgroup in _stat.group_size)) {
+            _stat.group_size[cgroup] = 0;
+          }
+          _stat.group_size[cgroup]++;
+        }
+
+      }
+    }
+  }
+
+  return _stat;
+}
+
+
+function pgr_blank(pgr, x0, y0, z0, dx, dy, dz) {
+
+  for (let z=z0; z<(z0+dz); z++) {
+    for (let y=y0; y<(y0+dy); y++) {
+      for (let x=x0; x<(x0+dx); x++) {
+
+        if (_oob(pgr, x,y,z)) { continue; }
+        pgr[z][y][x] = [{ "name": ".000", "valid": true, "processed": false }];
+      }
+    }
+  }
+}
+
+
+function realize_tri_from_grid(gr, pgr, show_debug) {
+  show_debug = ((typeof show_debug === "undefined") ? false : show_debug);
+  g_info.debug = gr;
+  g_info.data.tri = [];
+  g_info.data.tri_color_idx = [];
+
+  let Mz = gr.length,
+      My = gr[0].length,
+      Mx = gr[0][0].length;
+  let S = 1;
+  let tx = g_info.cx,
+      ty = g_info.cy,
+      tz = g_info.cz;
+
+  let n = gr.length;
+
+  tx = -S*((Mx-1)/2);
+  ty = -S*((My-1)/2);
+  tz = -S*((Mz-1)/2);
+
+  color_idx=0;
+
+  let mM = [];
+
+  for (let zidx=0; zidx<gr.length; zidx++) {
+    for (let yidx=0; yidx<gr[zidx].length; yidx++) {
+      for (let xidx=0; xidx<gr[zidx][yidx].length; xidx++) {
+
+        let u = gr[zidx][yidx][xidx];
+        let template_u = u[0];
+        if (template_u == '.') { continue; }
+
+        if ((!show_debug) && (template_u == 'd')) { continue; }
+
+        let ent = g_template.rot_lib[u];
+
+        let _rx = Math.PI*ent.r[0]/2;
+        let _ry = Math.PI*ent.r[1]/2;
+        let _rz = Math.PI*ent.r[2]/2;
+
+        let _tri = _template_rot_mov(g_template[template_u], _rx, _ry, _rz, xidx, yidx, zidx);
+        _p_mul_mov(_tri, S, tx, ty, tz);
+        g_info.data.tri.push(_tri);
+
+        for (let ii=0; ii<_tri.length; ii+=3) {
+          if (mM.length==0) {
+            mM.push(_tri[ii]);
+            mM.push(_tri[ii]);
+            mM.push(_tri[ii+1]);
+            mM.push(_tri[ii+1]);
+            mM.push(_tri[ii+2]);
+            mM.push(_tri[ii+2]);
+          }
+
+          if (mM[0] > _tri[ii+0]) { mM[0] = _tri[ii+0]; }
+          if (mM[1] < _tri[ii+0]) { mM[1] = _tri[ii+0]; }
+
+          if (mM[2] > _tri[ii+1]) { mM[2] = _tri[ii+1]; }
+          if (mM[3] < _tri[ii+1]) { mM[3] = _tri[ii+1]; }
+
+          if (mM[4] > _tri[ii+2]) { mM[4] = _tri[ii+2]; }
+          if (mM[5] < _tri[ii+2]) { mM[5] = _tri[ii+2]; }
+
+        }
+
+        if ("cgroup" in pgr[zidx][yidx][xidx][0]) {
+          g_info.data.tri_color_idx.push( pgr[zidx][yidx][xidx][0].cgroup );
+        }
+        else {
+          g_info.data.tri_color_idx.push(color_idx);
+          color_idx++;
+        }
+
+        if (g_info.debug_level > 3) {
+          console.log(u, template_u);
+        }
+
+      }
+    }
+  }
+
+
+  if (g_info.debug_level>2) {
+    console.log("tri xX:", mM[0], mM[1]);
+    console.log("tri yY:", mM[2], mM[3]);
+    console.log("tri zZ:", mM[4], mM[5]);
+  }
+
+}
+
+function realize_tri_from_sp_grid(gr, restrict_tile_h) {
+  restrict_tile_h = ((typeof restrict_tile_h === "undefined") ? {} : restrict_tile_h);
+  g_info.debug = gr;
+  g_info.data.tri = [];
+
+  //let S = 60;
+  let S = 160;
+  let tx = g_info.cx,
+      ty = g_info.cy,
+      tz = g_info.cz;
+
+  for (let zidx=0; zidx<gr.length; zidx++) {
+    for (let yidx=0; yidx<gr[zidx].length; yidx++) {
+      for (let xidx=0; xidx<gr[zidx][yidx].length; xidx++) {
+
+        let m = gr[zidx][yidx][xidx].length;
+        let _fac = Math.pow( (1/3), Math.floor(m/27)+1 );
+
+        for (let cidx=0; cidx<m; cidx++) {
+          let u = gr[zidx][yidx][xidx][cidx].name;
+          let template_u = u.charAt(0);
+          if (template_u == '.') { continue; }
+
+          if (template_u in restrict_tile_h) { continue; }
+          if (u in restrict_tile_h) { continue; }
+
+          let _f = 0.125;
+
+          let __x = fxrand()*_f;
+          let __y = fxrand()*_f;
+          let __z = fxrand()*_f;
+
+          let dx = _f*(cidx%3) + __x;
+          let dy = _f*(Math.floor(cidx/3)%3) + __y;
+          let dz = _f*(Math.floor(cidx/9)%3) + __z;
+
+
+          let ent = g_template.rot_lib[u];
+
+          let _rx = Math.PI*ent.r[0]/2;
+          let _ry = Math.PI*ent.r[1]/2;
+          let _rz = Math.PI*ent.r[2]/2;
+
+          let tu = [];
+          for (let ii=0; ii<g_template[template_u].length; ii++) {
+            tu.push( g_template[template_u][ii] );
+          }
+          let vv = _p_mul_mov(tu, _fac, dx, dy, dz);
+
+          let _tri = _template_rot_mov(vv, _rx, _ry, _rz, xidx, yidx, zidx);
+          _p_mul_mov(_tri, S, tx + dx, ty + dy, tz + dz);
+          g_info.data.tri.push(_tri);
+
+
+          if (g_info.debug_level > 3) {
+            console.log(u, template_u);
+          }
+        }
+      }
+    }
+  }
+
+
+}
+
+
+function palette_load_json(txt) {
+  let dat = JSON.parse(txt);
+  g_info.palette = dat.pal;
+
+  //palette_load();
+}
+
+function palette_load(pal_idx) {
+  pal_idx = ((typeof pal_idx === "undefined") ? _irnd(g_info.palette.length) : pal_idx );
+  g_info.palette_idx = pal_idx;
+  g_info.palette_choice = g_info.palette[ pal_idx ];
+  //g_info.palette_choice = _arnd( g_info.palette );
+
+  if ("background" in g_info.palette_choice) {
+    let n = g_info.palette_choice.colors.length;
+
+    let distinct = true;
+    for (let i=0; i<n; i++) {
+      if (g_info.palette_choice.colors[i] == g_info.palette_choice.background) {
+        distinct = false;
+        break;
+      }
+    }
+
+    if (distinct) {
+      g_info.bg_color = g_info.palette_choice.background;
+    }
+
+  }
+
+}
+
+
+function loadjson(fn, cb) {
+  var xhr = new XMLHttpRequest();
+  xhr.overrideMimeType("application/json");
+  xhr.open("GET", fn, true);
+  xhr.onreadystatechange = function() {
+    if ((xhr.readyState === 4) && (xhr.status === 200)) {
+      cb(xhr.responseText);
+    }
+  }
+  xhr.send(null);
+}
+
+
+
 //
 // m[t_idx][dv_Key] : {
 //   val
@@ -1558,7 +2457,7 @@ function init_pgr(pgr_dim) {
             "valid": true,
             "processed":false,
             "mu": [ ],
-            "cgroup":-1
+            "cgroup":0
           };
 
           for (let t=0; t<2; t++) {
@@ -2570,14 +3469,1292 @@ function grid_bpc(pgr) {
 
   console.log("end");
 
+}
+
+//---------
+//---------
+//---------
+function threejs_init() {
+
+  g_info.container = document.getElementById( 'container' );
+
+  //---
+
+  g_info.aspect = window.innerWidth / window.innerHeight;
+  g_info.camera = new THREE.OrthographicCamera(-g_info.frustumSize * g_info.aspect/2,
+                                                g_info.frustumSize * g_info.aspect/2,
+                                                g_info.frustumSize/2,
+                                               -g_info.frustumSize/2,
+                                                -8000,
+                                                8000);
+
+  g_info.camera.position.z = 0;
+
+  g_info.scene = new THREE.Scene();
+
+  let bg = '#070707';
+  if ("background" in g_info.palette_choice) {
+    bg = g_info.palette_choice.background;
+  }
+  g_info.background_color = bg;
+  g_info.background_brightness = _hex_brightness(bg);
+
+  g_info.max_color_brightness = 0.0;
+  for (let ii=0; ii<g_info.palette_choice.colors.length; ii++) {
+    let b = _hex_brightness( g_info.palette_choice.colors[ii] );
+    if (b > g_info.max_color_brightness) {
+      g_info.max_color_brightness = b;
+    }
+  }
+
+  g_info.scene.background = new THREE.Color( bg );
+  g_info.scene.fog = new THREE.Fog( bg, 16, 1024);
+
+
+  g_info.renderer = new THREE.WebGLRenderer({ "antialias": true });
+  g_info.renderer.setPixelRatio( window.devicePixelRatio );
+  g_info.renderer.setSize( window.innerWidth, window.innerHeight );
+  g_info.renderer.outputEncoding = THREE.sRGBEncoding;
+
+  let directional_light = true;
+  if (directional_light) {
+    //g_info.light.push(new THREE.DirectionalLight( 0xffffff, 1.5 ));
+    //g_info.light.push(new THREE.DirectionalLight( 0xffffff, 1.5 ));
+    g_info.light.push(new THREE.DirectionalLight( 0xffffff, 1.5 ));
+    g_info.light[0].position.set( 1, 1, 1 ).normalize();
+
+    // SHADOW
+    //
+    //let use_shadow = true;
+    if (g_info.use_shadow) {
+
+      let sdim = 1024;
+      sdim = 2048;
+
+      g_info.light[0].castShadow = true;
+
+      //g_info.light[0].shadow.camera.near  = -1000;
+      //g_info.light[0].shadow.camera.far   =  1000;
+
+      g_info.light[0].shadow.camera.near  = -4096;
+      g_info.light[0].shadow.camera.far   =  4096;
+
+      //g_info.light[0].shadow.camera.near  = -1024;
+      //g_info.light[0].shadow.camera.far   =  2048;
+
+      g_info.light[0].shadow.camera.top    = -sdim;
+      g_info.light[0].shadow.camera.bottom =  sdim;
+      g_info.light[0].shadow.camera.left  = -sdim;
+      g_info.light[0].shadow.camera.right =  sdim;
+
+      /*
+      g_info.light[0].shadow.camera.top    =  sdim;
+      g_info.light[0].shadow.camera.bottom = -sdim;
+      g_info.light[0].shadow.camera.left  =  sdim;
+      g_info.light[0].shadow.camera.right = -sdim;
+      */
+
+      g_info.light[0].shadow.mapSize.width = 1024*4;
+      g_info.light[0].shadow.mapSize.height = 1024*4;
+
+      //g_info.light[0].shadow.mapSize.width = 4096;
+      //g_info.light[0].shadow.mapSize.height = 4096;
+
+      g_info.light[0].shadow.radius = 4;
+      //g_info.light[0].shadow.radius = 8;
+      //g_info.light[0].shadow.radius = 16;
+      //g_info.light[0].shadow.radius = 2;
+      //g_info.light[0].shadow.radius = 1;
+      g_info.light[0].shadow.bias = -0.0005;
+      //g_info.light[0].shadow.bias = -0.05;
+      //g_info.light[0].shadow.bias = -0.005;
+      //g_info.light[0].shadow.bias = -(0.5/2048);
+
+      //g_info.light[0].shadow.bias = 1;
+
+    }
+
+    g_info.scene.add( g_info.light[0] );
+  }
+  let use_composer = true;
+  if (use_composer) {
+
+    //let depthtexture = new THREE.DepthTexture();
+    //g_info.depth_texture = depthtexture;
+
+    let webgl_opt = {
+      //"depthTexture" : depthtexture,
+      //"depthBuffer": true,
+      "samples": 2
+    };
+
+    let sz = g_info.renderer.getDrawingBufferSize( new THREE.Vector2() );
+    let _wglrt = new THREE.WebGLRenderTarget( sz.width, sz.height, { "samples": 2} );
+
+    let composer = new POSTPROCESSING.EffectComposer(g_info.renderer, _wglrt);
+    g_info.composer = composer;
+
+
+
+    let renderpass = new POSTPROCESSING.RenderPass(g_info.scene, g_info.camera);
+    composer.addPass(renderpass);
+    g_info.render_pass = renderpass;
+
+    let use_bloom = true;
+    if (use_bloom) {
+      let bloom_opt = {
+        "intensity": 0.25,
+        "kernelSize": 2
+      };
+
+      if (g_info.background_brightness > 0.85) {
+        bloom_opt.intensity = 0.25;
+      }
+
+      let bloomeffect = new POSTPROCESSING.BloomEffect(bloom_opt);
+      let bloompass = new POSTPROCESSING.EffectPass(g_info.camera, bloomeffect);
+      g_info.bloom_effect = bloomeffect;
+      g_info.bloom_pass = bloompass;
+      composer.addPass(bloompass);
+    }
+
+    let use_fxaa = true;
+    if (use_fxaa) {
+      let fxaa_opt = {
+        "subpixelQuality": 4,
+        "samples": 4
+      }
+
+      let fxaaeffect = new POSTPROCESSING.FXAAEffect(fxaa_opt);
+      let fxaapass = new POSTPROCESSING.EffectPass(g_info.camera, fxaaeffect);
+      g_info.fxaa_effect = fxaaeffect;
+      g_info.fxaa_pass = fxaapass;
+      composer.addPass(fxaapass);
+    }
+
+
+    let use_vignette = false;
+    if (use_vignette) {
+      let vignette_opt = {
+        "offset": 0.5,
+        "darkness": 0.5
+      }
+
+      let vignette_effect = new POSTPROCESSING.VignetteEffect(vignette_opt);
+      let vignette_pass = new POSTPROCESSING.EffectPass(g_info.camera, vignette_effect);
+      g_info.vignette_effect = vignette_effect;
+      g_info.vignette_pass = vignette_pass;
+
+      composer.addPass(vignette_pass);
+    }
+  }
+
+  g_info.container.appendChild( g_info.renderer.domElement );
+
+  window.addEventListener( 'resize', window_resize );
+  window.addEventListener( 'mousemove', mouse_move );
+  window.addEventListener( 'wheel', mouse_wheel );
+
+  //---
+
+  //let intensity_range = 3.75;
+  //let intensity_max = 4;
+
+  //let I = 0.125;
+  let I = 1/16;
+  let intensity_max_val = [ 4,4,4,4, 4,3,2,2,1.5];
+  intensity_max_val = [ I,I,I,I ];
+
+  //let intensity_max = 2;
+  let intensity_max = intensity_max_val[ g_info.n_point_light-1 ];
+  let intensity_min = 0.75;
+  let intensity_range = intensity_max - intensity_min;
+
+  if (g_info.background_brightness > 0.75) {
+    I /= 2;
+    intensity_min /= 2;
+  }
+
+  if (g_info.max_color_brightness > 0.7) {
+    I /= 2;
+    intensity_min /= 2;
+  }
+
+
+  intensity_max = I;
+  intensity_range = intensity_max - intensity_min;
+
+  //console.log("I:", I, "m:", intensity_min, "r:", intensity_range);
+
+  /*
+  if ((g_info.background_brightness > 0.75) ||
+      (g_info.max_color_brightness > 0.75)) {
+    intensity_max_val = [ 2,2,2,2, 2,1.6,1,1,0.75];
+    intensity_max_val = [ I/2, I/2, I/2, I/2 ];
+    intensity_max = intensity_max_val[ g_info.n_point_light-1 ];
+    intensity_min = 0.5;
+    intensity_range = intensity_max - intensity_min;
+  }
+  */
+
+
+
+  let point_light = [];
+
+  //let n_point_light = 8;
+  //let n_point_light = _irnd(4,8);
+  let n_point_light = g_info.n_point_light;
+
+  //n_point_light = 4;
+
+  //let _ldist = 4*g_info.tri_scale * g_info.grid_size;
+  //let _ldist = 2*g_info.tri_scale * g_info.grid_size;
+  let _ldist = 2*g_info.tri_scale * g_info.avg_grid_size;
+
+  //let ds = [200,200,1000];
+  //let _B = g_info.tri_scale * g_info.grid_size;
+  let _B = g_info.tri_scale * g_info.avg_grid_size;
+  //let ds = [ 2*_B, 2*_B, 2*_B ];
+  let ds = [ _B, _B, _B ];
+
+  //let ds = [8000, 8000, 8000];
+  let pld = [],
+      pli = [],
+      plc = [],
+      plld = [];
+  for (let ii=0; ii<n_point_light; ii++) {
+    pld.push( [ (fxrand()-0.5)*ds[0], (fxrand()-0.5)*ds[1], (fxrand()-0.5)*ds[2] ] );
+    //pli.push( (3/n_point_light) - (fxrand()/n_point_light) );
+
+    //WIP
+    //pli.push( intensity_min + fxrand()*intensity_range );
+    //pli.push( _rndpow(0.5, intensity_min, intensity_min + intensity_range) );
+    pli.push( __rndpow(3)*intensity_range + intensity_min );
+
+    plld.push(_ldist);
+    plc.push(0xffffff);
+  }
+  //pli[0] = 3;
+  //pld.push([0,0,0]);
+
+  //let pld = [ [ds, 0, 0], [0, ds, 0], [0, 0, ds], [0.25, 1.5,1.5] ];
+  //let plc = [ 0xff0000, 0x00ff00, 0x0000ff, 0xffffff ];
+  //let plc = [ 0x20357e, 0xf44242, 0xffffff, 0xffffff ]
+  //let plc = [ 0xffffff, 0xffffff, 0xffffff, 0xffffff ]
+  //let pli = [ 8, 8, 1, 1 ];
+  //let pli = [ 2, 2, 2, 1 ];
+  //let pll = [ dl, dl, dl, 100 ];
+
+
+  for (let ii=0; ii<pld.length; ii++) {
+    point_light.push(new THREE.PointLight( plc[ii], pli[ii], plld[ii], 2));
+    point_light[ii].position.set( pld[ii][0], pld[ii][1], pld[ii][2] );
+    g_info.scene.add( point_light[ii] );
+  }
+
+  g_info["point_light"] = point_light;
+  g_info["point_light_info"]  = { "pos": pld, "intensity": pli, "color": plc, "dist": plld };
+
+  /*
+  point_light[0].position.set( ds, 0, 0 );
+  g_info.scene.add( point_light[0] );
+
+  point_light.push(new THREE.PointLight( 0x00ff00, 4, 1000 ));
+  point_light[1].position.set( 0, ds, 0 );
+  g_info.scene.add( point_light[1] );
+
+  point_light.push(new THREE.PointLight( 0x0000ff, 4, 1000 ));
+  point_light[2].position.set( 0, 0, ds );
+  g_info.scene.add( point_light[2] );
+
+  point_light.push(new THREE.PointLight( 0xffffff, 1, 1000 ));
+  point_light[3].position.set( 0, 0, 0 );
+  g_info.scene.add( point_light[3] );
+  */
+
+  //------
+  //------
+  //------
+  //
+  let cx = g_info.cx;
+  let cy = g_info.cy;
+  let cz = g_info.cz;
+
+  g_info.loading_line_geom = new THREE.BufferGeometry();
+
+  let loading_line_range = 1000;
+
+  let loading_line_material = new THREE.LineBasicMaterial({
+    "transparent": true,
+    "opacity": 1,
+    "linewidth": 4,
+    "vertexColors": true
+  });
+  let loading_line_pos = [];
+  let loading_line_color = [];
+
+
+  let _lr = 250;
+
+  let _c = 1.0;
+
+  let bg_rgb = _hex2rgb(bg.toString());
+  if (_brightness(bg_rgb.r, bg_rgb.g, bg_rgb.b) > 0.5) {
+    _c = 0.0;
+  }
+
+  let _llS = (1/16)*250;
+  let _lld = 16;
+  let _lln = _lld*_lld;
+
+  let _llc = [-_lld*_llS/2, -_lld*_llS/2, 0];
+  for (let ii=0; ii<_lln; ii++) {
+    let xy = hilbert_curve_d2xy(_lln, ii);
+
+    loading_line_pos.push( _llc[0]+(xy[0]*_llS), _llc[1]+(xy[1]*_llS), cz );
+
+    loading_line_color.push(_c);
+    loading_line_color.push(_c);
+    loading_line_color.push(_c);
+  }
+
+  /*
+  loading_line_pos.push(cx,cy,cz);
+  loading_line_pos.push(cx+_lr,cy+_lr,cz+_lr);
+
+  loading_line_pos.push(cx-_lr,cy+_lr,cz+_lr);
+  loading_line_pos.push(cx-_lr,cy-_lr,cz+_lr);
+  loading_line_pos.push(cx+_lr,cy-_lr,cz+_lr);
+  loading_line_pos.push(cx+_lr,cy+_lr,cz+_lr);
+
+  loading_line_pos.push(cx+_lr,cy+_lr,cz-_lr);
+  loading_line_pos.push(cx-_lr,cy+_lr,cz-_lr);
+  loading_line_pos.push(cx-_lr,cy-_lr,cz-_lr);
+  loading_line_pos.push(cx+_lr,cy-_lr,cz-_lr);
+  loading_line_pos.push(cx+_lr,cy+_lr,cz-_lr);
+
+  for (let i=0; i<11; i++) {
+    loading_line_color.push(_c);
+    loading_line_color.push(_c);
+    loading_line_color.push(_c);
+  }
+  */
+
+  g_info.loading_line_material = loading_line_material;
+  g_info.loading_line_geom.setAttribute( 'position', new THREE.Float32BufferAttribute( loading_line_pos, 3 ) );
+  g_info.loading_line_geom.setAttribute( 'color', new THREE.Float32BufferAttribute( loading_line_color, 3 ) );
+
+  g_info.loading_line_geom.computeBoundingSphere();
+  g_info.loading_line = new THREE.Line( g_info.loading_line_geom, loading_line_material );
+
+  g_info.scene.add( g_info.loading_line );
+
+  g_info.loading_line_active = true;
+  g_info.loading_line_fg = _c;
+  g_info.loading_line_bg = 1-_c;
+
+  //---
+}
+
+function threejs_scene_init() {
+
+  let cx = g_info.cx;
+  let cy = g_info.cy;
+  let cz = g_info.cz;
+
+  //
+  //------
+  //------
+  //------
+
+  g_info.geometry = new THREE.BufferGeometry();
+
+  const positions = [];
+  const normals = [];
+  const colors = [];
+
+  const color = new THREE.Color();
+
+  //const n = 800, n2 = n / 2; // triangles spread in the cube
+
+  const pA = new THREE.Vector3();
+  const pB = new THREE.Vector3();
+  const pC = new THREE.Vector3();
+
+  const cb = new THREE.Vector3();
+  const ab = new THREE.Vector3();
+
+  let tri_vf = g_info.data.tri;
+
+  //let pal = g_info.palette[ g_info.palette_idx ];
+  let pal = g_info.palette_choice;
+
+  //DEBUG
+  //pal.colors = [ '#524582', '#367bc3', '#38bfa7', '#8fe1a2' ];
+  //pal.colors = ['#FB938F', '#F2CAC8', '#C36B85', '#FDBB75' ];
+
+  let color_idx = _irnd(pal.colors.length);
+
+  //const d = 12,
+  const d = g_info.tri_scale,
+        d2 = 0;
+        //d2 = d/2;
+  for (let idx=0; idx<tri_vf.length; idx++) {
+
+    //let pal = g_info.palette[ g_info.palette_idx ];
+    //let color_hex = pal.colors[ _irnd(pal.colors.length) ];
+
+    color_idx = g_info.data.tri_color_idx[idx] % pal.colors.length;
+    let color_hex = pal.colors[ color_idx ];
+
+    let rgb = _hex2rgb(color_hex);
+    color.setRGB( rgb.r/255, rgb.g/255, rgb.b/255 );
+
+    /*
+    let hsv = RGBtoHSV(rgb.r, rgb.g, rgb.b);
+    hsv.s += (fxrand()-0.5)/12;
+    hsv.v += (fxrand()-0.5)/12;
+    if (hsv.s<0){ hsv.s = 0; }
+    if (hsv.s>1){ hsv.s = 1; }
+    if (hsv.v<0){ hsv.v = 0; }
+    if (hsv.v>1){ hsv.v = 1; }
+    rgb = HSVtoRGB(hsv.h, hsv.s, hsv.v);
+    color.setRGB( rgb.r/255, rgb.g/255, rgb.b/255 );
+    */
+
+
+    let alpha = 1;
+
+    for ( let i = 0; i < tri_vf[idx].length; i += 9 ) {
+
+      //const x = -200;
+      //const y = -200;
+      //const z = -200;
+
+      const x = 0;
+      const y = 0;
+      const z = 0;
+
+      let ax = x + tri_vf[idx][i + 0]*d - d2;
+      let ay = y + tri_vf[idx][i + 1]*d - d2;
+      let az = z + tri_vf[idx][i + 2]*d - d2;
+
+      let bx = x + tri_vf[idx][i + 3]*d - d2;
+      let by = y + tri_vf[idx][i + 4]*d - d2;
+      let bz = z + tri_vf[idx][i + 5]*d - d2;
+
+      let cx = x + tri_vf[idx][i + 6]*d - d2;
+      let cy = y + tri_vf[idx][i + 7]*d - d2;
+      let cz = z + tri_vf[idx][i + 8]*d - d2;
+
+      positions.push( ax, ay, az );
+      positions.push( bx, by, bz );
+      positions.push( cx, cy, cz );
+
+      // flat face normals
+      //
+      pA.set( ax, ay, az );
+      pB.set( bx, by, bz );
+      pC.set( cx, cy, cz );
+
+      cb.subVectors( pC, pB );
+      ab.subVectors( pA, pB );
+      cb.cross( ab );
+
+      cb.normalize();
+
+      const nx = cb.x;
+      const ny = cb.y;
+      const nz = cb.z;
+
+      normals.push( nx, ny, nz );
+      normals.push( nx, ny, nz );
+      normals.push( nx, ny, nz );
+
+      colors.push( color.r, color.g, color.b, alpha );
+      colors.push( color.r, color.g, color.b, alpha );
+      colors.push( color.r, color.g, color.b, alpha );
+
+    }
+
+  }
+
+  function disposeArray() { this.array = null; }
+
+  g_info.geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( positions,  3 ).onUpload( disposeArray ) );
+  g_info.geometry.setAttribute( 'normal',   new THREE.Float32BufferAttribute( normals,    3 ).onUpload( disposeArray ) );
+  g_info.geometry.setAttribute( 'color',    new THREE.Float32BufferAttribute( colors,     4 ).onUpload( disposeArray ) );
+
+  g_info.geometry.computeBoundingSphere();
+
+  //---
+
+  /*
+  g_info.renderer = new THREE.WebGLRenderer({ "antialias": true });
+  g_info.renderer.setPixelRatio( window.devicePixelRatio );
+  g_info.renderer.setSize( window.innerWidth, window.innerHeight );
+  g_info.renderer.outputEncoding = THREE.sRGBEncoding;
+  */
+
+  //SHADOW
+  if (g_info.use_shadow) {
+    g_info.renderer.shadowMap.enabled = true;
+    //g_info.renderer.shadowMap.type = THREE.BasicShadowMap;
+    //g_info.renderer.shadowMap.type = THREE.VSMShadowMap;
+    g_info.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    //g_info.renderer.shadowMap.type = THREE.PCFShadowMap;
+  }
+
+
+  if (g_info.material_type == "phong")  {
+    g_info.material = new THREE.MeshPhongMaterial( {
+     color: 0xaaaaaa, specular: 0xffffff, shininess: 0,
+     //color: 0x000, specular: 0x000, shininess: 0,
+     side: THREE.DoubleSide, vertexColors: true, transparent: false
+    } );
+  }
+  else if (g_info.material_type == "toon") {
+    let alpha = 0.0;
+    let beta = 0.0;
+    let gamma = 0.65;
+    let diffuseColor = new THREE.Color().setHSL( alpha, beta, gamma );
+
+
+    let format = ( g_info.renderer.capabilities.isWebGL2 ) ? THREE.RedFormat : THREE.LuminanceFormat;
+
+    let alphaIndex = 256;
+    //alphaIndex = 2048;
+    let colors = new Uint8Array( alphaIndex  );
+    for ( let c = 0; c < colors.length; c ++ ) {
+      colors[ c ] = ( c / (colors.length-1) ) * 255;
+    }
+
+    let gradientMap = new THREE.DataTexture( colors, colors.length, 1, format );
+    gradientMap.needsUpdate = true;
+
+    g_info.material = new THREE.MeshToonMaterial({
+      vertexColors: true,
+      color: diffuseColor,
+      gradientMap: gradientMap,
+      transparent: true,
+      opacity: 0
+    });
+
+  }
+
+  g_info.mesh = new THREE.Mesh( g_info.geometry, g_info.material );
+
+  //SHADOW
+  if (g_info.use_shadow) {
+    g_info.mesh.castShadow = true;
+    g_info.mesh.receiveShadow = true;
+  }
+
+  g_info.scene.add( g_info.mesh );
+
+  // wip
+  //
+  if (g_info.boundary_condition != 'n') {
+    for (let ii=0; ii<g_info.meshN; ii++) {
+      let _msh = new THREE.Mesh( g_info.geometry, g_info.material );
+
+      if (g_info.use_shadow) {
+        _msh.castShadow = true;
+        _msh.receiveShadow = true;
+      }
+
+      g_info.mesha.push( _msh );
+      g_info.scene.add( _msh );
+      //g_info.scene.add( g_info.mesha[ii] );
+    }
+  }
+
+}
+function mouse_move(ev) {
+  ev.preventDefault();
+
+  if (!g_info.ready) { return; }
+
+  g_info.mouse_x =  ((ev.clientX / window.innerWidth)  * 2) - 1;
+  g_info.mouse_y = -((ev.clientY / window.innerHeight) * 2) + 1;
+
+  if (g_info.point_light.length>0) {
+    g_info.point_light[0].position.x = g_info.mouse_x *1000;
+    g_info.point_light[0].position.y = g_info.mouse_y *1000;
+    g_info.point_light[0].position.z = 400;
+  }
+}
+
+function mouse_wheel(ev) {
+  //ev.preventDefault();
+
+  if (!g_info.ready) { return; }
+
+  if (g_info.point_light.length>0) {
+    let _del_i = -ev.deltaY/500;
+    let _intensity = g_info.point_light[0].intensity;
+    let min_intensity = 0.125;
+    let max_intensity = 4;
+    _intensity += _del_i;
+    if ((_intensity > min_intensity) &&
+        (_intensity < max_intensity)) {
+      g_info.point_light[0].intensity = _intensity;
+
+    }
+  }
+
 
 }
 
+function window_resize() {
+
+  g_info.aspect = window.innerWidth / window.innerHeight;
+
+  g_info.camera.left    = -g_info.frustumSize * g_info.aspect/2;
+  g_info.camera.right   =  g_info.frustumSize * g_info.aspect/2;
+  g_info.camera.top     =  g_info.frustumSize /2;
+  g_info.camera.bottom  = -g_info.frustumSize /2;
+  g_info.camera.near    = -8000;
+  g_info.camera.far     =  8000;
+
+  g_info.camera.updateProjectionMatrix();
+  g_info.camera.position.z = 0;
+
+  g_info.renderer.setSize( window.innerWidth, window.innerHeight );
+  if ("composer" in g_info) {
+    g_info.composer.setSize( window.innerWidth, window.innerHeight );
+  }
+
+
+}
+function animate() {
+
+  render();
+  requestAnimationFrame( animate );
+
+  if (g_info.animation_capture) {
+    g_info.capturer.capture( g_info.renderer.domElement );
+
+    let _t = Date.now();
+
+    console.log("!!", g_info.capture_end - _t);
+
+    if (_t >= g_info.capture_end) {
+      g_info.animation_capture = false;
+      g_info.capturer.stop();
+      g_info.capturer.save();
+    }
+
+  }
+
+
+}
+//----
+//
+// The following easing functions taken from https://github.com/ai/easings.net/
+// and available under a GPLv3 license.
+// See https://github.com/ai/easings.net/blob/master/LICENSE for details.
+//
+function easeInOutSine(x) {
+  return -(Math.cos(Math.PI*x) - 1)/2;
+}
+
+function easeInOutQuad(x) {
+  return ( (x<0.5) ? (2*x*x) : (1 - Math.pow(-2*x + 2,2)/2) );
+}
+
+function easeInOutCubic(x) {
+  return ((x<0.5) ? (4*x*x*x) : (1 - Math.pow(-2*x + 2,3)/2) );
+}
+
+function easeInOutQuart(x) {
+  return ((x < 0.5) ? (8*x*x*x*x) : (1 - Math.pow(-2*x + 2,4)/2) );
+}
+//
+//----
+
+function render_n() {
+
+
+
+  const time = Date.now() * g_info.speed_factor;
+  let _t_rem_orig = time - Math.floor(time);
+
+  let N = 3;
+
+  // init
+  //
+  if (g_info.time_prv < 0) {
+    g_info.time_prv = time;
+    g_info.view_prv = _irnd(N);
+    g_info.view_nxt = (_irnd(2) + g_info.view_prv + 1)%N;
+  }
+  //fiddling
+  if ( Math.floor(g_info.time_prv) != Math.floor(time)) {
+    g_info.time_prv = time;
+
+    if (g_info.view_counter == 0) {
+      g_info.view_prv = g_info.view_nxt;
+      g_info.view_nxt = _irnd(N);
+
+      if (g_info.view_nxt == g_info.view_prv) {
+        g_info.view_nxt = (g_info.view_prv+1)%N;
+      }
+
+    }
+
+    g_info.view_counter ++;
+    g_info.view_counter %= g_info.view_counter_n;
+  }
+
+  //----
+  //----
+  //----
+
+
+  let theta_x = Math.sin(time*0.5)*0.125;
+  let theta_y = time*0.5;
+
+  theta_x = 0;
+  theta_y = 0;
+
+  let view_prv = g_info.view_prv;
+  let view_nxt = g_info.view_nxt;
+  let view_counter = g_info.view_counter;
+
+  let _euler = false;
+  if (_euler) {
+    g_info.mesh.rotation.x = g_info.rotx + theta_x;
+    g_info.mesh.rotation.y = g_info.roty + theta_y;
+    g_info.mesh.rotation.z = g_info.rotz;
+  }
+  else {
+
+
+    let mp0 = m4.xRotation(0);
+    let mp1 = m4.yRotation(0);
+
+    let mn0 = m4.xRotation(0);
+    let mn1 = m4.yRotation(0);
+
+    let _t_rem = easeInOutSine(_t_rem_orig);
+
+    if (view_counter != 0) {
+      _t_rem = 0;
+    }
+    else {
+    }
+
+    let D = 4;
+    //D = 1.75;
+    //D = 1.387;
+
+    if (view_prv == 0) {
+      mp0 = m4.xRotation((1-_t_rem)*Math.PI/D);
+      mp1 = m4.yRotation((1-_t_rem)*Math.PI/D);
+    }
+
+    else if (view_prv == 1) {
+      mp0 = m4.xRotation((1-_t_rem)*Math.PI/D);
+      mp1 = m4.zRotation((1-_t_rem)*Math.PI/D);
+    }
+
+    else if (view_prv == 2) {
+      mp0 = m4.yRotation((1-_t_rem)*Math.PI/D);
+      mp1 = m4.zRotation((1-_t_rem)*Math.PI/D);
+    }
+
+
+    else if (view_prv == 3) {
+      mp0 = m4.xRotation((_t_rem)*Math.PI/D);
+      mp1 = m4.yRotation((1-_t_rem)*Math.PI/D);
+    }
+    else if (view_prv == 4) {
+      mp0 = m4.xRotation((_t_rem)*Math.PI/D);
+      mp1 = m4.zRotation((1-_t_rem)*Math.PI/D);
+    }
+    else if (view_prv == 5) {
+      mp0 = m4.yRotation((_t_rem)*Math.PI/D);
+      mp1 = m4.zRotation((1-_t_rem)*Math.PI/D);
+    }
+
+
+    if (view_nxt == 0 ) {
+      mn0 = m4.xRotation(_t_rem*Math.PI/D);
+      mn1 = m4.yRotation(_t_rem*Math.PI/D);
+    }
+    else if (view_nxt == 1) {
+      mn0 = m4.xRotation((_t_rem)*Math.PI/D);
+      mn1 = m4.zRotation((_t_rem)*Math.PI/D);
+    }
+    else if (view_nxt == 2) {
+      mn0 = m4.yRotation((_t_rem)*Math.PI/D);
+      mn1 = m4.zRotation((_t_rem)*Math.PI/D);
+    }
+
+    else if (view_nxt == 3) {
+      mp0 = m4.xRotation((1-_t_rem)*Math.PI/D);
+      mp1 = m4.yRotation((_t_rem)*Math.PI/D);
+    }
+    else if (view_nxt == 4) {
+      mp0 = m4.xRotation((1-_t_rem)*Math.PI/D);
+      mp1 = m4.zRotation((_t_rem)*Math.PI/D);
+    }
+    else if (view_nxt == 5) {
+      mp0 = m4.yRotation((1-_t_rem)*Math.PI/D);
+      mp1 = m4.zRotation((_t_rem)*Math.PI/D);
+    }
+
+    let mrp = m4.multiply(mp1, mp0);
+    let mrn = m4.multiply(mn1, mn0);
+
+    g_info.t_mov += (1/2048);
+    g_info.t_rot += (1/8192)*Math.PI;
+
+    if (g_info.t_rot > (2*Math.PI)) { g_info.t_rot -= 2*Math.PI; }
+
+    let mZ = m4.zRotation( g_info.t_rot );
+    //let mZs = m4.t2( 0, 0, g_info.t_rot*1000 );
+    let mZs = m4.t2(0,0,0);
+
+    let mZoom = m4.scaling(1,1,1);
+
+    /*
+    if (g_info.mouse_pressed) {
+      let _s = g_info.tri_scale * g_info.grid_size * 8;
+      let _mdx = g_info.mouse_y * _s,
+          _mdy = -g_info.mouse_x * _s;
+      let _mdz = 1000;
+      mZs = m4.t2( _mdx, _mdy, _mdz );
+      mZoom = m4.scaling(2,2,2);
+    }
+    */
+
+    //let mZs = m4.translation( 0, 0, g_info.t_rot*30);
+    //let mr = m4.multiply( mZs, m4.multiply( mZ, m4.multiply(mrp, mrn) ) );
+    let mr = m4.multiply( mZoom, m4.multiply( mZs, m4.multiply( mZ, m4.multiply(mrp, mrn) ) ) );
+
+    let m = new THREE.Matrix4();
+    m.set( mr[ 0], mr[ 1], mr[ 2], mr[ 3],
+           mr[ 4], mr[ 5], mr[ 6], mr[ 7],
+           mr[ 8], mr[ 9], mr[10], mr[11],
+           mr[12], mr[13], mr[14], mr[15] );
+
+    g_info.mesh.scale.x = 1;
+    g_info.mesh.scale.y = 1;
+    g_info.mesh.scale.z = 1;
+    g_info.mesh.position.x = 0;
+    g_info.mesh.position.y = 0;
+    g_info.mesh.position.z = 0;
+    g_info.mesh.rotation.x = 0;
+    g_info.mesh.rotation.y = 0;
+    g_info.mesh.rotation.z = 0;
+    g_info.mesh.applyMatrix4(m);
+
+    for (let i=0; i<g_info.debug_cube.length; i++) {
+      g_info.debug_cube[i].position.x = g_info.debug_cube_pos[i][0];
+      g_info.debug_cube[i].position.y = g_info.debug_cube_pos[i][1];
+      g_info.debug_cube[i].position.z = g_info.debug_cube_pos[i][2];
+
+      g_info.debug_cube[i].rotation.x = 0;
+      g_info.debug_cube[i].rotation.y = 0;
+      g_info.debug_cube[i].rotation.z = 0;
+      g_info.debug_cube[i].applyMatrix4(m);
+
+    }
+  }
+
+  theta_x = Math.sin(time*0.5)*0.125;
+  theta_y = time*0.5;
+
+  for (let i=0; i<g_info.light.length; i++) {
+    let _a = time*g_info.light_speed_factor + i*Math.PI/2;
+    let p0 = 7753;
+    let p1 = 7789;
+    let p2 = 7841;
+    let p3 = 7879;
+    let _x = Math.cos(p0*_a);
+    let _y = Math.sin(p1*_a);
+    let _z = Math.cos(p2*_a)*Math.sin(p3*_a);
+
+    g_info.light[i].position.set( _x, _y, _z ).normalize();
+  }
+
+
+  if ("composer" in g_info) {
+    g_info.composer.render();
+  }
+  else {
+    g_info.renderer.render( g_info.scene, g_info.camera );
+  }
+
+  if (g_info.take_screenshot_flag) {
+    let imgdata = g_info.renderer.domElement.toDataURL();
+    screenshot_data(imgdata);
+    g_info.take_screenshot_flag = false;
+  }
+
+}
+
+function render_loading() {
+
+  if ("attributes" in g_info.loading_line_geom) {
+    let line_color = g_info.loading_line_geom.attributes.color.array;
+
+    let lfg = g_info.loading_line_fg;
+    let lbg = g_info.loading_line_bg;
+
+    let n = line_color.length/3;
+    //let alpha = 2*g_info.data.wfc_iter / (g_info.grid_size*g_info.grid_size*g_info.grid_size);
+    let alpha = 2*g_info.data.wfc_iter / (g_info.grid_size[0]*g_info.grid_size[1]*g_info.grid_size[2]);
+    let m = Math.floor(alpha*n);
+    if (m>n) { m=n; }
+    if (m<0) { m=0; }
+
+    for (let ii=0; ii<(3*m); ii+=3) {
+      line_color[ii+0] = lbg;
+      line_color[ii+1] = lbg;
+      line_color[ii+2] = lbg;
+    }
+
+    g_info.loading_line_geom.attributes.color.needsUpdate = true;
+
+  }
+
+
+  if ("composer" in g_info) {
+    g_info.composer.render();
+  }
+  else {
+    g_info.renderer.render( g_info.scene, g_info.camera );
+  }
+}
+
+function render() {
+
+  if (!g_info.ready) {
+    render_loading();
+    return;
+  }
+
+
+  // fade in transition of main object and
+  // fade out transition of loading animation 
+  //
+  if (g_info.material.opacity < (1-(1/1024))) {
+    g_info.material.opacity += 1/32;
+    g_info.loading_line_material.opacity -= 1/32;
+    let s = g_info.loading_line_material.opacity;
+    g_info.loading_line.position.z = -100000*s;
+  }
+  else {
+    if (g_info.loading_line_active) {
+      g_info.scene.remove( g_info.loading_line );
+      g_info.loading_line_active = false;
+    }
+
+    if (!g_info.preview_available) {
+      g_info.preview_available = true;
+      if (typeof fxpreview !== "undefined") {
+        setTimeout( fxpreview, 1000 );
+      }
+    }
+
+
+  }
+
+  if (g_info.material.opacity > 1) {
+    g_info.material.opacity = 1;
+    g_info.loading_line_material.opacity = 0;
+
+  }
+  if (g_info.loading_line_material.opacity < 0) {
+    g_info.loading_line_material.opacity = 0;
+  }
+
+  //---
+
+  // 'zoom' and 'pan' feature for mouse presses
+  //
+  if (g_info.mouse_pressed) {
+    g_info.camera.scale.x = 0.5;
+    g_info.camera.scale.y = 0.5;
+
+    //let _s = g_info.tri_scale * g_info.grid_size ;
+    let _s = g_info.tri_scale * g_info.avg_grid_size ;
+    let _mdx = -g_info.mouse_x * _s,
+        _mdy = -g_info.mouse_y * _s;
+
+    g_info.camera.position.x = _mdx;
+    g_info.camera.position.y = _mdy;
+    g_info.camera.position.z = 0;
+
+  }
+  else {
+    g_info.camera.scale.x = 1;
+    g_info.camera.scale.y = 1;
+
+    g_info.camera.position.x = 0;
+    g_info.camera.position.y = 0;
+    g_info.camera.position.z = 0;
+  }
+
+  // finally, conditionally render depending
+  // on our boundary conditions
+  //
+  if (g_info.boundary_condition == 'z') {
+    render_z();
+  }
+  else if (g_info.boundary_condition == 'zy') {
+    render_zy();
+  }
+  else {
+    render_n();
+  }
+
+}
+
+//---------
+//---------
+//---------
+
+
+function init_param() {
+
+  // palette choice
+  //
+  g_info.palette_idx = _irnd( g_info.palette.length );
+
+  palette_load(g_info.palette_idx);
+
+  g_info.features["Palette"] = g_info.palette[ g_info.palette_idx ].name;
+  g_info.palette_choice = g_info.palette[ g_info.palette_idx ];
+
+  // take out black?
+  //
+  let new_pal = [];
+  for (let ii=0; ii<g_info.palette_choice.colors.length; ii++) {
+    //if (g_info.palette_choice.colors[ii] == '#000000') {
+    if (_hex_brightness(g_info.palette_choice.colors[ii]) < 0.01) {
+      console.log("REMOVING:", ii, g_info.palette_choice.name);
+      continue;
+    }
+    new_pal.push(g_info.palette_choice.colors[ii]);
+  }
+  g_info.palette_choice.colors = new_pal;
+
+  //g_info.inverted_bg = (fxrand() < 0.5);
+  //g_info.features["Inverted Background"] = (g_info.inverted_bg ? "True" : "False" );
+
+  //--
+
+  let grid_weight = g_info.grid_weight;
+  let grid_pd = weight2pd(grid_weight);
+
+  g_info.grid_size = [
+    parseInt(rnd_cdf(grid_pd.cdf)),
+    parseInt(rnd_cdf(grid_pd.cdf)),
+    parseInt(rnd_cdf(grid_pd.cdf))
+  ];
+  g_info.features["Grid Size"] = g_info.grid_size.toString();
+
+  //--
+
+  let boundary_condition = ["n", "z"];
+  boundary_condition = 'n';
+  g_info.boundary_condition = boundary_condition[ _irnd(2) ];
+
+  if (g_info.boundary_condition == 'n') {
+    g_info.features["Boundary Condition"] = "None";
+  }
+  else {
+    g_info.features["Boundary Condition"] = "Z";
+
+    g_info.t_mov_ds = ((fxrand() < 0.5) ? (-0.5) : 0.5);
+    g_info.features["Direction"] = ((g_info.t_mov_ds < 0) ? "Falling" : "Rising");
+
+    g_info.move_direction = _irnd(2);
+    g_info.features["Orientation"] = g_info.move_direction;
+
+  }
+
+  //---
+
+  //g_info.n_point_light = _irnd(4,8);
+  g_info.n_point_light = _irnd(4,4);
+  //g_info.features["Light Count"] = g_info.n_point_light;
+
+  //---
+
+  let _sf_d = _irnd(1,16);
+  g_info.speed_factor = 1/(_sf_d*4096);
+
+
+  //spped is consistent so don't expose it as an option
+  //
+  //g_info.speed_factor = 1/8192;
+  g_info.speed_factor = 1/(32*1024);
+
+  //g_info.features["Speed Factor"] = g_info.speed_factor;
+
+  //---
+
+  let width_pd = weight2pd( g_info.tile_width_denom_weight );
+  let width_d = rnd_cdf(width_pd.cdf);
+  g_info.tile_width = 1 / width_d;
+  //g_info.features["Tile Width"] = g_info.tile_width;
+  g_info.features["Tile Width"] = "1/" + width_d.toString();
+
+  let _gh_weight = {};
+  for (let key in g_info.tile_height_denom_weight) {
+    //if (parseInt(key) <= width_d) { continue; }
+    if (parseInt(key) <= (parseInt(width_d)+2)) { continue; }
+    _gh_weight[key] = g_info.tile_height_denom_weight[key];
+  }
+  let height_pd = weight2pd( _gh_weight );
+  let height_d = rnd_cdf(height_pd.cdf);
+  g_info.tile_height = 1/height_d;
+  //g_info.features["Tile Height"] = g_info.tile_height;
+  g_info.features["Tile Height"] = "1/" + height_d.toString();
+
+  //--
+
+  let tile_weight_profile_info = g_info.tile_weight_profile;
+
+  let twpi_idx = _irnd(16);
+
+  let profile_desc = ((twpi_idx == 15) ? "Uniform": "");
+
+  let tile_w = tile_weight_profile_info[twpi_idx].tile;
+  for (let tile_type in tile_w) {
+    g_template.weight[tile_type] = tile_w[tile_type];
+    if (profile_desc.length > 0) { profile_desc += ","; }
+    profile_desc += tile_type;
+  }
+
+  g_info.features["Tile Preference"] = profile_desc;
+
+  //--
+
+  //g_info.use_shadow = (fxrand() < 0.5);
+  //g_info.features["Shadows"] = g_info.use_shadow.toString();
+
+
+
+  //--
+
+  window.$fxhashFeatures = g_info.features;
+}
+
+
+function gen_simple_grid(pgr) {
+  let gr = [];
+
+  let dim = [pgr[0][0].length, pgr[0].length, pgr.length];
+  for (let z=0; z<pgr.length; z++) {
+    gr.push([]);
+    for (let y=0; y<pgr[z].length; y++) {
+      gr[z].push([]);
+      for (let x=0; x<pgr[z][y].length; x++) {
+        gr[z][y].push('.');
+      }
+    }
+  }
+
+  if (g_info.debug_level > 3) {
+    console.log(dim);
+  }
+
+  for (let z=0; z<pgr.length; z++) {
+    for (let y=0; y<pgr[z].length; y++) {
+      for (let x=0; x<pgr[z][y].length; x++) {
+
+        let u = '.';
+        for (let ii=0; ii<pgr[z][y][x].length; ii++) {
+          if (!pgr[z][y][x][ii].valid) { continue; }
+          u = pgr[z][y][x][ii].name;
+          break;
+        }
+
+        if (g_info.debug_level > 3) {
+          console.log(x,y,z, u);
+        }
+
+        gr[z][y][x] = u;
+
+      }
+    }
+  }
+
+  return gr;
+}
+
+
+
+
 function init() {
+
   init_template();
   build_tile_library( g_template.endpoint );
 
-  let dim = [12,12,3];
+  init_param();
+  threejs_init();
+
+
+  // SCALE
+  //
+
+  let _wh = window.innerHeight;
+  let _ww = window.innerWidth;
+  let _F = ((_wh < _ww) ? (1.25*_wh) : (2*_ww));
+
+  let _a = g_info.grid_size[0],
+      _b = g_info.grid_size[1],
+      _c = g_info.grid_size[2];
+  g_info.avg_grid_size = p_norm( [_a,_b,_c], 0.125 );
+  g_info.tri_scale = Math.ceil( _F / g_info.avg_grid_size );
+
+  //---
+
+  welcome();
+
+  document.addEventListener('keydown', function(ev) {
+    if (ev.key == 's') {
+      g_info.take_screenshot_flag=true;
+    }
+    else if (ev.key == 'a') {
+      if (g_info.animation_capture) { console.log("already capturing!"); return; }
+      g_info.capturer = new CCapture({"format":"webm"});
+      g_info.capturer.start();
+      g_info.animation_capture = true;
+
+      g_info.capture_start = Date.now();
+      g_info.capture_end = g_info.capture_start + g_info.capture_dt;
+
+      console.log(">>>", g_info.capture_start, g_info.capture_end, g_info.capture_dt);
+    }
+    else if (ev.key == 'o') {
+      if (("light" in g_info) && (g_info.light.length>0)) {
+        g_info.light[0].castShadow = !g_info.light[0].castShadow;
+      }
+    }
+
+  });
+
+  document.addEventListener('dblclick', function() {
+  });
+
+  document.addEventListener('mousedown', function() {
+    g_info.mouse_pressed = true;
+  });
+
+  document.addEventListener('mouseup', function() {
+    g_info.mouse_pressed = false;
+  });
+
+
+
+  let dim = [12,12,5];
   let pgr = init_pgr(dim);
 
   g_info["grid"] = pgr;
@@ -2592,83 +4769,17 @@ function init() {
 
   debug_print_p(pgr);
 
-  return;
 
-  grid_renormalize(pgr);
+  g_info.ready = true;
 
-  //debug_print_p(pgr);
+  let fin_gr = gen_simple_grid(pgr);
+  realize_tri_from_grid(fin_gr, pgr);
 
-  /*
-  filter_gr(pgr, 0, 0, 0, [ 'p013', 'p012', 'r003', '^012' ]);
-  filter_gr(pgr, 1, 0, 0, [ 'p011', 'p012', 'r003', '^011' ]);
-  filter_gr(pgr, 0, 1, 0, [ 'p013', 'p010', '^013' ]);
-  filter_gr(pgr, 1, 1, 0, [ 'p011', 'p010', '^010' ]);
-  */
+  g_info.data["grid"] = fin_gr;
+  threejs_scene_init();
+ 
 
-  /*
-  let t = 0;
-  grid_bp(pgr, t);
-  t=1-t;
-  grid_renormalize(pgr, t);
-  */
-
-
-  let t = 0;
-  console.log("---------------------------- t=", t);
-  debug_print_p(pgr, t);
-  console.log("---");
-
-  let iter_stop_eps = (1/(1024*1024*1024*1024));
-  let iter=0;
-  let n_iter = 10000;
-  let d = 0;
-  for (iter=0; iter<n_iter; iter++) {
-    if ((iter%10)==0) { console.log("### iter:", iter, "max_change:", d); }
-
-    d = grid_bp(pgr, t);
-    t=1-t;
-
-    //console.log("---------------------------- t=", t, d);
-    //debug_print_p(pgr, t, 4);
-
-
-
-    //console.log("...", d);
-    if (d<iter_stop_eps) { break; }
-  }
-
-  let ele = grid_belief(pgr, t);
-  console.log(">>>", ele);
-
-  grid_collapse_tile(pgr, ele.v[0], ele.v[1], ele.v[2], ele.tile);
-
-  for (iter=0; iter<n_iter; iter++) {
-    if ((iter%10)==0) { console.log("### iter:", iter, "max_change:", d); }
-
-    d = grid_bp(pgr, t);
-    t=1-t;
-
-    //console.log("---------------------------- t=", t, d);
-    //debug_print_p(pgr, t, 4);
-
-
-
-    //console.log("...", d);
-    if (d<iter_stop_eps) { break; }
-  }
-
-
-
-  console.log("---------------------------- t=", t, "iter=", iter, "max_change=", d);
-  debug_print_p(pgr, t, 4);
-
-
-
-  //console.log("---------------------------- t=1");
-  //debug_print_p(pgr, 1);
-
-  //debug_cell_renorm(pgr[0][3][3]);
-  
+  animate();
 }
 
 
