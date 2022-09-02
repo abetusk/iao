@@ -3128,6 +3128,138 @@ function _fill_accessed(gr, accessed, x,y,z) {
 }
 
 
+function grid_bp_opt(gr, t_cur) {
+  t_cur = ((typeof t_cur === "undefined") ? 0 : t_cur);
+  let _eps = 1/(1024*1024*1024*1024);
+
+  t_nxt = (t_cur+1)%2;
+
+  grid_bp_clear(gr, t_nxt);
+
+  let oppo = g_template.oppo;
+  let admissible_nei = g_template.admissible_nei;
+  let admissible_pos = g_template.admissible_pos;
+  for (let z=0; z<gr.length; z++) {
+    for (let y=0; y<gr[z].length; y++) {
+      for (let x=0; x<gr[z][y].length; x++) {
+
+        let anchor_cell = gr[z][y][x];
+
+        for (let anchor_idx=0; anchor_idx<anchor_cell.length; anchor_idx++) {
+          let anchor_tile = anchor_cell[anchor_idx];
+
+          for (let dv_idx=0; dv_idx<admissible_pos.length; dv_idx++) {
+            let anchor_dv_key = admissible_pos[dv_idx].dv_key;
+            let dv = admissible_pos[dv_idx].dv;
+
+            let p = _posbc(gr, x+dv[0], y+dv[1], z+dv[2]);
+            let ux = p[0],
+                uy = p[1],
+                uz = p[2];
+            if (_oob(gr,ux, uy, uz)) {
+              anchor_tile.mu[t_nxt][anchor_dv_key].val = 0;
+              continue;
+            }
+
+            let nei_cell = gr[uz][uy][ux];
+
+            let mu_ij_b = 0;
+            for (let nei_idx=0; nei_idx<nei_cell.length; nei_idx++) {
+              let nei_tile = nei_cell[nei_idx];
+
+              //
+              //                       - 1 valid adjacency (connected or no)
+              // f_{i,j}(nei,anch) = <
+              //                       - 0 non-valid adjacency (cannot be placed together)
+              //
+              if (is_admissible(admissible_nei, anchor_tile.name, anchor_dv_key, nei_tile.name)==0) { continue; }
+
+              //
+              // g_i(nei) - assumed to be 1 (uniform)
+              //
+
+              //
+              // \prod_{k\nN(i) \ j} \mu_{k,j}(a)
+              //
+
+              let _P_mu_kj_a = 1;
+              for (let nei_dv_idx=0; nei_dv_idx<admissible_pos.length; nei_dv_idx++) {
+                let nei_dv_key = admissible_pos[nei_dv_idx].dv_key;
+                let nei_dv = admissible_pos[nei_dv_idx].dv;
+
+                // in case we implement these boundary conditions or
+                // degenerate caess?
+                //
+                if (!(nei_dv_key in nei_tile.mu[t_cur])) { continue; }
+                if (_oob(gr, ux+nei_dv[0], uy+nei_dv[1], uz+nei_dv[2])) { continue; }
+
+                // disallow msg back into where w're coming from (anchor)
+                //
+                let _bp_dv_key = oppo[nei_dv_key];
+                if (_bp_dv_key == anchor_dv_key) { continue; }
+
+                // running product of messages from neighbors of neighbor
+                //
+                _P_mu_kj_a *= nei_tile.mu[t_cur][nei_dv_key].val;
+
+              }
+
+              mu_ij_b += _P_mu_kj_a;
+
+            }
+
+            anchor_tile.mu[t_nxt][anchor_dv_key].val = mu_ij_b;
+
+          }
+        }
+
+      }
+    }
+  }
+
+  // renormalize our newly calculated mu's
+  //
+  grid_renormalize(gr, t_nxt);
+
+  // calculate maximum difference between this
+  // iteration and the last
+  //
+  let max_diff = -1;
+  for (let z=0; z<gr.length; z++) {
+    for (let y=0; y<gr[z].length; y++) {
+      for (let x=0; x<gr[z][y].length; x++) {
+
+        let anchor_cell = gr[z][y][x];
+        for (let anchor_idx=0; anchor_idx<anchor_cell.length; anchor_idx++) {
+          let anchor_tile = anchor_cell[anchor_idx];
+
+          for (let dv_idx=0; dv_idx<admissible_pos.length; dv_idx++) {
+            let anchor_dv_key = admissible_pos[dv_idx].dv_key;
+            let dv = admissible_pos[dv_idx].dv;
+
+            let p = _posbc(gr, x+dv[0], y+dv[1], z+dv[2]);
+            let ux = p[0],
+                uy = p[1],
+                uz = p[2];
+            if (_oob(gr, ux,uy,uz)) { continue; }
+
+            let cur_val = anchor_tile.mu[t_cur][anchor_dv_key].val;
+            let nxt_val = anchor_tile.mu[t_nxt][anchor_dv_key].val;
+            if ((max_diff < 0) ||
+                (Math.abs(cur_val - nxt_val) > max_diff)) {
+              max_diff = Math.abs(cur_val - nxt_val);
+            }
+
+          }
+        }
+      }
+    }
+  }
+
+  return max_diff;
+}
+
+
 function grid_bp(gr, t_cur) {
   t_cur = ((typeof t_cur === "undefined") ? 0 : t_cur);
   let _eps = 1/(1024*1024*1024*1024);
@@ -3423,6 +3555,8 @@ function grid_finished(gr) {
 
 }
 
+// Belief Propagation Collapse
+//
 function grid_bpc(pgr) {
   let iter_stop_eps = (1/(1024*1024*1024*1024));
   iter_stop_eps = (1/(1024));
