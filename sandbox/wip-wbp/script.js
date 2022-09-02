@@ -1586,6 +1586,141 @@ function init_pgr(pgr_dim) {
   return pgr;
 }
 
+function grid_consistency(gr) {
+  let _ret = { "status": "success", "state":"finished", "msg":"ok", "data":{} };
+
+  let admissible_pos = [
+    { "dv_key" : "-1:0:0" , "dv": [-1,  0,  0] },
+    { "dv_key" : "1:0:0"  , "dv": [ 1,  0,  0] },
+
+    { "dv_key" : "0:-1:0" , "dv": [ 0, -1,  0] },
+    { "dv_key" : "0:1:0"  , "dv": [ 0,  1,  0] },
+
+    { "dv_key" : "0:0:-1" , "dv": [ 0,  0, -1] },
+    { "dv_key" : "0:0:1"  , "dv": [ 0,  0,  1] }
+  ];
+
+  let oppo = {
+    "-1:0:0" :  "1:0:0",
+    "1:0:0"  : "-1:0:0",
+
+    "0:-1:0" :  "0:1:0",
+    "0:1:0"  : "0:-1:0",
+
+    "0:0:-1" : "0:0:1",
+    "0:0:1"  : "0:0:-1"
+  }
+
+  let admissible_nei = g_template.admissible_nei;
+
+  // zero occupancy test
+  //
+  for (let z=0; z<gr.length; z++) {
+    for (let y=0; y<gr[z].length; y++) {
+      for (let x=0; x<gr[z][y].length; x++) {
+
+        if (gr[z][y][x].length == 0) {
+          _ret.status = "fail";
+          _ret.data[ _pos_keystr(x, y, z) ] = [x,y,z];
+          _ret.msg = "no tiles at cell " + _pos_keystr(x,y,z);
+          return _ret;
+        }
+
+        let gr_cell = gr[z][y][x];
+        for (let cell_idx=0; cell_idx<gr_cell.length; cell_idx++) {
+
+          let key_anchor = gr_cell[cell_idx].name;
+
+          for (let posidx=0; posidx<admissible_pos.length; posidx++) {
+            let dv_key = admissible_pos[posidx].dv_key;
+            let dv = admissible_pos[posidx].dv;
+
+            let ux = x + dv[0],
+                uy = y + dv[1],
+                uz = z + dv[2];
+
+            if (!(dv_key in admissible_nei[key_anchor])) { continue; }
+
+            for (let key_nei in admissible_nei[key_anchor][dv_key]) {
+
+              //--
+
+              // oob check
+              //
+              if (admissible_nei[key_anchor][dv_key][key_nei].conn) {
+                if ((uz < 0) || (uz >= gr.length) ||
+                    (uy < 0) || (uy >= gr[z].length) ||
+                    (ux < 0) || (ux >= gr[z][y].length)) {
+                  _ret.status = "fail";
+                  _ret.data[ _pos_keystr(x, y, z) ] = [x,y,z];
+                  _ret.msg = key_anchor + "@(" + _pos_keystr(x,y,z) + ") has connection over edge boundary:  "+
+                    _pos_keystr(ux,uy,uz) + " (" + dv_key + ")";
+                  return _ret;
+                }
+              }
+
+              //--
+
+            }
+
+            if (!((uz < 0) || (uz >= gr.length) ||
+                  (uy < 0) || (uy >= gr[z].length) ||
+                  (ux < 0) || (ux >= gr[z][y].length))) {
+
+              let tile_valid = false;
+              let gr_nei = gr[uz][uy][ux];
+              for (let nei_idx=0; nei_idx<gr_nei.length; nei_idx++) {
+                let dv_nei_key = oppo[dv_key];
+                let key_nei = gr_nei[nei_idx].name;
+                if ((key_nei in admissible_nei[key_anchor][dv_key]) &&
+                    (!(key_anchor in admissible_nei[key_nei][dv_nei_key]))) {
+                  _ret.status = "fail";
+                  _ret.msg = key_anchor + "@(" + _pos_keystr(x,y,z) + ") does not have entry for  "+
+                    key_nei + "@(" + _pos_keystr(ux,uy,uz) + ") dv(" + dv_key + ") but neighbor " +
+                    "has connection to anchor";
+                  return _ret;
+                }
+                if ((!(key_nei in admissible_nei[key_anchor][dv_key])) &&
+                    (key_anchor in admissible_nei[key_nei][dv_nei_key])) {
+                  _ret.status = "fail";
+                  _ret.msg = key_anchor + "@(" + _pos_keystr(x,y,z) + ") has entry for  "+
+                    key_nei + "@(" + _pos_keystr(ux,uy,uz) + ") dv(" + dv_key + ") but neighbor " +
+                    "does not have connection to anchor";
+                  return _ret;
+                }
+
+
+                if (key_nei in admissible_nei[key_anchor][dv_key]) {
+                  if (admissible_nei[key_anchor][dv_key][key_nei].conn == admissible_nei[key_nei][dv_nei_key][key_anchor].conn) {
+                    tile_valid = true;
+                    break;
+                  }
+                }
+
+              }
+
+              if (!tile_valid) {
+                _ret.status = "fail";
+                _ret.msg = key_anchor + "@(" + _pos_keystr(x,y,z) + ") could not find valid neighbor "+
+                  "@(" + _pos_keystr(ux,uy,uz) + ") dv(" + dv_key + ")";
+                return _ret;
+              }
+
+            }
+
+          }
+
+        }
+
+      }
+    }
+  }
+
+
+
+  return _ret;
+}
+
 
 
 // grid elements contain array of objects.
@@ -1837,6 +1972,83 @@ function is_admissible(h, anchor_tile_name, dv_key, nei_tile_name) {
   return 1;
 }
 
+function grid_belief(gr, t_idx) {
+  t_idx = ((typeof t_idx==="undefined") ? 0 : t_idx);
+  let _eps = (1/(1024*1024*1024*1024));
+  let max_belief = {
+    "v": [0,0,0],
+    "tile": "",
+    "belief":-1
+  };
+
+
+  let oppo = g_template.oppo;
+  let admissible_nei = g_template.admissible_nei;
+  let admissible_pos = g_template.admissible_pos;
+
+
+  for (let z=0; z<gr.length; z++) {
+    for (let y=0; y<gr[z].length; y++) {
+      for (let x=0; x<gr[z][y].length; x++) {
+
+        let S = 0;
+        let _belief = [];
+
+        let gr_cell = gr[z][y][x];
+        if (gr_cell.length < 2) { continue; }
+        for (let i=0; i<gr_cell.length; i++) {
+
+          _belief.push(1);
+          for (let dv_idx=0; dv_idx<admissible_pos.length; dv_idx++) {
+            let dv_key = admissible_pos[dv_idx].dv_key;
+            let dv = admissible_pos[dv_idx].dv;
+
+            let p = _posbc(gr, x+dv[0], y+dv[1], z+dv[2]);
+            let ux = p[0],
+                uy = p[1],
+                uz = p[2];
+            if (_oob(gr,ux, uy, uz)) { continue; }
+
+            _belief[i] *= gr_cell[i].mu[t_idx][dv_key].val;
+          }
+
+
+          S += _belief[i];
+        }
+
+        if (S < _eps) { S=1; }
+
+        for (let i=0; i<gr_cell.length; i++) {
+          _belief[i] /= S;
+        }
+
+        for (let i=0; i<gr_cell.length; i++) {
+          if (max_belief.belief < _belief[i]) {
+            max_belief.belief = _belief[i];
+            max_belief.tile = gr_cell[i].name;
+            max_belief.v = [x,y,z];
+          }
+              
+        }
+
+
+      }
+    }
+  }
+
+  return max_belief;
+}
+
+function grid_collapse_tile(gr, x,y,z, tile_name) {
+
+  let gr_cell = gr[z][y][x];
+  for (let i=0; i<gr_cell.length; i++) {
+    gr_cell[i].valid = ((gr_cell[i].name == tile_name) ? true : false);
+  }
+
+  grid_cull_remove_invalid(gr);
+}
+
 function grid_bp_clear(gr, t) {
   let oppo = g_template.oppo;
   let admissible_nei = g_template.admissible_nei;
@@ -1860,6 +2072,162 @@ function grid_bp_clear(gr, t) {
   }
 
 }
+
+function grid_cull_propagate_opt(gr, accessed, debug) {
+  let _ret = { "status": "success", "state":"processing", "msg":"..." };
+
+  let admissible_nei = g_template.admissible_nei;
+  let admissible_pos = g_template.admissible_pos;
+  let oppo = g_template.oppo;
+
+  let new_accessed = accessed;
+
+  if (debug) {
+    console.log("grid_cull_propagate_opt.i:");
+    for (let k in accessed) {
+      console.log("::", k, accessed[k]);
+    }
+  }
+
+  let still_processing = true;
+  while (still_processing) {
+
+    accessed = new_accessed;
+    new_accessed = {};
+
+    still_processing = false;
+
+    let _rrp = grid_cull_remove_invalid(gr);
+    if (_rrp.status != "success") {
+      _ret.status = "error";
+      _ret.msg = "grid_cull_remove_invalid:" + _rrp.msg;
+      continue;
+    }
+
+    for (let access_poskey in accessed) {
+
+      accessed_cell = accessed[access_poskey];
+      let x = accessed_cell[0],
+          y = accessed_cell[1],
+          z = accessed_cell[2];
+
+
+      let gr_cell = gr[z][y][x];
+      for (let cidx=0; cidx<gr_cell.length; cidx++) {
+        let key_anchor = gr_cell[cidx].name;
+
+        let tile_valid = true;
+
+        for (let posidx=0; posidx<admissible_pos.length; posidx++) {
+          let dv_key = admissible_pos[posidx].dv_key;
+          let dv = admissible_pos[posidx].dv;
+
+          let _p = _posbc(gr, x+dv[0], y+dv[1], z+dv[2]);
+          let ux = _p[0],
+              uy = _p[1],
+              uz = _p[2];
+
+          if (!(dv_key in admissible_nei[key_anchor])) { continue; }
+
+          // oob check
+          //
+          for (let key_nei in admissible_nei[key_anchor][dv_key]) {
+            if (admissible_nei[key_anchor][dv_key][key_nei].conn) {
+
+              if (_oob(gr, ux, uy, uz)) {
+                tile_valid = false;
+
+                _fill_accessed(gr, new_accessed, x,y,z);
+
+                if (debug) {
+                  console.log("CULL.oob: anch:", key_anchor, "@(", x,y,z, ") has connecting outside of boundary");
+                }
+
+                break;
+              }
+            }
+          }
+
+          if (!(tile_valid)) {
+            _fill_accessed(gr, new_accessed, x,y,z);
+
+            gr_cell[cidx].valid = false;
+            still_processing = true;
+            break;;
+          }
+
+          if (_oob(gr, ux,uy,uz)) {
+            continue;
+          }
+
+          let anchor_has_valid_conn = false;
+
+          let gr_nei = gr[uz][uy][ux];
+          for (let nei_idx=0; nei_idx<gr_nei.length; nei_idx++) {
+            let dv_nei_key = oppo[dv_key];
+            let key_nei = gr_nei[nei_idx].name;
+
+            // if anchor has hvaid connection to at least one
+            // tile ...
+            //
+            if (key_nei in admissible_nei[key_anchor][dv_key]) {
+              let dv_nei_key = oppo[dv_key];
+              if (admissible_nei[key_anchor][dv_key][key_nei].conn == admissible_nei[key_nei][dv_nei_key][key_anchor].conn) {
+                anchor_has_valid_conn = true;
+
+                break;
+              }
+            }
+
+          }
+
+
+          if (!anchor_has_valid_conn) {
+            tile_valid = false;
+
+            _fill_accessed(gr, new_accessed, x,y,z);
+
+            if (debug) {
+              console.log("CULL.c: anch:", key_anchor, "@(", x,y,z, ") has no possible connections to neighbors");
+            }
+
+            gr_cell[cidx].valid = false;
+            still_processing = true;
+            break;
+          }
+
+        }
+
+      }
+
+    }
+
+  }
+
+  return _ret;
+}
+
+
+function _fill_accessed(gr, accessed, x,y,z) {
+  let admissible_pos = g_template.admissible_pos;
+
+  accessed[ _pos_keystr(x,y,z) ] = [x,y,z];
+
+  for (let posidx=0; posidx<admissible_pos.length; posidx++) {
+    let dv = admissible_pos[posidx].dv;
+
+    let _p = _posbc(gr, x+dv[0], y+dv[1], z+dv[2]);
+    let ux = _p[0],
+        uy = _p[1],
+        uz = _p[2];
+
+    if (_oob(gr, ux, uy, uz)) { continue; }
+
+    accessed[ _pos_keystr(ux, uy, uz) ] = [ ux, uy, uz ];
+  }
+
+}
+
 
 function grid_bp(gr, t_cur) {
   t_cur = ((typeof t_cur === "undefined") ? 0 : t_cur);
@@ -2122,39 +2490,6 @@ function debug_print_p(gr, t_idx, _digit) {
 //-----
 //-----
 
-// equal weight for now
-//
-function g(val) {
-  return 1;
-
-  let tile_code = val.charAt(0);
-
-  if (!(tile_code in g_template.pdf)) { return 0; }
-  return g_template.pdf[ tile_code ];
-}
-
-function f(poskey0,poskey1,val0,val1) {
-
-  let admissible_nei = g_template.admissible_nei;
-
-  let dv = [
-    poskey1[0] - poskey0[0],
-    poskey1[1] - poskey0[1],
-    poskey1[2] - poskey0[2]
-  ];
-  let dv_key = _pos_keystr(dv[0],dv[1],dv[2]);
-
-
-  if (!(val0 in admissible_nei)) { return 0; }
-  if (!(dv_key in admissible_nei[val0])) { return 0; }
-  if (!(val1 in admissible_nei[val0][dv_key])) { return 0; }
-
-
-  return 1;
-
-  //if (admissible_nei[val0][dv_key][val1].conn == true) { return 1; }
-}
-
 function filter_gr(gr, x,y,z, tile_list) {
   let tile_map = {};
   for (let ii=0; ii<tile_list.length; ii++) {
@@ -2173,17 +2508,91 @@ function filter_gr(gr, x,y,z, tile_list) {
   grid_cull_remove_invalid(gr);
 }
 
+function grid_finished(gr) {
+
+  for (let z=0; z<gr.length; z++) {
+    for (let y=0; y<gr[z].length; y++) {
+      for (let x=0; x<gr[z][y].length; x++) {
+
+        if (gr[z][y][x].length > 1) { return false; }
+
+      }
+    }
+  }
+
+  return true;
+
+}
+
+function grid_bpc(pgr) {
+  let iter_stop_eps = (1/(1024*1024*1024*1024));
+  iter_stop_eps = (1/(1024));
+  let iter=0;
+  let d = 0;
+  let n_iter = 10000;
+  let time_idx = 0;
+
+  let _ret = {"msg":"?" };
+
+  grid_renormalize(pgr);
+
+  console.log("start");
+  let processing = true;
+  while (processing) {
+
+    console.log("...");
+
+    if (grid_finished(pgr)) { break; }
+
+    for (iter=0; iter<n_iter; iter++) {
+      if ((iter%10)==0) { console.log("### iter:", iter, "max_change:", d); }
+
+      d = grid_bp(pgr, time_idx);
+      time_idx=1-time_idx;
+      if (d<iter_stop_eps) { break; }
+    }
+
+    let belief = grid_belief(pgr);
+
+    console.log(">>>>", belief);
+
+    grid_collapse_tile(pgr, belief.v[0], belief.v[1], belief.v[2], belief.tile);
+
+    let accessed={};
+    _fill_accessed(pgr, accessed, belief.v[0], belief.v[1], belief.v[2]);
+
+    let r = grid_cull_propagate_opt(pgr, accessed);
+    if (r.state == "finished") { _ret = r; break; }
+
+    //debug_print_p(pgr, time_idx, 4);
+
+  }
+
+  console.log("end");
+
+
+}
+
 function init() {
   init_template();
   build_tile_library( g_template.endpoint );
 
-  let dim = [4,3,1];
+  let dim = [12,12,3];
   let pgr = init_pgr(dim);
 
   g_info["grid"] = pgr;
 
   grid_cull_boundary(pgr);
   grid_cull_propagate(pgr);
+
+  let r = grid_bpc(pgr);
+  console.log(">>> bpc:", r);
+
+  console.log(">>> consistency:", grid_consistency(pgr));
+
+  debug_print_p(pgr);
+
+  return;
 
   grid_renormalize(pgr);
 
@@ -2209,19 +2618,51 @@ function init() {
   debug_print_p(pgr, t);
   console.log("---");
 
-  let iter_stop_eps = (1/(1024*1024*1024));
-  n_iter = 100;
-  for (let iter=0; iter<n_iter; iter++) {
-    let d = grid_bp(pgr, t);
+  let iter_stop_eps = (1/(1024*1024*1024*1024));
+  let iter=0;
+  let n_iter = 10000;
+  let d = 0;
+  for (iter=0; iter<n_iter; iter++) {
+    if ((iter%10)==0) { console.log("### iter:", iter, "max_change:", d); }
+
+    d = grid_bp(pgr, t);
     t=1-t;
 
+    //console.log("---------------------------- t=", t, d);
+    //debug_print_p(pgr, t, 4);
 
-    console.log("...", d);
+
+
+    //console.log("...", d);
     if (d<iter_stop_eps) { break; }
   }
 
-  console.log("---------------------------- t=", t);
-  debug_print_p(pgr, t);
+  let ele = grid_belief(pgr, t);
+  console.log(">>>", ele);
+
+  grid_collapse_tile(pgr, ele.v[0], ele.v[1], ele.v[2], ele.tile);
+
+  for (iter=0; iter<n_iter; iter++) {
+    if ((iter%10)==0) { console.log("### iter:", iter, "max_change:", d); }
+
+    d = grid_bp(pgr, t);
+    t=1-t;
+
+    //console.log("---------------------------- t=", t, d);
+    //debug_print_p(pgr, t, 4);
+
+
+
+    //console.log("...", d);
+    if (d<iter_stop_eps) { break; }
+  }
+
+
+
+  console.log("---------------------------- t=", t, "iter=", iter, "max_change=", d);
+  debug_print_p(pgr, t, 4);
+
+
 
   //console.log("---------------------------- t=1");
   //debug_print_p(pgr, 1);
@@ -2250,13 +2691,11 @@ if (typeof module !== "undefined") {
   };
 
 
-	function main() {
-		init();
+  function main() {
+    init();
 
     g_info.debug = {};
-    g_info.debug["f"] = f;
-    g_info.debug["g"] = g;
-	}
+  }
 
   var m4 = require("./m4.js");
 
