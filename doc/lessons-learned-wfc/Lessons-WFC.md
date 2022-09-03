@@ -111,9 +111,9 @@ Tiles that cannot be next to each other are not in the admissible map.
 Tiles that are in the admissible map also have an indication of whether they are connected or
 disconnected.
 
-![stair and road with endpoints](assets/road_to_stair_conn.png)
+![stair and road with endpoints](assets/road_stair_conn.png)
 
-![stair and road with endpoints](assets/road_stair_bad_conn.png)
+![stair and road with endpoints](assets/road_stair_noconn.png)
 
 ![stair and road with endpoints](assets/road_road_admissible.png)
  
