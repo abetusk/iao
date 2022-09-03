@@ -84,7 +84,7 @@ Each tile that can connect to another has a grouping of 4 points on each edge th
 connect out of.
 These points are flush in the plane they sit on at the edge of a zero centered 1 unit width cube.
 
-![stair tile with endpoints](assets/stair_w_endpoint.png);
+![stair tile with endpoints](assets/stair_w_endpoint.png)
 
 A complete "raw" library of endpoint rotations is constructed by rotating each base
 tile by 90 degree increments in each of the major axies, `X`, `Y` and `Z`.
@@ -210,6 +210,10 @@ function collapseSingleTile(grid) {
   let minEntropy = -1;
   let minCell = null;
   for (let gridCell in grid) {
+
+    // skip already processed cell positions
+    if (gridCell.length==1) { continue; }
+
     for (let tile in gridCell) {
       tileProbability = pdf(tile);
       cellEntropy += tileProbability * Math.log(tileProbability);
@@ -336,7 +340,6 @@ as any other tile would be meant the special cases to consider the empty tile di
 
 #### Pitfall #2, Complicated Tile Connections
 
-![complicated connection](assets/complicated.png)
 
 The "wave function collapse" (WFC) like algorithm is conceptually simpler when
 tile neighbor tests can be treated in a homogeneous way.
@@ -353,6 +356,8 @@ which tiles have no connections out of it or into it, or any of the
 myriad of other tests, quickly become overly complex.
 
 #### Pitfall #3, Overly Constrained Tilemap
+
+![complicated connection](assets/complicated.png)
 
 
 The initial tileset used didn't have a "dead-end" tile (`p`) and
