@@ -9,7 +9,7 @@ Lessons learned from implementing a variant of the "wave function collapse" algo
 Tags
 ---
 
-procedural generation, procgen, generative, wave function collapse, wfc, 3d, tileset
+procedural generation, procgen, generative, wave function collapse, wfc, 3d, tileset, programming, algorithms
 
 Introduction
 ---
@@ -33,7 +33,7 @@ Review
 
 ![Like Go Up Vanity (1)](assets/lgu_vanity_1.png)
 
-"Wave Function Collapse" (WFC) is a [generative art tool by project](https://github.com/mxgmn/WaveFunctionCollapse) by \[mxgmn\].  From the project site, "Wave Function Collapse" (WFC) is a:
+"Wave Function Collapse" (WFC) is a [generative art tool](https://github.com/mxgmn/WaveFunctionCollapse) by \[mxgmn\].  From the project site, "Wave Function Collapse" (WFC) is a:
 
 > Bitmap & tilemap generation from a single example with the help of ideas from quantum mechanics
 
@@ -42,7 +42,7 @@ Note that the reference to quantum mechanics is an homage, as \[mxgmn\] writes:
 > ... it doesn't do the actual quantum mechanics, but it was inspired by QM
 
 
-The implementation that will be discussed in this article is more of a "Wave Function Collapse" (WFC) inspired algorithm as it doesn't take any input image or scene.  Instead, it uses a constructed 3D tileset to create 3D structures using a type of constraint propagation and chooses candidate tile positions to collapse via entropy minimization.
+The implementation that will be discussed in this article is more of a "Wave Function Collapse" (WFC) inspired algorithm as it doesn't take any input image or scene. Instead, it uses a constructed 3D tileset to create 3D structures. The algorithm propagates constraints after choosing candidate tile positions to collapse via entropy minimization.
 
 Briefly, this means for any state of the system, entries are removed if their presence would create a contradiction.  Once all contradictions are removed, a candidate tile is chosen based on how "constrained" it is.
 
@@ -66,6 +66,8 @@ The library of 3D tiles consists, conceptually, of 8 different types of tiles:
 | `^`  | Stair        | ![Stair Tile](assets/stair_tile_s.png) |
 | `p`  | Dead End     | ![Dead End Tile](assets/p_tile_s.png) |
 
+######caption: Each of the base "template" files. From upper left to lower right, the tiles are "road", "cross", "T", "bend", "stair" and "dead-end".
+
 From the "base" tiles, the triangle display geometry is calculated and a set of "endpoints" is created as an indication of how it can be attached to other tiles in the library.
 
 
@@ -73,12 +75,14 @@ Each tile that can connect to another has a grouping of 4 points on each edge th
 
 ![stair tile with endpoints](assets/stair_w_endpoint.png)
 
+######caption: A stair tile with attachment endpoints highlighted
+
 A complete "raw" library of endpoint rotations is constructed by rotating each base tile by 90 degree increments in each of the major axies, `X`, `Y` and `Z`.
 
 
 By comparing the endpoints with either a rotated version of itself or with other rotated tiles, identical tiles can be identified and neighboring tiles can be identified.
 
-From the duplicated list of tiles, a representative is chosen to be the representative of the different rotated versions.
+From the duplicated list of tiles, a representative is chosen to represent different rotated versions.
 
 For example, the "cross", if it lies flat in the `XY` plane, is identical to a "cross" that is rotated by 90 degrees around the `Z` axis.  In this case, the tile `+000` is kept and used as the representative as `+001`, `+002` and `+003` are all identical to it, where the `+` is the single character code for the tile and the three digits that follow represent the rotations in each of the three major axies by how many 90 degree increments it's rotated.
 
@@ -92,9 +96,13 @@ Tiles that cannot be next to each other are not in the admissible map.  Tiles th
 ![stair and road with endpoints](assets/road_stair_noconn.png)
 
 ![stair and road with endpoints](assets/road_road_admissible.png)
- 
-For example, a `T` tile that has connection points `[-1,0,0], [1,0,0], [0,-1,0]` (in `[x,y,z]` coordinates) would not have a bend above it in the `[0,1,0]` direction if the bend tile that had connection points `[0,-1,0], [1,0,0]`.  For the above `T` tile, there would be an admissible blank tile (`.`) in the `[0,1,0]` position with an indication that they are disconnected and there would also be an admissible road tile (`|`) to the bottom of it at `[0,-1,0]` for a suitably oriented road tile.
 
+######caption: A road tile can connect to a suitably oriented stair tile or can exist in parallel to another road tile but cannot be connected to a stair tile where the connection points to not match up.
+
+For example, a road tile has connection points for other viable tiles in the `+/-1` `Y` directions (`[0,1,0],[0,-1,0]`) in addition to allowing other tiles to be adjacent in the `+/-1` `X` directions, so long as they don't have an incoming connection to it. In the above, the road tile can connect to a suitably oriented stair tile or is allowed to be next to a suitably oriented road tile that is parallel to it.
+
+What is not admissible is if a road tile, say, were rotated 90 degrees in the `Y` axis and then tried to connect to the stair tile as before.
+ 
 After the representative tiles are chose, the display geometry is created by rotating the triangle geometry for the canonical tile.
 
 The endpoint representation and programmatic rotation allows for a semi-automated creation of the tileset.  Additional tiles can be added by only adding the canonical tile geometry and endpoints, without the need to add the profusion of pairwise interactions that would result.
@@ -106,6 +114,8 @@ Wave Function Collapse Algorithm
 ---
 
 ![tile possibilities](assets/tile_possibilities.png)
+
+######caption: A snapshot of a un-collapsed grid, where each remaining viable tile choice is shown.
 
 Once the tilemap has been constructed, we the wave function collapse algorithm can be run in earnest.
 
@@ -277,10 +287,9 @@ Without this simplifying assumption, the code to find out which tiles are admiss
 
 ![complicated connection](assets/complicated.png)
 
-######caption: An complicated pattern that WFC has difficulty in generating
+######caption: An complicated pattern that WFC has difficulty in generating without the presense of the "dead-end" tile
 
-
-The initial tileset used didn't have a "dead-end" tile (`p`) and for many of the test runs, this resulted in failed realizations.
+The initial tileset used didn't have a "dead-end" tile (`p`) and for many of the test runs, this resulted in failing to find a realization.
 
 For small grid sizes, the realization would sometimes succeed, but as the grid sizes increased, the chances of finding a valid realization quickly diminished.
 
@@ -308,7 +317,7 @@ Folklore wisdom is "get it working, then get it to working fast", also known as 
 
 Just from the initial setup of the problem, each cell needs to be visited at least once because it needs to be collapsed into a definite state.  This gives already an $O(n)$ run-time, where $n$ is the number of cells of the grid.  If the whole grid needs to be examined every update, this gives an $O(n^2)$ which grows quickly, especially when uniformly increasing each dimension of the grid.
 
-Though it's difficult to say what the estimated run time is without some intricate knowledge of tile interactions, either for this setup or others, one can imagine a constant update time after each cell position is collapsed, recovering an $O(n)$ runtime.
+Though it's difficult to say what the estimated run time is for the optimized version without some intricate knowledge of tile interactions, either for this setup or others, one can imagine a constant update time after each cell position is collapsed because only cells that have been altered are being considered, recovering an approximate $O(n)$ runtime
 
 
 Conclusion
@@ -318,7 +327,7 @@ Conclusion
 
 \[mxgmn\]'s "Wave Function Collapse" (WFC) algorithm is both an accessible framework to more theoretical ideas of constraint satisfaction problems but also conceptually simple and powerful that allows rich outputs from minimal effort.
 
-The main drawbacks of it's inability to overcome local consistency at the sacrifice of further reaching cohesion are issues that grieve many adjacent classes of problems and algorithms in this space.  Constraint satisfaction, as a general problem, is $\text{NP-Complete}$ so we have no hope of ever finding efficient algorithms.  It would be interesting to pursue other heuristics to see if they can't keep the same ease and versatility in their use while providing more powerful tools.
+The main drawbacks of it's inability to overcome local consistency at the sacrifice of further reaching cohesion are issues that grieve many similar classes of problems and algorithms in this space.  Constraint satisfaction, as a general problem, is $\text{NP-Complete}$ so we have no hope of ever finding efficient algorithms.  It would be interesting to pursue other heuristics to see if they can't keep the same ease and versatility in their use while providing more powerful tools.
 
 
 References
@@ -333,4 +342,7 @@ References
 License
 ---
 
-All text, code, images and other digital artifacts in this article is licensed under a CC0 license.
+All text, code, images and other digital artifacts in this article, unless expressly indicated otherwise, is licensed under a CC0 license.
+
+![cc0](assets/cc0-257x50.png)
+
