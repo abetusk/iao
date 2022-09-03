@@ -269,9 +269,10 @@ let g_template = {
     "|": 1,
     "+": 1,
     "T": 1,
-    "r": 1,
+    "r": 3,
     //"p": 1,
-    "^": 1
+    //"^": 1
+    "^": 5
   },
 
   "_weight": {
@@ -3260,7 +3261,7 @@ function grid_bp_opt(gr, t_cur) {
 }
 
 
-function grid_bp(gr, t_cur) {
+function grid_bp(gr, t_cur, _thresh_eps) {
   t_cur = ((typeof t_cur === "undefined") ? 0 : t_cur);
   let _eps = 1/(1024*1024*1024*1024);
 
@@ -3268,6 +3269,7 @@ function grid_bp(gr, t_cur) {
 
   grid_bp_clear(gr, t_nxt);
 
+  let pdf = g_template.pdf;
   let oppo = g_template.oppo;
   let admissible_nei = g_template.admissible_nei;
   let admissible_pos = g_template.admissible_pos;
@@ -3306,15 +3308,17 @@ function grid_bp(gr, t_cur) {
               //
               if (is_admissible(admissible_nei, anchor_tile.name, anchor_dv_key, nei_tile.name)==0) { continue; }
 
+              let _P_mu_kj_a = 1;
+
               //
               // g_i(nei) - assumed to be 1 (uniform)
               //
+              _P_mu_kj_a *= pdf[ nei_tile.name.charAt(0) ];
 
               //
               // \prod_{k\nN(i) \ j} \mu_{k,j}(a)
               //
 
-              let _P_mu_kj_a = 1;
               for (let nei_dv_idx=0; nei_dv_idx<admissible_pos.length; nei_dv_idx++) {
                 let nei_dv_key = admissible_pos[nei_dv_idx].dv_key;
                 let nei_dv = admissible_pos[nei_dv_idx].dv;
@@ -3334,29 +3338,10 @@ function grid_bp(gr, t_cur) {
                 //
                 _P_mu_kj_a *= nei_tile.mu[t_cur][nei_dv_key].val;
 
-                /*
-                if (debug) {
-                  //let _s = ["mu_{(",ux,uy,uz,"),(", x,y,z,")(" + anchor_tile.name + ") +="].join(" ");
-                  let _s = [ "mu_{:,(", x,y,z,")}(" + anchor_tile.name + "): R_{(", ux, uy, uz, ")}(" + nei_tile.name + ") *="].join(" ");
-                  _s += ["  g_{(",ux,uy,uz,")}(" + nei_tile.name + ")", "(", nei_dv_key, ")", nei_tile.mu[t_cur][nei_dv_key].val].join(" ");
-                  _s += [ " [", _P_mu_kj_a, "]" ].join(" ");
-                  console.log(_s);
-                  //console.log("mu_{(",ux,uy,uz,"),(", x,y,z,")(" + anchor_tile.name + ") +=");
-                  //console.log("  ", anchor_tile.name + "(", x,y,z, ")", nei_tile.name + "(", nei_dv_key, ")", nei_tile.mu[t_cur][nei_dv_key].val);
-                }
-                */
-
               }
-
-              //DEBUG
-              //console.log("### mu_ij_b += ", _P_mu_kj_a);
-
               mu_ij_b += _P_mu_kj_a;
 
             }
-
-            //DEBUG
-            //console.log(anchor_tile.name, "[t:", t_nxt, "][", anchor_dv_key, "]=", mu_ij_b);
 
             anchor_tile.mu[t_nxt][anchor_dv_key].val = mu_ij_b;
 
@@ -3367,16 +3352,11 @@ function grid_bp(gr, t_cur) {
     }
   }
 
-  //console.log("BEFORE RENORM:");
-  //debug_print_p(gr, t_nxt, 6);
-
   // renormalize our newly calculated mu's
   //
   grid_renormalize(gr, t_nxt);
 
-  //console.log("AFTER RENORM:");
-  //debug_print_p(gr, t_nxt, 6);
-
+  let err_stat = { "above":0, "below": 0};
 
   let max_diff = -1;
   for (let z=0; z<gr.length; z++) {
@@ -3399,6 +3379,11 @@ function grid_bp(gr, t_cur) {
 
             let cur_val = anchor_tile.mu[t_cur][anchor_dv_key].val;
             let nxt_val = anchor_tile.mu[t_nxt][anchor_dv_key].val;
+
+            let _del = Math.abs(cur_val-nxt_val);
+            if (_del < _thresh_eps) { err_stat["below"]++; }
+            else { err_stat["above"]++; }
+
             if ((max_diff < 0) ||
                 (Math.abs(cur_val - nxt_val) > max_diff)) {
               max_diff = Math.abs(cur_val - nxt_val);
@@ -3409,6 +3394,13 @@ function grid_bp(gr, t_cur) {
       }
     }
   }
+
+  //DEBUG
+  console.log("cellstat: below:", err_stat["below"], "above:", err_stat["above"]);
+  //for (let idel in err_stat) {
+    //if (err_stat[idel].diff < _thresh_eps) { continue; }
+    //console.log(">>>", "(", idel, ")", err_stat[idel].diff, err_stat[idel].count);
+  //}
 
   return max_diff;
 }
@@ -3557,47 +3549,65 @@ function grid_finished(gr) {
 
 // Belief Propagation Collapse
 //
-function grid_bpc(pgr) {
+function grid_bpc(pgr, step) {
+  step = ((typeof step === "undefined") ? 0 : step);
   let iter_stop_eps = (1/(1024*1024*1024*1024));
-  iter_stop_eps = (1/(1024));
   let iter=0;
   let d = 0;
-  let n_iter = 10000;
+  let n_iter = 100;
   let time_idx = 0;
 
   let _ret = {"msg":"?" };
 
   grid_renormalize(pgr);
 
+  let N = pgr.length * pgr[0].length * pgr[0][0].length;
+
   console.log("start");
   let processing = true;
   while (processing) {
+    //iter_stop_eps = 1/((step+1)*128);
+    iter_stop_eps = 1/((step+1)*64);
 
-    console.log("...");
+    console.log("...", iter_stop_eps, "(", step, "/", N, ")");
 
     if (grid_finished(pgr)) { break; }
 
     for (iter=0; iter<n_iter; iter++) {
+      //console.log("##iter:", iter);
       if ((iter%10)==0) { console.log("### iter:", iter, "max_change:", d); }
 
-      d = grid_bp(pgr, time_idx);
+      d = grid_bp(pgr, time_idx, iter_stop_eps);
+
+      //console.log("##iter:", iter, "max_diff", d, "iter_stop_eps:", iter_stop_eps);
+
       time_idx=1-time_idx;
       if (d<iter_stop_eps) { break; }
     }
 
+    console.log(">>belief");
+
     let belief = grid_belief(pgr);
 
-    console.log(">>>>", belief);
+    console.log("<<belief");
 
+    console.log(">>>>", belief.v[0], belief.v[1], belief.v[2], belief.tile, belief.belief);
+
+    console.log(">>collapse");
     grid_collapse_tile(pgr, belief.v[0], belief.v[1], belief.v[2], belief.tile);
+    console.log("<<collapse");
 
     let accessed={};
     _fill_accessed(pgr, accessed, belief.v[0], belief.v[1], belief.v[2]);
 
+    console.log(">>propagate");
     let r = grid_cull_propagate_opt(pgr, accessed);
     if (r.state == "finished") { _ret = r; break; }
+    console.log("<<propagate");
 
     //debug_print_p(pgr, time_idx, 4);
+
+    step++;
 
   }
 
@@ -4690,6 +4700,10 @@ function init_param() {
     parseInt(rnd_cdf(grid_pd.cdf)),
     parseInt(rnd_cdf(grid_pd.cdf))
   ];
+
+  //DEBUG
+  g_info.grid_size = [6,6,6];
+
   g_info.features["Grid Size"] = g_info.grid_size.toString();
 
   //--
@@ -4777,7 +4791,9 @@ function init_param() {
 
   //--
 
-  window.$fxhashFeatures = g_info.features;
+  if (typeof window !== "undefined") {
+    window.$fxhashFeatures = g_info.features;
+  }
 }
 
 
@@ -4823,8 +4839,30 @@ function gen_simple_grid(pgr) {
   return gr;
 }
 
+function pgr_filter(pgr, filt) {
+
+  for (let z=0; z<pgr.length; z++) {
+    for (let y=0; y<pgr[z].length; y++) {
+      for (let x=0; x<pgr[z][y].length; x++) {
+
+        for (let cidx=0; cidx<pgr[z][y][x].length; cidx++) {
+          if (!("cgroup" in pgr[z][y][x][cidx])) { continue; }
+          let _name = pgr[z][y][x][cidx].name;
+          if (_name.length == 0) { continue; }
+
+          let cgroup = pgr[z][y][x][cidx].cgroup;
+          if (cgroup in filt) {
+            pgr[z][y][x][cidx].name = ".000";
+          }
 
 
+        }
+
+      }
+    }
+  }
+
+}
 
 function init() {
 
@@ -4888,8 +4926,10 @@ function init() {
 
 
 
-  let dim = [12,12,5];
-  let pgr = init_pgr(dim);
+  //let dim = [6,6,6];
+  //let pgr = init_pgr(dim);
+
+  let pgr = init_pgr(g_info.grid_size);
 
   g_info["grid"] = pgr;
 
@@ -4902,6 +4942,21 @@ function init() {
   console.log(">>> consistency:", grid_consistency(pgr));
 
   debug_print_p(pgr);
+
+  decorate_pgr(pgr);
+  let _stat = pgr_stat(pgr);
+  g_info["_stat"] = _stat;
+
+  let filt_group = {};
+  //let thresh = g_info.grid_size;
+  let thresh = g_info.grid_size[0];
+  for (let group_name in _stat.group_size) {
+    if (_stat.group_size[group_name] < thresh) {
+      filt_group[group_name] = true;
+    }
+  }
+
+  pgr_filter(pgr, filt_group);
 
 
   g_info.ready = true;
@@ -4937,7 +4992,25 @@ if (typeof module !== "undefined") {
 
 
   function main() {
-    init();
+    init_template();
+    build_tile_library( g_template.endpoint );
+
+    init_param();
+
+    let dim = [6,6,6];
+    let pgr = init_pgr(dim);
+
+    g_info["grid"] = pgr;
+
+    grid_cull_boundary(pgr);
+    grid_cull_propagate(pgr);
+
+    let r = grid_bpc(pgr);
+    console.log(">>> bpc:", r);
+
+    console.log(">>> consistency:", grid_consistency(pgr));
+
+    debug_print_p(pgr);
 
     g_info.debug = {};
   }

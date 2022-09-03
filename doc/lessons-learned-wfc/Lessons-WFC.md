@@ -1,7 +1,7 @@
 Lessons Learned from Implementing "Wave Function Collapse"
 ===
 
-![Like Go Up Splash](img/header.png)
+![Like Go Up Splash](assets/header.png)
 
 In the project "Like Go Up", a version
 of \[mxgmn\]'s "Wave Function Collapse" (WFC)
@@ -13,7 +13,7 @@ implementing a "Wave Function Collapse" (WFC) like algorithm.
 The aim is to provide a review of
 how the algorithm works and what some pitfalls were.
 
-![Like Go Up vanity](img/lgu_vanity.png)
+![Like Go Up vanity](assets/lgu_vanity.png)
 
 This article will go more in depth but as an overview,
 here are the succinct lessons learned:
@@ -29,7 +29,7 @@ here are the succinct lessons learned:
 Review
 ---
 
-![Like Go Up Vanity (1)](img/lgu_vanity_1.png)
+![Like Go Up Vanity (1)](assets/lgu_vanity_1.png)
 
 "Wave Function Collapse" (WFC) is a [generative art tool by
 project](https://github.com/mxgmn/WaveFunctionCollapse) by \[mxgmn\].
@@ -69,30 +69,29 @@ The library of 3D tiles consists, conceptually, of 8 different types of tiles:
 | Name | Description  | Picture |
 |------|--------------|---------|
 | `.`  | Blank/Empty  | empty grid |
-| `\|`  | Road         | ![Road Tile](img/road_tile_s.png) |
-| `+`  | Cross        | ![Cross Tile](img/cross_tile_s.png) |
-| `T`  | T            | ![T Tile](img/t_tile_s.png)  |
-| `r`  | Bend         | ![Bend Tile](img/r_tile_s.png) |
-| `^`  | Stair        | ![Stair Tile](img/stair_tile_s.png) |
-| `p`  | Dead End     | ![Dead End Tile](img/p_tile_s.png) |
+| `\|`  | Road         | ![Road Tile](assets/road_tile_s.png) |
+| `+`  | Cross        | ![Cross Tile](assets/cross_tile_s.png) |
+| `T`  | T            | ![T Tile](assets/t_tile_s.png)  |
+| `r`  | Bend         | ![Bend Tile](assets/r_tile_s.png) |
+| `^`  | Stair        | ![Stair Tile](assets/stair_tile_s.png) |
+| `p`  | Dead End     | ![Dead End Tile](assets/p_tile_s.png) |
 
 From the "base" tiles, the triangle display geometry is calculated and a set of "endpoints" is
 created as an indication of how it can be attached to other tiles in the library.
+
+
 Each tile that can connect to another has a grouping of 4 points on each edge that it can
 connect out of.
 These points are flush in the plane they sit on at the edge of a zero centered 1 unit width cube.
 
-::raw rotated
+![stair tile with endpoints](assets/stair_w_endpoint.png);
 
 A complete "raw" library of endpoint rotations is constructed by rotating each base
 tile by 90 degree increments in each of the major axies, `X`, `Y` and `Z`.
 
-::endpoint comparison
 
 By comparing the endpoints with either a rotated version of itself or with other rotated tiles,
 identical tiles can be identified and neighboring tiles can be identified.
-
-::representative tile
 
 From the duplicated list of tiles, a representative is chosen to be the representative of
 the different rotated versions.
@@ -102,8 +101,7 @@ is rotated by 90 degrees around the `Z` axis.
 In this case, the tile `+000` is kept and used as the representative as `+001`, `+002` and
 `+003` are all identical to it.
 
-::admissible
- 
+
 For each representative tile, a map of admissible neighbors is created that stores information about what tiles can be placed
 next to each other and whether they are connected or not.
 The only neighbor positions allowed are in increments of `+/-1` in each of the major axies (`X`, `Y`, `Z`),
@@ -113,10 +111,12 @@ Tiles that cannot be next to each other are not in the admissible map.
 Tiles that are in the admissible map also have an indication of whether they are connected or
 disconnected.
 
+![stair and road with endpoints](assets/road_to_stair_conn.png)
 
-::admissible valid, connected, not connected, invalid
+![stair and road with endpoints](assets/road_stair_bad_conn.png)
 
-
+![stair and road with endpoints](assets/road_road_admissible.png)
+ 
 For example, a `T` tile that has connection points `[-1,0,0], [1,0,0], [0,-1,0]` (in `[x,y,z]` coordinates)
 would not have a bend above it in the `[0,1,0]` direction if the bend tile that had connection points `[0,-1,0], [1,0,0]`.
 For the above `T` tile, there would be an admissible blank tile (`.`) in the `[0,1,0]` position with an indication that
@@ -139,7 +139,7 @@ represented by a tile.
 Wave Function Collapse Algorithm
 ---
 
-::wfc
+![tile possibilities](assets/tile_possibilities.png)
 
 Once the tilemap has been constructed, we the wave function collapse algorithm
 can be run in earnest.
@@ -312,10 +312,6 @@ Some notable points:
 * Anytime a tile gets culled, the cell and all of it's valid neighbors need to be reprocessed
 * The `outOfBounds` check can be altered to contain wrap around conditions if desired
 
-::flag neighbors
-
-::wrap boundary conditions
-
 The above pseudo-code is meant more for illustrative purposes.
 An implementation of the above code would need to check for errors to see if it fails to find a realization
 by removing all potential possibilities in a cell position, say.
@@ -340,7 +336,7 @@ as any other tile would be meant the special cases to consider the empty tile di
 
 #### Pitfall #2, Complicated Tile Connections
 
-::complicated
+![complicated connection](assets/complicated.png)
 
 The "wave function collapse" (WFC) like algorithm is conceptually simpler when
 tile neighbor tests can be treated in a homogeneous way.
@@ -358,7 +354,6 @@ myriad of other tests, quickly become overly complex.
 
 #### Pitfall #3, Overly Constrained Tilemap
 
-::constrained
 
 The initial tileset used didn't have a "dead-end" tile (`p`) and
 for many of the test runs, this resulted in failed realizations.
@@ -378,7 +373,7 @@ Intuitively, only tiles "in plane" are the most likely.
 That is, tiles that are flat in the `XY` plane should
 be the most likely to be chosen for most realizations.
 
-::4x4x1 counterexample
+![constrained realization](assets/improbable.png)
 
 If a "stair" (`^`) tile is ever chosen, this drastically
 restricts the potential tiles available for any valid
@@ -387,8 +382,6 @@ Now, not only do the tiles chosen need
 to be either "road" (`|`) tiles or other stair tiles (`^`)
 in the `XZ` or `YZ` directions, it also needs to loop
 back in on itself.
-
-:: 4x4x1 realization contradiction pitfall
 
 The algorithm will start
 choosing other tiles that are locally consistent.
@@ -412,7 +405,7 @@ a valid realization.
 
 #### Pitfall #4, Not Optimizing
 
-::loading
+![loading screen](assets/loading.png)
 
 The consensus is "get it working, then get it to working fast",
 also known as "premature optimization is the root of all evil"
@@ -436,7 +429,7 @@ cell position is collapsed, recovering an $O(n)$ runtime.
 Conclusion
 ---
 
-::vanity
+![vanity shot](assets/vanity_e.png)
 
 \[mxgmn\]'s "Wave Function Collapse" (WFC) algorithm is both
 an accessible framework to more theoretical
@@ -446,12 +439,12 @@ outputs from minimal effort.
 
 The main drawbacks of it's inability to overcome local consistency
 at the sacrifice of further reaching cohesion are issues that grieve
-many adjacent problems in this space.
+many adjacent classes of problems and algorithms in this space.
 Constraint satisfaction, as a general problem, is $\text{NP-Complete}$
-so we have no hope of ever finding efficient algorithms but
-it would be interesting to pursue other heuristics to see
-if they can't keep the same accessibility while providing
-more powerful tools.
+so we have no hope of ever finding efficient algorithms.
+It would be interesting to pursue other heuristics to see
+if they can't keep the same ease and versatility in their
+use while providing more powerful tools.
 
 
 References
@@ -459,7 +452,9 @@ References
 
 * mxgmn (2022) WaveFunctionCollapse \[Source code\] [github.com/mxgmn/WaveFunctionCollapse](https://github.com/mxgmn/WaveFunctionCollapse)
 * kchapelier (2022) wavefunctioncollapse \[Source code\] [github.com/kchapelier/wavefunctioncollapse](https://github.com/kchapelier/wavefunctioncollapse)
-
+* Wikipedia (2022, September) Constraint Satisfaction Problem. [https://en.wikipedia.org/wiki/Constraint_satisfaction_problem](https://en.wikipedia.org/wiki/Constraint_satisfaction_problem)
+* Wikipedia (2022, September) NP-Completeness. [https://en.wikipedia.org/wiki/NP-completeness](https://en.wikipedia.org/wiki/NP-completeness)
+* 
 
 License
 ---
