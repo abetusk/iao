@@ -378,7 +378,7 @@ Intuitively, only tiles "in plane" are the most likely.
 That is, tiles that are flat in the `XY` plane should
 be the most likely to be chosen for most realizations.
 
-![constrained realization](assets/improbable.png)
+![constrained realization](assets/warning.png)
 
 If a "stair" (`^`) tile is ever chosen, this drastically
 restricts the potential tiles available for any valid
