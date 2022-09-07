@@ -44,8 +44,8 @@ var g_info = {
   "grid_size": [8,8,8],
   "avg_grid_size": 8,
 
-  "tile_width" : 1/4,
-  "tile_height": 1/7,
+  //"tile_width" : 1/4,
+  //"tile_height": 1/7,
 
   "ready": false,
   "preview_available": false,
@@ -166,7 +166,7 @@ var g_info = {
     //"15": 1,
     //"16": 1
   },
-  "tile_height": 1/8,
+  "tile_height": 1/7,
     
   "grid_weight" : {
     "9": 25,
@@ -229,7 +229,15 @@ var g_info = {
 
   "debug_level": 0,
 
-  "material_type" : "toon"
+  "material_type" : "toon",
+
+  "profile" : {
+    "s": 0,
+    "e": 0,
+    "dt": 0
+  },
+
+  "profile_hist": []
 
 };
 
@@ -266,13 +274,14 @@ let g_template = {
   "weight": {
     //"d": 0,
     ".": 1,
-    "|": 1,
+    "|": 2,
     "+": 1,
-    "T": 1,
-    "r": 3,
+    "T": 2,
+    "r": 2,
+    //"r": 3,
     //"p": 1,
-    //"^": 1
-    "^": 5
+    "^": 6
+    //"^": 5
   },
 
   "_weight": {
@@ -373,6 +382,14 @@ function screenshot_data(imguri) {
 }
 
 
+function start_profile() {
+  g_info.profile.s = (new Date().getTime() / 1000);
+}
+
+function end_profile() {
+  g_info.profile.e = (new Date().getTime() / 1000);
+  g_info.profile.dt = g_info.profile.e - g_info.profile.s;
+}
 
 
 function _pos_keystr(x,y,z) {
@@ -2872,6 +2889,95 @@ function is_admissible(h, anchor_tile_name, dv_key, nei_tile_name) {
   return 1;
 }
 
+function grid_belief_m(gr, t_idx) {
+  t_idx = ((typeof t_idx==="undefined") ? 0 : t_idx);
+  let _eps = (1/(1024*1024));
+
+  let oppo = g_template.oppo;
+  let admissible_nei = g_template.admissible_nei;
+  let admissible_pos = g_template.admissible_pos;
+
+  let dx = Math.floor(gr[0][0].length/2),
+      dy = Math.floor(gr[0].length/2),
+      dz = Math.floor(gr.length/2);
+
+  let bounds_idx = [
+    { "x_start":  0, "x_len": dx, "y_start":  0, "y_len" : dy, "z_start":  0, "z_len": dz },
+    { "x_start": dx, "x_len": dx, "y_start":  0, "y_len" : dy, "z_start":  0, "z_len": dz },
+    { "x_start":  0, "x_len": dx, "y_start": dy, "y_len" : dy, "z_start":  0, "z_len": dz },
+    { "x_start": dx, "x_len": dx, "y_start": dy, "y_len" : dy, "z_start":  0, "z_len": dz },
+    { "x_start":  0, "x_len": dx, "y_start":  0, "y_len" : dy, "z_start": dz, "z_len": dz },
+    { "x_start": dx, "x_len": dx, "y_start":  0, "y_len" : dy, "z_start": dz, "z_len": dz },
+    { "x_start":  0, "x_len": dx, "y_start": dy, "y_len" : dy, "z_start": dz, "z_len": dz },
+    { "x_start": dx, "x_len": dx, "y_start": dy, "y_len" : dy, "z_start": dz, "z_len": dz }
+  ];
+
+  let belief_choice = [];
+
+  for (let idx=0; idx<bounds_idx.length; idx++) {
+
+    let max_belief = {
+      "v": [0,0,0],
+      "tile": "",
+      "belief":-1
+    };
+
+    let bound = bounds_idx[idx];
+
+    for (let z=bound.z_start; z<(bound.z_start+bound.z_len); z++) {
+      for (let y=bound.y_start; y<(bound.y_start+bound.y_len); y++) {
+        for (let x=bound.x_start; x<(bound.x_start+bound.x_len); x++) {
+
+          let S = 0;
+          let _belief = [];
+
+          let gr_cell = gr[z][y][x];
+          if (gr_cell.length < 2) { continue; }
+          for (let i=0; i<gr_cell.length; i++) {
+
+            _belief.push(1);
+            for (let dv_idx=0; dv_idx<admissible_pos.length; dv_idx++) {
+              let dv_key = admissible_pos[dv_idx].dv_key;
+              let dv = admissible_pos[dv_idx].dv;
+
+              let p = _posbc(gr, x+dv[0], y+dv[1], z+dv[2]);
+              let ux = p[0],
+                  uy = p[1],
+                  uz = p[2];
+              if (_oob(gr,ux, uy, uz)) { continue; }
+
+              _belief[i] *= gr_cell[i].mu[t_idx][dv_key].val;
+            }
+
+            S += _belief[i];
+          }
+
+          if (S < _eps) { S=1; }
+
+          for (let i=0; i<gr_cell.length; i++) {
+            _belief[i] /= S;
+          }
+
+          for (let i=0; i<gr_cell.length; i++) {
+            if (max_belief.belief < _belief[i]) {
+              max_belief.belief = _belief[i];
+              max_belief.tile = gr_cell[i].name;
+              max_belief.v = [x,y,z];
+            }
+                
+          }
+
+        }
+      }
+    }
+
+    belief_choice.push(max_belief);
+
+  }
+
+  return belief_choice;
+}
+
 function grid_belief(gr, t_idx) {
   t_idx = ((typeof t_idx==="undefined") ? 0 : t_idx);
   let _eps = (1/(1024*1024*1024*1024));
@@ -3129,7 +3235,190 @@ function _fill_accessed(gr, accessed, x,y,z) {
 }
 
 
-function grid_bp_opt(gr, t_cur) {
+function grid_bp_opt(info) {
+  let t_cur = ((typeof info.time_index === "undefined") ? 0 : info.time_index);
+  let _stop_eps = ((typeof info.stop_epsilon === "undefined") ? (1/(1024*1024)) : info.stop_epsilon);
+  let _eps = ((typeof info.update_epsilon === "undefined") ? (1/(1024*1024)) : info.update_epsilon);
+  let gr = info.grid;
+  let wave_front = info.wave_front;
+
+  let nxt_wave_front = {};
+
+  t_nxt = (t_cur+1)%2;
+
+  //grid_bp_clear(gr, t_nxt);
+
+  let pdf = g_template.pdf;
+  let oppo = g_template.oppo;
+  let admissible_nei = g_template.admissible_nei;
+  let admissible_pos = g_template.admissible_pos;
+
+  //DEBUG
+  let wf_count=0;
+  let _sz = gr.length * gr[0].length * gr[0][0].length;
+  for (let _k in wave_front) { wf_count++; }
+  console.log("grid_bp_opt:", wf_count, "/", _sz);
+  //DEBUG
+
+  for (let wf_key in wave_front) {
+    wf_ele = wave_front[wf_key];
+    let x = wf_ele[0],
+        y = wf_ele[1],
+        z = wf_ele[2];
+
+    _fill_accessed(gr, nxt_wave_front, x,y,z);
+
+    let anchor_cell = gr[z][y][x];
+
+    for (let anchor_idx=0; anchor_idx<anchor_cell.length; anchor_idx++) {
+      let anchor_tile = anchor_cell[anchor_idx];
+
+      for (let dv_idx=0; dv_idx<admissible_pos.length; dv_idx++) {
+        let anchor_dv_key = admissible_pos[dv_idx].dv_key;
+        let dv = admissible_pos[dv_idx].dv;
+
+        let p = _posbc(gr, x+dv[0], y+dv[1], z+dv[2]);
+        let ux = p[0],
+            uy = p[1],
+            uz = p[2];
+        if (_oob(gr,ux, uy, uz)) {
+          anchor_tile.mu[t_nxt][anchor_dv_key].val = 0;
+          continue;
+        }
+
+        let nei_cell = gr[uz][uy][ux];
+
+        let mu_ij_b = 0;
+        for (let nei_idx=0; nei_idx<nei_cell.length; nei_idx++) {
+          let nei_tile = nei_cell[nei_idx];
+
+          //
+          //                       - 1 valid adjacency (connected or no)
+          // f_{i,j}(nei,anch) = <
+          //                       - 0 non-valid adjacency (cannot be placed together)
+          //
+          //if (is_admissible(admissible_nei, anchor_tile.name, anchor_dv_key, nei_tile.name)==0) { continue; }
+          if (!(nei_tile.name in admissible_nei[anchor_tile.name][anchor_dv_key])) { continue; }
+
+          let _P_mu_kj_a = 1;
+
+          //
+          // g_i(nei) - individual tile probability
+          //
+          _P_mu_kj_a *= pdf[ nei_tile.name.charAt(0) ];
+
+
+          //
+          // \prod_{k\nN(i) \ j} \mu_{k,j}(a)
+          //
+
+          for (let nei_dv_idx=0; nei_dv_idx<admissible_pos.length; nei_dv_idx++) {
+            let nei_dv_key = admissible_pos[nei_dv_idx].dv_key;
+            let nei_dv = admissible_pos[nei_dv_idx].dv;
+
+            // in case we implement these boundary conditions or
+            // degenerate caess?
+            //
+            if (!(nei_dv_key in nei_tile.mu[t_cur])) { continue; }
+            if (_oob(gr, ux+nei_dv[0], uy+nei_dv[1], uz+nei_dv[2])) { continue; }
+
+            // disallow msg back into where w're coming from (anchor)
+            //
+            let _bp_dv_key = oppo[nei_dv_key];
+            if (_bp_dv_key == anchor_dv_key) { continue; }
+
+            // running product of messages from neighbors of neighbor
+            //
+            _P_mu_kj_a *= nei_tile.mu[t_cur][nei_dv_key].val;
+
+          }
+
+          mu_ij_b += _P_mu_kj_a;
+
+        }
+
+        anchor_tile.mu[t_nxt][anchor_dv_key].val = mu_ij_b;
+
+      }
+    }
+
+  }
+
+  // renormalize our newly calculated mu's
+  //
+  grid_renormalize(gr, t_nxt);
+
+  // calculate maximum difference between this
+  // iteration and the last
+  //
+
+  let tot_count=0;
+  let remove_count = 0;
+
+  let max_diff = -1;
+  for (let wf_key in wave_front) {
+    tot_count++;
+    let wf_ele = wave_front[wf_key];
+    let x = wf_ele[0],
+        y = wf_ele[1],
+        z = wf_ele[2];
+    let anchor_cell = gr[z][y][x];
+
+    let anchor_max_eps = -1;
+    for (let anchor_idx=0; anchor_idx<anchor_cell.length; anchor_idx++) {
+      let anchor_tile = anchor_cell[anchor_idx];
+
+      for (let dv_idx=0; dv_idx<admissible_pos.length; dv_idx++) {
+        let anchor_dv_key = admissible_pos[dv_idx].dv_key;
+        let dv = admissible_pos[dv_idx].dv;
+
+        let p = _posbc(gr, x+dv[0], y+dv[1], z+dv[2]);
+        let ux = p[0],
+            uy = p[1],
+            uz = p[2];
+        if (_oob(gr, ux,uy,uz)) { continue; }
+
+        let cur_val = anchor_tile.mu[t_cur][anchor_dv_key].val;
+        let nxt_val = anchor_tile.mu[t_nxt][anchor_dv_key].val;
+        let _diff = Math.abs(cur_val - nxt_val);
+        if ((max_diff < 0) || (_diff > max_diff)) {
+          max_diff = _diff;
+        }
+
+        if ((anchor_max_eps < 0) || (_diff > anchor_max_eps)) {
+          anchor_max_eps = _diff;
+        }
+
+      }
+
+    }
+
+    if (anchor_max_eps < _eps)  {
+
+      let _pk = _pos_keystr(x,y,z);
+
+      //DEBUG
+      //console.log("grid_bp_opt: iter(", info.iter, "):", x, y,  z, " < _eps, removing (", anchor_max_eps, "<", _eps, ")");
+
+      if (_pk in nxt_wave_front) {
+        remove_count++;
+        delete nxt_wave_front[_pk];
+      }
+    }
+
+
+  }
+
+  //DEBUG
+  //console.log("removed", remove_count, "/", "tot_count", tot_count);
+
+  info.wave_front = nxt_wave_front;
+
+  return max_diff;
+}
+
+
+function grid_bp_sim(gr, t_cur, _thresh_eps) {
   t_cur = ((typeof t_cur === "undefined") ? 0 : t_cur);
   let _eps = 1/(1024*1024*1024*1024);
 
@@ -3137,6 +3426,7 @@ function grid_bp_opt(gr, t_cur) {
 
   grid_bp_clear(gr, t_nxt);
 
+  let pdf = g_template.pdf;
   let oppo = g_template.oppo;
   let admissible_nei = g_template.admissible_nei;
   let admissible_pos = g_template.admissible_pos;
@@ -3175,15 +3465,17 @@ function grid_bp_opt(gr, t_cur) {
               //
               if (is_admissible(admissible_nei, anchor_tile.name, anchor_dv_key, nei_tile.name)==0) { continue; }
 
+              let _P_mu_kj_a = 1;
+
               //
               // g_i(nei) - assumed to be 1 (uniform)
               //
+              _P_mu_kj_a *= pdf[ nei_tile.name.charAt(0) ];
 
               //
               // \prod_{k\nN(i) \ j} \mu_{k,j}(a)
               //
 
-              let _P_mu_kj_a = 1;
               for (let nei_dv_idx=0; nei_dv_idx<admissible_pos.length; nei_dv_idx++) {
                 let nei_dv_key = admissible_pos[nei_dv_idx].dv_key;
                 let nei_dv = admissible_pos[nei_dv_idx].dv;
@@ -3204,7 +3496,6 @@ function grid_bp_opt(gr, t_cur) {
                 _P_mu_kj_a *= nei_tile.mu[t_cur][nei_dv_key].val;
 
               }
-
               mu_ij_b += _P_mu_kj_a;
 
             }
@@ -3222,9 +3513,8 @@ function grid_bp_opt(gr, t_cur) {
   //
   grid_renormalize(gr, t_nxt);
 
-  // calculate maximum difference between this
-  // iteration and the last
-  //
+  let err_stat = { "above":0, "below": 0};
+
   let max_diff = -1;
   for (let z=0; z<gr.length; z++) {
     for (let y=0; y<gr[z].length; y++) {
@@ -3246,6 +3536,15 @@ function grid_bp_opt(gr, t_cur) {
 
             let cur_val = anchor_tile.mu[t_cur][anchor_dv_key].val;
             let nxt_val = anchor_tile.mu[t_nxt][anchor_dv_key].val;
+
+            let _del = Math.abs(cur_val-nxt_val);
+            if (_del < _thresh_eps) {
+              err_stat["below"]++;
+
+              anchor_tile.mu[t_nxt][anchor_dv_key].val = cur_val;
+            }
+            else { err_stat["above"]++; }
+
             if ((max_diff < 0) ||
                 (Math.abs(cur_val - nxt_val) > max_diff)) {
               max_diff = Math.abs(cur_val - nxt_val);
@@ -3257,9 +3556,15 @@ function grid_bp_opt(gr, t_cur) {
     }
   }
 
+  //DEBUG
+  console.log("cellstat: below:", err_stat["below"], "above:", err_stat["above"]);
+  //for (let idel in err_stat) {
+    //if (err_stat[idel].diff < _thresh_eps) { continue; }
+    //console.log(">>>", "(", idel, ")", err_stat[idel].diff, err_stat[idel].count);
+  //}
+
   return max_diff;
 }
-
 
 function grid_bp(gr, t_cur, _thresh_eps) {
   t_cur = ((typeof t_cur === "undefined") ? 0 : t_cur);
@@ -3547,6 +3852,22 @@ function grid_finished(gr) {
 
 }
 
+function grid_finished_count(gr) {
+
+  let one_count = 0;
+
+  for (let z=0; z<gr.length; z++) {
+    for (let y=0; y<gr[z].length; y++) {
+      for (let x=0; x<gr[z][y].length; x++) {
+        if (gr[z][y][x].length==1) { one_count++; }
+      }
+    }
+  }
+
+  return one_count;
+
+}
+
 // Belief Propagation Collapse
 //
 function grid_bpc(pgr, step) {
@@ -3559,6 +3880,22 @@ function grid_bpc(pgr, step) {
 
   let _ret = {"msg":"?" };
 
+  let grid_bp_info = {
+    "iter": 0,
+    "grid": pgr,
+    "time_index" : 0,
+    "stop_epsilon": iter_stop_eps,
+    "wave_front" : {}
+  };
+
+  for (let z=0; z<pgr.length; z++) {
+    for (let y=0; y<pgr[z].length; y++) {
+      for (let x=0; x<pgr[z][y].length; x++) {
+        grid_bp_info.wave_front[ _pos_keystr(x,y,z) ] = [x,y,z];
+      }
+    }
+  }
+
   grid_renormalize(pgr);
 
   let N = pgr.length * pgr[0].length * pgr[0][0].length;
@@ -3566,8 +3903,11 @@ function grid_bpc(pgr, step) {
   console.log("start");
   let processing = true;
   while (processing) {
+
     //iter_stop_eps = 1/((step+1)*128);
     iter_stop_eps = 1/((step+1)*64);
+    //iter_stop_eps = 1/((step+1)*128);
+    //iter_stop_eps = 1/((step+1)*1024);
 
     console.log("...", iter_stop_eps, "(", step, "/", N, ")");
 
@@ -3577,7 +3917,22 @@ function grid_bpc(pgr, step) {
       //console.log("##iter:", iter);
       if ((iter%10)==0) { console.log("### iter:", iter, "max_change:", d); }
 
+      grid_bp_info.iter++;
+
+      //d = grid_bp_opt(pgr, time_idx, iter_stop_eps);
+      grid_bp_info.time_index = time_idx;
+      grid_bp_info.stop_epsilon = iter_stop_eps;
+      //grid_bp_info.update_epsilon = (iter_stop_eps*iter_stop_eps);
+      grid_bp_info.update_epsilon = (iter_stop_eps/8);
+
+      start_profile();
+      //d = grid_bp_opt(grid_bp_info);
       d = grid_bp(pgr, time_idx, iter_stop_eps);
+      //d = grid_bp_sim(pgr, time_idx, iter_stop_eps);
+      end_profile();
+
+      g_info.profile_hist.push( g_info.profile.dt );
+      //d = grid_bp(pgr, time_idx, iter_stop_eps);
 
       //console.log("##iter:", iter, "max_diff", d, "iter_stop_eps:", iter_stop_eps);
 
@@ -3585,30 +3940,163 @@ function grid_bpc(pgr, step) {
       if (d<iter_stop_eps) { break; }
     }
 
-    console.log(">>belief");
+    let phist = 0;
+    for (let ii=0; ii<g_info.profile_hist.length; ii++) {
+      phist += g_info.profile_hist[ii];
+    }
+    console.log("grid_bp_opt average:", phist/g_info.profile_hist.length);
 
-    let belief = grid_belief(pgr);
+    //console.log(">>belief");
 
-    console.log("<<belief");
+    let belief = grid_belief(pgr, time_idx);
 
-    console.log(">>>>", belief.v[0], belief.v[1], belief.v[2], belief.tile, belief.belief);
+    //console.log("<<belief");
+    //console.log(">>>>", belief.v[0], belief.v[1], belief.v[2], belief.tile, belief.belief);
+
+    //DEBUG
+    //g_info.debug = pgr;
+    //console.log("debug:", pgr);
+    //return;
 
     console.log(">>collapse");
     grid_collapse_tile(pgr, belief.v[0], belief.v[1], belief.v[2], belief.tile);
     console.log("<<collapse");
 
-    let accessed={};
-    _fill_accessed(pgr, accessed, belief.v[0], belief.v[1], belief.v[2]);
+    //let accessed = grid_bp_info.wave_front;
+    //let accessed={};
+    //_fill_accessed(pgr, accessed, belief.v[0], belief.v[1], belief.v[2]);
+    _fill_accessed(pgr, grid_bp_info.wave_front, belief.v[0], belief.v[1], belief.v[2]);
+
 
     console.log(">>propagate");
-    let r = grid_cull_propagate_opt(pgr, accessed);
+    //let r = grid_cull_propagate_opt(pgr, accessed);
+    let r = grid_cull_propagate_opt(pgr, grid_bp_info.wave_front);
     if (r.state == "finished") { _ret = r; break; }
     console.log("<<propagate");
 
+    //console.log("???", accessed);
+
+    //grid_bp_info.wave_front = accessed;
+
     //debug_print_p(pgr, time_idx, 4);
+
+    //console.log("wave_front:", grid_bp_info.wave_front);
+    //return;
 
     step++;
 
+  }
+
+  console.log("end");
+
+}
+
+// Belief Propagation Collapse
+//
+function grid_bpc_m(pgr, step) {
+  step = ((typeof step === "undefined") ? 0 : step);
+  let iter_stop_eps = (1/(1024*1024*1024*1024));
+  let iter=0;
+  let d = 0;
+  let n_iter = 100;
+  let time_idx = 0;
+
+  let _ret = {"msg":"?" };
+
+  let grid_bp_info = {
+    "iter": 0,
+    "grid": pgr,
+    "time_index" : 0,
+    "stop_epsilon": iter_stop_eps,
+    "wave_front" : {}
+  };
+
+  for (let z=0; z<pgr.length; z++) {
+    for (let y=0; y<pgr[z].length; y++) {
+      for (let x=0; x<pgr[z][y].length; x++) {
+        grid_bp_info.wave_front[ _pos_keystr(x,y,z) ] = [x,y,z];
+      }
+    }
+  }
+
+  grid_renormalize(pgr);
+
+  let N = pgr.length * pgr[0].length * pgr[0][0].length;
+
+  console.log("start");
+  let processing = true;
+  while (processing) {
+
+    iter_stop_eps = 1/((step+1)*64);
+
+    console.log("...", iter_stop_eps, "(", step, "/", N, ")");
+
+    let fi = grid_finished(pgr);
+    console.log("grid_finished:", fi, grid_finished_count(pgr));
+
+    if (grid_finished(pgr)) { break; }
+
+    for (iter=0; iter<n_iter; iter++) {
+      if ((iter%10)==0) { console.log("### iter:", iter, "max_change:", d); }
+
+      grid_bp_info.iter++;
+
+      grid_bp_info.time_index = time_idx;
+      grid_bp_info.stop_epsilon = iter_stop_eps;
+      grid_bp_info.update_epsilon = (iter_stop_eps/8);
+
+      start_profile();
+      d = grid_bp(pgr, time_idx, iter_stop_eps);
+      end_profile();
+
+      g_info.profile_hist.push( g_info.profile.dt );
+
+      time_idx=1-time_idx;
+      if (d<iter_stop_eps) { break; }
+    }
+
+    let phist = 0;
+    for (let ii=0; ii<g_info.profile_hist.length; ii++) {
+      phist += g_info.profile_hist[ii];
+    }
+    console.log("grid_bp_opt average:", phist/g_info.profile_hist.length);
+
+    let belief_m = grid_belief_m(pgr, time_idx);
+
+    for (let ii=0; ii<belief_m.length; ii++) {
+      let belief = belief_m[ii];
+
+      let ux = belief.v[0],
+          uy = belief.v[1],
+          uz = belief.v[2];
+
+      console.log("belief_m", ii, ":", ux, uy, uz);
+
+      if (pgr[uz][uy][ux].length==1) {
+        console.log("  skipping");
+        continue;
+      }
+      for (let jj=0; jj<pgr[uz][uy][ux].length; jj++) {
+        if (belief.tile == pgr[uz][uy][ux][jj].name) {
+          console.log(">>collapse");
+          grid_collapse_tile(pgr, belief.v[0], belief.v[1], belief.v[2], belief.tile);
+          console.log("<<collapse");
+
+          _fill_accessed(pgr, grid_bp_info.wave_front, belief.v[0], belief.v[1], belief.v[2]);
+
+          console.log(">>propagate");
+          //let r = grid_cull_propagate_opt(pgr, accessed);
+          let r = grid_cull_propagate_opt(pgr, grid_bp_info.wave_front);
+          if (r.state == "finished") { _ret = r; break; }
+          console.log("<<propagate");
+
+          break;
+        }
+      }
+
+    }
+
+    step++;
   }
 
   console.log("end");
@@ -4702,7 +5190,9 @@ function init_param() {
   ];
 
   //DEBUG
-  g_info.grid_size = [6,6,6];
+  //g_info.grid_size = [6,6,6];
+  g_info.grid_size = [8,8,4];
+  //g_info.grid_size = [5,5,5];
 
   g_info.features["Grid Size"] = g_info.grid_size.toString();
 
@@ -4936,12 +5426,19 @@ function init() {
   grid_cull_boundary(pgr);
   grid_cull_propagate(pgr);
 
-  let r = grid_bpc(pgr);
+  let start_s = (new Date().getTime() / 1000);
+
+  //let r = grid_bpc(pgr);
+  let r = grid_bpc_m(pgr);
+
   console.log(">>> bpc:", r);
+
+  let end_s = (new Date().getTime() / 1000);
+  console.log("TIME:", end_s - start_s);
 
   console.log(">>> consistency:", grid_consistency(pgr));
 
-  debug_print_p(pgr);
+  //debug_print_p(pgr);
 
   decorate_pgr(pgr);
   let _stat = pgr_stat(pgr);
@@ -4990,6 +5487,54 @@ if (typeof module !== "undefined") {
     "v6": { "nei": { "v4": true }, "val": [] }
   };
 
+  function print_admissible_matrix() {
+    let uniq_repr = g_template.uniq_repr;
+    let admissible_nei = g_template.admissible_nei;
+    let admissible_pos = g_template.admissible_pos;
+
+    let tile_name = [];
+    let adj = [];
+
+    let count =0;
+    for (let tile in uniq_repr) {
+      adj.push([]);
+      tile_name.push(tile);
+      count++;
+    }
+
+    let rowcol_name = [];
+    for (let ii=0; ii<tile_name.length; ii++) {
+      for (let pos_idx=0; pos_idx<admissible_pos.length; pos_idx++) {
+        let dv_key = admissible_pos[pos_idx].dv_key;
+        rowcol_name.push( tile_name[ii] + ";" + dv_key );
+      }
+    }
+
+    for (let ii=0; ii<tile_name.length; ii++) {
+      for (let jj=0; jj<tile_name.length; jj++) {
+        for (let pos_idx=0; pos_idx<admissible_pos.length; pos_idx++) {
+
+          let dv_key = admissible_pos[pos_idx].dv_key;
+          if (!(dv_key in admissible_nei[ tile_name[jj] ])) {
+            adj[ii].push('x');
+            continue;
+          }
+
+          let ok = ((tile_name[ii] in admissible_nei[ tile_name[jj] ][dv_key]) ? '.' : 'x');
+          //let ok = ((tile_name[ii] in admissible_nei[ tile_name[jj] ][dv_key]) ? '1' : '0');
+          adj[ii].push( ok );
+        }
+      }
+    }
+
+    console.log(" ," + rowcol_name.join(","));
+    for (let ii=0; ii<tile_name.length; ii++) {
+      console.log(tile_name[ii] + "," + adj[ii].toString());
+    }
+
+    return;
+
+  }
 
   function main() {
     init_template();
@@ -4997,7 +5542,13 @@ if (typeof module !== "undefined") {
 
     init_param();
 
+    //DEBUG
+    //print_admissible_matrix();
+    //return;
+
+
     let dim = [6,6,6];
+    //let dim = [10,10,10];
     let pgr = init_pgr(dim);
 
     g_info["grid"] = pgr;
@@ -5005,7 +5556,7 @@ if (typeof module !== "undefined") {
     grid_cull_boundary(pgr);
     grid_cull_propagate(pgr);
 
-    let r = grid_bpc(pgr);
+    let r = grid_bpc_m(pgr);
     console.log(">>> bpc:", r);
 
     console.log(">>> consistency:", grid_consistency(pgr));

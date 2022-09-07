@@ -67,6 +67,10 @@ Ideas
 * Provide textured noise to flat spaces to give visual interest
   - could be uniform noise in background
 
+Reference
+---
+
+* [Isometric Weave Pattern](https://www.shadertoy.com/view/WdcBDB)
 
 Discussion
 ---
