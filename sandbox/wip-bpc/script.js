@@ -47,6 +47,8 @@ var g_info = {
   //"tile_width" : 1/4,
   //"tile_height": 1/7,
 
+  "verbose_level": 1,
+
   "ready": false,
   "preview_available": false,
 
@@ -273,15 +275,15 @@ let g_template = {
 
   "weight": {
     //"d": 0,
-    ".": 1,
-    "|": 2,
-    "+": 1,
-    "T": 2,
-    "r": 2,
+    ".": 20,
+    "|": 10,
+    "+": 10,
+    "T": 10,
+    "r": 10,
     //"r": 3,
     //"p": 1,
-    "^": 6
-    //"^": 5
+    //"^": 6
+    "^": 45
   },
 
   "_weight": {
@@ -1848,19 +1850,144 @@ function build_tile_library( _endp_lib ) {
   g_template["uniq_repr"] = uniq_repr;
   g_template["tile_attach"] = tile_attach;
   g_template["rot_lib"] = rot_lib;
-
   g_template["admissible_nei"] = admissible_nei;
 
 
   // restrict undesirable combinations
   //
-  filter_steeple(admissible_nei);
+  filter_steeple();
+
+
+  //---
+  //
+  // build matrix
+  //
+  let _eps = (1/(1024*1024*1024));
+
+  let tile_name_a = [];
+  let tile_name_a_map_idx = {};
+  for (let tn in uniq_repr) {
+    tile_name_a_map_idx[tn] = tile_name_a.length;
+    tile_name_a.push(tn);
+  }
+
+  let F_matrix = {};
+  let _adj_info = {};
+
+  g_info["svd"] = [];
+
+  for (let pos_idx=0; pos_idx<admissible_pos.length; pos_idx++) {
+
+    let dv_key = admissible_pos[pos_idx].dv_key;
+
+    let _F = [];
+    let _F_map = {};
+    for (let ii=0; ii<tile_name_a.length; ii++) {
+      let anchor_key = tile_name_a[ii];
+
+      _F.push([]);
+      _F_map[ tile_name_a[ii] ] = {};
+      for (let jj=0; jj<tile_name_a.length; jj++) {
+        let nei_key = tile_name_a[jj];
+
+        let _val = ((nei_key in admissible_nei[ anchor_key ][ dv_key ]) ? 1 : 0);
+
+        _F[ii].push( _val );
+        _F_map[ anchor_key ][ nei_key ] = _val;
+      }
+    }
+
+    F_matrix[ dv_key ] = _F;
+
+    let _SVt = [];
+    let _U = [];
+    let S = [];
+
+
+    if (typeof numeric !== "undefined") {
+
+      let svd = numeric.svd( _F );
+
+      let Sm = [];
+      let Vt = numeric.transpose(svd.V);
+      let nz_count = 0;
+
+      g_info.svd.push(svd);
+
+      for (let ii=0; ii<svd.S.length; ii++) {
+        S.push([]);
+        for (let jj=0; jj<svd.S.length; jj++) {
+          S[ii].push( (ii==jj) ? svd.S[ii] : 0 );
+        }
+        if (Math.abs(svd.S[ii]) > _eps) { nz_count++; }
+      }
+
+      let SVt_all = numeric.dot(S, numeric.transpose(svd.V));
+
+      //console.log("SVt_all", SVt_all);
+      //console.log(">>>nz", nz_count);
+
+      for (let ii=0; ii<nz_count; ii++) { _SVt.push(SVt_all[ii]); }
+
+      //console.log( svd.U.length, svd.U[0].length, "::", svd.S.length, "::", svd.V.length, svd.V[0].length);
+      //let SVt_all = numeric.dot(Sm, Vt);
+
+      for (let ii=0; ii<svd.U.length; ii++) {
+        _U.push([]);
+        for (let jj=0; jj<nz_count; jj++) {
+          _U[ii].push( svd.U[ii][jj] );
+        }
+      }
+
+    }
+
+    // matrix check
+    //
+    let xx = numeric.dot( _U, _SVt );
+    console.log(">>>", _cmp_mat(xx, _F), _U.length, _U[0].length, _SVt.length, _SVt[0].length );
+
+    _adj_info[ dv_key ] = {
+      "F": _F,
+      "Fmap": _F_map,
+      "S": S,
+      "SV": _SVt,
+      "U": _U
+    };
+
+  }
+
+  //
+  //---
+
+  g_template["tile_name"] = tile_name_a;
+  g_template["tile_name_idx"] = tile_name_a_map_idx;
+
+  g_template["F"] = F_matrix;
+  g_template["adj"] = _adj_info;
 
 }
 
 
+function _cmp_mat(a,b, _eps) {
+  _eps = ((typeof _eps === "undefined") ? (1/(1024*1024*1024)) : _eps);
+  if (a.length != b.length) { return false; }
+  for (let ii=0; ii<a.length; ii++) {
+    if (a[ii].length != b[ii].length) { return false; }
+    for (let jj=0; jj<a[ii].length; jj++) {
+      if (Math.abs(a[ii][jj] - b[ii][jj]) > _eps) {
+        console.log("!=", ii, jj, a[ii][jj], b[ii][jj]);
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
 function filter_steeple() {
   let _eps = 1/(1024*1024);
+
+  //DEBUG
+  console.log("FILTERING STEEPLE");
 
   let admissible_nei  = g_template.admissible_nei;
   let admissible_pos  = g_template.admissible_pos;
@@ -1868,6 +1995,8 @@ function filter_steeple() {
   let raw_lib         = g_template.raw_lib;
 
   let delete_list = [];
+
+  console.log("???", admissible_nei, admissible_pos, oppo, raw_lib);
 
   for (let key_anchor in admissible_nei) {
     if (key_anchor.charAt(0) != '^') { continue; }
@@ -1879,9 +2008,9 @@ function filter_steeple() {
       anc_p_repr[1] += endp[ii][1];
       anc_p_repr[2] += endp[ii][2];
     }
-    //anc_p_repr[0] /= endp.length;
-    //anc_p_repr[1] /= endp.length;
-    //anc_p_repr[2] /= endp.length;
+
+
+    console.log("filter_steeple.cp0");
 
     for (let posidx=0; posidx<admissible_pos.length; posidx++) {
       let dv_anc_key = admissible_pos[posidx].dv_key;
@@ -1890,9 +2019,13 @@ function filter_steeple() {
       let dv_anc = admissible_pos[posidx].dv;
       let dv_nei = [ -dv_anc[0], -dv_anc[1], -dv_anc[2] ];
 
+      console.log("filter_steeple.cp1");
+
       for (let key_nei in admissible_nei[key_anchor][dv_anc_key]) {
         if (key_nei.charAt(0) != '^') { continue; }
         if (!admissible_nei[key_anchor][dv_anc_key][key_nei].conn) { continue; }
+
+        console.log("filter_steeple.cp2");
 
         let nei_p_repr = [0,0,0];
         let endp = raw_lib[key_nei];
@@ -1915,6 +2048,9 @@ function filter_steeple() {
         ];
 
         let de = Math.abs(nei_v[0] - anc_v[0] + nei_v[1] - anc_v[1] + nei_v[2] - anc_v[2]);
+
+        console.log("steeple_cmp:", key_anchor, dv_anc_key, key_nei, "de:", de);
+
         if (de < _eps) {
           delete_list.push( [ key_anchor, key_nei, dv_anc_key ] );
           delete_list.push( [ key_anchor, dv_anc_key, key_nei ] );
@@ -1927,6 +2063,8 @@ function filter_steeple() {
     let a = delete_list[ii][0];
     let b = delete_list[ii][1];
     let c = delete_list[ii][2];
+
+    console.log("deleting:", a, b, c);
 
     delete admissible_nei[a][b][c];
   }
@@ -3557,7 +3695,159 @@ function grid_bp_sim(gr, t_cur, _thresh_eps) {
   }
 
   //DEBUG
-  console.log("cellstat: below:", err_stat["below"], "above:", err_stat["above"]);
+  if (g_info.verbose_level > 2) {
+    console.log("cellstat: below:", err_stat["below"], "above:", err_stat["above"]);
+  }
+  //for (let idel in err_stat) {
+    //if (err_stat[idel].diff < _thresh_eps) { continue; }
+    //console.log(">>>", "(", idel, ")", err_stat[idel].diff, err_stat[idel].count);
+  //}
+
+  return max_diff;
+}
+
+function grid_bp_mat(gr, t_cur, _thresh_eps) {
+  t_cur = ((typeof t_cur === "undefined") ? 0 : t_cur);
+  let _eps = 1/(1024*1024*1024*1024);
+
+  t_nxt = (t_cur+1)%2;
+
+  //grid_bp_clear(gr, t_nxt);
+
+  let pdf = g_template.pdf;
+  let oppo = g_template.oppo;
+  let admissible_nei = g_template.admissible_nei;
+  let admissible_pos = g_template.admissible_pos;
+  //let F = g_template.F;
+  let tile_name_a = g_template.tile_name;
+  let tile_name_a_idx = g_template.tile_name_idx;
+  for (let z=0; z<gr.length; z++) {
+    for (let y=0; y<gr[z].length; y++) {
+      for (let x=0; x<gr[z][y].length; x++) {
+
+        for (let dv_idx=0; dv_idx<admissible_pos.length; dv_idx++) {
+          let anchor_dv_key = admissible_pos[dv_idx].dv_key;
+          let dv = admissible_pos[dv_idx].dv;
+
+          let SV = g_template.adj[anchor_dv_key].SV;
+          let U = g_template.adj[anchor_dv_key].U;
+
+          let p = _posbc(gr, x+dv[0], y+dv[1], z+dv[2]);
+          let ux = p[0],
+              uy = p[1],
+              uz = p[2];
+          if (_oob(gr,ux, uy, uz)) {
+            //anchor_tile.mu[t_nxt][anchor_dv_key].val = 0;
+            continue;
+          }
+
+          let h_ij_vec = [];
+          for (let ii=0; ii<tile_name_a.length; ii++) { h_ij_vec.push(0); }
+
+          let nei_cell = gr[uz][uy][ux];
+
+          let mu_ij_b = 0;
+          for (let nei_idx=0; nei_idx<nei_cell.length; nei_idx++) {
+            let nei_tile = nei_cell[nei_idx];
+
+            let _P_mu_kj_a = 1;
+
+            // g_i(nei) - assumed to be 1 (uniform)
+            //
+            _P_mu_kj_a *= pdf[ nei_tile.name.charAt(0) ];
+
+            // \prod_{k\nN(i) \ j} \mu_{k,j}(a)
+            //
+            for (let nei_dv_idx=0; nei_dv_idx<admissible_pos.length; nei_dv_idx++) {
+              let nei_dv_key = admissible_pos[nei_dv_idx].dv_key;
+              let nei_dv = admissible_pos[nei_dv_idx].dv;
+
+              // in case we implement these boundary conditions or
+              // degenerate caess?
+              //
+              if (!(nei_dv_key in nei_tile.mu[t_cur])) { continue; }
+              if (_oob(gr, ux+nei_dv[0], uy+nei_dv[1], uz+nei_dv[2])) { continue; }
+
+              // disallow msg back into where w're coming from (anchor)
+              //
+              let _bp_dv_key = oppo[nei_dv_key];
+              if (_bp_dv_key == anchor_dv_key) { continue; }
+
+              // running product of messages from neighbors of neighbor
+              //
+              _P_mu_kj_a *= nei_tile.mu[t_cur][nei_dv_key].val;
+
+            }
+
+            let h_idx = tile_name_a_idx[ nei_tile.name ];
+            h_ij_vec[ h_idx ] = _P_mu_kj_a;
+
+          }
+
+          let mu_ij_vec = numeric.dot( U, numeric.dot( SV, h_ij_vec ) );
+
+          let anchor_cell = gr[z][y][x];
+          for (let anch_idx=0; anch_idx < anchor_cell.length; anch_idx++) {
+            let anchor_tile = anchor_cell[anch_idx];
+
+            let mu_ij_vec_idx = tile_name_a_idx[ anchor_tile.name ];
+            anchor_tile.mu[ t_nxt ][ anchor_dv_key ].val = mu_ij_vec[ mu_ij_vec_idx ];
+
+          }
+
+        }
+
+      }
+    }
+  }
+
+  // renormalize our newly calculated mu's
+  //
+  grid_renormalize(gr, t_nxt);
+
+  let err_stat = { "above":0, "below": 0};
+
+  let max_diff = -1;
+  for (let z=0; z<gr.length; z++) {
+    for (let y=0; y<gr[z].length; y++) {
+      for (let x=0; x<gr[z][y].length; x++) {
+
+        let anchor_cell = gr[z][y][x];
+        for (let anchor_idx=0; anchor_idx<anchor_cell.length; anchor_idx++) {
+          let anchor_tile = anchor_cell[anchor_idx];
+
+          for (let dv_idx=0; dv_idx<admissible_pos.length; dv_idx++) {
+            let anchor_dv_key = admissible_pos[dv_idx].dv_key;
+            let dv = admissible_pos[dv_idx].dv;
+
+            let p = _posbc(gr, x+dv[0], y+dv[1], z+dv[2]);
+            let ux = p[0],
+                uy = p[1],
+                uz = p[2];
+            if (_oob(gr, ux,uy,uz)) { continue; }
+
+            let cur_val = anchor_tile.mu[t_cur][anchor_dv_key].val;
+            let nxt_val = anchor_tile.mu[t_nxt][anchor_dv_key].val;
+
+            let _del = Math.abs(cur_val-nxt_val);
+            if (_del < _thresh_eps) { err_stat["below"]++; }
+            else { err_stat["above"]++; }
+
+            if ((max_diff < 0) ||
+                (Math.abs(cur_val - nxt_val) > max_diff)) {
+              max_diff = Math.abs(cur_val - nxt_val);
+            }
+
+          }
+        }
+      }
+    }
+  }
+
+  //DEBUG
+  if (g_info.verbose_level > 2) {
+    console.log("cellstat: below:", err_stat["below"], "above:", err_stat["above"]);
+  }
   //for (let idel in err_stat) {
     //if (err_stat[idel].diff < _thresh_eps) { continue; }
     //console.log(">>>", "(", idel, ")", err_stat[idel].diff, err_stat[idel].count);
@@ -3701,7 +3991,9 @@ function grid_bp(gr, t_cur, _thresh_eps) {
   }
 
   //DEBUG
-  console.log("cellstat: below:", err_stat["below"], "above:", err_stat["above"]);
+  if (g_info.verbose_level > 2) {
+    console.log("cellstat: below:", err_stat["below"], "above:", err_stat["above"]);
+  }
   //for (let idel in err_stat) {
     //if (err_stat[idel].diff < _thresh_eps) { continue; }
     //console.log(">>>", "(", idel, ")", err_stat[idel].diff, err_stat[idel].count);
@@ -3836,6 +4128,24 @@ function filter_gr(gr, x,y,z, tile_list) {
   grid_cull_remove_invalid(gr);
 }
 
+function force_tile_gr(gr, x,y,z, tile_list) {
+  let tile_map = {};
+  for (let ii=0; ii<tile_list.length; ii++) {
+    tile_map[ tile_list[ii] ] = true
+  }
+
+  let cell_list = gr[z][y][x];
+
+  for (let ii=0; ii<cell_list.length; ii++) {
+    let tile_name = cell_list[ii].name;
+
+    if (tile_name in tile_map)  { cell_list[ii].valid = true; }
+    else                        { cell_list[ii].valid = false; }
+  }
+
+  grid_cull_remove_invalid(gr);
+}
+
 function grid_finished(gr) {
 
   for (let z=0; z<gr.length; z++) {
@@ -3915,7 +4225,9 @@ function grid_bpc(pgr, step) {
 
     for (iter=0; iter<n_iter; iter++) {
       //console.log("##iter:", iter);
-      if ((iter%10)==0) { console.log("### iter:", iter, "max_change:", d); }
+      if (g_info.verbose_level > 1) {
+        if ((iter%10)==0) { console.log("### iter:", iter, "max_change:", d); }
+      }
 
       grid_bp_info.iter++;
 
@@ -3992,6 +4304,147 @@ function grid_bpc(pgr, step) {
 }
 
 // Belief Propagation Collapse
+// matrix edition
+//
+function grid_bpc_mat(pgr, step) {
+  step = ((typeof step === "undefined") ? 0 : step);
+  let iter_stop_eps = (1/(1024*1024*1024*1024));
+  let iter=0;
+  let d = 0;
+  let n_iter = 100;
+  let time_idx = 0;
+
+  let _ret = {"msg":"?" };
+
+  let grid_bp_info = {
+    "iter": 0,
+    "grid": pgr,
+    "time_index" : 0,
+    "stop_epsilon": iter_stop_eps,
+    "wave_front" : {}
+  };
+
+  for (let z=0; z<pgr.length; z++) {
+    for (let y=0; y<pgr[z].length; y++) {
+      for (let x=0; x<pgr[z][y].length; x++) {
+        grid_bp_info.wave_front[ _pos_keystr(x,y,z) ] = [x,y,z];
+      }
+    }
+  }
+
+  grid_renormalize(pgr);
+
+  let N = pgr.length * pgr[0].length * pgr[0][0].length;
+
+  console.log("start");
+  let processing = true;
+  while (processing) {
+
+    iter_stop_eps = 1/((step+1)*64);
+
+    console.log("...", iter_stop_eps, "(", step, "/", N, ")");
+
+    //let fi = grid_finished(pgr);
+    //console.log("grid_finished:", fi, grid_finished_count(pgr));
+
+    if (grid_finished(pgr)) { break; }
+
+    for (iter=0; iter<n_iter; iter++) {
+      if (g_info.verbose_level > 1) {
+        if ((iter%10)==0) { console.log("### iter:", iter, "max_change:", d); }
+      }
+
+      grid_bp_info.iter++;
+
+      grid_bp_info.time_index = time_idx;
+      grid_bp_info.stop_epsilon = iter_stop_eps;
+      grid_bp_info.update_epsilon = (iter_stop_eps/8);
+
+      start_profile();
+      d = grid_bp_mat(pgr, time_idx, iter_stop_eps);
+      end_profile();
+
+      g_info.profile_hist.push( g_info.profile.dt );
+
+      time_idx=1-time_idx;
+      if (d<iter_stop_eps) { break; }
+    }
+
+    /*
+    let p_hist = 0;
+    for (let ii=0; ii<g_info.profile_hist.length; ii++) {
+      p_hist += g_info.profile_hist[ii];
+    }
+    console.log("grid_bp_opt average:", p_hist/g_info.profile_hist.length);
+    */
+
+
+    let multi_collapse = false;
+    if (multi_collapse) {
+      let belief_m = grid_belief_m(pgr, time_idx);
+
+      for (let ii=0; ii<belief_m.length; ii++) {
+        let belief = belief_m[ii];
+
+        let ux = belief.v[0],
+            uy = belief.v[1],
+            uz = belief.v[2];
+
+        console.log("belief_m", ii, ":", ux, uy, uz);
+
+        if (pgr[uz][uy][ux].length==1) {
+          console.log("  skipping");
+          continue;
+        }
+        for (let jj=0; jj<pgr[uz][uy][ux].length; jj++) {
+          if (belief.tile == pgr[uz][uy][ux][jj].name) {
+            console.log(">>collapse");
+            grid_collapse_tile(pgr, belief.v[0], belief.v[1], belief.v[2], belief.tile);
+            console.log("<<collapse");
+
+            _fill_accessed(pgr, grid_bp_info.wave_front, belief.v[0], belief.v[1], belief.v[2]);
+
+            console.log(">>propagate");
+            //let r = grid_cull_propagate_opt(pgr, accessed);
+            let r = grid_cull_propagate_opt(pgr, grid_bp_info.wave_front);
+            if (r.state == "finished") { _ret = r; break; }
+            console.log("<<propagate");
+
+            break;
+          }
+        }
+
+      }
+    }
+    else {
+      let belief = grid_belief(pgr, time_idx);
+
+      //console.log(">>collapse");
+      grid_collapse_tile(pgr, belief.v[0], belief.v[1], belief.v[2], belief.tile);
+      //console.log("<<collapse");
+
+      let accessed = {};
+      //_fill_accessed(pgr, grid_bp_info.wave_front, belief.v[0], belief.v[1], belief.v[2]);
+      _fill_accessed(pgr, accessed, belief.v[0], belief.v[1], belief.v[2]);
+
+
+      //console.log(">>propagate");
+      //let r = grid_cull_propagate_opt(pgr, grid_bp_info.wave_front);
+      let r = grid_cull_propagate_opt(pgr, accessed);
+      if (r.state == "finished") { _ret = r; break; }
+      //console.log("<<propagate");
+
+    }
+       
+
+    step++;
+  }
+
+  console.log("end");
+
+}
+
+// Belief Propagation Collapse
 //
 function grid_bpc_m(pgr, step) {
   step = ((typeof step === "undefined") ? 0 : step);
@@ -4037,7 +4490,9 @@ function grid_bpc_m(pgr, step) {
     if (grid_finished(pgr)) { break; }
 
     for (iter=0; iter<n_iter; iter++) {
-      if ((iter%10)==0) { console.log("### iter:", iter, "max_change:", d); }
+      if (g_info.verbose_level > 1) {
+        if ((iter%10)==0) { console.log("### iter:", iter, "max_change:", d); }
+      }
 
       grid_bp_info.iter++;
 
@@ -5190,8 +5645,9 @@ function init_param() {
   ];
 
   //DEBUG
-  //g_info.grid_size = [6,6,6];
-  g_info.grid_size = [8,8,4];
+  g_info.grid_size = [6,6,6];
+  //g_info.grid_size = [8,8,4];
+  //g_info.grid_size = [10,10,6];
   //g_info.grid_size = [5,5,5];
 
   g_info.features["Grid Size"] = g_info.grid_size.toString();
@@ -5199,8 +5655,10 @@ function init_param() {
   //--
 
   let boundary_condition = ["n", "z"];
-  boundary_condition = 'n';
   g_info.boundary_condition = boundary_condition[ _irnd(2) ];
+
+  //DEBUG
+  g_info.boundary_condition = 'n';
 
   if (g_info.boundary_condition == 'n') {
     g_info.features["Boundary Condition"] = "None";
@@ -5428,8 +5886,10 @@ function init() {
 
   let start_s = (new Date().getTime() / 1000);
 
+
   //let r = grid_bpc(pgr);
-  let r = grid_bpc_m(pgr);
+  //let r = grid_bpc_m(pgr);
+  let r = grid_bpc_mat(pgr);
 
   console.log(">>> bpc:", r);
 
@@ -5449,7 +5909,7 @@ function init() {
   let thresh = g_info.grid_size[0];
   for (let group_name in _stat.group_size) {
     if (_stat.group_size[group_name] < thresh) {
-      filt_group[group_name] = true;
+      //filt_group[group_name] = true;
     }
   }
 
@@ -5486,6 +5946,140 @@ if (typeof module !== "undefined") {
     "v5": { "nei": { "v4": true }, "val": [] },
     "v6": { "nei": { "v4": true }, "val": [] }
   };
+
+  function pretty_print_mat(m) {
+    for (let ii=0; ii<m.length; ii++) {
+      let _v = [];
+      for (let jj=0; jj<m[ii].length; jj++) {
+
+        _v.push( (m[ii][jj] < 0.5) ? 'x' : '.' );
+
+      }
+      console.log(_v.toString());
+    }
+  }
+
+  function admissible_matrix_single(dv_key) {
+    let uniq_repr = g_template.uniq_repr;
+    let admissible_nei = g_template.admissible_nei;
+    let admissible_pos = g_template.admissible_pos;
+
+    let tile_name = [];
+    let adj = [];
+
+    let count =0;
+    for (let tile in uniq_repr) {
+      adj.push([]);
+      tile_name.push(tile);
+      count++;
+    }
+
+    let rowcol_name = [];
+    for (let ii=0; ii<tile_name.length; ii++) {
+      rowcol_name.push( tile_name[ii] + ";" + dv_key );
+    }
+
+    for (let ii=0; ii<tile_name.length; ii++) {
+      for (let jj=0; jj<tile_name.length; jj++) {
+
+        //let dv_key = admissible_pos[pos_idx].dv_key;
+        if (!(dv_key in admissible_nei[ tile_name[jj] ])) {
+          adj[ii].push('x');
+          continue;
+        }
+
+        let ok = ((tile_name[ii] in admissible_nei[ tile_name[jj] ][dv_key]) ? 1 : 0);
+        adj[ii].push( ok );
+
+      }
+    }
+
+    return adj;
+  }
+
+  function print_admissible_matrix_single(dv_key) {
+    let uniq_repr = g_template.uniq_repr;
+    let admissible_nei = g_template.admissible_nei;
+    let admissible_pos = g_template.admissible_pos;
+
+    let tile_name = [];
+    let adj = [];
+
+    let count =0;
+    for (let tile in uniq_repr) {
+      adj.push([]);
+      tile_name.push(tile);
+      count++;
+    }
+
+    let rowcol_name = [];
+    for (let ii=0; ii<tile_name.length; ii++) {
+      rowcol_name.push( tile_name[ii] + ";" + dv_key );
+    }
+
+    for (let ii=0; ii<tile_name.length; ii++) {
+      for (let jj=0; jj<tile_name.length; jj++) {
+
+        //let dv_key = admissible_pos[pos_idx].dv_key;
+        if (!(dv_key in admissible_nei[ tile_name[jj] ])) {
+          adj[ii].push('x');
+          continue;
+        }
+
+        let ok = ((tile_name[ii] in admissible_nei[ tile_name[jj] ][dv_key]) ? '.' : 'x');
+        adj[ii].push( ok );
+
+      }
+    }
+
+    console.log(" ," + rowcol_name.join(","));
+    for (let ii=0; ii<tile_name.length; ii++) {
+      console.log(tile_name[ii] + "," + adj[ii].toString());
+    }
+
+  }
+
+  function admissible_matrix() {
+    let uniq_repr = g_template.uniq_repr;
+    let admissible_nei = g_template.admissible_nei;
+    let admissible_pos = g_template.admissible_pos;
+
+    let tile_name = [];
+    let adj = [];
+
+    let count =0;
+    for (let tile in uniq_repr) {
+      adj.push([]);
+      tile_name.push(tile);
+      count++;
+    }
+
+    let rowcol_name = [];
+    for (let ii=0; ii<tile_name.length; ii++) {
+      for (let pos_idx=0; pos_idx<admissible_pos.length; pos_idx++) {
+        let dv_key = admissible_pos[pos_idx].dv_key;
+        rowcol_name.push( tile_name[ii] + ";" + dv_key );
+      }
+    }
+
+    for (let ii=0; ii<tile_name.length; ii++) {
+      for (let jj=0; jj<tile_name.length; jj++) {
+        for (let pos_idx=0; pos_idx<admissible_pos.length; pos_idx++) {
+
+          let dv_key = admissible_pos[pos_idx].dv_key;
+          if (!(dv_key in admissible_nei[ tile_name[jj] ])) {
+            adj[ii].push('x');
+            continue;
+          }
+
+          let ok = ((tile_name[ii] in admissible_nei[ tile_name[jj] ][dv_key]) ? 1 : 0);
+          adj[ii].push( ok );
+        }
+      }
+    }
+
+    return adj;
+  }
 
   function print_admissible_matrix() {
     let uniq_repr = g_template.uniq_repr;
@@ -5536,15 +6130,352 @@ if (typeof module !== "undefined") {
 
   }
 
-  function main() {
+  function svd_estimate(dv_key) {
+    let adj = admissible_matrix_single(dv_key);
+    let svd = numeric.svd(adj);
+
+    let _eps = (1/(1024*1024*1024));
+    let ok_count = 0;
+    for (let ii=0; ii<svd.S.length; ii++) {
+      if (Math.abs(svd.S[ii]) > _eps) { ok_count++; }
+    }
+    console.log(dv_key, "OK:", ok_count, "(of", svd.S.length, ")");
+  }
+
+  function ok_matrix(mat, name) {
+    console.log(" ," + name.join(","));
+    for (let ii=0; ii<mat.length; ii++) {
+      console.log(name[ii] + "," + mat[ii].toString());
+    }
+  }
+
+  function _xx_main() {
     init_template();
     build_tile_library( g_template.endpoint );
 
     init_param();
 
+    let admissible_pos = g_template.admissible_pos;
+    for (let idx=0; idx<admissible_pos.length; idx++) {
+      let dv_key = admissible_pos[idx].dv_key;
+
+      console.log(dv_key);
+      ok_matrix( g_template.F[dv_key], g_template.tile_name );
+
+    }
+
+    //console.log( g_template.F);
+
+
+  }
+
+  function _test_f_main() {
+    init_template();
+    build_tile_library( g_template.endpoint );
+
+    init_param();
+
+    let admissible_pos = g_template.admissible_pos;
+
+    let dv_adj = [];
+    for (let ii=0; ii<admissible_pos.length; ii++) {
+      dv_adj.push( admissible_matrix_single( admissible_pos[ii].dv_key ) );
+    }
+
+    let adj = [];
+    for (let ii=0; ii<dv_adj[0].length; ii++) {
+      let n = adj.length;
+      adj.push([]);
+      for (let p=0; p<dv_adj.length; p++) {
+        for (let jj=0; jj<dv_adj[0][0].length; jj++) {
+          adj[n].push(dv_adj[p][ii][jj]);
+        }
+      }
+    }
+
+    adj = numeric.transpose(adj);
+
+    /*
+    for (let ii=0; ii<adj1.length; ii++) {
+      let n = adj.length;
+      adj.push([]);
+      for (let jj=0; jj<adj1[0].length; jj++) {
+        adj[n].push(adj1[ii][jj]);
+      }
+    }
+    */
+
+    console.log("??", adj.length, adj[0].length);
+
+    let svd = numeric.svd(adj);
+    let _eps = (1/(1024*1024*1024));
+    let ok_count = 0;
+    for (let ii=0; ii<svd.S.length; ii++) {
+      if (Math.abs(svd.S[ii]) > _eps) { ok_count++; }
+    }
+    console.log(dv_key, "OK:", ok_count, "(of", svd.S.length, ")");
+
+    return;
+  }
+
+
+  function __main() {
+    init_template();
+    build_tile_library( g_template.endpoint );
+
+    init_param();
+
+    let admissible_pos = g_template.admissible_pos;
+    for (let ii=0; ii<admissible_pos.length; ii++) {
+      svd_estimate(admissible_pos[ii].dv_key);
+    }
+
+    return;
+
+    let _eps = (1/(1024*1024*1024));
+
+    print_admissible_matrix("0:1:0");
+    let _adj = admissible_matrix("0:1:0");
+
+    let adj = numeric.transpose(_adj);
+
+
+
+    //let eig_v = eig.E;
+    //for (let ii=0; ii<eig_v.x.length; ii++) { console.log(ii, eig_v.x[ii], eig_v.y[ii]); }
+    let svd = numeric.svd(adj);
+
+    let ok_count = 0;
+    let Sm = [];
+    for (let ii=0; ii<svd.S.length; ii++) {
+      Sm.push([]);
+      for (let jj=0; jj<svd.S.length; jj++) {
+        Sm[ii].push( (ii==jj) ? svd.S[ii] : 0 );
+
+      }
+
+      if (Math.abs(svd.S[ii]) > _eps) { ok_count++; }
+    }
+    console.log("OK:", ok_count);
+
+
+    console.log(adj.length, adj[0].length);
+    console.log(svd.S);
+
+  }
+
+  function _main() {
+    init_template();
+    build_tile_library( g_template.endpoint );
+
+    init_param();
+
+    let _eps = (1/(1024*1024*1024*1024*1024*1024));
+
     //DEBUG
-    //print_admissible_matrix();
-    //return;
+    print_admissible_matrix_single("0:1:0");
+    let adj = admissible_matrix_single("0:1:0");
+
+    //let eig_v = eig.E;
+    //for (let ii=0; ii<eig_v.x.length; ii++) { console.log(ii, eig_v.x[ii], eig_v.y[ii]); }
+    let svd = numeric.svd(adj);
+
+    let ok_count = 0;
+
+    console.log(svd.S);
+
+
+    // https://math.stackexchange.com/questions/1615784/how-is-it-the-matrix-vector-multiplication-with-svd-is-omn
+    //
+    let Sm = [];
+    for (let ii=0; ii<svd.S.length; ii++) {
+      Sm.push([]);
+      for (let jj=0; jj<svd.S.length; jj++) {
+        Sm[ii].push( (ii==jj) ? svd.S[ii] : 0 );
+
+      }
+
+      if (Math.abs(svd.S[ii]) > _eps) { ok_count++; }
+    }
+    console.log("OK:", ok_count);
+
+    let Vt = numeric.transpose(svd.V);
+    let SVt_all = numeric.dot(Sm, Vt);
+    let SVt = [];
+    let U = [];
+
+    for (let ii=0; ii<ok_count; ii++) {
+      SVt.push(SVt_all[ii]);
+    }
+
+    for (let ii=0; ii<svd.U.length; ii++) {
+      U.push([]);
+      for (let jj=0; jj<ok_count; jj++) {
+        U[ii].push( svd.U[ii][jj] );
+      }
+    }
+
+
+    //let _res = numeric.dot( svd.U, numeric.dot(Sm, svd.V) );
+    //let _res = numeric.dot( svd.U, numeric.dot(Sm, numeric.transpose(svd.V)) );
+    //let _res = numeric.dot( svd.U, SVt);
+    let _res = numeric.dot( U, SVt );
+
+    let test_adj = [];
+    for (let ii=0; ii<_res.length; ii++) {
+      test_adj.push([]);
+      for (let jj=0; jj<_res[ii].length; jj++) {
+        if (_res[ii][jj] < 0.5) {
+          test_adj[ii].push(0);
+        }
+        else {
+          test_adj[ii].push(1);
+        }
+      }
+    }
+
+
+    pretty_print_mat(test_adj);
+
+
+    console.log("check:");
+    let bad_count = 0;
+    for (let ii=0; ii<adj.length; ii++) {
+      for (let jj=0; jj<adj[ii].length; jj++) {
+        if (adj[ii][jj] != test_adj[ii][jj]) {
+          console.log("!!!", ii, jj, "...", adj[ii][jj], "!=", test_adj[ii][jj]);
+          bad_count++;
+        }
+      }
+    }
+    console.log("bad_count:", bad_count);
+
+    console.log("U:", U.length, U[0].length);
+    console.log("SVt:", SVt.length, SVt[0].length);
+
+
+    //console.log(_res);
+    return;
+
+
+
+    /*
+    var _m = mlmatrix.Matrix.zeros(adj.length, adj[0].length);
+    for (let ii=0; ii<adj.length; ii++) {
+      for (let jj=0; jj<adj[ii].length; jj++) {
+        _m.set(ii,jj,adj[ii][jj]);
+      }
+    }
+
+    let _e = new mlmatrix.EigenvalueDecomposition(_m);
+    console.log(_e);
+
+    let _eig_r = _e.realEigenvalues;
+    let _eig_c = _e.imaginaryEigenvalues;
+    let _eig_v = _e.eigenvectorMatrix;
+
+    console.log("_eig_r:", _eig_r);
+    console.log("_eig_c:", _eig_c);
+    console.log("_eig_v:", _eig_v);
+    return;
+    */
+
+    console.log(adj.length, adj[0].length);
+
+    let bn_adj = [];
+    for (let ii=0; ii<adj.length; ii++) {
+      bn_adj.push([]);
+      for (let jj=0; jj<adj[ii].length; jj++) {
+        bn_adj[ii].push( mathjs.bignumber(adj[ii][jj]) );
+      }
+    }
+
+    console.log("...");
+
+    let eig = mathjs.eigs(bn_adj, mathjs.bignumber( 1e-32));
+    console.log(eig);
+
+
+    return;
+    //console.log(adj);
+    let _eig = numeric.eig(adj);
+    console.log(eig);
+
+    let Einv = eig.E.inv();
+
+    let wat = eig.E.dot( numeric.T.diag(eig.lambda) ).dot(eig.E.inv()) ;
+    //console.log("CHECK:", wat);
+
+    let keepers_idx = [];
+    let eig_c_lamb = [],
+        eig_c_v = [];
+
+
+    let lamb = eig.lambda;
+    //let _eps = (1/(1024*1024*1024));
+    let okok = false;
+    if (okok) {
+    for (let ii=0; ii<lamb.x.length; ii++) {
+      if ((Math.abs(lamb.x[ii]) > _eps) ||
+          (Math.abs(lamb.y[ii]) > _eps)) {
+        keepers_idx.push(ii);
+
+        eig_c_lamb.push( [ lamb.x[ii], lamb.y[ii] ] );
+        eig_c_v.push( [ eig.E.x[ii], eig.E.y[ii] ] );
+      }
+      else {
+        eig.lambda.x[ii] = 0;
+        eig.lambda.y[ii] = 0;
+        for (jj=0; jj<eig.E.x[ii].length; jj++) {
+          //eig.E.x[jj][ii] = 0;
+          //eig.E.y[jj][ii] = 0;
+          eig.E.x[jj][ii] = 0;
+          eig.E.y[jj][ii] = 0;
+
+          Einv.x[ii][jj] = 0;
+          Einv.y[ii][jj] = 0;
+        }
+      }
+    }
+    }
+    console.log(">>", keepers_idx);
+    //console.log(eig.E.x[4]);
+
+    //console.log(eig.E.transjugate());
+    //let vv = eig.E.dot( numeric.T.diag(eig.lambda) ).dot(Einv) ;
+    let vv = eig.E.dot( numeric.T.diag(eig.lambda) ).dot(eig.E.inv()) ;
+
+    let _test_adj = [];
+    for (let ii=0; ii<vv.x.length; ii++) {
+      test_adj.push([]);
+      for (let jj=0; jj<vv.x[ii].length; jj++) {
+        if (vv.x[ii][jj] < 0.5) {
+          test_adj[ii].push(0);
+        }
+        else {
+          test_adj[ii].push(1);
+        }
+      }
+    }
+    console.log( "vv>>>", vv);
+    //console.log( "test_adj>>>", test_adj);
+
+
+
+    pretty_print_mat(test_adj);
+
+
+    for (let ii=0; ii<adj.length; ii++) {
+      for (let jj=0; jj<adj[ii].length; jj++) {
+        if (adj[ii][jj] != test_adj[ii][jj]) {
+          console.log("!!!", ii, jj, "...", adj[ii][jj], "!=", test_adj[ii][jj]);
+        }
+      }
+    }
+
+
+
+
 
 
     let dim = [6,6,6];
@@ -5566,13 +6497,75 @@ if (typeof module !== "undefined") {
     g_info.debug = {};
   }
 
+  function main_0() {
+    init_template();
+    build_tile_library( g_template.endpoint );
+
+    init_param();
+
+    let admissible_pos = g_template.admissible_pos;
+
+    let dim = [6,6,6];
+    //let dim = [8,8,8];
+    let pgr = init_pgr(dim);
+
+    g_info["grid"] = pgr;
+
+    grid_cull_boundary(pgr);
+    grid_cull_propagate(pgr);
+
+    let r = grid_bpc_mat(pgr);
+    console.log(">>> bpc:", r);
+
+    console.log(">>> consistency:", grid_consistency(pgr));
+
+    debug_print_p(pgr);
+
+
+
+  }
+
+  function main_test() {
+    init_template();
+    build_tile_library( g_template.endpoint );
+    init_param();
+
+    let tt = require("./bp-example.js");
+
+    let ctx = {
+      "init_pgr": init_pgr,
+      "grid_cull_boundary" : grid_cull_boundary,
+      "grid_cull_propagate": grid_cull_propagate,
+      "filter_gr": filter_gr,
+      "force_tile_gr": force_tile_gr,
+      "debug_print_p" : debug_print_p,
+
+      "grid_bpc": grid_bpc,
+      "grid_bp": grid_bp,
+
+      "grid_bpc_mat": grid_bpc_mat,
+      "grid_bp_mat": grid_bp_mat
+    };
+
+    tt.example0(ctx);
+    console.log("----");
+    tt.example1(ctx);
+  }
+
+  function main() {
+    main_test();
+  }
+
+
   var m4 = require("./m4.js");
+  var numeric = require("./numeric.js");
+  var mathjs = require("./math.js");
+  var mlmatrix = require("ml-matrix");
 
   if (typeof fxrand === "undefined") {
     if (!g_info.quiet) {
       console.log("WARNING: USING BUILT-IN Math.random() INSTEAD OF fxrand()");
     }
-
     var fxrand = Math.random;
   }
 
@@ -5580,6 +6573,14 @@ if (typeof module !== "undefined") {
   module.exports["template"] = g_template;
 
   module.exports["info"] = g_info;
+
+  module.exports["init_pgr"] = init_pgr;
+  module.exports["debug_print_p"] = debug_print_p;
+  module.exports["grid_cull_boundary"] = grid_cull_boundary;
+  module.exports["grid_cull_propagate"] = grid_cull_propagate;
+  module.exports["grid_bpc"] = grid_bpc;
+  module.exports["grid_bp"] = grid_bp;
+  module.exports["grid_bpc_mat"] = grid_bpc_mat;
 
   main();
 
