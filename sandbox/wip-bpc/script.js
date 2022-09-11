@@ -6359,43 +6359,6 @@ if (typeof module !== "undefined") {
 
 
 
-    /*
-    var _m = mlmatrix.Matrix.zeros(adj.length, adj[0].length);
-    for (let ii=0; ii<adj.length; ii++) {
-      for (let jj=0; jj<adj[ii].length; jj++) {
-        _m.set(ii,jj,adj[ii][jj]);
-      }
-    }
-
-    let _e = new mlmatrix.EigenvalueDecomposition(_m);
-    console.log(_e);
-
-    let _eig_r = _e.realEigenvalues;
-    let _eig_c = _e.imaginaryEigenvalues;
-    let _eig_v = _e.eigenvectorMatrix;
-
-    console.log("_eig_r:", _eig_r);
-    console.log("_eig_c:", _eig_c);
-    console.log("_eig_v:", _eig_v);
-    return;
-    */
-
-    console.log(adj.length, adj[0].length);
-
-    let bn_adj = [];
-    for (let ii=0; ii<adj.length; ii++) {
-      bn_adj.push([]);
-      for (let jj=0; jj<adj[ii].length; jj++) {
-        bn_adj[ii].push( mathjs.bignumber(adj[ii][jj]) );
-      }
-    }
-
-    console.log("...");
-
-    let eig = mathjs.eigs(bn_adj, mathjs.bignumber( 1e-32));
-    console.log(eig);
-
-
     return;
     //console.log(adj);
     let _eig = numeric.eig(adj);
@@ -6559,8 +6522,6 @@ if (typeof module !== "undefined") {
 
   var m4 = require("./m4.js");
   var numeric = require("./numeric.js");
-  var mathjs = require("./math.js");
-  var mlmatrix = require("ml-matrix");
 
   if (typeof fxrand === "undefined") {
     if (!g_info.quiet) {
