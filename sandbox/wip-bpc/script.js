@@ -5777,7 +5777,7 @@ function init_param() {
   ];
 
   //DEBUG
-  g_info.grid_size = [8,8,5];
+  g_info.grid_size = [10,10,10];
   //g_info.grid_size = [8,8,4];
   //g_info.grid_size = [10,10,6];
   //g_info.grid_size = [5,5,5];
@@ -6045,7 +6045,8 @@ function init() {
 
   pgr_filter(pgr, filt_group);
   */
-  let bpc = new BeliefPropagationCollapse( g_template, null, 10,10,10 );
+  let dim = g_info.grid_size;
+  let bpc = new BeliefPropagationCollapse( g_template, null, dim[0], dim[1], dim[2]);
   //let bpc = new BeliefPropagationCollapse( g_template, null, 6,6,6 );
 
   bpc.simple_realize();
