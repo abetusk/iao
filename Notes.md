@@ -171,4 +171,7 @@ weighting the amplitude.
 * [Worley Noise](https://en.wikipedia.org/wiki/Worley_noise)
 
 
+#### Soft Shadows
 
+* [three.js example](https://threejs.org/examples/?q=shado#webgl_shadowmap_pcss) ([src](https://github.com/mrdoob/three.js/blob/master/examples/webgl_shadowmap_pcss.html))
+* [threejsfundamentals shadow tutorial](https://r105.threejsfundamentals.org/threejs/lessons/threejs-shadows.html)

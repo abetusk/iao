@@ -2343,6 +2343,7 @@ function realize_tri_from_grid(gr, pgr, show_debug) {
 
         let u = gr[zidx][yidx][xidx];
         let template_u = u[0];
+
         if (template_u == '.') { continue; }
 
         if ((!show_debug) && (template_u == 'd')) { continue; }
@@ -2352,6 +2353,7 @@ function realize_tri_from_grid(gr, pgr, show_debug) {
         let _rx = Math.PI*ent.r[0]/2;
         let _ry = Math.PI*ent.r[1]/2;
         let _rz = Math.PI*ent.r[2]/2;
+
 
         let _tri = _template_rot_mov(g_template[template_u], _rx, _ry, _rz, xidx, yidx, zidx);
         _p_mul_mov(_tri, S, tx, ty, tz);
@@ -6007,33 +6009,31 @@ function init() {
   //let dim = [6,6,6];
   //let pgr = init_pgr(dim);
 
+  /*
   let pgr = init_pgr(g_info.grid_size);
-
   g_info["grid"] = pgr;
-
   grid_cull_boundary(pgr);
   grid_cull_propagate(pgr);
-
   let start_s = (new Date().getTime() / 1000);
+  */
 
 
   //let r = grid_bpc(pgr);
   //let r = grid_bpc_m(pgr);
-  let r = grid_bpc_mat(pgr);
+  //let r = grid_bpc_mat(pgr);
 
-  console.log(">>> bpc:", r);
-
-  let end_s = (new Date().getTime() / 1000);
-  console.log("TIME:", end_s - start_s);
-
-  console.log(">>> consistency:", grid_consistency(pgr));
+  //console.log(">>> bpc:", r);
+  //let end_s = (new Date().getTime() / 1000);
+  //console.log("TIME:", end_s - start_s);
+  //console.log(">>> consistency:", grid_consistency(pgr));
 
   //debug_print_p(pgr);
 
-  decorate_pgr(pgr);
-  let _stat = pgr_stat(pgr);
-  g_info["_stat"] = _stat;
+  //decorate_pgr(pgr);
+  //let _stat = pgr_stat(pgr);
+  //g_info["_stat"] = _stat;
 
+  /*
   let filt_group = {};
   //let thresh = g_info.grid_size;
   let thresh = g_info.grid_size[0];
@@ -6044,16 +6044,27 @@ function init() {
   }
 
   pgr_filter(pgr, filt_group);
+  */
+  let bpc = new BeliefPropagationCollapse( g_template, null, 10,10,10 );
+  //let bpc = new BeliefPropagationCollapse( g_template, null, 6,6,6 );
 
+  bpc.simple_realize();
+  bpc.debug_print();
+
+  let pgr = bpc.create_pgr();
+  g_info["grid"] = pgr;
+  decorate_pgr(pgr);
 
   g_info.ready = true;
 
   let fin_gr = gen_simple_grid(pgr);
+
+  console.log("fin_gr:", fin_gr);
+
   realize_tri_from_grid(fin_gr, pgr);
 
   g_info.data["grid"] = fin_gr;
   threejs_scene_init();
- 
 
   animate();
 }
@@ -6646,7 +6657,13 @@ if (typeof module !== "undefined") {
   }
 
   function main() {
-    main_test();
+    //main_test();
+    init_template();
+    build_tile_library( g_template.endpoint );
+    init_param();
+
+    console.log("...");
+
   }
 
 
