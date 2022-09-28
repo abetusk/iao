@@ -45,6 +45,13 @@ Concepts
   - [Poisson Disk](https://www.cs.ubc.ca/~rbridson/docs/bridson-siggraph07-poissondisk.pdf)
 * [Quasi-Random Sequences](http://extremelearning.com.au/unreasonable-effectiveness-of-quasirandom-sequences/)
 
+Tutorials
+---
+
+* [Generative Terrain](https://www.generativehut.com/post/generative-terrain-nfts-for-fxhash-in-three-js) ([gh](https://github.com/danielpetho/terrestrial-fxhash-tutorial))
+* [Watercolor](https://tylerxhobbs.com/essays/2017/a-generative-approach-to-simulating-watercolor-paints)
+* 
+
 Ideas
 ---
 
