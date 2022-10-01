@@ -30619,7 +30619,7 @@ class CompressedTexture extends (/* unused pure expression or super */ null && (
 
 }
 
-class CanvasTexture extends (/* unused pure expression or super */ null && (Texture)) {
+class CanvasTexture extends Texture {
 
 	constructor( canvas, mapping, wrapS, wrapT, magFilter, minFilter, format, type, anisotropy ) {
 
@@ -50169,24 +50169,65 @@ class MapControls extends (/* unused pure expression or super */ null && (OrbitC
 
 
 
-;// CONCATENATED MODULE: ./src/index.js
+;// CONCATENATED MODULE: ./src/s3/shader.vert
+/* harmony default export */ const shader = ("varying vec2 vUv;\n\nvarying vec4 v_wpos;\n\nvoid main() {\n  vUv = uv;\n\n  //v_wpos = modelViewMatrix * vec4(position, 1.0);\n  v_wpos = vec4(position, 1.0);\n\n  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);\n}\n");
+;// CONCATENATED MODULE: ./src/s3/shader.frag
+/* harmony default export */ const s3_shader = ("varying vec2 vUv;\nuniform sampler2D tex;\n\nvarying vec4 v_wpos;\n\nvoid main() {\n\n  float I;\n  vec4 vI;\n\n  //I = max(0.0, min(1.0, (v_wpos[1] + 256.0)/512.0));\n  I = max(0.0, min(1.0, (v_wpos[1] + 256.0)/512.0));\n  //I = v_wpos[1]/256.0;\n\n  //I = 0.9;\n\n  //vI = vec4(I,1.0,1.0,1.0);\n  vI = vec4(I,I,I,1.0);\n\n  gl_FragColor = vI*texture2D(tex, vUv);\n}\n\n");
+;// CONCATENATED MODULE: ./src/script.js
 
 
+
+//import vertexShader from './shaders/surface.vert';
+//import fragmentShader from './shaders/surface.frag';
+
+//import vertexShader from './s0/shader.vert';
+//import fragmentShader from './s0/shader.frag';
+
+//import vertexShader from './s2/shader.vert';
+//import fragmentShader from './s2/shader.frag';
+
+
+
+
+function _rnd() {
+  return Math.random();
+}
+
+var g_info = {
+};
+
+function render() {
+
+  // Control update
+  g_info.controls.update();
+
+  // Render
+  g_info.renderer.render(g_info.scene, g_info.camera);
+  window.requestAnimationFrame(render);
+
+}
 
 function init() {
+  let sz = 4096;
+  sz = 1024;
+
   const canvas = document.getElementById("three-canvas");
   const renderer = new  WebGLRenderer({canvas: canvas, antialias: true});
-  renderer.setSize(4096, 4096, false);
+  renderer.setSize(sz, sz, false);
+  g_info["renderer"] = renderer;
 
   // Scene
   const scene = new Scene();
   scene.background = new Color(0xeeeeee);
+  g_info["scene"] = scene;
+
   // Camera
-  const near = 0.1;
-  const far = 1000;
-  const width = 1024;
-  const height = 1024;
+  const near = -8000;
+  const far = 8000;
+  const width = 512;
+  const height = 512;
   const camera = new OrthographicCamera(-width / 2, width / 2, height / 2, -height / 2, near, far);
+  g_info["camera"] = camera;
 
   // Camera position
   camera.position.x = 256;
@@ -50198,44 +50239,139 @@ function init() {
 
   // OrbitControl
   const controls = new OrbitControls(camera, renderer.domElement);
+  g_info["controls"] = controls;
 
   // Plane geometry
-  const planeSize = 512;
-  const planeSegments = 400;
-  const geometry = new PlaneGeometry(planeSize, planeSize, planeSegments, planeSegments);
+  let planeSize = 512;
+  let planeSegments = 400;
+  //planeSize = 4;
+  //planeSegments = 4;
+  let geometry = new PlaneGeometry(planeSize, planeSize, planeSegments, planeSegments);
 
   // Plane material
-  const material = new MeshLambertMaterial({
-      color: new Color(0x333333)
+  //const material = new THREE.MeshLambertMaterial({ color: new THREE.Color(0x333333) });
+
+  // s0
+  //const material = new THREE.ShaderMaterial({
+  //  vertexShader: vertexShader,
+  //  fragmentShader: fragmentShader
+  //});
+
+  // s1
+  /*
+  const material = new THREE.ShaderMaterial({
+    uniforms: { amplitude: { type: 'f', value: 0 } },
+    //attributes: { displacement: { type: 'f', value: [] } },
+    vertexShader: vertexShader,
+    fragmentShader: fragmentShader
   });
+  */
+
+  // s2
+  let tex = create_texture();
+  const material = new ShaderMaterial({
+    uniforms: { tex: { type: 'f', value: tex } },
+    //attributes: { displacement: { type: 'f', value: [] } },
+    vertexShader: shader,
+    fragmentShader: s3_shader,
+    transparent: true
+  });
+
+  //const material = new THREE.MeshBasicMaterial({
+  //  map: create_texture(),
+  //  side: THREE.DoubleSide
+  //});
 
   // Plane mesh
   const plane = new Mesh(geometry, material);
 
-  plane.rotateX(-Math.PI / 2.);
-  plane.position.y = -100;
+  //plane.rotateX(-Math.PI / 2.);
+  //plane.position.y = -100;
   scene.add(plane);
 
+  /*
   // Render loop
   const render = () => {
 
-  // Control update
-  controls.update();
+    // Control update
+    controls.update();
 
-  // Render
-  renderer.render(scene, camera);
-  window.requestAnimationFrame(render);
-} 
+    // Render
+    renderer.render(scene, camera);
+    window.requestAnimationFrame(render);
+  } 
+  */
 
-render();
-
-
-
+  render();
 
 }
 
+function create_texture() {
+  let W = 512;
+  let H = 512;
+
+  let canvas = document.createElement('canvas');
+  canvas.width = W;
+  canvas.height = W;
+
+  let n = Math.floor(Math.sqrt(W*H));
+  n = Math.floor(W*H/10);
+
+  let ctx = canvas.getContext('2d');
+  let x, y;
+
+  let p = [0,0];
+
+  ctx.fillStyle = '#ccc';
+  ctx.fillRect(0,0,W,H);
+
+  let dx = 5,
+      dy = 5,
+      ds = (0.65*dx)/2,
+      jitxy = 1.75;
+
+  let ix,iy,
+      nx = Math.floor(W/dx)+2,
+      ny = Math.floor(W/dx)+2;
+
+  ctx.fillStyle = '#bbb';
+  for (ix=-1; ix<nx; ix++) {
+    for (iy=-1; iy<ny; iy++) {
+      let ux = (dx*ix) + (_rnd()-0.5)*jitxy;
+      let uy = (dy*iy) + (_rnd()-0.5)*jitxy;
+      if ((iy%2)==0) { ux += dx/2; }
+      ctx.beginPath();
+      ctx.arc(ux, uy, ds, 0, 2*Math.PI, false);
+      ctx.fill();
+    }
+  }
+
+  //ctx.clearRect(0,0,W,H);
+  ctx.fillStyle = '#444';
+  for (let ii=0; ii<n; ii++) {
+    x = _rnd()*W;
+    y = _rnd()*H;
+
+    p[0] = x/W;
+    p[1] = y/H;
+
+    //let sz = 8*(1-p[1]);
+    let sz = 8*p[1];
+    ctx.fillRect(x, y, sz,sz);
+  }
+
+  /// fill ctx
+  //
+
+  let texture = new CanvasTexture( canvas );
+  return texture;
+}
+
+
 init();
-console.log("...");
+console.log("...??");
+
+
 
 /******/ })()
 ;

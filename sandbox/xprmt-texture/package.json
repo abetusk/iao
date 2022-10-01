@@ -10,6 +10,10 @@
     "start": "webpack serve --config ./config/webpack.config.js"
   },
   "dependencies": {
+    "copy-webpack-plugin": "^11.0.0",
+    "css-loader": "^6.7.1",
+    "html-webpack-plugin": "^5.5.0",
+    "raw-loader": "^4.0.2",
     "three": "^0.141.0",
     "webpack": "^5.74.0",
     "webpack-cli": "^4.10.0"
