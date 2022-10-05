@@ -1956,10 +1956,12 @@ function init_param() {
   //
   if (g_info.n_core < 2) {
     if (g_info.n_core == 0) {
-      g_info.n_rect = _arnd( [8000, 10000, 20000, 30000, 40000] );
+      //g_info.n_rect = _arnd( [8000, 10000, 20000, 30000, 40000] );
+      g_info.n_rect = _arnd( [8000, 10000, 20000 ]);
     }
     else {
-      g_info.n_rect = _arnd( [6000, 8000, 10000, 20000, 30000 ] );
+      //g_info.n_rect = _arnd( [6000, 8000, 10000, 20000, 30000 ] );
+      g_info.n_rect = _arnd( [6000, 8000, 10000, 20000]);
     }
   }
   else {

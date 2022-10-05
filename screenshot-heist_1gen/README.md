@@ -1,7 +1,7 @@
 Screenshot Heist : 1Gen
 ===
 
-[![screenshot](../img/screenshot_heist_1gen.png)](https://github.com/abetusk/iao/tree/main/screeshot_heist_1gen)
+[![screenshot](../img/screenshot_heist_1gen.png)](https://github.com/abetusk/iao/tree/main/screeshot-heist_1gen)
 
 (Not) Available on [fxhash](https://www.fxhash.xyz/slug/...)
 
@@ -27,17 +27,26 @@ s - screenshot
 
 a - video capture (5s) (advanced usage)
 
+A common bad faith argument against NFTs is that because it's easy to create a "screenshot" of the underlying asset, the value of the NFT is worthless. "Screenshot Heist" is an attempt to address this critique by highlighting the absurdity of normalizing the current state of copyright and digital property ownership while considering ownership through a public decentralized ledger as irrational.
+
+Physical reproduction of traditional art has become commonplace so that we've equated the physical
+limitations of duplication, and the physical artifacts that are distributed, with the
+authenticity of the piece, even though from a social and legal standpoint, these
+are only tangentially related.
+Without the physical limitation imposed on duplication of art, we are forced to abandon weak arguments
+using the difficulty of reproduction to value the underlying digital asset.
+
+The hope is we can elevate the discussion from bad faith arguments to a more balanced and productive conversation about
+the ecosystem that we've developed around digital goods and intellectual property.
+
+"Screenshot Heist : 1Gen" is a continuation of "Screenshot Heist" extending the idea by using 3D, random color palettes and extending export options.
+
 To the extent possible, the source code is dedicated to the public domain (CC0) and can be used for any purpose, even commercial, by anyone. All third party libraries used are libre/free. Please check individual files for their respective licenses.
-
-
-A common bad faith argument against NFTs is that because it's easy to create a "screenshot" of the underlying asset, the value of the NFT is worthless.  "Screenshot Heist" is an attempt to address this critique by highlighting the absurdity of normalizing the current state of copyright and digital property ownership while considering ownership through a public decentralized ledger as irrational.
-
-This work hopes to add to the conversation about examining the ecosystem that we've developed around digital goods and intellectual property.
 
 Tags
 ---
 
-minimal, generative, geometry, rectangles
+minimal, generative, geometry, rectangles, orthographic, three.js, rectangular cuboid
 
 Statement
 ---
