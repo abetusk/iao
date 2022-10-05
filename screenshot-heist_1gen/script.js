@@ -1872,7 +1872,8 @@ function init_param() {
 
   // rectcuboid speed
   //
-  g_info.speed_modifier = 27 + ((fxrand()-0.5)*10);
+  //g_info.speed_modifier = 27 + ((fxrand()-0.5)*10);
+  g_info.speed_modifier = 10 + ((fxrand()-0.5)*10);
   g_info.features["Speed Modifier"] = g_info.speed_modifier;
 
   // direction
