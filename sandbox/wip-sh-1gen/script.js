@@ -33,9 +33,11 @@
 // cores ~ 2bits
 // color  ~ 4bits ( lg(6*3) ) (?)
 // size   ~ 2bits
-// align   ~ 2bits
+// align   ~ 1bits
 // direction ~ 2bits
 //
+// one directoin only (~1bit)
+// direction determines shape characteristic (~1bit)
 
 var g_info = {
   "PROJECT" : "screenshot heist",
@@ -154,14 +156,15 @@ var g_info = {
     "pos" : []
   },
 
-  "initial_center_type_choice" : ["uniform", "core", "2core-vertical", "2core-horizontal"],
+  //"initial_center_type_choice" : ["uniform", "core", "2core-vertical", "2core-horizontal"],
+  "initial_center_type_choice" : ["uniform", "core" ],
   "initial_center_type" : "uniform",
 
   "rotation_option" : false,
 
   "dimension_factor_profile" : [
     [2,12,72],  [2,10,50],  [2,8,32], [2,6,18],
-    [1,6,36],   [1,5,25],   [1,4,16], [1,3,9],
+    [1,6,36],   [1,5,25],   // [1,4,16], [1,3,9],
     [1,12,72],  [1,10,50],  [1,8,32], [1,6,18]
   ],
   "dimension_factor" : [ 1,1,1],
@@ -1052,11 +1055,12 @@ function sh_init() {
     _dim[1] *= rndscale();
     _dim[2] *= rndscale();
 
-    if (g_info.n_rect < 20000) {
+    if ((g_info.n_rect < 20000) || (g_info.dimension_factor[0] == 1)) {
       _dim[0] *= 2;
       _dim[1] *= 2;
       _dim[2] *= 2;
     }
+
 
     fisher_yates_shuffle(_dim);
 
@@ -1076,11 +1080,19 @@ function sh_init() {
 
     let _R = 1;
     let cxyz = [0,0,0];
-    if (g_info.initial_center_type == "core") {
+    if (g_info.initial_center_type == "single_core") {
       _R = 1000;
       cxyz[0] =  _R*(fxrand()-0.5);
       cxyz[1] =  _R*(fxrand()-0.5);
       cxyz[2] =  _R*(fxrand()-0.5);
+    }
+    else if (g_info.initial_center_type == "core") {
+
+      let cent = _arnd( g_info.core_center );
+      _R = 800;
+      cxyz[0] =  _R*(fxrand()-0.5) + cent[0];
+      cxyz[1] =  _R*(fxrand()-0.5) + cent[1];
+      cxyz[2] =  _R*(fxrand()-0.5) + cent[2];
     }
     else if (g_info.initial_center_type == "uniform") {
       _R = 4000;
@@ -1088,6 +1100,8 @@ function sh_init() {
       cxyz[1] =  _R*(fxrand()-0.5);
       cxyz[2] =  _R*(fxrand()-0.5);
     }
+
+    /*
     else if (g_info.initial_center_type == "2core-vertical") {
       _R = 1000;
       let _xy = ((fxrand() < 0.5) ? -1200 : 1200);
@@ -1110,6 +1124,7 @@ function sh_init() {
         cxyz[2] = _R*(fxrand()-0.5) + _xy;
       }
     }
+    */
 
     dv[0] = 0;
     dv[1] = 0;
@@ -1863,12 +1878,24 @@ function init_param() {
   g_info.initial_center_type = _arnd(g_info.initial_center_type_choice);
   g_info.features["Center Distribution"] = g_info.initial_center_type;
 
+  if (g_info.initial_center_type == "core") {
+    g_info.n_core = _irnd(1,5);
+    g_info.core_center = [];
+
+    for (let ii=0; ii<g_info.n_core; ii++) {
+      let _R = 1000;
+      g_info.core_center.push( [ _irnd(-_R,_R), _irnd(-_R,_R), _irnd(-_R,_R) ] ); 
+    }
+
+    g_info.features["NCore"] = g_info.n_core;
+  }
+
   // n creatures
   //
   g_info.n_rect = _arnd( [4000, 6000, 8000, 10000, 20000, 30000, 40000] );
 
   //DEBUG
-  g_info.n_rect = 6000;
+  //g_info.n_rect = 6000;
 
   g_info.features["Rectangular Cuboid Count"] = g_info.n_rect;
 
@@ -1902,6 +1929,21 @@ function init_param() {
   g_info.features["Speed Factor"] = g_info.speed_factor;
 
   window.$fxhashFeatures = g_info.features;
+
+}
+
+function _init_random_palette() {
+  let pal = [];
+  pal.push( chroma.random().hex() );
+  pal.push( chroma.random().hex() );
+  pal.push( chroma.random().hex() );
+  g_info.random_palette = {
+    "name": "random",
+    "colors": pal,
+    "stroke": "#777777",
+    "background": "#333333"
+  };
+
 
 }
 
@@ -1944,24 +1986,37 @@ function init_random_palette() {
   l1 = l0 - 0.05 - fxrand()*0.2;
   l2 = l1 - 0.05 - fxrand()*0.2;
 
-  let cmin = 0.1;
-  let cmax = 0.4;
+  l0 = _rnd(0.8,1);
+  l1 = l0 - 0.05 - fxrand()*0.4;
+  l2 = l1 - 0.05 - fxrand()*0.4;
 
-  cmin = 0.25;
-  cmax = 0.8;
+  let cmin = 0.05;
+  let cmax = 0.5;
+
+  cmin = 0.1;
+  cmax = 0.85;
 
 
   let chroma0 = fxrand()*(cmax-cmin) + cmin;
   let chroma1 = fxrand()*(cmax-cmin) + cmin;
   let chroma2 = fxrand()*(cmax-cmin) + cmin;
 
+  /*
   l0 *= 120;
   l1 *= 120;
   l2 *= 120;
-
   chroma0 *= 120;
   chroma1 *= 120;
   chroma2 *= 120;
+  */
+
+  l0 *= 130;
+  l1 *= 130;
+  l2 *= 130;
+
+  chroma0 *= 130;
+  chroma1 *= 130;
+  chroma2 *= 130;
 
   //console.log("0:", l0, chroma0, 360*theta0);
   //console.log("1:", l1, chroma1, 360*theta1);
@@ -1973,11 +2028,17 @@ function init_random_palette() {
 
   let pal = [ c0, c1, c2 ];
 
+  //let u = _irnd(256);
+  //let bghex = _rgb2hex( u, u, u );
+
+  let bg_choice = [ "#101010", "#070707", "#080808", "#777777", "#fefefe" ]
+  let bghex = _arnd(bg_choice);
+
   g_info.random_palette = {
     "name": "random",
     "colors": pal,
     "stroke": "#777777",
-    "background": "#333333"
+    "background": bghex
   };
 
   return pal;
