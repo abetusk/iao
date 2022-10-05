@@ -1,12 +1,9 @@
-VADFAD : 2Gen
+Screenshot Heist : 1Gen
 ===
 
+[![screenshot](../img/screenshot_heist_1gen.png)](https://github.com/abetusk/iao/tree/main/screeshot_heist_1gen)
 
-[![vadfad : 2gen](../img/vadfad_2gen.png)](https://abetusk.github.io/iao/vadfad_2gen)
-
-[Live](https://abetusk.github.io/iao/vadfad_2gen/)
-
-(not) Available on [fxhash](https://www.fxhash.xyz/generative/slug/vadfad-:-2gen)
+(Not) Available on [fxhash](https://www.fxhash.xyz/slug/...)
 
 Quick Start
 ---
@@ -22,87 +19,92 @@ chromium 'http://localhost:8000'
 Short Statement
 ---
 
-"VADFAD : 2Gen" is an experimental generative art piece that attempts to highlight some of the inherent contradictions surrounding the discussion of non-fungible tokens (NFTs) and its place as a vehicle for artistic creation, artistic expression and the potential of remuneration for artists.
+"Screenshot Heist : 1Gen" is an experimental generative art piece that attempts to highlight some of the inherent contradictions surrounding the discussion of non-fungible tokens (NFTs) and its place as a vehicle for artistic creation, artistic expression and the potential of remuneration for artists.
 
-s - Screenshot (PNG)
+p - pause
 
-a - Animation (5s, webm) (advanced use)
+s - screenshot
+
+a - video capture (5s) (advanced usage)
 
 To the extent possible, the source code is dedicated to the public domain (CC0) and can be used for any purpose, even commercial, by anyone. All third party libraries used are libre/free. Please check individual files for their respective licenses.
 
-The hope is that the "VADFAD : 2Gen" NFT draws a parallel to other technological trends of the past and highlights how new technologies that are only just being understood, or experimented with, can have unforeseen benefits and whose enjoyment might seem obscure to an outside observer.
 
-The video game arcade industry helped create video game empires, drive the adoption of home video consoles and advance the proliferation of personal computers. Just as video games of the past helped promote innovative new technologies, NFTs have the potential to drive innovation in other markets that aren't well understood or explored yet.
+A common bad faith argument against NFTs is that because it's easy to create a "screenshot" of the underlying asset, the value of the NFT is worthless.  "Screenshot Heist" is an attempt to address this critique by highlighting the absurdity of normalizing the current state of copyright and digital property ownership while considering ownership through a public decentralized ledger as irrational.
 
-By combining a 1980s "8-bit" aesthetic, "VADFAD : 2Gen" tries to touch on the nostalgia for the arcade video game era of the 1980s while using a generative process to create almost surely unique 8-bit like monster scenes and creations. The combination of styles is done to try emphasize the similarity between the two eras, where the exuberance for the new technology, art and entertainment of the past has a similar spirit to the exhilaration of the present.
-
-"VADFAD : 2Gen" is a continuation of "VADFAD" incorporating different compositions, color palettes and export options.
-
-This work hopes to add to the conversation about examining the reality of the ecosystem that we've developed around digital goods and intellectual property.
-
-This work takes inspiration from the artists `Jared Tarbell` and `Frederik Vanhoutte`.
-
+This work hopes to add to the conversation about examining the ecosystem that we've developed around digital goods and intellectual property.
 
 Tags
 ---
 
-minimal, generative, 8-bit, coin-op, arcade, 1980s, retro, video game, nostalgia, orthographic, three.js, voxel
+minimal, generative, geometry, rectangles
 
 Statement
 ---
 
-"VADFAD : 2Gen" is an experimental generative art piece that
+"Screenshot Heist" is an experimental generative art piece that
 attempts to highlight some of the inherent contradictions
 surrounding the discussion of non-fungible tokens (NFTs) and
 its place as a vehicle for artistic creation, artistic expression
 and the potential of remuneration for artists.
 
+A common bad faith argument against NFTs is that because it's easy to
+create a "screenshot" of the underlying asset, the value of the NFT is
+worthless.
+"Screenshot Heist" is an attempt to address this critique by highlighting
+the absurdity of normalizing the current state of copyright and digital
+property ownership while considering ownership through a public decentralized
+ledger as irrational.
+
+A difference that digital media has to traditional media is that duplication
+is low cost.
+Since copying digital media is only a matter of reproducing the digital information,
+social constructs, such as copyright law, need to be put in place to police
+ownership and theft.
+The current state of digital information property enforcement has been normalized
+while transactions relating to digital information property on a public blockchain
+are treated as irrational.
+
+For example, a limited reproduction run of a photograph can be signed by the original artist
+and be purchased with claims of ownership and authenticity, even though the
+art is not owned by the purchasing party and the purchased item is a reproduction.
+When a limited minting run of an NFT is created, suddenly
+it's criticized for not being "real", without any thought as to whether
+a copy of a photograph is any more real.
+
+One aspect of the value of any piece of art might be the origin of how it was created
+and a certification of who created it.
+We've normalized traditional art and reproduction so that we've equated the physical
+limitations of duplication, and the physical artifacts that are distributed, with the
+authenticity of the piece, even though from a social and legal standpoint, these
+are only tangentially related.
+
 To the extent possible, the source code is dedicated to the public
-domain (CC0) and can be used for any purpose, even commercial, by anyone.
-All third party libraries used are libre/free. Please check individual files
-for their respective licenses.
+domain (CC0) and can be used or modified, even for commercial purposes, by anyone.
+All third party libraries used are libre/free.
+Please check individual files for their respective licenses.
 
-The hope is that the "VADFAD : 2Gen" NFT draws a parallel to other technological trends of the past and
-highlights how new technologies that are only just being understood, or experimented with, can
-have unforeseen benefits and whose enjoyment might seem obscure to an outside observer.
-
-The video game arcade industry helped create video game empires, drive the adoption of home
-video consoles and advance the proliferation of personal computers.
-Just as video games of the past helped promote innovative new technologies, NFTs have
-the potential to drive innovation in other markets that aren't well understood or explored yet.
-
-I believe many people in the NFT space are acting in "good faith", helping fund artists,
-driving innovation and willing to spend money for art and experiences that they enjoy,
-just like people enjoying video game arcades of 1980s and 1990s.
-
-By combining a 1980s "8-bit" aesthetic, "VADFAD : 2Gen" tries to touch on the nostalgia for the
-arcade video game era of the 1980s while using a generative process to create almost surely
-unique 8-bit like monster creations.
-The combination of styles is done to try emphasize the similarity between the two eras,
-where the exuberance for the new technology, art and entertainment of the past has a similar
-spirit to the exhilaration of the present.
-
-In addition, since all code is libre/free, artists and fans alike are encouraged to alter,
+As all code is libre/free, artists and fans are encouraged to alter,
 experiment and publish, even for commercial gain, ideas expressed in this NFT.
 The license in the code used to create the art associated with this NFT allows for
 further exploration, innovation and experimentation.
 
-I don't know if "VADFAD : 2Gen"
-is worth anything nor do I know if NFTs are
-a worthwhile idea but perhaps we can start
-to have a conversation that isn't a continuous
-stream of incredulous dismissals and start to examine
-the reality of the ecosystem that we've developed
-around digital goods and intellectual property.
+Cryptocurrency and the related digital assets, such as NFTs, are in a state of
+flux and their utility, application and adoption are being explored and developed.
+The hope is we can elevate the discussion from bad faith arguments and outright personal insults
+to a more balanced and productive conversation about
+the ecosystem that we've developed around digital goods and intellectual property.
 
-This work takes inspiration from the artist `Jared Tarbell`.
+This work is heavily influenced by the artists `01000010`, also known
+as `benkelmann`.
+Please see the `Reference` section for details and other information
+on their work.
 
 
 Reference
 ---
 
-* [INVADER FRACTAL by Jared S Tarbell](http://www.complexification.net/gallery/machines/invaderfractal/)
-* [Frederik Vanhoutte](https://twitter.com/wblut/status/1492632480079306756)
+* [01000010 on versum.xyz](https://versum.xyz/user/tz1MkjnBhAB5y7ZCSVXmwCayZvrWhB3LcUr2) ([@benkelmann](https://twitter.com/benkelmann) [fxhash](https://www.fxhash.xyz/u/01000010))
 
 License
 ---
@@ -114,3 +116,5 @@ All other source code and other assets in this directory are, to the extent poss
 under [CC0](https://creativecommons.org/publicdomain/zero/1.0/).
 
 ![CC0](../img/cc0_88x31.png).
+
+

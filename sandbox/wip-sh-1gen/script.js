@@ -146,6 +146,7 @@ var g_info = {
   "view_prv" : 0,
   "view_nxt" : 1,
   "time_prv": -1,
+  "time_cp": -1,
 
   "data": {
     "info": [],
@@ -171,7 +172,11 @@ var g_info = {
 
   "n_direction": 3,
   "direction": ['x', 'y',  'z'],
-  "box_align": false,
+  "box_align": 0,
+
+  "speed_modifier": 27,
+
+  "smear_opt" : false,
 
   "debug_line": false,
   "debug_cube": [],
@@ -1036,7 +1041,12 @@ function sh_init() {
   /*
   "n_direction": 3,
   "direction": ['x', 'y',  'z'],
-  "box_align": false,
+  "box_align": 0,
+
+  rotation_option
+
+  g_info.smear_opt = ((fxrand() < 0.5) ? true : false);
+
   */
 
   for (let i=0; i<g_info.n_rect; i++) {
@@ -1061,7 +1071,6 @@ function sh_init() {
       _dim[2] *= 2;
     }
 
-
     fisher_yates_shuffle(_dim);
 
     let u = [ fxrand()*_dim[0] + _min,
@@ -1076,6 +1085,28 @@ function sh_init() {
     let idx_min = 0;
     if (u[1] < u[idx_min]) { idx_min = 1; }
     if (u[2] < u[idx_min]) { idx_min = 2; }
+
+    if (g_info.n_direction != 3) {
+      let didx = _arnd( g_info.direction_idx );
+      let t = u[idx_max];
+      u[idx_max] = u[didx];
+      u[didx] = t;
+
+      idx_max = didx;
+    }
+
+    // force all rectangular cuboids to be in the same plane
+    //
+    if (g_info.box_align>0) {
+      let idx1 = (idx_max+g_info.box_align)%3;
+      let idx2 = (idx_max+2*g_info.box_align)%3;
+
+      if (u[idx1] < u[idx2]) {
+        let t = u[idx1];
+        u[idx1] = u[idx2];
+        u[idx2] = t;
+      }
+    }
 
 
     let _R = 1;
@@ -1101,30 +1132,9 @@ function sh_init() {
       cxyz[2] =  _R*(fxrand()-0.5);
     }
 
-    /*
-    else if (g_info.initial_center_type == "2core-vertical") {
-      _R = 1000;
-      let _xy = ((fxrand() < 0.5) ? -1200 : 1200);
-      cxyz[0] =  _R*(fxrand()-0.5) ;
-      cxyz[1] =  _R*(fxrand()-0.5) + _xy;
-      cxyz[2] =  _R*(fxrand()-0.5) ;
+    if (g_info.smear_opt) {
+      cxyz[idx_max] += _rnd( -2.5*g_info.frustumSize, 2.5*g_info.frustumSize );
     }
-
-    else if (g_info.initial_center_type == "2core-horizontal") {
-      _R = 500;
-      let _xy = 1000;
-      if (fxrand() < 0.5) {
-        cxyz[0] = _R*(fxrand()-0.5) + _xy;
-        cxyz[1] = _R*(fxrand()-0.5) - _xy/2;
-        cxyz[2] = _R*(fxrand()-0.5) ;
-      }
-      else {
-        cxyz[0] = _R*(fxrand()-0.5) ;
-        cxyz[1] = _R*(fxrand()-0.5) - _xy/2;
-        cxyz[2] = _R*(fxrand()-0.5) + _xy;
-      }
-    }
-    */
 
     dv[0] = 0;
     dv[1] = 0;
@@ -1141,11 +1151,16 @@ function sh_init() {
     //let _P = u[0]*u[1]*u[2]/8.0;
     //_P = u[0]*u[1]*u[2]/32.0;
 
-    let _P = (27*rndscale())/(_V);
+    let _speed = g_info.speed_modifier;
+    let _P = (_speed*rndscale())/(_V);
     let _Q = (rndscale())/(_V);
 
     let _dv_sgn = ((fxrand()<0.5) ? -1 : 1);
     let _dr_sgn = ((fxrand()<0.5) ? -1 : 1);
+
+    if (g_info.direction_velocity[idx_max]!=0) {
+      _dv_sgn = g_info.direction_velocity[idx_max];
+    }
 
     //_P *= rndscale();
 
@@ -1355,7 +1370,8 @@ function threejs_init() {
 
     let bloom_opt = {
       "intensity": 0.25,
-      "kernelSize": 2
+      //"kernelSize": 2
+      "kernelSize": 1
     };
 
     //if (g_info.background_brightness > 0.85) { bloom_opt.intensity = 0.25; }
@@ -1371,8 +1387,10 @@ function threejs_init() {
   let use_fxaa = true;
   if (use_fxaa) {
     let fxaa_opt = {
-      "subpixelQuality": 4,
-      "samples": 4
+      //"subpixelQuality": 4,
+      //"samples": 4
+      "subpixelQuality": 1,
+      "samples": 1
     }
 
     let fxaaeffect = new POSTPROCESSING.FXAAEffect(fxaa_opt);
@@ -1564,13 +1582,26 @@ function threejs_init() {
 function onWindowResize() {
 
   g_info.aspect = window.innerWidth / window.innerHeight;
+
+  /*
   g_info.camera = new THREE.OrthographicCamera(-g_info.frustumSize * g_info.aspect/2,
                                                 g_info.frustumSize * g_info.aspect/2,
                                                 g_info.frustumSize/2,
                                                -g_info.frustumSize/2,
                                                 -8000,
                                                 8000);
+  */
+
+  g_info.camera.left    = -g_info.frustumSize * g_info.aspect/2;
+  g_info.camera.right   =  g_info.frustumSize * g_info.aspect/2;
+  g_info.camera.top     =  g_info.frustumSize /2;
+  g_info.camera.bottom  = -g_info.frustumSize /2;
+  g_info.camera.near    = -8000;
+  g_info.camera.far     =  8000;
+
   g_info.camera.updateProjectionMatrix();
+  g_info.camera.position.z = 0;
+
   g_info.renderer.setSize( window.innerWidth, window.innerHeight );
 
   if ("composer" in g_info) {
@@ -1584,8 +1615,10 @@ function onWindowResize() {
 
 function animate() {
 
-  let B = 4000;
+  let B = 2.5*g_info.frustumSize ;
   let BBOX = [ -B, B, -B, B, -B, B ];
+
+  g_info.debug_x = { "B":B, "BBOX":BBOX };
 
   requestAnimationFrame( animate );
   render();
@@ -1597,25 +1630,28 @@ function animate() {
     g_info.data.pos[3*ii+2] += g_info.data.dv[3*ii+2];
   }
   */
-  for (let ii=0; ii<g_info.n_rect; ii++) {
-    g_info.data.pos[3*ii+0] += g_info.data.dv[3*ii+0];
-    g_info.data.pos[3*ii+1] += g_info.data.dv[3*ii+1];
-    g_info.data.pos[3*ii+2] += g_info.data.dv[3*ii+2];
 
-    g_info.data.rot[3*ii+0] = _mod1(g_info.data.rot[3*ii+0] + g_info.data.dr[3*ii+0], -Math.PI, Math.PI);
-    g_info.data.rot[3*ii+1] = _mod1(g_info.data.rot[3*ii+1] + g_info.data.dr[3*ii+1], -Math.PI, Math.PI);
-    g_info.data.rot[3*ii+2] = _mod1(g_info.data.rot[3*ii+2] + g_info.data.dr[3*ii+2], -Math.PI, Math.PI);
+  if (!g_info.paused) {
+    for (let ii=0; ii<g_info.n_rect; ii++) {
+      g_info.data.pos[3*ii+0] += g_info.data.dv[3*ii+0];
+      g_info.data.pos[3*ii+1] += g_info.data.dv[3*ii+1];
+      g_info.data.pos[3*ii+2] += g_info.data.dv[3*ii+2];
+
+      g_info.data.rot[3*ii+0] = _mod1(g_info.data.rot[3*ii+0] + g_info.data.dr[3*ii+0], -Math.PI, Math.PI);
+      g_info.data.rot[3*ii+1] = _mod1(g_info.data.rot[3*ii+1] + g_info.data.dr[3*ii+1], -Math.PI, Math.PI);
+      g_info.data.rot[3*ii+2] = _mod1(g_info.data.rot[3*ii+2] + g_info.data.dr[3*ii+2], -Math.PI, Math.PI);
 
 
-    if      (g_info.data.pos[3*ii+0] < BBOX[0]) { g_info.data.pos[3*ii+0] += 2*B; }
-    else if (g_info.data.pos[3*ii+0] > BBOX[1]) { g_info.data.pos[3*ii+0] -= 2*B; }
+      if      (g_info.data.pos[3*ii+0] < BBOX[0]) { g_info.data.pos[3*ii+0] += 2*B; }
+      else if (g_info.data.pos[3*ii+0] > BBOX[1]) { g_info.data.pos[3*ii+0] -= 2*B; }
 
-    else if (g_info.data.pos[3*ii+1] < BBOX[2]) { g_info.data.pos[3*ii+1] += 2*B; }
-    else if (g_info.data.pos[3*ii+1] > BBOX[3]) { g_info.data.pos[3*ii+1] -= 2*B; }
+      else if (g_info.data.pos[3*ii+1] < BBOX[2]) { g_info.data.pos[3*ii+1] += 2*B; }
+      else if (g_info.data.pos[3*ii+1] > BBOX[3]) { g_info.data.pos[3*ii+1] -= 2*B; }
 
-    else if (g_info.data.pos[3*ii+2] < BBOX[4]) { g_info.data.pos[3*ii+2] += 2*B; }
-    else if (g_info.data.pos[3*ii+2] > BBOX[5]) { g_info.data.pos[3*ii+2] -= 2*B; }
+      else if (g_info.data.pos[3*ii+2] < BBOX[4]) { g_info.data.pos[3*ii+2] += 2*B; }
+      else if (g_info.data.pos[3*ii+2] > BBOX[5]) { g_info.data.pos[3*ii+2] -= 2*B; }
 
+    }
   }
 
   if (g_info.animation_capture) {
@@ -1667,8 +1703,16 @@ function render() {
   _g_count++;
   if (_g_count > 300) { _g_count=0; }
 
-  const time = Date.now() * g_info.speed_factor;
+  let time = Date.now() * g_info.speed_factor;
   let _t_rem_orig = time - Math.floor(time);
+
+  if (g_info.paused) {
+    time = g_info.time_cp;
+  }
+  else {
+    g_info.time_cp = time;
+  }
+
 
   // init
   //
@@ -1848,19 +1892,61 @@ function render() {
 
 function init_param() {
 
+  // clumped together initially or spread out
+  //
+  g_info.smear_opt = ((fxrand() < 0.5) ? true : false);
+  g_info.features["Smeared"] = (g_info.smear_opt ? "True" : "False");
+
+  // rectcuboid speed
+  //
+  g_info.speed_modifier = 27 + ((fxrand()-0.5)*10);
+  g_info.features["Speed Modifier"] = g_info.speed_modifier;
+
   // direction
   //
   g_info.n_direction = _irnd(3) + 1;
   g_info.direction = ['x', 'y', 'z'];
-  fisher_yates_shuffle(g_info.direction);
-  g_info.direction = g_info.direction.slice(0, g_info.n_direction);
-  g_info.direction.sort();
-  g_info.features["Axies"] = g_info.direction.join(",");
+  g_info.direction_idx = [ 0, 1, 2 ];
+  fisher_yates_shuffle(g_info.direction_idx);
+  g_info.direction_idx = g_info.direction_idx.slice(0, g_info.n_direction);
+
+  let dir_descr = [];
+  for (let ii=0; ii<g_info.direction_idx.length; ii++) {
+    dir_descr.push( g_info.direction[ g_info.direction_idx[ii] ] );
+  }
+  //g_info.features["Axies"] = g_info.direction.join(",");
+  g_info.features["Axies"] = dir_descr.join(",");
+
+  // directoinal
+  //
+  let sgn_descr = [ "-", "+/-", "+" ];
+  g_info.direction_velocity = [0,0,0];
+  g_info.direction_velocity = [ _irnd(-1,2), _irnd(-1,2), _irnd(-1,2) ];
+
+  let _vv = g_info.direction_velocity;
+
+  let dir_vel_descr = [
+    sgn_descr[_vv[0]+1] + "x",
+    sgn_descr[_vv[1]+1] + "y" ,
+    sgn_descr[_vv[2]+1] + "z"
+  ]
+
+  let dir_vel_descr_fin = [];
+  for (let ii=0; ii<g_info.direction_idx.length; ii++) {
+    dir_vel_descr_fin.push( dir_vel_descr[ g_info.direction_idx[ii] ] );
+  }
+
+  g_info.features["Directional Velocity"] = dir_vel_descr_fin.join(",");
+
+
 
   // cuboid alignment
   //
-  g_info.box_align = ((fxrand() < 0.5) ? true : false);
-  g_info.features["Box Align"] = ( g_info.box_align ? "True" : "False" );
+  //g_info.box_align = ((fxrand() < 0.5) ? true : false);
+  //g_info.features["Box Align"] = ( g_info.box_align ? "True" : "False" );
+
+  g_info.box_align = _irnd(3);
+  g_info.features["Box Align"] = g_info.box_align;
 
 
   // dimensional factors
@@ -1878,6 +1964,8 @@ function init_param() {
   g_info.initial_center_type = _arnd(g_info.initial_center_type_choice);
   g_info.features["Center Distribution"] = g_info.initial_center_type;
 
+  g_info.n_core = 0;
+
   if (g_info.initial_center_type == "core") {
     g_info.n_core = _irnd(1,5);
     g_info.core_center = [];
@@ -1892,19 +1980,29 @@ function init_param() {
 
   // n creatures
   //
-  g_info.n_rect = _arnd( [4000, 6000, 8000, 10000, 20000, 30000, 40000] );
+  if (g_info.n_core < 2) {
+    if (g_info.n_core == 0) {
+      g_info.n_rect = _arnd( [8000, 10000, 20000, 30000, 40000] );
+    }
+    else {
+      g_info.n_rect = _arnd( [6000, 8000, 10000, 20000, 30000 ] );
+    }
+  }
+  else {
+    g_info.n_rect = _arnd( [8000, 10000, 20000] );
+  }
 
   //DEBUG
-  //g_info.n_rect = 6000;
+  //g_info.n_rect = 1000;
 
   g_info.features["Rectangular Cuboid Count"] = g_info.n_rect;
 
   // palette choice
   //
-  g_info.palette_idx = _irnd( g_info.palette.length );
-  let pidx = g_info.palette_idx;
+  //g_info.palette_idx = _irnd( g_info.palette.length );
+  //let pidx = g_info.palette_idx;
 
-  g_info.features["Palette"] = g_info.palette[pidx].name;
+  //g_info.features["Palette"] = g_info.palette[pidx].name;
 
   //DEBUG
   g_info.palette_idx = g_info.palette.length;
@@ -1920,16 +2018,14 @@ function init_param() {
 
   g_info.features["Distribution"] = dist_name[idx];
 
-  //g_info.distribution_type = 11;
-
   // speed factor
   //
   g_info.speed_factor  = _rnd(1/2048, 1/512); //0.00075,
+  g_info.speed_factor  = _rnd(1/(2048*8), 1/(512*8)); //0.00075,
 
-  g_info.features["Speed Factor"] = g_info.speed_factor;
+  //g_info.features["Speed Factor"] = g_info.speed_factor;
 
   window.$fxhashFeatures = g_info.features;
-
 }
 
 function _init_random_palette() {
@@ -1943,8 +2039,6 @@ function _init_random_palette() {
     "stroke": "#777777",
     "background": "#333333"
   };
-
-
 }
 
 function init_random_palette() {
@@ -2067,6 +2161,9 @@ function init() {
       g_info.capture_end = g_info.capture_start + g_info.capture_dt;
 
       console.log(">>>", g_info.capture_start, g_info.capture_end, g_info.capture_dt);
+    }
+    else if (ev.key == 'p') {
+      g_info.paused = (g_info.paused ? false : true);
     }
   });
 
