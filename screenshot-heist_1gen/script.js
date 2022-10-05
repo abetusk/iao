@@ -15,13 +15,6 @@
 //
 
 //
-// Some portions have been copied from other sources, like StackOverflow.
-// and WebGL Fundamentals (https://webglfundamentals.org/,
-// https://github.com/gfxfundamentals/webgl-fundamentals).
-// Where appropriate, these have been laballed with their corresponding
-// license, attribution and link to the original source.
-
-//
 // Care has been taken to make sure all third party libraries,
 // whether parts used in this source file or used in external source
 // files, are under a libre/free/open source license that allows
@@ -244,21 +237,6 @@ function __rndpow(s) {
   return Math.pow(fxrand(), s);
 }
 
-// from https://stackoverflow.com/questions/918736/random-number-generator-that-produces-a-power-law-distribution
-// CC-BY-SA gnovice (https://stackoverflow.com/users/52738/gnovice
-//
-function _rndpow(s, x1) {
-  x0 = ((typeof x0 === "undefined") ? 0 : x0 );
-  x1 = ((typeof x1 === "undefined") ? 1 : x1 );
-  let y = fxrand();
-
-  let x1p = Math.pow(x1, s+1);
-  let x0p = Math.pow(x0, s+1);
-
-  let x = Math.pow(((x1p - x0p)*y + x0p), 1/(s+1));
-  return x;
-}
-
 function _expow(s) {
   return -Math.log(1 - fxrand()) / s;
 }
@@ -397,13 +375,6 @@ function _hex_dhsv(hexstr, dh, ds, dv) {
   return _rgb2hex(rgb_c.r, rgb_c.g, rgb_c.b);
 }
 
-// https://stackoverflow.com/a/596243 CC-BY-SA
-// https://stackoverflow.com/users/61574/anonymous
-//
-function _brightness(r, g, b) {
-  return ((r/255.0)*0.299) + (0.587*(g/255.0)) + (0.114*(b/255.0));
-}
-
 //  https://stackoverflow.com/a/17243070
 // From user Paul S. (https://stackoverflow.com/users/1615483/paul-s)
 //
@@ -540,6 +511,7 @@ function _lookup_block_key(x,y,z) {
 // which are used with permission via a BSD-3 clause license.
 //
 
+/*
 var m4 = {
 
   projection: function(width, height, depth) {
@@ -690,6 +662,7 @@ var m4 = {
   },
 
 };
+*/
 
 //
 //----

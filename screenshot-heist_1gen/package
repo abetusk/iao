@@ -11,5 +11,5 @@
 outfn=heist_1gn.zip
 rm -f $outfn
 
-zip $outfn CCapture.js download.js webm-writer-0.2.0.js script.js index.html style.css three.js quadtree.js LICENSE LICENSE-three-js README.md
+zip $outfn CCapture.js download.js webm-writer-0.2.0.js chroma.js postprocessing.js script.js index.html style.css three.js quadtree.js LICENSE LICENSE-three-js README.md
 

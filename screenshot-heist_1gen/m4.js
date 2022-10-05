@@ -4,6 +4,7 @@
 // which are used with permission via a BSD-3 clause license.
 //
 
+
 var m4 = {
 
   projection: function(width, height, depth) {
@@ -71,7 +72,7 @@ var m4 = {
     ];
   },
 
-  t2: function(tx, ty, tz) {
+  _translation: function(tx, ty, tz) {
     return [
        1,  0,  0, tx,
        0,  1,  0, ty,
@@ -216,4 +217,20 @@ if (typeof module !== "undefined") {
 
 //
 //----
+
+// from https://stackoverflow.com/questions/918736/random-number-generator-that-produces-a-power-law-distribution
+// CC-BY-SA gnovice (https://stackoverflow.com/users/52738/gnovice
+//
+function _rndpow(s, x1) {
+  x0 = ((typeof x0 === "undefined") ? 0 : x0 );
+  x1 = ((typeof x1 === "undefined") ? 1 : x1 );
+  let y = fxrand();
+
+  let x1p = Math.pow(x1, s+1);
+  let x0p = Math.pow(x0, s+1);
+
+  let x = Math.pow(((x1p - x0p)*y + x0p), 1/(s+1));
+  return x;
+}
+
 
