@@ -40,6 +40,11 @@ var g_info = {
   "rnd": [],
   "ds": 5,
 
+  "runtime_start":-1,
+  "runtime_ms": 0,
+  "preview_taken" : false,
+  "trigger_preview_delay_ms" : 3000,
+
   "download_filename":"screenshot_heist_1gen.png",
 
   "capturer": {},
@@ -77,7 +82,12 @@ var g_info = {
 
   "fudge": 1/1024,
 
+  "background_color": [ "#101010", "#070707", "#080808", "#fefefe" ],
+
+
   "palette": [
+
+    /*
     { 
       "name": "yuma_punk",
       "colors": ["#f05e3b", "#ebdec4", "#ffdb00"],
@@ -115,6 +125,7 @@ var g_info = {
       "stroke": "#000000",
       "background": "#0a5e78"
     },
+    */
 
     { 
       "name" : "monochrome",
@@ -156,10 +167,15 @@ var g_info = {
 
   "rotation_option" : false,
 
-  "dimension_factor_profile" : [
+  "_dimension_factor_profile" : [
     [2,12,72],  [2,10,50],  [2,8,32], [2,6,18],
     [1,6,36],   [1,5,25],   // [1,4,16], [1,3,9],
     [1,12,72],  [1,10,50],  [1,8,32], [1,6,18]
+  ],
+  "dimension_factor_profile" : [
+    [3,18,108],  [6,30,150],  [3,12,48], [3,9,27],
+    [2,12,72],   [2,10,50],
+    [2,24,144],  [2,20,100],  [2,16,64], [2,12,36]
   ],
   "dimension_factor" : [ 1,1,1],
 
@@ -174,6 +190,26 @@ var g_info = {
   "debug_line": false,
   "debug_cube": [],
   "debug_cube_pos": [],
+
+  "vertexShader" : //'attribute float size;\n' +
+   //'varying vec3 vColor;\n' +
+   'attribute vec3 pos;\n' +
+   'varying vec4 vColor;\n' +
+   //'varying vec4 vColor;\n' +
+   'void main() {\n' +
+   '  vColor = color;\n' +
+   '  vec4 mvPosition = modelViewMatrix * vec4( pos, 1.0 );\n' +
+   //'  gl_PointSize = size * ( 300.0 / -mvPosition.z );\n' +
+   '  gl_Position = projectionMatrix * mvPosition;\n' +
+   //'  gl_Position = vec4(1000.0, 100.0, 1000.0, 1.0);\n' +
+
+   '}\n',
+
+  "fragmentShader" : 'varying vec4 vColor;\n' +
+    'void main() {\n' +
+    //'  gl_FragColor = vec4( vColor,l 1.0 );\n' +
+    '  gl_FragColor = vColor;\n' +
+    '}\n',
 
   //"material_type" : "phong"
   "material_type" : "toon"
@@ -964,7 +1000,11 @@ function rndscale() {
   if      (g_info.distribution_type == 0) { _scale = _expow(2.25) + 1/32; }
   //else if (g_info.distribution_type == 1) { _scale = _rndpow(-0.925, 1.25) + 1/32; }
   else if (g_info.distribution_type == 1) { _scale = _rndpow(-0.925, 1.5) + 1/3; }
-  else if (g_info.distribution_type == 2) { _scale = _rndpow(-0.5, 1.125) + 1/16; }
+
+  //else if (g_info.distribution_type == 2) { _scale = _rndpow(-0.5, 1.125) + 1/16; }
+  else if (g_info.distribution_type == 2) { _scale = _rndpow(-0.5, 1.125) + 1/2; }
+  //else if (g_info.distribution_type == 2) { _scale = _rndpow(-0.5, 3.05) + 1/8; }
+
   else if (g_info.distribution_type == 3) { _scale = _rndpow(0.75) + 1/32; }
   else if (g_info.distribution_type == 4) { _scale = _rndpow(1) + 1/32; }
   else if (g_info.distribution_type == 5) { _scale = _rndpow(1.25) + 1/32; }
@@ -1027,22 +1067,11 @@ function sh_init() {
     let tri = [];
 
     let _min = 0.25;
-    let _dim = [ 50, 10, 2 ];
-    _dim = [ 64,8,1];
-    //_dim = [ 32,16,2];
-
-    _dim = [ g_info.dimension_factor[0], g_info.dimension_factor[1], g_info.dimension_factor[2] ];
-
+    let _dim = [ g_info.dimension_factor[0], g_info.dimension_factor[1], g_info.dimension_factor[2] ];
 
     _dim[0] *= rndscale();
     _dim[1] *= rndscale();
     _dim[2] *= rndscale();
-
-    if ((g_info.n_rect < 20000) || (g_info.dimension_factor[0] == 1)) {
-      _dim[0] *= 2;
-      _dim[1] *= 2;
-      _dim[2] *= 2;
-    }
 
     fisher_yates_shuffle(_dim);
 
@@ -1121,9 +1150,6 @@ function sh_init() {
 
     if (_V < (1/(1024*1024))) { _V = 1; console.log("bang");  }
 
-    //let _P = u[0]*u[1]*u[2]/8.0;
-    //_P = u[0]*u[1]*u[2]/32.0;
-
     let _speed = g_info.speed_modifier;
     let _P = (_speed*rndscale())/(_V);
     let _Q = (rndscale())/(_V);
@@ -1135,21 +1161,14 @@ function sh_init() {
       _dv_sgn = g_info.direction_velocity[idx_max];
     }
 
-    //_P *= rndscale();
-
-    //dv[idx_max] = (fxrand()-0.5)*_P + dv_min;
     dv[idx_max] = _dv_sgn*(_P + dv_min);
-    //dr[idx_max] = fxrand()*Math.PI*2/1024;
 
     if (g_info.rotatation_option) {
-      dr[idx_max] = _clamp(_dr_sgn*_Q*_P*8, 1.0/512.0, 1/32.0);
+      //dr[idx_max] = _clamp(_dr_sgn*_Q*_P*8, 1.0/512.0, 1/32.0);
+      dr[idx_max] = _clamp(_dr_sgn*_Q*_P*8,
+        _rnd(1/512, 1/256),
+        _rnd(1/64, 1/32.0) );
     }
-    //dr[idx_max] = 0;
-
-    //dr[(idx_max+1)%3] = dr[idx_max];
-    //dr[(idx_max+2)%3] = dr[idx_max];
-
-    //fisher_yates_shuffle( dv );
 
     g_info.data.dv[3*i+0] = dv[0];
     g_info.data.dv[3*i+1] = dv[1];
@@ -1167,22 +1186,10 @@ function sh_init() {
       g_info.data.rot[3*i+idx_max] = fxrand()*Math.PI*2;
     }
 
-    //play
-    //g_info.data.rot[3*i+0] = fxrand()*Math.PI*2;
-    //g_info.data.rot[3*i+1] = fxrand()*Math.PI*2;
-    //g_info.data.rot[3*i+2] = fxrand()*Math.PI*2;
-
     g_info.data.dr[3*i+0] = dr[0];
     g_info.data.dr[3*i+1] = dr[1];
     g_info.data.dr[3*i+2] = dr[2];
 
-    //g_info.data.dv.push(dv[0], dv[1], dv[2]);
-    //g_info.data.pos.push( cxyz[0], cxyz[1], cxyz[2] );
-
-    //g_info.data.dv.push(dv);
-    //g_info.data.pos.push( cxyz );
-
-    //tri_rect(tri, u, cxyz);
     tri_rect(tri, u);
     tri_sh.push(tri);
 
@@ -1289,7 +1296,8 @@ function threejs_init() {
   //------
   //------
   //------
-  g_info.renderer = new THREE.WebGLRenderer({ "antialias": true });
+  g_info.renderer = new THREE.WebGLRenderer({ "antialias": true, "powerPreference": "high-performance" });
+  //g_info.renderer = new THREE.WebGLRenderer();
   g_info.renderer.setPixelRatio( window.devicePixelRatio );
   g_info.renderer.setSize( window.innerWidth, window.innerHeight );
   g_info.renderer.outputEncoding = THREE.sRGBEncoding;
@@ -1325,13 +1333,20 @@ function threejs_init() {
       gradientMap: gradientMap
     });
 
+    /*
+    g_info.material = new THREE.ShaderMaterial({
+      vertexShader: g_info.vertexShader,
+      fragmentShader: g_info.fragmentShader,
+      //color: diffuseColor,
+      //gradientMap: gradientMap,
+      vertexColors: true
+    });
+    */
+
   }
 
-  // bloom
-  //
-
-  let use_bloom = true;
-  if (use_bloom) {
+  let use_composer = true;
+  if (use_composer) {
     let sz = g_info.renderer.getDrawingBufferSize( new THREE.Vector2() );
     let _wglrt = new THREE.WebGLRenderTarget( sz.width, sz.height, { "samples": 2} );
     let composer = new POSTPROCESSING.EffectComposer(g_info.renderer, _wglrt);
@@ -1341,38 +1356,52 @@ function threejs_init() {
     composer.addPass(renderpass);
     g_info.render_pass = renderpass;
 
-    let bloom_opt = {
-      "intensity": 0.25,
-      //"kernelSize": 2
-      "kernelSize": 1
-    };
+    // bloom
+    //
 
-    //if (g_info.background_brightness > 0.85) { bloom_opt.intensity = 0.25; }
+    let use_bloom = true;
+    if (use_bloom) {
+      let bloom_opt = {
+        "intensity": 0.25,
+        //"kernelSize": 2
+        "kernelSize": 1.5
+      };
 
-    let bloomeffect = new POSTPROCESSING.BloomEffect(bloom_opt);
-    let bloompass = new POSTPROCESSING.EffectPass(g_info.camera, bloomeffect);
-    g_info.bloom_effect = bloomeffect;
-    g_info.bloom_pass = bloompass;
-    composer.addPass(bloompass);
-  }
+      //if (g_info.background_brightness > 0.85) { bloom_opt.intensity = 0.25; }
 
-
-  let use_fxaa = true;
-  if (use_fxaa) {
-    let fxaa_opt = {
-      //"subpixelQuality": 4,
-      //"samples": 4
-      "subpixelQuality": 1,
-      "samples": 1
+      let bloomeffect = new POSTPROCESSING.BloomEffect(bloom_opt);
+      let bloompass = new POSTPROCESSING.EffectPass(g_info.camera, bloomeffect);
+      g_info.bloom_effect = bloomeffect;
+      g_info.bloom_pass = bloompass;
+      composer.addPass(bloompass);
     }
 
-    let fxaaeffect = new POSTPROCESSING.FXAAEffect(fxaa_opt);
-    let fxaapass = new POSTPROCESSING.EffectPass(g_info.camera, fxaaeffect);
-    g_info.fxaa_effect = fxaaeffect;
-    g_info.fxaa_pass = fxaapass;
-    g_info.composer.addPass(fxaapass);
-  }
 
+    let use_fxaa = true;
+    if (use_fxaa) {
+      let fxaa_opt = {
+        //"subpixelQuality": 4,
+        //"samples": 4
+        "subpixelQuality": 1,
+        "samples": 1
+      }
+
+      let fxaaeffect = new POSTPROCESSING.FXAAEffect(fxaa_opt);
+      let fxaapass = new POSTPROCESSING.EffectPass(g_info.camera, fxaaeffect);
+      g_info.fxaa_effect = fxaaeffect;
+      g_info.fxaa_pass = fxaapass;
+      g_info.composer.addPass(fxaapass);
+    }
+
+  }
+  else {
+
+    g_info.renderer = new THREE.WebGLRenderer({ "antialias": true });
+    g_info.renderer.setPixelRatio( window.devicePixelRatio );
+    g_info.renderer.setSize( window.innerWidth, window.innerHeight );
+    g_info.renderer.outputEncoding = THREE.sRGBEncoding;
+
+  }
 
 
 
@@ -1380,7 +1409,7 @@ function threejs_init() {
 
   function disposeArray() { this.array = null; }
 
-  g_info.geometry = new THREE.BufferGeometry();
+  //g_info.geometry = new THREE.BufferGeometry();
 
   //const positions = [];
   //const normals = [];
@@ -1401,19 +1430,13 @@ function threejs_init() {
 
   g_info["mesh_a"] = [];
 
-  //let _geom = new THREE.BoxGeometry(100, 30, 1);
-  //let _mat  = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-  //let _cube = new THREE.Mesh(_geom, _mat);
-
-  //const d = 12, d2 = d/2;
+  let positions = [];
+  let rect_colors = [];
+  let normals = [];
 
   let d = 12;
   let d2 = 0;
   for (let idx=0; idx<tri_sh.length; idx++) {
-
-    //const x = -200;
-    //const y = -200;
-    //const z = -200;
 
     const x = 0;
     const y = 0;
@@ -1427,34 +1450,22 @@ function threejs_init() {
 
     let alpha = 1;
 
-    //let cc_a = chroma.random().rgb();
-    //let cc = { "r": cc_a[0]/255, "g": cc_a[1]/255, "b": cc_a[2]/255 };
-    //cc = color;
-
     let _atten = [
       _rnd(0.95,1.05), 
       _rnd(0.95,1.05), 
       _rnd(0.95,1.05)
     ];
 
-    /*
-    _atten = [
-      _rnd(0.85,1.15), 
-      _rnd(0.85,1.15), 
-      _rnd(0.85,1.15)
-    ];
+      //DEBUG
+      let tx = (fxrand()-0.5)*200;
+      let ty = (fxrand()-0.5)*200;
+      let tz = (fxrand()-0.5)*200;
 
-    _atten = [
-      _rnd(0.9,1.1), 
-      _rnd(0.9,1.1), 
-      _rnd(0.9,1.1)
-    ];
-    */
 
     //let colors = [];
-    let normals = [];
-    let rect_colors = [];
-    let positions = new Float32Array( tri_sh[idx].length );
+    //let normals = [];
+    //let rect_colors = [];
+    //let positions = new Float32Array( tri_sh[idx].length );
     for ( let i = 0; i < tri_sh[idx].length; i += 9 ) {
       let ax = x + tri_sh[idx][i + 0]*d - d2;
       let ay = y + tri_sh[idx][i + 1]*d - d2;
@@ -1468,9 +1479,24 @@ function threejs_init() {
       let cy = y + tri_sh[idx][i + 7]*d - d2;
       let cz = z + tri_sh[idx][i + 8]*d - d2;
 
-      //positions.push( ax, ay, az );
-      //positions.push( bx, by, bz );
-      //positions.push( cx, cy, cz );
+      //DEBUG
+      ax += tx;
+      ay += ty;
+      az += tz;
+
+      bx += tx;
+      by += ty;
+      bz += tz;
+
+      cx += tx;
+      cy += ty;
+      cz += tz;
+
+      positions.push( ax, ay, az );
+      positions.push( bx, by, bz );
+      positions.push( cx, cy, cz );
+
+      /*
       positions[i + 0] = ax;
       positions[i + 1] = ay;
       positions[i + 2] = az;
@@ -1482,6 +1508,7 @@ function threejs_init() {
       positions[i + 6] = cx;
       positions[i + 7] = cy;
       positions[i + 8] = cz;
+      */
 
       pA.set( ax, ay, az );
       pB.set( bx, by, bz );
@@ -1501,11 +1528,6 @@ function threejs_init() {
       normals.push( nx, ny, nz );
       normals.push( nx, ny, nz );
 
-
-      //rect_colors.push( color.r, color.g, color.b, alpha );
-      //rect_colors.push( color.r, color.g, color.b, alpha );
-      //rect_colors.push( color.r, color.g, color.b, alpha );
-
       let cc = { "r": _atten[0]*color.r, "g": _atten[1]*color.g, "b": _atten[2]*color.b };
       rect_colors.push( cc.r, cc.g, cc.b, alpha );
       rect_colors.push( cc.r, cc.g, cc.b, alpha );
@@ -1515,16 +1537,33 @@ function threejs_init() {
 
 
 
-    let geom = new THREE.BufferGeometry();
-    geom.setAttribute( 'position', new THREE.BufferAttribute( positions, 3 ).onUpload( disposeArray )  );
-    //geom.setAttribute( 'color', new THREE.Float32BufferAttribute( colors, 4 ).onUpload( disposeArray ) );
-    geom.setAttribute( 'color', new THREE.Float32BufferAttribute( rect_colors, 4 ).onUpload( disposeArray ) );
-    geom.setAttribute( 'normal', new THREE.Float32BufferAttribute( normals, 3 ).onUpload( disposeArray ) );
-
-    let mesh = new THREE.Mesh( geom, g_info.material );
-
-    g_info.mesh_a.push(mesh);
   }
+
+  g_info.positions = positions;
+
+  let pp = new Float32Array( positions.length );
+  for (let ii=0; ii<pp.length; ii++) {
+    pp[ii] = positions[ii];
+  }
+
+  g_info.pp = pp;
+
+  let geom = new THREE.BufferGeometry();
+  //geom.setAttribute( 'position', new THREE.BufferAttribute( positions, 3 ).onUpload( disposeArray )  );
+  //geom.setAttribute( 'position', new THREE.Float32BufferAttribute( positions, 3 ).onUpload( disposeArray )  );
+  //geom.setAttribute( 'position', new THREE.Float32BufferAttribute( positions, 3 ) );
+  geom.setAttribute( 'position', new THREE.Float32BufferAttribute( positions, 3 ) );
+  //geom.setAttribute( 'pos', new THREE.Float32BufferAttribute( pp, 3 ).setUsage( THREE.DynamicDrawUsage ) );
+  //geom.setAttribute( 'color', new THREE.Float32BufferAttribute( colors, 4 ).onUpload( disposeArray ) );
+  //geom.setAttribute( 'color', new THREE.Float32BufferAttribute( rect_colors, 4 ).onUpload( disposeArray ) );
+  //geom.setAttribute( 'normal', new THREE.Float32BufferAttribute( normals, 3 ).onUpload( disposeArray ) );
+
+  geom.setAttribute( 'color', new THREE.Float32BufferAttribute( rect_colors, 4 ) );
+  geom.setAttribute( 'normal', new THREE.Float32BufferAttribute( normals, 3 ) );
+
+  let mesh = new THREE.Mesh( geom, g_info.material );
+
+  g_info.mesh_a.push(mesh);
 
   //---
 
@@ -1535,13 +1574,13 @@ function threejs_init() {
 
   //---
 
-  g_info.mesh = new THREE.Mesh( g_info.geometry, g_info.material );
+  //g_info.mesh = new THREE.Mesh( g_info.geometry, g_info.material );
 
   //SHADOW
   //g_info.mesh.castShadow = true;
   //g_info.mesh.receiveShadow = true;
 
-  g_info.scene.add( g_info.mesh );
+  //g_info.scene.add( g_info.mesh );
 
   for (let ii=0; ii<g_info.mesh_a.length; ii++) {
     g_info.scene.add( g_info.mesh_a[ii] );
@@ -1586,15 +1625,45 @@ function onWindowResize() {
 
 //---
 
+var g_fps = {
+  "counter": 0,
+  "prv": -1,
+  "cur": -1,
+  "dt": 0
+};
+
 function animate() {
+
+  g_fps.cur = Date.now();
+  if (g_fps.prv < 0) { g_fps.prv = g_fps.cur; }
+
+  g_fps.counter++;
+  if ((g_fps.counter % 20)==0) {
+    g_fps.dt = g_fps.cur - g_fps.prv;
+    if (g_fps.dt>0) {
+      console.log("fps:", 1000.0/g_fps.dt);
+    }
+  }
+  g_fps.prv = g_fps.cur;
+
+
+  if (g_info.runtime_start < 0) {
+    g_info.runtime_start = Date.now();
+  }
+  g_info.runtime_ms = Date.now() - g_info.runtime_start;
 
   let B = 2.5*g_info.frustumSize ;
   let BBOX = [ -B, B, -B, B, -B, B ];
 
   g_info.debug_x = { "B":B, "BBOX":BBOX };
 
+  //"trigger_preview_delay_ms" : 3000,
+  if ((!g_info.preview_taken) && (g_info.runtime_ms > g_info.trigger_preview_delay_ms)) {
+    fxpreview();
+    g_info.preview_taken = true;
+  }
+
   requestAnimationFrame( animate );
-  render();
 
   /*
   for (let ii=0; ii<g_info.data.pos.length; ii++) {
@@ -1623,8 +1692,31 @@ function animate() {
 
       else if (g_info.data.pos[3*ii+2] < BBOX[4]) { g_info.data.pos[3*ii+2] += 2*B; }
       else if (g_info.data.pos[3*ii+2] > BBOX[5]) { g_info.data.pos[3*ii+2] -= 2*B; }
-
     }
+
+
+    //let pos =  g_info.mesh_a[0].geometry.attributes.pos.array;
+    let pos =  g_info.mesh_a[0].geometry.attributes.position.array;
+    for (let ii=0, idx=0; ii<pos.length; ii+=(3*3*2*6), idx+=1) {
+      let idx = Math.floor(ii/(3*3*2*6));
+
+      for (jj=0; jj<(3*3*2*6); jj+=3) {
+        pos[ii+jj+0] = g_info.pp[ii+jj+0] + g_info.data.pos[3*idx+0];
+        pos[ii+jj+1] = g_info.pp[ii+jj+1] + g_info.data.pos[3*idx+1];
+        pos[ii+jj+2] = g_info.pp[ii+jj+2] + g_info.data.pos[3*idx+2];
+
+      }
+    }
+    //g_info.mesh_a[0].geometry.attributes.pos.needsUpdate = true;
+    g_info.mesh_a[0].geometry.attributes.position.needsUpdate = true;
+    /*
+    g_info.mesh_a[0].geometry.attributes.normal.needsUpdate = true;
+    g_info.mesh_a[0].geometry.attributes.position.needsUpdate = true;
+    g_info.mesh_a[0].geometry.attributes.color.needsUpdate = true;
+    */
+    g_info.mesh_a[0].geometry.computeBoundingBox();
+    g_info.mesh_a[0].geometry.computeBoundingSphere();
+
   }
 
   if (g_info.animation_capture) {
@@ -1642,6 +1734,7 @@ function animate() {
 
   }
 
+  render();
 
 }
 
@@ -1818,7 +1911,8 @@ function render() {
       g_info.mesh_a[ii].rotation.y = 0;
       g_info.mesh_a[ii].rotation.z = 0;
 
-      let _mt = m4._translation( g_info.data.pos[3*ii+0],  g_info.data.pos[3*ii+1],  g_info.data.pos[3*ii+2]);
+      //let _mt = m4._translation( g_info.data.pos[3*ii+0],  g_info.data.pos[3*ii+1],  g_info.data.pos[3*ii+2]);
+      let _mt = m4._translation( 0, 0, 0 );
       let _mrx = m4.xRotation(g_info.data.rot[3*ii+0]);
       let _mry = m4.yRotation(g_info.data.rot[3*ii+1]);
       let _mrz = m4.zRotation(g_info.data.rot[3*ii+2]);
@@ -1829,7 +1923,6 @@ function render() {
              mr[ 4], mr[ 5], mr[ 6], mr[ 7],
              mr[ 8], mr[ 9], mr[10], mr[11],
              mr[12], mr[13], mr[14], mr[15] );
-
 
       g_info.mesh_a[ii].applyMatrix4(m);
     }
@@ -1846,8 +1939,12 @@ function render() {
     g_info.light[0].position.set( _x, _y, _z ).normalize();
   }
 
+
+  //g_info.mesh_a[0].geometry.attributes.pos.needsUpdate = true;
+  //g_info.mesh_a[0].geometry.attributes.position.needsUpdate = true;
+
   if ("composer" in g_info) {
-    g_info.composer.render();
+    g_info.composer.render( g_info.scene, g_info.camera );
   }
   else {
     g_info.renderer.render( g_info.scene, g_info.camera );
@@ -1913,7 +2010,6 @@ function init_param() {
   g_info.features["Directional Velocity"] = dir_vel_descr_fin.join(",");
 
 
-
   // cuboid alignment
   //
   //g_info.box_align = ((fxrand() < 0.5) ? true : false);
@@ -1926,6 +2022,10 @@ function init_param() {
   // dimensional factors
   //
   g_info.dimension_factor = _arnd(g_info.dimension_factor_profile);
+
+  //DEBUG
+  //g_info.dimension_factor = [1,4,16];
+
   g_info.features["Dimension Profile"] = g_info.dimension_factor.join(",");
 
   // rotation in-axis
@@ -1956,20 +2056,21 @@ function init_param() {
   //
   if (g_info.n_core < 2) {
     if (g_info.n_core == 0) {
-      //g_info.n_rect = _arnd( [8000, 10000, 20000, 30000, 40000] );
-      g_info.n_rect = _arnd( [8000, 10000, 20000 ]);
+      g_info.n_rect = _arnd( [10000, 20000, 30000, 40000] );
+      //g_info.n_rect = _arnd( [8000, 10000, 20000 ]);
     }
     else {
-      //g_info.n_rect = _arnd( [6000, 8000, 10000, 20000, 30000 ] );
-      g_info.n_rect = _arnd( [6000, 8000, 10000, 20000]);
+      g_info.n_rect = _arnd( [10000, 20000, 30000, 40000 ] );
+      //g_info.n_rect = _arnd( [6000, 8000, 10000, 20000]);
     }
   }
   else {
-    g_info.n_rect = _arnd( [8000, 10000, 20000] );
+    g_info.n_rect = _arnd( [10000, 20000, 30000, 40000] );
+    //g_info.n_rect = _arnd( [8000, 10000, 20000] );
   }
 
   //DEBUG
-  //g_info.n_rect = 1000;
+  //g_info.n_rect = 100;
 
   g_info.features["Rectangular Cuboid Count"] = g_info.n_rect;
 
@@ -1989,10 +2090,20 @@ function init_param() {
 
   let dist_name = [ "Exponential (#0)", "Exponential (#1)", "Exponential (#2)", "Power Law (#0)", "Power Law (#1)" ];
   let dist_id = [0, 9, 10, 1, 2] ;
+
   let idx = _irnd( dist_id.length );
+
+  //DEBUG
+  //idx = 4;
+
   g_info.distribution_type = dist_id[idx];
 
   g_info.features["Distribution"] = dist_name[idx];
+
+  //DEBUG
+  g_info.distribution_type = _irnd(11);
+  g_info.features["Distribution"] = g_info.distribution_type;
+
 
   // speed factor
   //
@@ -2101,7 +2212,8 @@ function init_random_palette() {
   //let u = _irnd(256);
   //let bghex = _rgb2hex( u, u, u );
 
-  let bg_choice = [ "#101010", "#070707", "#080808", "#777777", "#fefefe" ]
+  //let bg_choice = [ "#101010", "#070707", "#080808", "#777777", "#fefefe" ]
+  let bg_choice = g_info.background_color;
   let bghex = _arnd(bg_choice);
 
   g_info.random_palette = {

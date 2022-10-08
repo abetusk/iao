@@ -16,6 +16,12 @@
       //---- do not edit the following code (you can indent as you wish)
       let alphabet = "123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ"
       var fxhash = "oo" + Array(49).fill(0).map(_=>alphabet[(Math.random()*alphabet.length)|0]).join('')
+//fxhash='oobx6eSHgAyzcqtMum2EpCt7KAVYU3moKsa7FPPmWFY1CghKW4o';
+//fxhash = 'ooRcuXDv9ZBpoDgPQsmLbUL1ug4aw99zStnRVbcezQTjDaAcxwy';
+//fxhash = 'oofoSznKtLa7V6JTV4Dggt2LySerm6uxqtGQiuyTwqA2YCzcCCe';
+
+//popping
+fxhash = 'oobdXim5j2g76Yu94PYfDf4UKQjvXUCwJn1y3hE3vtth1NFA1QZ'
       let b58dec = str=>[...str].reduce((p,c)=>p*alphabet.length+alphabet.indexOf(c)|0, 0)
       let fxhashTrunc = fxhash.slice(2)
       let regex = new RegExp(".{" + ((fxhash.length/4)|0) + "}", 'g')
