@@ -21,7 +21,10 @@
 //fxhash = 'oofoSznKtLa7V6JTV4Dggt2LySerm6uxqtGQiuyTwqA2YCzcCCe';
 
 //popping
-fxhash = 'oobdXim5j2g76Yu94PYfDf4UKQjvXUCwJn1y3hE3vtth1NFA1QZ'
+//fxhash = 'oobdXim5j2g76Yu94PYfDf4UKQjvXUCwJn1y3hE3vtth1NFA1QZ'
+//fxhash = 'ooGS2xsT8Qe9Hc9cfiUcAhAYMK1nCS6EdZ4ZAZgAB93PCXJ54dF';
+//fxhash = 'ooGMmUGmxmbCVGunVoVGzDVWeNi1CJHMRWJz2aH4DfqgQQ7X7a6';
+
       let b58dec = str=>[...str].reduce((p,c)=>p*alphabet.length+alphabet.indexOf(c)|0, 0)
       let fxhashTrunc = fxhash.slice(2)
       let regex = new RegExp(".{" + ((fxhash.length/4)|0) + "}", 'g')

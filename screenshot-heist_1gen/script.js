@@ -929,7 +929,9 @@ function debug_add(x,y,z,s){
 function tri_rect(vert, dxyz, cxyz) {
   cxyz = ((typeof cxyz === "undefined") ? [0,0,0] : cxyz);
 
-  let u = [ dxyz[0]/2, dxyz[1]/2, dxyz[2]/2 ];
+  let _d = [ (fxrand()-0.5), (fxrand()-0.5), (fxrand()-0.5) ];
+
+  let u = [ dxyz[0]/2 + _d[0], dxyz[1]/2 +_d[1] , dxyz[2]/2 + _d[2] ];
   let c = [ cxyz[0], cxyz[1], cxyz[2] ];
 
   // xy -z
@@ -1021,6 +1023,21 @@ function rndscale() {
 
 function sh_init() {
 
+  //---
+
+  let B = 3.5*g_info.frustumSize ;
+  let BBOX = [ -B, B, -B, B, -B, B ];
+  let dB = [
+    BBOX[1] - BBOX[0],
+    BBOX[3] - BBOX[2],
+    BBOX[5] - BBOX[4]
+  ];
+
+  g_info.BBOX = BBOX;
+  g_info.dB = dB;
+
+  //---
+
   let cx = g_info.cx;
   let cy = g_info.cy;
   let cz = g_info.cz;
@@ -1033,34 +1050,15 @@ function sh_init() {
   let vf = [];
   let tri_sh = [];
 
-  //g_info["n_rect"] = 40000;
-  //g_info.n_rect = 1;
-  //g_info.n_rect = 100;
-  //g_info.n_rect = 8000;
-
   g_info.data.dr  = new Array( g_info.n_rect*3 );
   g_info.data.dv  = new Array( g_info.n_rect*3 );
   g_info.data.pos = new Array( g_info.n_rect*3 );
   g_info.data.rot = new Array( g_info.n_rect*3 );
 
-  //g_info.data.dv = [];
-  //g_info.data.pos = [];
-
   let dv = [0,0,0];
   let dv_min = 1;
 
   let dr = [0,0,0];
-
-  /*
-  "n_direction": 3,
-  "direction": ['x', 'y',  'z'],
-  "box_align": 0,
-
-  rotation_option
-
-  g_info.smear_opt = ((fxrand() < 0.5) ? true : false);
-
-  */
 
   for (let i=0; i<g_info.n_rect; i++) {
 
@@ -1134,8 +1132,13 @@ function sh_init() {
       cxyz[2] =  _R*(fxrand()-0.5);
     }
 
-    if (g_info.smear_opt) {
-      cxyz[idx_max] += _rnd( -2.5*g_info.frustumSize, 2.5*g_info.frustumSize );
+    if ((g_info.smear_opt) || (g_info.initial_center_type == "uniform")) {
+      //cxyz[idx_max] += _rnd( -2.5*g_info.frustumSize, 2.5*g_info.frustumSize );
+      //cxyz[idx_max] += _rnd( -g_info.dB[id_max]/2, g_info.dB[idx_max]/2 );
+
+      //console.log(">>", idx_max, g_info.BBOX);
+      //console.log(">>", idx_max, g_info.BBOX[2*idx_max], g_info.BBOX[2*idx_max+1] );
+      cxyz[idx_max] += _rnd( g_info.BBOX[2*idx_max], g_info.BBOX[2*idx_max+1] );
     }
 
     dv[0] = 0;
@@ -1163,7 +1166,7 @@ function sh_init() {
 
     dv[idx_max] = _dv_sgn*(_P + dv_min);
 
-    if (g_info.rotatation_option) {
+    if (g_info.rotation_option) {
       //dr[idx_max] = _clamp(_dr_sgn*_Q*_P*8, 1.0/512.0, 1/32.0);
       dr[idx_max] = _clamp(_dr_sgn*_Q*_P*8,
         _rnd(1/512, 1/256),
@@ -1196,6 +1199,17 @@ function sh_init() {
   }
 
   g_info.data.tri = tri_sh;
+
+  //DEBUG
+  /*
+  console.log("SINGLE TRI");
+  for (let i=0; i<g_info.data.tri[0].length; i+=9) {
+    console.log( g_info.data.tri[0][i+0], g_info.data.tri[0][i+1], g_info.data.tri[0][i+2] );
+    console.log( g_info.data.tri[0][i+3], g_info.data.tri[0][i+4], g_info.data.tri[0][i+5] );
+    console.log( g_info.data.tri[0][i+6], g_info.data.tri[0][i+7], g_info.data.tri[0][i+8] );
+    console.log("");
+  }
+  */
 
 }
 
@@ -1467,6 +1481,8 @@ function threejs_init() {
     //let rect_colors = [];
     //let positions = new Float32Array( tri_sh[idx].length );
     for ( let i = 0; i < tri_sh[idx].length; i += 9 ) {
+
+      /*
       let ax = x + tri_sh[idx][i + 0]*d - d2;
       let ay = y + tri_sh[idx][i + 1]*d - d2;
       let az = z + tri_sh[idx][i + 2]*d - d2;
@@ -1478,8 +1494,22 @@ function threejs_init() {
       let cx = x + tri_sh[idx][i + 6]*d - d2;
       let cy = y + tri_sh[idx][i + 7]*d - d2;
       let cz = z + tri_sh[idx][i + 8]*d - d2;
+      */
+
+      let ax = tri_sh[idx][i + 0]*d;
+      let ay = tri_sh[idx][i + 1]*d;
+      let az = tri_sh[idx][i + 2]*d;
+
+      let bx = tri_sh[idx][i + 3]*d;
+      let by = tri_sh[idx][i + 4]*d;
+      let bz = tri_sh[idx][i + 5]*d;
+
+      let cx = tri_sh[idx][i + 6]*d;
+      let cy = tri_sh[idx][i + 7]*d;
+      let cz = tri_sh[idx][i + 8]*d;
 
       //DEBUG
+      /*
       ax += tx;
       ay += ty;
       az += tz;
@@ -1491,6 +1521,7 @@ function threejs_init() {
       cx += tx;
       cy += ty;
       cz += tz;
+      */
 
       positions.push( ax, ay, az );
       positions.push( bx, by, bz );
@@ -1535,24 +1566,43 @@ function threejs_init() {
 
     }
 
-
-
   }
 
   g_info.positions = positions;
+
+  //DEBUG
+  /*
+  console.log("SINGLE TRI");
+  for (let i=0; i<g_info.data.tri[0].length; i+=9) {
+    console.log( g_info.data.tri[0][i+0], g_info.data.tri[0][i+1], g_info.data.tri[0][i+2] );
+    console.log( g_info.data.tri[0][i+3], g_info.data.tri[0][i+4], g_info.data.tri[0][i+5] );
+    console.log( g_info.data.tri[0][i+6], g_info.data.tri[0][i+7], g_info.data.tri[0][i+8] );
+    console.log("");
+  }
+  console.log("---");
+  for (let i=0; i<g_info.positions.length; i+=3) {
+    console.log(positions[i], positions[i+1], positions[i+2]);
+  }
+  console.log("---");
+  */
+
+
 
   let pp = new Float32Array( positions.length );
   for (let ii=0; ii<pp.length; ii++) {
     pp[ii] = positions[ii];
   }
 
-  g_info.pp = pp;
+  g_info.cpos = pp;
 
   let geom = new THREE.BufferGeometry();
+
   //geom.setAttribute( 'position', new THREE.BufferAttribute( positions, 3 ).onUpload( disposeArray )  );
   //geom.setAttribute( 'position', new THREE.Float32BufferAttribute( positions, 3 ).onUpload( disposeArray )  );
   //geom.setAttribute( 'position', new THREE.Float32BufferAttribute( positions, 3 ) );
+
   geom.setAttribute( 'position', new THREE.Float32BufferAttribute( positions, 3 ) );
+
   //geom.setAttribute( 'pos', new THREE.Float32BufferAttribute( pp, 3 ).setUsage( THREE.DynamicDrawUsage ) );
   //geom.setAttribute( 'color', new THREE.Float32BufferAttribute( colors, 4 ).onUpload( disposeArray ) );
   //geom.setAttribute( 'color', new THREE.Float32BufferAttribute( rect_colors, 4 ).onUpload( disposeArray ) );
@@ -1646,32 +1696,34 @@ function animate() {
   }
   g_fps.prv = g_fps.cur;
 
-
   if (g_info.runtime_start < 0) {
     g_info.runtime_start = Date.now();
   }
   g_info.runtime_ms = Date.now() - g_info.runtime_start;
 
-  let B = 2.5*g_info.frustumSize ;
+  /*
+  let B = 3.5*g_info.frustumSize ;
+  //let BBOX = [ -B, B, -2*B, 2*B, -B, B ];
   let BBOX = [ -B, B, -B, B, -B, B ];
+  let dB = [
+    BBOX[1] - BBOX[0],
+    BBOX[3] - BBOX[2],
+    BBOX[5] - BBOX[4]
+  ];
 
-  g_info.debug_x = { "B":B, "BBOX":BBOX };
+  g_info.BBOX = BBOX;
+  g_info.dB = dB;
+  */
 
-  //"trigger_preview_delay_ms" : 3000,
+  let BBOX = g_info.BBOX;
+  let dB = g_info.dB;
+
   if ((!g_info.preview_taken) && (g_info.runtime_ms > g_info.trigger_preview_delay_ms)) {
     fxpreview();
     g_info.preview_taken = true;
   }
 
   requestAnimationFrame( animate );
-
-  /*
-  for (let ii=0; ii<g_info.data.pos.length; ii++) {
-    g_info.data.pos[3*ii+0] += g_info.data.dv[3*ii+0];
-    g_info.data.pos[3*ii+1] += g_info.data.dv[3*ii+1];
-    g_info.data.pos[3*ii+2] += g_info.data.dv[3*ii+2];
-  }
-  */
 
   if (!g_info.paused) {
     for (let ii=0; ii<g_info.n_rect; ii++) {
@@ -1683,37 +1735,77 @@ function animate() {
       g_info.data.rot[3*ii+1] = _mod1(g_info.data.rot[3*ii+1] + g_info.data.dr[3*ii+1], -Math.PI, Math.PI);
       g_info.data.rot[3*ii+2] = _mod1(g_info.data.rot[3*ii+2] + g_info.data.dr[3*ii+2], -Math.PI, Math.PI);
 
+      if      (g_info.data.pos[3*ii+0] < BBOX[0]) { g_info.data.pos[3*ii+0] += dB[0]; }
+      else if (g_info.data.pos[3*ii+0] > BBOX[1]) { g_info.data.pos[3*ii+0] -= dB[0]; }
+      //if      (g_info.data.pos[3*ii+0] < BBOX[0]) { g_info.data.pos[3*ii+0] += 2*B; }
+      //else if (g_info.data.pos[3*ii+0] > BBOX[1]) { g_info.data.pos[3*ii+0] -= 2*B; }
 
-      if      (g_info.data.pos[3*ii+0] < BBOX[0]) { g_info.data.pos[3*ii+0] += 2*B; }
-      else if (g_info.data.pos[3*ii+0] > BBOX[1]) { g_info.data.pos[3*ii+0] -= 2*B; }
+      else if (g_info.data.pos[3*ii+1] < BBOX[2]) { g_info.data.pos[3*ii+1] += dB[1]; }
+      else if (g_info.data.pos[3*ii+1] > BBOX[3]) { g_info.data.pos[3*ii+1] -= dB[1]; }
+      //else if (g_info.data.pos[3*ii+1] < BBOX[2]) { g_info.data.pos[3*ii+1] += 2*B; }
+      //else if (g_info.data.pos[3*ii+1] > BBOX[3]) { g_info.data.pos[3*ii+1] -= 2*B; }
 
-      else if (g_info.data.pos[3*ii+1] < BBOX[2]) { g_info.data.pos[3*ii+1] += 2*B; }
-      else if (g_info.data.pos[3*ii+1] > BBOX[3]) { g_info.data.pos[3*ii+1] -= 2*B; }
-
-      else if (g_info.data.pos[3*ii+2] < BBOX[4]) { g_info.data.pos[3*ii+2] += 2*B; }
-      else if (g_info.data.pos[3*ii+2] > BBOX[5]) { g_info.data.pos[3*ii+2] -= 2*B; }
+      else if (g_info.data.pos[3*ii+2] < BBOX[4]) { g_info.data.pos[3*ii+2] += dB[2]; }
+      else if (g_info.data.pos[3*ii+2] > BBOX[5]) { g_info.data.pos[3*ii+2] -= dB[2]; }
+      //else if (g_info.data.pos[3*ii+2] < BBOX[4]) { g_info.data.pos[3*ii+2] += 2*B; }
+      //else if (g_info.data.pos[3*ii+2] > BBOX[5]) { g_info.data.pos[3*ii+2] -= 2*B; }
     }
 
+    let xyzw = [0,0,0,0];
+    let uu = [0,0,0,0];
 
-    //let pos =  g_info.mesh_a[0].geometry.attributes.pos.array;
+
     let pos =  g_info.mesh_a[0].geometry.attributes.position.array;
-    for (let ii=0, idx=0; ii<pos.length; ii+=(3*3*2*6), idx+=1) {
-      let idx = Math.floor(ii/(3*3*2*6));
 
-      for (jj=0; jj<(3*3*2*6); jj+=3) {
-        pos[ii+jj+0] = g_info.pp[ii+jj+0] + g_info.data.pos[3*idx+0];
-        pos[ii+jj+1] = g_info.pp[ii+jj+1] + g_info.data.pos[3*idx+1];
-        pos[ii+jj+2] = g_info.pp[ii+jj+2] + g_info.data.pos[3*idx+2];
+    if (g_info.rotation_option) {
 
+      for (let ii=0, idx=0; ii<pos.length; ii+=(3*3*2*6), idx+=1) {
+
+        let _mrx = m4.xRotation(g_info.data.rot[3*idx+0]);
+        let _mry = m4.yRotation(g_info.data.rot[3*idx+1]);
+        let _mrz = m4.zRotation(g_info.data.rot[3*idx+2]);
+        let _mlr = m4.multiply( _mrx, m4.multiply( _mry, _mrz ) );
+
+        for (let jj=0; jj<(3*3*2*6); jj+=3) {
+
+          xyzw[0] = g_info.cpos[ii+jj+0];
+          xyzw[1] = g_info.cpos[ii+jj+1];
+          xyzw[2] = g_info.cpos[ii+jj+2];
+          xyzw[3] = 1;
+
+          uu[0] = xyzw[0]*_mlr[0]  + xyzw[1]*_mlr[1]  + xyzw[2]*_mlr[2]  + xyzw[3]*_mlr[3] ;
+          uu[1] = xyzw[0]*_mlr[4]  + xyzw[1]*_mlr[5]  + xyzw[2]*_mlr[6]  + xyzw[3]*_mlr[7] ;
+          uu[2] = xyzw[0]*_mlr[8]  + xyzw[1]*_mlr[9]  + xyzw[2]*_mlr[10] + xyzw[3]*_mlr[11] ;
+          uu[3] = xyzw[0]*_mlr[12] + xyzw[1]*_mlr[13] + xyzw[2]*_mlr[14] + xyzw[3]*_mlr[15] ;
+
+          pos[ii+jj+0] = uu[0] + g_info.data.pos[3*idx+0];
+          pos[ii+jj+1] = uu[1] + g_info.data.pos[3*idx+1];
+          pos[ii+jj+2] = uu[2] + g_info.data.pos[3*idx+2];
+
+        }
       }
+
     }
-    //g_info.mesh_a[0].geometry.attributes.pos.needsUpdate = true;
+    else {
+
+      for (let ii=0, idx=0; ii<pos.length; ii+=(3*3*2*6), idx+=1) {
+        for (let jj=0; jj<(3*3*2*6); jj+=3) {
+          pos[ii+jj+0] = g_info.cpos[ii+jj+0] + g_info.data.pos[3*idx+0];
+          pos[ii+jj+1] = g_info.cpos[ii+jj+1] + g_info.data.pos[3*idx+1];
+          pos[ii+jj+2] = g_info.cpos[ii+jj+2] + g_info.data.pos[3*idx+2];
+        }
+      }
+
+    }
+
     g_info.mesh_a[0].geometry.attributes.position.needsUpdate = true;
+
     /*
     g_info.mesh_a[0].geometry.attributes.normal.needsUpdate = true;
     g_info.mesh_a[0].geometry.attributes.position.needsUpdate = true;
     g_info.mesh_a[0].geometry.attributes.color.needsUpdate = true;
     */
+
     g_info.mesh_a[0].geometry.computeBoundingBox();
     g_info.mesh_a[0].geometry.computeBoundingSphere();
 
@@ -1900,6 +1992,8 @@ function render() {
 
     let _mr = m4.multiply(mrp, mrn);
     let m = new THREE.Matrix4();
+  
+    let mr = _mr;
 
     for (let ii=0; ii<g_info.mesh_a.length; ii++) {
 
@@ -1911,6 +2005,7 @@ function render() {
       g_info.mesh_a[ii].rotation.y = 0;
       g_info.mesh_a[ii].rotation.z = 0;
 
+      /*
       //let _mt = m4._translation( g_info.data.pos[3*ii+0],  g_info.data.pos[3*ii+1],  g_info.data.pos[3*ii+2]);
       let _mt = m4._translation( 0, 0, 0 );
       let _mrx = m4.xRotation(g_info.data.rot[3*ii+0]);
@@ -1918,6 +2013,7 @@ function render() {
       let _mrz = m4.zRotation(g_info.data.rot[3*ii+2]);
       let _mlr = m4.multiply( _mrx, m4.multiply( _mry, _mrz ) );
       let mr = m4.multiply( m4.multiply(_mlr, _mt ), _mr);
+      */
 
       m.set( mr[ 0], mr[ 1], mr[ 2], mr[ 3],
              mr[ 4], mr[ 5], mr[ 6], mr[ 7],
@@ -2031,6 +2127,10 @@ function init_param() {
   // rotation in-axis
   //
   g_info.rotation_option = ((fxrand() < (1/32)) ? true : false);
+
+  //DEBUG
+  //g_info.rotation_option = true;
+
   g_info.features["Axis-Rotation"] = (g_info.rotation_option ? "True": "False");
 
   // initial center distribution
@@ -2070,7 +2170,7 @@ function init_param() {
   }
 
   //DEBUG
-  //g_info.n_rect = 100;
+  //g_info.n_rect = 1;
 
   g_info.features["Rectangular Cuboid Count"] = g_info.n_rect;
 
