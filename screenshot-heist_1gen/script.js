@@ -40,6 +40,8 @@ var g_info = {
   "rnd": [],
   "ds": 5,
 
+  "epoch_ms": -1,
+
   "runtime_start":-1,
   "runtime_ms": 0,
   "preview_taken" : false,
@@ -1297,7 +1299,12 @@ function render() {
   _g_count++;
   if (_g_count > 300) { _g_count=0; }
 
-  let time = Date.now() * g_info.speed_factor;
+  if (g_info.epoch_ms < 0) {
+    g_info.epoch_ms = Date.now();
+  }
+
+  //let time = Date.now() * g_info.speed_factor;
+  let time = (Date.now() - g_info.epoch_ms) * g_info.speed_factor;
   let _t_rem_orig = time - Math.floor(time);
 
   if (g_info.paused) {
