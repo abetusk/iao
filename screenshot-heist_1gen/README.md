@@ -3,7 +3,7 @@ Screenshot Heist : 1Gen
 
 [![screenshot](../img/screenshot_heist_1gen.png)](https://github.com/abetusk/iao/tree/main/screeshot-heist_1gen)
 
-(Not) Available on [fxhash](https://www.fxhash.xyz/slug/screenshot-heist-:-1gen)
+Available on [fxhash](https://www.fxhash.xyz/generative/20176)
 
 Quick Start
 ---
