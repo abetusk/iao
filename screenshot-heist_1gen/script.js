@@ -1246,6 +1246,8 @@ function animate() {
 
   }
 
+  render();
+
   if (g_info.animation_capture) {
     g_info.capturer.capture( g_info.renderer.domElement );
 
@@ -1261,7 +1263,6 @@ function animate() {
 
   }
 
-  render();
 
 }
 
