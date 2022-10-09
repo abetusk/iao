@@ -86,53 +86,11 @@ var g_info = {
 
 
   "palette": [
-
-    /*
-    { 
-      "name": "yuma_punk",
-      "colors": ["#f05e3b", "#ebdec4", "#ffdb00"],
-      "stroke": "#ebdec4",
-      "background": "#161616"
-    },
-
-    { 
-      "name": "juxtapoz",
-      "colors": ["#20357e", "#f44242", "#ffffff"],
-      "stroke": "#000000",
-      "background": "#cfc398"
-    },
-
-
-    { 
-      "name": "ducci_i",
-      "colors": ["#e9dcad", "#143331", "#ffc000"],
-      "stroke": "#ffc000",
-      "background": "#a74c02"
-    },
-
-
-    { 
-      "name": "ducci_j",
-      //"colors": ["#c47c2b", "#5f5726", "#000000", "#7e8a84"],
-      "colors": ["#c47c2b", "#5f5726", "#1e1e1e", "#7e8a84"],
-      "stroke": "#7e8a84",
-      "background": "#ecddc5"
-    },
-    {  
-      "name": "dt03",
-      //"colors": ["#000000", "#a7a7a7"],
-      "colors": ["#222222", "#a7a7a7"],
-      "stroke": "#000000",
-      "background": "#0a5e78"
-    },
-    */
-
     { 
       "name" : "monochrome",
       "colors" : [ "#111111", "#eeeeee" ],
       "background": "#777777"
     }
-
   ],
 
   "palette_idx": 1,
@@ -161,7 +119,6 @@ var g_info = {
     "pos" : []
   },
 
-  //"initial_center_type_choice" : ["uniform", "core", "2core-vertical", "2core-horizontal"],
   "initial_center_type_choice" : ["uniform", "core" ],
   "initial_center_type" : "uniform",
 
@@ -507,6 +464,7 @@ function welcome() {
   console.log("");
   console.log("commands:");
   console.log("");
+  console.log(" p   - pause");
   console.log(" s   - save screenshot (PNG)");
   console.log(" a   - save animation (5s webm) (advanced usage)");
   console.log("");
@@ -541,392 +499,12 @@ function _lookup_block_key(x,y,z) {
   return _x + ":" + _y + ":" + _z;
 }
 
-//----
-// Parse of the following were taken from https://webglfundamentals.org/
-// https://github.com/gfxfundamentals/webgl-fundamentals
-// which are used with permission via a BSD-3 clause license.
-//
-
-/*
-var m4 = {
-
-  projection: function(width, height, depth) {
-
-    // Note: This matrix flips the Y axis so 0 is at the top.
-    //
-    return [
-       2 / width, 0, 0, 0,
-       0, -2 / height, 0, 0,
-       0, 0, 2 / depth, 0,
-      -1, 1, 0, 1,
-    ];
-  },
-
-  multiply: function(a, b) {
-    var a00 = a[0 * 4 + 0];
-    var a01 = a[0 * 4 + 1];
-    var a02 = a[0 * 4 + 2];
-    var a03 = a[0 * 4 + 3];
-    var a10 = a[1 * 4 + 0];
-    var a11 = a[1 * 4 + 1];
-    var a12 = a[1 * 4 + 2];
-    var a13 = a[1 * 4 + 3];
-    var a20 = a[2 * 4 + 0];
-    var a21 = a[2 * 4 + 1];
-    var a22 = a[2 * 4 + 2];
-    var a23 = a[2 * 4 + 3];
-    var a30 = a[3 * 4 + 0];
-    var a31 = a[3 * 4 + 1];
-    var a32 = a[3 * 4 + 2];
-    var a33 = a[3 * 4 + 3];
-    var b00 = b[0 * 4 + 0];
-    var b01 = b[0 * 4 + 1];
-    var b02 = b[0 * 4 + 2];
-    var b03 = b[0 * 4 + 3];
-    var b10 = b[1 * 4 + 0];
-    var b11 = b[1 * 4 + 1];
-    var b12 = b[1 * 4 + 2];
-    var b13 = b[1 * 4 + 3];
-    var b20 = b[2 * 4 + 0];
-    var b21 = b[2 * 4 + 1];
-    var b22 = b[2 * 4 + 2];
-    var b23 = b[2 * 4 + 3];
-    var b30 = b[3 * 4 + 0];
-    var b31 = b[3 * 4 + 1];
-    var b32 = b[3 * 4 + 2];
-    var b33 = b[3 * 4 + 3];
-    return [
-      b00 * a00 + b01 * a10 + b02 * a20 + b03 * a30,
-      b00 * a01 + b01 * a11 + b02 * a21 + b03 * a31,
-      b00 * a02 + b01 * a12 + b02 * a22 + b03 * a32,
-      b00 * a03 + b01 * a13 + b02 * a23 + b03 * a33,
-      b10 * a00 + b11 * a10 + b12 * a20 + b13 * a30,
-      b10 * a01 + b11 * a11 + b12 * a21 + b13 * a31,
-      b10 * a02 + b11 * a12 + b12 * a22 + b13 * a32,
-      b10 * a03 + b11 * a13 + b12 * a23 + b13 * a33,
-      b20 * a00 + b21 * a10 + b22 * a20 + b23 * a30,
-      b20 * a01 + b21 * a11 + b22 * a21 + b23 * a31,
-      b20 * a02 + b21 * a12 + b22 * a22 + b23 * a32,
-      b20 * a03 + b21 * a13 + b22 * a23 + b23 * a33,
-      b30 * a00 + b31 * a10 + b32 * a20 + b33 * a30,
-      b30 * a01 + b31 * a11 + b32 * a21 + b33 * a31,
-      b30 * a02 + b31 * a12 + b32 * a22 + b33 * a32,
-      b30 * a03 + b31 * a13 + b32 * a23 + b33 * a33,
-    ];
-  },
-
-  translation: function(tx, ty, tz) {
-    return [
-       1,  0,  0,  0,
-       0,  1,  0,  0,
-       0,  0,  1,  0,
-       tx, ty, tz, 1,
-    ];
-  },
-
-  _translation: function(tx, ty, tz) {
-    return [
-       1,  0,  0,  tx,
-       0,  1,  0,  ty,
-       0,  0,  1,  tz,
-       0,  0,  0,  1,
-    ];
-  },
-
-  xRotation: function(angleInRadians) {
-    var c = Math.cos(angleInRadians);
-    var s = Math.sin(angleInRadians);
-
-    return [
-      1, 0, 0, 0,
-      0, c, s, 0,
-      0, -s, c, 0,
-      0, 0, 0, 1,
-    ];
-  },
-  yRotation: function(angleInRadians) {
-    var c = Math.cos(angleInRadians);
-    var s = Math.sin(angleInRadians);
-
-    return [
-      c, 0, -s, 0,
-      0, 1, 0, 0,
-      s, 0, c, 0,
-      0, 0, 0, 1,
-    ];
-  },
-
-  zRotation: function(angleInRadians) {
-    var c = Math.cos(angleInRadians);
-    var s = Math.sin(angleInRadians);
-
-    return [
-       c, s, 0, 0,
-      -s, c, 0, 0,
-       0, 0, 1, 0,
-       0, 0, 0, 1,
-    ];
-  },
-
-  scaling: function(sx, sy, sz) {
-    return [
-      sx, 0,  0,  0,
-      0, sy,  0,  0,
-      0,  0, sz,  0,
-      0,  0,  0,  1,
-    ];
-  },
-
-  translate: function(m, tx, ty, tz) {
-    return m4.multiply(m, m4.translation(tx, ty, tz));
-  },
-
-  xRotate: function(m, angleInRadians) {
-    return m4.multiply(m, m4.xRotation(angleInRadians));
-  },
-
-  yRotate: function(m, angleInRadians) {
-    return m4.multiply(m, m4.yRotation(angleInRadians));
-  },
-
-  zRotate: function(m, angleInRadians) {
-    return m4.multiply(m, m4.zRotation(angleInRadians));
-  },
-
-  scale: function(m, sx, sy, sz) {
-    return m4.multiply(m, m4.scaling(sx, sy, sz));
-  },
-
-};
-*/
-
-//
-//----
-
-
 //-----
 //-----
 //-----
-
-function iso_project(plane,x,y,z,s) {
-  plane = ((typeof plane === "undefined") ? "xy": plane);
-
-  let s2 = Math.sqrt(2);
-  let s3 = Math.sqrt(3);
-
-  let basis = {
-    "xy": [
-      [ s3/2, -s3/2, 0 ],
-      [ 0.5, 0.5, 1 ]
-    ],
-    "xz": [
-      [ s3/2, 0, -s3/2 ],
-      [ 0.5, 1, 0.5 ]
-    ],
-    "yz": [
-      [ 0, s3/2, -s3/2 ],
-      [ 1, 0.5, 0.5 ]
-    ],
-
-    "zx": [
-      [ -s3/2, s3/2, 0 ],
-      [ 0.5, 0.5, 1 ]
-    ],
-    "yx": [
-      [ -s3/2, 0, s3/2 ],
-      [ 0.5, 1, 0.5 ]
-    ],
-    "zy": [
-      [ 0, -s3/2, s3/2 ],
-      [ 1, 0.5, 0.5 ]
-    ]
-
-  };
-
-  let b = basis[plane];
-
-  let x2d = b[0][0]*x + b[0][1]*y + b[0][2]*z;
-  let y2d = b[1][0]*x + b[1][1]*y + b[1][2]*z;
-
-  return {"x": x2d, "y": y2d, "s": s, "width": s, "height": s };
-
-}
-
-function quad_intersect(q0, q1) {
-  if (q1.x >= (q0.x + q0.width))   { return false; }
-  if (q1.y >= (q0.y + q0.height))  { return false; }
-  if (q0.x >= (q1.x + q1.width))   { return false; }
-  if (q0.y >= (q1.y + q1.height))  { return false; }
-
-  return true;
-}
-
-function debug() {
-  //let xy2d = iso_project("xy",  vf_candidate[_r][_c].x, vf_candidate[_r][_c].y, vf_candidate[_r][_c].z , vf_candidate[_r][_c].s );
-  //let _q = {"x": xy2d.x, "y": xy2d.y, "width": _w, "height": _h };
-  let _w = 1;
-  let _h = 1;
-
-  let _ox = 0, _oy = 0, _oz = 10;
-  let u = iso_project("xy", _ox, _oy, _oz, 1);
-  let b = { "x":u.x, "y": u.y, "width": 1, "height": 1 };
-
-  for (let x=0; x<10; x++) {
-    for (let y=0; y<10; y++) {
-      for (let z = 0; z<10; z++) {
-        let xy2d = iso_project("xy",  x, y, z, 1 );
-
-        //console.log("xyz:[", x, y, z, "] --> xy(", xy2d.x, xy2d.y, ")");
-
-        let _q = {"x": xy2d.x, "y": xy2d.y, "width": _w, "height": _h };
-        if (quad_intersect( _q, b)) {
-          //console.log("!!!", x, y, z, _q, b);
-        }
-      }
-    }
-  }
-
-}
-
-function debug2() {
-  let ok = {};
-  let n = 200;
-  for (let i=0; i<n; i++) {
-    for (let j=0; j<n; j++) {
-      for (let k=0; k<n; k++) {
-
-        ok[i + ":" + j + ":" + k] = 1;
-      }
-    }
-  }
-
-  console.log("...");
-}
-
-function fst_intersect(placed,candidate) {
-  let planes = ["xy", "xz", "yz", "yx", "zx", "zy" ];
-
-  let qtree = new Quadtree( {"x":-80, "y": -80, "width": 160, "height": 160} );
-
-  for (let pidx=0; pidx<planes.length; pidx++) {
-    let plane = planes[pidx];
-    for (let idx=0; idx<placed.length; idx++) {
-      for (let ii=0; ii<placed[idx].length; ii++) {
-        for (let jj=0; jj<placed[idx][ii].length; jj++) {
-          let pxy = placed[idx][ii][jj];
-          let pxy2d = iso_project(plane, pxy.x, pxy.y, pxy.z, pxy.s);
-
-          let _q = {"x": pxy2d.x, "y": pxy2d.y, "width": pxy.s, "height": pxy.s };
-          qtree.insert( _q );
-
-        }
-      }
-    }
-  }
-
-
-  for (let pidx=0; pidx<planes.length; pidx++) {
-    let plane = planes[pidx];
-    for (let _r=0; _r<candidate.length; _r++) {
-      for (let _c=0; _c<candidate[_r].length; _c++) {
-        let xy = candidate[_r][_c];
-        let xy2d = iso_project(plane,  candidate[_r][_c].x, candidate[_r][_c].y, candidate[_r][_c].z , candidate[_r][_c].s );
-
-        let _q = {"x": xy2d.x, "y": xy2d.y, "width": xy.s, "height": xy.s };
-
-        let ele = qtree.retrieve(_q);
-        for (let ii=0; ii<ele.length; ii++) {
-          if (quad_intersect(ele[ii], _q)) { return true; }
-        }
-      }
-    }
-  }
-
-  return false;
-}
-
-function slo_intersect(placed,candidate) {
-  let planes = ["xy", "xz", "yz", "yx", "zx", "zy" ];
-
-  for (let pidx=0; pidx<planes.length; pidx++) {
-    let plane = planes[pidx];
-    for (let _r=0; _r<candidate.length; _r++) {
-      for (let _c=0; _c<candidate[_r].length; _c++) {
-        //let xy2d = iso_project("xy",  candidate[_r][_c].x, candidate[_r][_c].y, candidate[_r][_c].z , candidate[_r][_c].s );
-        let xy2d = iso_project(plane,  candidate[_r][_c].x, candidate[_r][_c].y, candidate[_r][_c].z , candidate[_r][_c].s );
-
-        for (let idx=0; idx<placed.length; idx++) {
-          for (let ii=0; ii<placed[idx].length; ii++) {
-            for (let jj=0; jj<placed[idx][ii].length; jj++) {
-              let pxy = placed[idx][ii][jj];
-              //let pxy2d = iso_project("xy", pxy.x, pxy.y, pxy.z, pxy.s);
-              let pxy2d = iso_project(plane, pxy.x, pxy.y, pxy.z, pxy.s);
-
-              //console.log("candidate", candidate[_r][_c].x, candidate[_r][_c].y, candidate[_r][_c].z , candidate[_r][_c].s, "->", xy2d.x, xy2d.y,
-              //"placed", pxy.x, pxy.y, pxy.z, "->", pxy2d.x, pxy2d.y);
-
-              if (quad_intersect(xy2d, pxy2d)) { return true; }
-            }
-          }
-        }
-      }
-    }
-  }
-  return false;
-}
-
-function debug_ok() {
-  let ds = 64;
-
-  let cx = g_info.cx;
-  let cy = g_info.cy;
-  let cz = g_info.cz;
-
-
-  for (let p=-ds; p<=ds; p++) {
-    //debug_add(ds*p, ds*p, ds*p, ds);
-    //
-    debug_add(cx + p, cy + p, cz + p, 20);
-
-    debug_add(cx - p, cy + p, cz + p, 20);
-
-    debug_add(cx - p, cy - p, cz + p, 20);
-
-    debug_add(cx + p, cy - p, cz - p, 20);
-
-    debug_add(cx - p, cy + p, cz - p, 20);
-  }
-}
-
-function debug_add(x,y,z,s){
-  let cube_geom = new THREE.BoxGeometry( s, s, s );
-  let cube_mat = new THREE.MeshPhongMaterial( {
-     color: 0xaaaaaa, specular: 0xffffff, shininess: 0,
-     side: THREE.DoubleSide, vertexColors: true, transparent: false
-    });
-
-  let cube = new THREE.Mesh( cube_geom, cube_mat);
-
-  cube.position.copy(new THREE.Vector3());
-
-  //let cube = new THREE.Mesh( cube_geom, g_info.material);
-
-  cube.position.x = x;
-  cube.position.y = y;
-  cube.position.z = z;
-
-  //cube.position.copy( [x,y,z] );
-
-
-  //cube.computeBoundingSphere();
-
-  g_info.debug_cube.push(cube);
-  g_info.debug_cube_pos.push( [x,y,z] );
-
-  g_info.scene.add(cube);
-}
 
 function tri_rect(vert, dxyz, cxyz) {
+
   cxyz = ((typeof cxyz === "undefined") ? [0,0,0] : cxyz);
 
   let _d = [ (fxrand()-0.5), (fxrand()-0.5), (fxrand()-0.5) ];
@@ -1133,11 +711,6 @@ function sh_init() {
     }
 
     if ((g_info.smear_opt) || (g_info.initial_center_type == "uniform")) {
-      //cxyz[idx_max] += _rnd( -2.5*g_info.frustumSize, 2.5*g_info.frustumSize );
-      //cxyz[idx_max] += _rnd( -g_info.dB[id_max]/2, g_info.dB[idx_max]/2 );
-
-      //console.log(">>", idx_max, g_info.BBOX);
-      //console.log(">>", idx_max, g_info.BBOX[2*idx_max], g_info.BBOX[2*idx_max+1] );
       cxyz[idx_max] += _rnd( g_info.BBOX[2*idx_max], g_info.BBOX[2*idx_max+1] );
     }
 
@@ -1199,17 +772,6 @@ function sh_init() {
   }
 
   g_info.data.tri = tri_sh;
-
-  //DEBUG
-  /*
-  console.log("SINGLE TRI");
-  for (let i=0; i<g_info.data.tri[0].length; i+=9) {
-    console.log( g_info.data.tri[0][i+0], g_info.data.tri[0][i+1], g_info.data.tri[0][i+2] );
-    console.log( g_info.data.tri[0][i+3], g_info.data.tri[0][i+4], g_info.data.tri[0][i+5] );
-    console.log( g_info.data.tri[0][i+6], g_info.data.tri[0][i+7], g_info.data.tri[0][i+8] );
-    console.log("");
-  }
-  */
 
 }
 
@@ -1347,16 +909,6 @@ function threejs_init() {
       gradientMap: gradientMap
     });
 
-    /*
-    g_info.material = new THREE.ShaderMaterial({
-      vertexShader: g_info.vertexShader,
-      fragmentShader: g_info.fragmentShader,
-      //color: diffuseColor,
-      //gradientMap: gradientMap,
-      vertexColors: true
-    });
-    */
-
   }
 
   let use_composer = true;
@@ -1377,11 +929,8 @@ function threejs_init() {
     if (use_bloom) {
       let bloom_opt = {
         "intensity": 0.25,
-        //"kernelSize": 2
         "kernelSize": 1.5
       };
-
-      //if (g_info.background_brightness > 0.85) { bloom_opt.intensity = 0.25; }
 
       let bloomeffect = new POSTPROCESSING.BloomEffect(bloom_opt);
       let bloompass = new POSTPROCESSING.EffectPass(g_info.camera, bloomeffect);
@@ -1394,10 +943,8 @@ function threejs_init() {
     let use_fxaa = true;
     if (use_fxaa) {
       let fxaa_opt = {
-        //"subpixelQuality": 4,
-        //"samples": 4
-        "subpixelQuality": 1,
-        "samples": 1
+        "subpixelQuality": 4,
+        "samples": 4
       }
 
       let fxaaeffect = new POSTPROCESSING.FXAAEffect(fxaa_opt);
@@ -1423,15 +970,7 @@ function threejs_init() {
 
   function disposeArray() { this.array = null; }
 
-  //g_info.geometry = new THREE.BufferGeometry();
-
-  //const positions = [];
-  //const normals = [];
-  //const colors = [];
-
   const color = new THREE.Color();
-
-  //const n = 800, n2 = n / 2; // triangles spread in the cube
 
   const pA = new THREE.Vector3();
   const pB = new THREE.Vector3();
@@ -1470,31 +1009,8 @@ function threejs_init() {
       _rnd(0.95,1.05)
     ];
 
-      //DEBUG
-      let tx = (fxrand()-0.5)*200;
-      let ty = (fxrand()-0.5)*200;
-      let tz = (fxrand()-0.5)*200;
 
-
-    //let colors = [];
-    //let normals = [];
-    //let rect_colors = [];
-    //let positions = new Float32Array( tri_sh[idx].length );
     for ( let i = 0; i < tri_sh[idx].length; i += 9 ) {
-
-      /*
-      let ax = x + tri_sh[idx][i + 0]*d - d2;
-      let ay = y + tri_sh[idx][i + 1]*d - d2;
-      let az = z + tri_sh[idx][i + 2]*d - d2;
-
-      let bx = x + tri_sh[idx][i + 3]*d - d2;
-      let by = y + tri_sh[idx][i + 4]*d - d2;
-      let bz = z + tri_sh[idx][i + 5]*d - d2;
-
-      let cx = x + tri_sh[idx][i + 6]*d - d2;
-      let cy = y + tri_sh[idx][i + 7]*d - d2;
-      let cz = z + tri_sh[idx][i + 8]*d - d2;
-      */
 
       let ax = tri_sh[idx][i + 0]*d;
       let ay = tri_sh[idx][i + 1]*d;
@@ -1508,38 +1024,9 @@ function threejs_init() {
       let cy = tri_sh[idx][i + 7]*d;
       let cz = tri_sh[idx][i + 8]*d;
 
-      //DEBUG
-      /*
-      ax += tx;
-      ay += ty;
-      az += tz;
-
-      bx += tx;
-      by += ty;
-      bz += tz;
-
-      cx += tx;
-      cy += ty;
-      cz += tz;
-      */
-
       positions.push( ax, ay, az );
       positions.push( bx, by, bz );
       positions.push( cx, cy, cz );
-
-      /*
-      positions[i + 0] = ax;
-      positions[i + 1] = ay;
-      positions[i + 2] = az;
-
-      positions[i + 3] = bx;
-      positions[i + 4] = by;
-      positions[i + 5] = bz;
-
-      positions[i + 6] = cx;
-      positions[i + 7] = cy;
-      positions[i + 8] = cz;
-      */
 
       pA.set( ax, ay, az );
       pB.set( bx, by, bz );
@@ -1570,24 +1057,6 @@ function threejs_init() {
 
   g_info.positions = positions;
 
-  //DEBUG
-  /*
-  console.log("SINGLE TRI");
-  for (let i=0; i<g_info.data.tri[0].length; i+=9) {
-    console.log( g_info.data.tri[0][i+0], g_info.data.tri[0][i+1], g_info.data.tri[0][i+2] );
-    console.log( g_info.data.tri[0][i+3], g_info.data.tri[0][i+4], g_info.data.tri[0][i+5] );
-    console.log( g_info.data.tri[0][i+6], g_info.data.tri[0][i+7], g_info.data.tri[0][i+8] );
-    console.log("");
-  }
-  console.log("---");
-  for (let i=0; i<g_info.positions.length; i+=3) {
-    console.log(positions[i], positions[i+1], positions[i+2]);
-  }
-  console.log("---");
-  */
-
-
-
   let pp = new Float32Array( positions.length );
   for (let ii=0; ii<pp.length; ii++) {
     pp[ii] = positions[ii];
@@ -1597,17 +1066,7 @@ function threejs_init() {
 
   let geom = new THREE.BufferGeometry();
 
-  //geom.setAttribute( 'position', new THREE.BufferAttribute( positions, 3 ).onUpload( disposeArray )  );
-  //geom.setAttribute( 'position', new THREE.Float32BufferAttribute( positions, 3 ).onUpload( disposeArray )  );
-  //geom.setAttribute( 'position', new THREE.Float32BufferAttribute( positions, 3 ) );
-
   geom.setAttribute( 'position', new THREE.Float32BufferAttribute( positions, 3 ) );
-
-  //geom.setAttribute( 'pos', new THREE.Float32BufferAttribute( pp, 3 ).setUsage( THREE.DynamicDrawUsage ) );
-  //geom.setAttribute( 'color', new THREE.Float32BufferAttribute( colors, 4 ).onUpload( disposeArray ) );
-  //geom.setAttribute( 'color', new THREE.Float32BufferAttribute( rect_colors, 4 ).onUpload( disposeArray ) );
-  //geom.setAttribute( 'normal', new THREE.Float32BufferAttribute( normals, 3 ).onUpload( disposeArray ) );
-
   geom.setAttribute( 'color', new THREE.Float32BufferAttribute( rect_colors, 4 ) );
   geom.setAttribute( 'normal', new THREE.Float32BufferAttribute( normals, 3 ) );
 
@@ -1645,15 +1104,6 @@ function onWindowResize() {
 
   g_info.aspect = window.innerWidth / window.innerHeight;
 
-  /*
-  g_info.camera = new THREE.OrthographicCamera(-g_info.frustumSize * g_info.aspect/2,
-                                                g_info.frustumSize * g_info.aspect/2,
-                                                g_info.frustumSize/2,
-                                               -g_info.frustumSize/2,
-                                                -8000,
-                                                8000);
-  */
-
   g_info.camera.left    = -g_info.frustumSize * g_info.aspect/2;
   g_info.camera.right   =  g_info.frustumSize * g_info.aspect/2;
   g_info.camera.top     =  g_info.frustumSize /2;
@@ -1676,7 +1126,9 @@ function onWindowResize() {
 //---
 
 var g_fps = {
+  "display": false,
   "counter": 0,
+  "cp": -1,
   "prv": -1,
   "cur": -1,
   "dt": 0
@@ -1685,35 +1137,32 @@ var g_fps = {
 function animate() {
 
   g_fps.cur = Date.now();
-  if (g_fps.prv < 0) { g_fps.prv = g_fps.cur; }
+  if (g_fps.prv < 0) {
+    g_fps.prv = g_fps.cur;
+    g_fps.cp = g_fps.cur;
+  }
 
-  g_fps.counter++;
-  if ((g_fps.counter % 20)==0) {
-    g_fps.dt = g_fps.cur - g_fps.prv;
-    if (g_fps.dt>0) {
-      console.log("fps:", 1000.0/g_fps.dt);
+  if (g_fps.display) {
+    g_fps.counter++;
+    if ((g_fps.cur - g_fps.cp) > 1000) {
+      console.log("fps:", g_fps.counter * 1000 / (g_fps.cur - g_fps.cp));
+      g_fps.counter = 0;
+      g_fps.cp = g_fps.cur;
     }
   }
+
+  /*
+  if ((g_fps.counter % 20)==0) {
+    g_fps.dt = g_fps.cur - g_fps.prv;
+    if ((g_fps.display) && (g_fps.dt>0)) { console.log("fps:", 1000.0/g_fps.dt); }
+  }
+  */
   g_fps.prv = g_fps.cur;
 
   if (g_info.runtime_start < 0) {
     g_info.runtime_start = Date.now();
   }
   g_info.runtime_ms = Date.now() - g_info.runtime_start;
-
-  /*
-  let B = 3.5*g_info.frustumSize ;
-  //let BBOX = [ -B, B, -2*B, 2*B, -B, B ];
-  let BBOX = [ -B, B, -B, B, -B, B ];
-  let dB = [
-    BBOX[1] - BBOX[0],
-    BBOX[3] - BBOX[2],
-    BBOX[5] - BBOX[4]
-  ];
-
-  g_info.BBOX = BBOX;
-  g_info.dB = dB;
-  */
 
   let BBOX = g_info.BBOX;
   let dB = g_info.dB;
@@ -1737,23 +1186,16 @@ function animate() {
 
       if      (g_info.data.pos[3*ii+0] < BBOX[0]) { g_info.data.pos[3*ii+0] += dB[0]; }
       else if (g_info.data.pos[3*ii+0] > BBOX[1]) { g_info.data.pos[3*ii+0] -= dB[0]; }
-      //if      (g_info.data.pos[3*ii+0] < BBOX[0]) { g_info.data.pos[3*ii+0] += 2*B; }
-      //else if (g_info.data.pos[3*ii+0] > BBOX[1]) { g_info.data.pos[3*ii+0] -= 2*B; }
 
       else if (g_info.data.pos[3*ii+1] < BBOX[2]) { g_info.data.pos[3*ii+1] += dB[1]; }
       else if (g_info.data.pos[3*ii+1] > BBOX[3]) { g_info.data.pos[3*ii+1] -= dB[1]; }
-      //else if (g_info.data.pos[3*ii+1] < BBOX[2]) { g_info.data.pos[3*ii+1] += 2*B; }
-      //else if (g_info.data.pos[3*ii+1] > BBOX[3]) { g_info.data.pos[3*ii+1] -= 2*B; }
 
       else if (g_info.data.pos[3*ii+2] < BBOX[4]) { g_info.data.pos[3*ii+2] += dB[2]; }
       else if (g_info.data.pos[3*ii+2] > BBOX[5]) { g_info.data.pos[3*ii+2] -= dB[2]; }
-      //else if (g_info.data.pos[3*ii+2] < BBOX[4]) { g_info.data.pos[3*ii+2] += 2*B; }
-      //else if (g_info.data.pos[3*ii+2] > BBOX[5]) { g_info.data.pos[3*ii+2] -= 2*B; }
     }
 
     let xyzw = [0,0,0,0];
     let uu = [0,0,0,0];
-
 
     let pos =  g_info.mesh_a[0].geometry.attributes.position.array;
 
@@ -1799,15 +1241,8 @@ function animate() {
     }
 
     g_info.mesh_a[0].geometry.attributes.position.needsUpdate = true;
-
-    /*
-    g_info.mesh_a[0].geometry.attributes.normal.needsUpdate = true;
-    g_info.mesh_a[0].geometry.attributes.position.needsUpdate = true;
-    g_info.mesh_a[0].geometry.attributes.color.needsUpdate = true;
-    */
-
     g_info.mesh_a[0].geometry.computeBoundingBox();
-    g_info.mesh_a[0].geometry.computeBoundingSphere();
+    //g_info.mesh_a[0].geometry.computeBoundingSphere();
 
   }
 
@@ -1914,16 +1349,6 @@ function render() {
   view_prv = 0;
   view_nxt = 0;
 
-  /*
-  let _euler = false;
-  if (_euler) {
-    g_info.mesh.rotation.x = g_info.rotx + theta_x;
-    g_info.mesh.rotation.y = g_info.roty + theta_y;
-    g_info.mesh.rotation.z = g_info.rotz;
-  }
-  else {
-  */
-
     let mp0 = m4.xRotation(0);
     let mp1 = m4.yRotation(0);
 
@@ -2005,16 +1430,6 @@ function render() {
       g_info.mesh_a[ii].rotation.y = 0;
       g_info.mesh_a[ii].rotation.z = 0;
 
-      /*
-      //let _mt = m4._translation( g_info.data.pos[3*ii+0],  g_info.data.pos[3*ii+1],  g_info.data.pos[3*ii+2]);
-      let _mt = m4._translation( 0, 0, 0 );
-      let _mrx = m4.xRotation(g_info.data.rot[3*ii+0]);
-      let _mry = m4.yRotation(g_info.data.rot[3*ii+1]);
-      let _mrz = m4.zRotation(g_info.data.rot[3*ii+2]);
-      let _mlr = m4.multiply( _mrx, m4.multiply( _mry, _mrz ) );
-      let mr = m4.multiply( m4.multiply(_mlr, _mt ), _mr);
-      */
-
       m.set( mr[ 0], mr[ 1], mr[ 2], mr[ 3],
              mr[ 4], mr[ 5], mr[ 6], mr[ 7],
              mr[ 8], mr[ 9], mr[10], mr[11],
@@ -2034,10 +1449,6 @@ function render() {
 
     g_info.light[0].position.set( _x, _y, _z ).normalize();
   }
-
-
-  //g_info.mesh_a[0].geometry.attributes.pos.needsUpdate = true;
-  //g_info.mesh_a[0].geometry.attributes.position.needsUpdate = true;
 
   if ("composer" in g_info) {
     g_info.composer.render( g_info.scene, g_info.camera );
@@ -2081,7 +1492,6 @@ function init_param() {
   for (let ii=0; ii<g_info.direction_idx.length; ii++) {
     dir_descr.push( g_info.direction[ g_info.direction_idx[ii] ] );
   }
-  //g_info.features["Axies"] = g_info.direction.join(",");
   g_info.features["Axies"] = dir_descr.join(",");
 
   // directoinal
@@ -2108,9 +1518,6 @@ function init_param() {
 
   // cuboid alignment
   //
-  //g_info.box_align = ((fxrand() < 0.5) ? true : false);
-  //g_info.features["Box Align"] = ( g_info.box_align ? "True" : "False" );
-
   g_info.box_align = _irnd(3);
   g_info.features["Box Align"] = g_info.box_align;
 
@@ -2156,17 +1563,14 @@ function init_param() {
   //
   if (g_info.n_core < 2) {
     if (g_info.n_core == 0) {
-      g_info.n_rect = _arnd( [10000, 20000, 30000, 40000] );
-      //g_info.n_rect = _arnd( [8000, 10000, 20000 ]);
+      g_info.n_rect = _arnd( [10000, 20000, 30000, 40000, 50000] );
     }
     else {
-      g_info.n_rect = _arnd( [10000, 20000, 30000, 40000 ] );
-      //g_info.n_rect = _arnd( [6000, 8000, 10000, 20000]);
+      g_info.n_rect = _arnd( [10000, 20000, 30000, 40000, 50000 ] );
     }
   }
   else {
-    g_info.n_rect = _arnd( [10000, 20000, 30000, 40000] );
-    //g_info.n_rect = _arnd( [8000, 10000, 20000] );
+    g_info.n_rect = _arnd( [10000, 20000, 30000, 40000, 50000] );
   }
 
   //DEBUG
@@ -2174,33 +1578,23 @@ function init_param() {
 
   g_info.features["Rectangular Cuboid Count"] = g_info.n_rect;
 
-  // palette choice
+  // random palette
   //
-  //g_info.palette_idx = _irnd( g_info.palette.length );
-  //let pidx = g_info.palette_idx;
-
-  //g_info.features["Palette"] = g_info.palette[pidx].name;
-
-  //DEBUG
   g_info.palette_idx = g_info.palette.length;
   g_info.palette.push( g_info.random_palette );
 
   // distribution type
   //
-
+  /*
   let dist_name = [ "Exponential (#0)", "Exponential (#1)", "Exponential (#2)", "Power Law (#0)", "Power Law (#1)" ];
   let dist_id = [0, 9, 10, 1, 2] ;
-
   let idx = _irnd( dist_id.length );
-
-  //DEBUG
-  //idx = 4;
-
   g_info.distribution_type = dist_id[idx];
-
   g_info.features["Distribution"] = dist_name[idx];
+  */
 
-  //DEBUG
+  // ...
+  //
   g_info.distribution_type = _irnd(11);
   g_info.features["Distribution"] = g_info.distribution_type;
 
@@ -2209,8 +1603,6 @@ function init_param() {
   //
   g_info.speed_factor  = _rnd(1/2048, 1/512); //0.00075,
   g_info.speed_factor  = _rnd(1/(2048*8), 1/(512*8)); //0.00075,
-
-  //g_info.features["Speed Factor"] = g_info.speed_factor;
 
   window.$fxhashFeatures = g_info.features;
 }
@@ -2282,15 +1674,6 @@ function init_random_palette() {
   let chroma1 = fxrand()*(cmax-cmin) + cmin;
   let chroma2 = fxrand()*(cmax-cmin) + cmin;
 
-  /*
-  l0 *= 120;
-  l1 *= 120;
-  l2 *= 120;
-  chroma0 *= 120;
-  chroma1 *= 120;
-  chroma2 *= 120;
-  */
-
   l0 *= 130;
   l1 *= 130;
   l2 *= 130;
@@ -2299,20 +1682,12 @@ function init_random_palette() {
   chroma1 *= 130;
   chroma2 *= 130;
 
-  //console.log("0:", l0, chroma0, 360*theta0);
-  //console.log("1:", l1, chroma1, 360*theta1);
-  //console.log("2:", l2, chroma2, 360*theta2);
-
   let c0 = chroma.lch(l0, chroma0, 360*theta0).hex();
   let c1 = chroma.lch(l1, chroma1, 360*theta1).hex();
   let c2 = chroma.lch(l2, chroma2, 360*theta2).hex();
 
   let pal = [ c0, c1, c2 ];
 
-  //let u = _irnd(256);
-  //let bghex = _rgb2hex( u, u, u );
-
-  //let bg_choice = [ "#101010", "#070707", "#080808", "#777777", "#fefefe" ]
   let bg_choice = g_info.background_color;
   let bghex = _arnd(bg_choice);
 
