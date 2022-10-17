@@ -50,7 +50,15 @@ Tutorials
 
 * [Generative Terrain](https://www.generativehut.com/post/generative-terrain-nfts-for-fxhash-in-three-js) ([gh](https://github.com/danielpetho/terrestrial-fxhash-tutorial))
 * [Watercolor](https://tylerxhobbs.com/essays/2017/a-generative-approach-to-simulating-watercolor-paints)
-* 
+
+Artists
+---
+
+
+### Libre/Free Artists
+
+* (3dlyfer](https://alifeinlimbo.xyz/) [objkt](https://objkt.com/profile/alifeinlimbo/created)
+
 
 Ideas
 ---

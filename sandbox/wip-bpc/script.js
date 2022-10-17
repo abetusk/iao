@@ -181,6 +181,30 @@ var g_info = {
   },
 
   "tile_weight_profile" : {
+    "0": { "tile": { "|" : 200 } },
+    "1": { "tile": { "+" : 200 } },
+    "2": { "tile": { "T" : 200 } },
+    "3": { "tile": { "r" : 200 } },
+    "4": { "tile": { "^" : 200 } },
+
+    "5": { "tile": { "|": 200, "+": 200 } },
+    "6": { "tile": { "|": 200, "T": 200 } },
+    "7": { "tile": { "|": 200, "r": 200 } },
+    "8": { "tile": { "|": 200, "^": 200 } },
+
+    "9": { "tile": { "+": 200, "T": 200 } },
+    "10": { "tile": { "+": 200, "r": 200 } },
+    "11": { "tile": { "+": 200, "^": 200 } },
+
+    "12": { "tile": { "T": 200, "r": 200 } },
+    "13": { "tile": { "T": 200, "^": 200 } },
+
+    "14": { "tile": { "r": 200, "^": 200 } },
+
+    "15": { "tile": {} }
+  },
+
+  "_tile_weight_profile" : {
     "0": { "tile": { "|" : 100 } },
     "1": { "tile": { "+" : 100 } },
     "2": { "tile": { "T" : 100 } },
@@ -1946,7 +1970,7 @@ function build_tile_library( _endp_lib ) {
     // matrix check
     //
     let xx = numeric.dot( _U, _SVt );
-    console.log(">>>", _cmp_mat(xx, _F), _U.length, _U[0].length, _SVt.length, _SVt[0].length );
+    //console.log(">>>", _cmp_mat(xx, _F), _U.length, _U[0].length, _SVt.length, _SVt[0].length );
 
     _adj_info[ dv_key ] = {
       "F": _F,
@@ -1988,17 +2012,12 @@ function _cmp_mat(a,b, _eps) {
 function filter_steeple() {
   let _eps = 1/(1024*1024);
 
-  //DEBUG
-  console.log("FILTERING STEEPLE");
-
   let admissible_nei  = g_template.admissible_nei;
   let admissible_pos  = g_template.admissible_pos;
   let oppo            = g_template.oppo;
   let raw_lib         = g_template.raw_lib;
 
   let delete_list = [];
-
-  console.log("???", admissible_nei, admissible_pos, oppo, raw_lib);
 
   for (let key_anchor in admissible_nei) {
     if (key_anchor.charAt(0) != '^') { continue; }
@@ -2011,9 +2030,6 @@ function filter_steeple() {
       anc_p_repr[2] += endp[ii][2];
     }
 
-
-    console.log("filter_steeple.cp0");
-
     for (let posidx=0; posidx<admissible_pos.length; posidx++) {
       let dv_anc_key = admissible_pos[posidx].dv_key;
       let dv_nei_key = oppo[dv_anc_key];
@@ -2021,13 +2037,9 @@ function filter_steeple() {
       let dv_anc = admissible_pos[posidx].dv;
       let dv_nei = [ -dv_anc[0], -dv_anc[1], -dv_anc[2] ];
 
-      console.log("filter_steeple.cp1");
-
       for (let key_nei in admissible_nei[key_anchor][dv_anc_key]) {
         if (key_nei.charAt(0) != '^') { continue; }
         if (!admissible_nei[key_anchor][dv_anc_key][key_nei].conn) { continue; }
-
-        console.log("filter_steeple.cp2");
 
         let nei_p_repr = [0,0,0];
         let endp = raw_lib[key_nei];
@@ -2051,8 +2063,6 @@ function filter_steeple() {
 
         let de = Math.abs(nei_v[0] - anc_v[0] + nei_v[1] - anc_v[1] + nei_v[2] - anc_v[2]);
 
-        console.log("steeple_cmp:", key_anchor, dv_anc_key, key_nei, "de:", de);
-
         if (de < _eps) {
           delete_list.push( [ key_anchor, key_nei, dv_anc_key ] );
           delete_list.push( [ key_anchor, dv_anc_key, key_nei ] );
@@ -2065,8 +2075,6 @@ function filter_steeple() {
     let a = delete_list[ii][0];
     let b = delete_list[ii][1];
     let c = delete_list[ii][2];
-
-    console.log("deleting:", a, b, c);
 
     delete admissible_nei[a][b][c];
   }
@@ -2207,6 +2215,7 @@ function decorate_pgr_cgroup(pgr, x,y,z, cgroup, lvl) {
   }
 
 }
+
 function decorate_pgr(pgr) {
 
   let admissible_nei = g_template.admissible_nei;
@@ -5777,10 +5786,16 @@ function init_param() {
   ];
 
   //DEBUG
-  g_info.grid_size = [10,10,10];
+  //g_info.grid_size = [10,10,10];
   //g_info.grid_size = [8,8,4];
   //g_info.grid_size = [10,10,6];
   //g_info.grid_size = [5,5,5];
+  //g_info.grid_size = [8,4,40];
+  //g_info.grid_size = [10,10,8];
+  //g_info.grid_size = [12,12,6];
+  //g_info.grid_size = [20,4,6];
+  //g_info.grid_size = [10,4,6];
+  g_info.grid_size = [32,4,4];
 
   g_info.features["Grid Size"] = g_info.grid_size.toString();
 
@@ -5946,10 +5961,11 @@ function pgr_filter(pgr, filt) {
 
 function init() {
 
+  init_param();
+
   init_template();
   build_tile_library( g_template.endpoint );
 
-  init_param();
   threejs_init();
 
 
@@ -6048,6 +6064,8 @@ function init() {
   let dim = g_info.grid_size;
   let bpc = new BeliefPropagationCollapse( g_template, null, dim[0], dim[1], dim[2]);
   //let bpc = new BeliefPropagationCollapse( g_template, null, 6,6,6 );
+
+  g_info["bpc"] = bpc;
 
   bpc.simple_realize();
   bpc.debug_print();
