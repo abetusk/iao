@@ -13,12 +13,21 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import vertexShader from './s3/shader.vert';
 import fragmentShader from './s3/shader.frag';
 
+//import perlin from "./perlin.js";
+import perlin from "./FastNoiseLite.js";
+
 function _rnd() {
   return Math.random();
 }
 
 var g_info = {
 };
+
+if (typeof window !== "undefined") {
+  window.perlin = perlin;
+  window.info = g_info;
+}
+
 
 function render() {
 
@@ -34,6 +43,8 @@ function render() {
 function init() {
   let sz = 4096;
   sz = 1024;
+
+  console.log("init");
 
   const canvas = document.getElementById("three-canvas");
   const renderer = new  THREE.WebGLRenderer({canvas: canvas, antialias: true});
@@ -131,6 +142,111 @@ function init() {
 }
 
 function create_texture() {
+  let W = 512;
+  let H = 512;
+
+  let canvas = document.createElement('canvas');
+  canvas.width = W;
+  canvas.height = W;
+
+  let n = Math.floor(Math.sqrt(W*H));
+  n = Math.floor(W*H/10);
+
+  let ctx = canvas.getContext('2d');
+  let x, y;
+
+  let p = [0,0];
+
+  ctx.fillStyle = '#ccc';
+  ctx.fillRect(0,0,W,H);
+
+  let dx = 5,
+      dy = 5,
+      ds = (0.65*dx)/2,
+      jitxy = 1.75;
+
+  let ix,iy,
+      nx = Math.floor(W/dx)+2,
+      ny = Math.floor(W/dx)+2;
+
+  /*
+  ctx.fillStyle = '#bbb';
+  for (ix=-1; ix<nx; ix++) {
+    for (iy=-1; iy<ny; iy++) {
+      let ux = (dx*ix) + (_rnd()-0.5)*jitxy;
+      let uy = (dy*iy) + (_rnd()-0.5)*jitxy;
+      if ((iy%2)==0) { ux += dx/2; }
+      ctx.beginPath();
+      ctx.arc(ux, uy, ds, 0, 2*Math.PI, false);
+      ctx.fill();
+    }
+  }
+  */
+
+  //ctx.clearRect(0,0,W,H);
+
+  let perl = new perlin();
+  perl.SetNoiseType( "Perlin" );
+
+  //let octave = [ 16, 8, 4, 2, 1, 0.5, 0.25 ];
+  let octave =  [ 32, 16,   8,  4,  2,    1 ];
+  let A =       [ 1, 1,    1,  1,  1,    1 ];
+
+  //let A =       [ 1, 1/2, 1/4, 1/8, 1/16, 1/32 ];
+  //let octave =  [ 32, 16,   8,  4,  2,    1 ];
+  //let A =       [ 1, 1/2, 1/3, 1/4, 1/5 ];
+  //let A =       [ 1, 1,    1,  1,  1,    1 ];
+
+  //let octave =  [ 32, 16,   8,  4, 2, 1 ];
+  //let A =       [ 1/32, 1/16, 1/8, 1/4, 1/2, 1 ]
+
+  //let octave =  [   1, 0.5, 0.25];
+  //let A =       [  1, 1, 1 ]
+
+  let smear_x = 1, smear_y = 4;
+
+  for (let x=0; x<W; x++) {
+    for (let y=0; y<H; y++) {
+      let z = 0;
+      let R = 0;
+      for (let ii=0; ii<octave.length; ii++) {
+        R += A[ii];
+        z += A[ii]*(perl.GetNoise( octave[ii]*x*smear_x, octave[ii]*y*smear_y )+1)/2;
+      }
+      z /= R;
+      //z /= 4;
+      //z += 0.5;
+
+      let c = Math.floor(((z + 1.0)/2)*255.0);
+      ctx.fillStyle = "rgb(" + c.toString() + "," + c.toString() + "," + c.toString() + ")";
+      ctx.fillRect(x,y,1,1);
+    }
+  }
+
+  /*
+  ctx.fillStyle = '#444';
+  for (let ii=0; ii<n; ii++) {
+    x = _rnd()*W;
+    y = _rnd()*H;
+
+    p[0] = x/W;
+    p[1] = y/H;
+
+    //let sz = 8*(1-p[1]);
+    let sz = 8*p[1];
+    ctx.fillRect(x, y, sz,sz);
+  }
+  */
+
+  /// fill ctx
+  //
+
+  let texture = new THREE.CanvasTexture( canvas );
+  return texture;
+
+}
+
+function create_texture0() {
   let W = 512;
   let H = 512;
 

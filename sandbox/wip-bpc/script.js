@@ -5795,7 +5795,9 @@ function init_param() {
   //g_info.grid_size = [12,12,6];
   //g_info.grid_size = [20,4,6];
   //g_info.grid_size = [10,4,6];
-  g_info.grid_size = [32,4,4];
+  //g_info.grid_size = [32,4,4];
+  //g_info.grid_size = [12,5,3];
+  g_info.grid_size = [10,6,4];
 
   g_info.features["Grid Size"] = g_info.grid_size.toString();
 
@@ -5844,6 +5846,9 @@ function init_param() {
 
   let width_pd = weight2pd( g_info.tile_width_denom_weight );
   let width_d = rnd_cdf(width_pd.cdf);
+
+  width_d = 3;
+
   g_info.tile_width = 1 / width_d;
   //g_info.features["Tile Width"] = g_info.tile_width;
   g_info.features["Tile Width"] = "1/" + width_d.toString();

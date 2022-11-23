@@ -794,6 +794,10 @@ BeliefPropagationCollapse.prototype.cell_belief = function(cell_info) {
   let d = 0;
   let n_dup = 0;
 
+  // experimental
+  //
+  let max_belief_a = [];
+
   for (z=0; z<this.FMZ; z++) {
     for (y=0; y<this.FMY; y++) {
       for (x=0; x<this.FMX; x++) {
@@ -814,11 +818,7 @@ BeliefPropagationCollapse.prototype.cell_belief = function(cell_info) {
 
             idx = this.idx(t, x, y, z, b_val, sidx);
             S *= this.pdf[b_val] * this.buf[idx];
-
-            //console.log("  cell_belief:", x,y,z, this.tile_name[b_val], this.dxyz[sidx].join(":"), "pdf:", this.pdf[b_val], "mu:", this.buf[idx]);
           }
-
-          //console.log("cell_belief:", x,y,z, this.tile_name[b_val], "S:", S);
 
           // There's an element of randomness involved with the initial setup of mu
           // which allows for some variation of choice if the beliefs are similar
@@ -831,11 +831,25 @@ BeliefPropagationCollapse.prototype.cell_belief = function(cell_info) {
             cell_info[3] = b_idx;
             cell_info[4] = b_val;
             n_dup = 1;
+            max_belief_a = [ [x,y,z,b_idx,b_val] ];
           }
+          else if (Math.abs(S - max_belief) <= _eps) {
+            max_belief_a.push( [x,y,z,b_idx,b_val] );
+          }
+
         }
 
       }
     }
+  }
+
+  if (max_belief>=0) {
+    let max_idx = Math.floor( Math.random() * max_belief_a.length );
+    cell_info[0] = max_belief_a[max_idx][0];
+    cell_info[1] = max_belief_a[max_idx][1];
+    cell_info[2] = max_belief_a[max_idx][2];
+    cell_info[3] = max_belief_a[max_idx][3];
+    cell_info[4] = max_belief_a[max_idx][4];
   }
 
   return max_belief;
@@ -2569,8 +2583,8 @@ if (typeof module !== "undefined") {
     //console.log("---");
     //test3();
     //console.log("---");
-    //test4();
-    //console.log("---");
+    test4();
+    console.log("---");
     //test5();
     //console.log("---");
 
@@ -2590,7 +2604,7 @@ if (typeof module !== "undefined") {
     //test13();
     //test13(3,3,3);
 
-    test14(10,10,6); // 1m43s
+    //test14(10,10,6); // 1m43s
     //test14(10,10,10); // 1m43s
     //test14(11,11,11); // 3m10s
     //test14(12,12,12); // 5m56s
