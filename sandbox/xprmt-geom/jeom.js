@@ -126,13 +126,16 @@ function jeom_extrude(pgn, info) {
   let c = ((typeof info.c === "undefined") ? [0,0,0] : info.c);
   let h = ((typeof info.h === "undefined") ? 1.0 : info.h);
   let f_h = ((typeof info.f_h === "undefined") ? (function() { return 1.0; }) : info.f_h);
+  let use_delaunay = ((typeof info.delaunay === "undefined") ? false : info.delaunay);
 
   let base_tri = [];
   let top_tri = [];
 
   let _z = -h/2;
 
-  let use_delaunay = false;
+  let trail_idx = 0;
+
+  //let use_delaunay = false;
 
   if (use_delaunay) {
 
@@ -160,9 +163,9 @@ function jeom_extrude(pgn, info) {
   }
   else {
 
-    for (let ii=0; ii<(pgn.length-1); ii++) {
+    for (let ii=0; ii<(pgn.length-trail_idx); ii++) {
       let idx0 = ii;
-      let idx1 = (ii+1)%(pgn.length-1);
+      let idx1 = (ii+1)%(pgn.length-trail_idx);
       base_tri.push( 0, 0, _z );
       base_tri.push( pgn[idx0].X, pgn[idx0].Y, _z);
       base_tri.push( pgn[idx1].X, pgn[idx1].Y, _z);
@@ -180,9 +183,9 @@ function jeom_extrude(pgn, info) {
     let _z_nxt = ((ii+1)/n) - 0.5;
     let _z_prv = (ii/n) - 0.5;
 
-    for (let idx=0; idx<(pgn.length-1); idx++) {
+    for (let idx=0; idx<(pgn.length-trail_idx); idx++) {
       let idx_prv = idx;
-      let idx_nxt = (idx+1)%(pgn.length-1);
+      let idx_nxt = (idx+1)%(pgn.length-trail_idx);
       tri.push(pgn[idx_prv].X,  pgn[idx_prv].Y, _z_nxt);
       tri.push(pgn[idx_nxt].X,  pgn[idx_nxt].Y, _z_prv);
       tri.push(pgn[idx_prv].X,  pgn[idx_prv].Y, _z_prv);
@@ -208,33 +211,6 @@ function jeom_extrude(pgn, info) {
 
   return tri;
 }
-
-//DEBG
-//
-
-let _n = 16, _r = 0.25;
-let _test_pgn = [];
-for (let ii=0; ii<_n; ii++) {
-  let theta = 2.0*Math.PI*ii/_n;
-  let f = Math.random()/4 + 0.8;
-  _test_pgn.push({ "X": f*Math.cos(theta)*_r, "Y": -f*Math.sin(theta)*_r });
-}
-_test_pgn.push({"X": 0, "Y":0.0});
-
-//for (let ii=0; ii<_test_pgn.length; ii++) {
-//  console.log(_test_pgn[ii].X, _test_pgn[ii].Y);
-//}
-
-let _debug_tri = jeom_extrude(_test_pgn);
-
-jeom_stl_print(_debug_tri);
-
-
-process.exit();
-
-
-//
-//DEBG
 
 
 function jeom_flatten() {
@@ -799,56 +775,95 @@ function jeom_cross(info) {
 // flat part on z,
 // lies in x-y plane
 //
-function jeom_pillar_middle(info) {
-  return [];
-}
+function jeom_pillar(info) {
+  let default_info = { "slice": 16, "r": 0.25, "rf": (function() { return 1.0; }) };
+  info = ((typeof info === "undefined") ? default_info : info);
+  let _n = ((typeof info.slice === "undefined") ? 16 : info.slice);
+  let _r = ((typeof info.r === "undefined") ? 0.25 : info.r);
+  let _rf = ((typeof info.rf === "undefined") ? (function() { return 1.0; }) : info.rf);
 
-function __jeom_pillar_middle(info) {
-  let _r = 0.25;
-  let _slice = 32;
-  let _stack = 8;
-  let c = CSG.cylinder({
-    "center": [0,0,0],
-    //"start": [0, -0.5, 0],
-    //"end": [0, 0.5, 0],
-    "start": [0, 0, -0.5 ],
-    "end": [0, 0, 0.5 ],
-    "radius": _r,
-    "slices": _slice,
-    "stacks": _stack
-  });
-
-  let _mini_r = 1.0/16.0;
-  let _n = 1;
+  let _base = [];
   for (let ii=0; ii<_n; ii++) {
-    let _c = _r*Math.cos( Math.PI*2.0*ii/_n );
-    let _s = _r*Math.sin( Math.PI*2.0*ii/_n );
-
-    let subc = CSG.cylinder({
-      "center": [_c, _s, 0],
-      "start": [0, 0,  -0.55 ],
-      "end": [0, 0, 0.55 ],
-      "radius": _mini_r,
-      "slices": 16,
-      "stacks": 8
-    });
-
-    //c = subc.subtract(c);
-    c = c.subtract(subc);
-
+    let theta = 2.0*Math.PI*ii/_n;
+    //let f = Math.random()/4 + 0.8;
+    f = _rf(ii);
+    _base.push({ "X": f*Math.cos(theta)*_r, "Y": -f*Math.sin(theta)*_r });
   }
 
-  return jeom_csg2tri(c);
+  let _tri = jeom_extrude(_base);
+  return _tri;
 }
 
 
-function jeom_pillar_center(info) {
-  info = ((typeof info === "undefined") ? jeom_info : info);
-  let _w = info.w;
-  let _h = info.h;
+//----
+//----
+//----
 
 
+function jeom_mov(tri, v) {
+  for (let i=0; i<tri.length; i+=3) {
+    tri[i+0] += v[0];
+    tri[i+1] += v[1];
+    tri[i+2] += v[2];
+  }
+}
 
+function jeom_scale(tri, v) {
+  for (let i=0; i<tri.length; i+=3) {
+    tri[i+0] *= v[0];
+    tri[i+1] *= v[1];
+    tri[i+2] *= v[2];
+  }
+}
+
+// https://en.wikipedia.org/wiki/Rotation_matrix#Rotation_matrix_from_axis_and_angle
+//
+function jeom_rot(tri, v, theta) {
+  let c = Math.cos(theta), s = Math.sin(theta);
+  let ic = 1-c, is = 1-s;
+  let uxx = v[0]*v[0],
+      uyy = v[1]*v[1],
+      uzz = v[2]*v[2],
+      uxy = v[0]*v[1],
+      uxz = v[0]*v[2],
+      uyz = v[1]*v[2],
+      ux = v[0],
+      uy = v[1],
+      uz = v[2];
+
+  let uyx = uxy,
+      uzx = uxz,
+      uzy = uyz;
+
+  let m_r = [
+    [ c + uxx*ic,       uxy*ic - uz*s,  uxz*ic + uy*s ],
+    [ uyx*ic + uz*s,    c + uyy*ic,     uyz*ic - ux*s ],
+    [ uzx*ic - uy*s,    uzy*ic + ux*s,  c + uzz*ic ]
+  ];
+
+  let tx=0, ty=0, tz=0;
+  for (let i=0; i<tri.length; i+=3) {
+    tx = m_r[0][0]*tri[i+0] + m_r[0][1]*tri[i+1] + m_r[0][2]*tri[i+2];
+    ty = m_r[1][0]*tri[i+0] + m_r[1][1]*tri[i+1] + m_r[1][2]*tri[i+2];
+    tz = m_r[2][0]*tri[i+0] + m_r[2][1]*tri[i+1] + m_r[2][2]*tri[i+2];
+
+    tri[i+0] = tx;
+    tri[i+1] = ty;
+    tri[i+2] = tz;
+  }
+
+}
+
+function jeom_rotx(tri, theta) { jeom_rot(tri, [1,0,0], theta); }
+function jeom_roty(tri, theta) { jeom_rot(tri, [0,1,0], theta); }
+function jeom_rotz(tri, theta) { jeom_rot(tri, [0,0,1], theta); }
+
+function jeom_dup(tri) {
+  let v = Array(tri.length);
+  for (let i=0; i<tri.length; i++) {
+    v[i] = tri[i];
+  }
+  return v;
 }
 
 function jeom_csg2tri(_csg) {
@@ -857,12 +872,7 @@ function jeom_csg2tri(_csg) {
 
   let pgn = _csg.polygons;
 
-  //console.log(_csg);
-  //console.log(pgn);
-
   for (let ii=0; ii<pgn.length; ii++) {
-
-    //console.log(">>>>", ii, pgn[ii].vertices.length);
 
     let vertices = pgn[ii].vertices;
     let pos0 = vertices[0].pos;
@@ -946,7 +956,20 @@ function jeom_stl_print(tri) {
   }
   console.log("endsolid");
 
+}
 
+function jeom_off_print(tri) {
+
+  console.log("OFF");
+  console.log(tri.length/3, tri.length/9, 0);
+  for (let i=0; i<tri.length; i+=3) {
+    console.log(tri[i], tri[i+1], tri[i+2]);
+  }
+  for (let i=0; i<tri.length; i+=9) {
+    console.log(3, i+0, i+1, i+2);
+    console.log(3, i+3, i+4, i+5);
+    console.log(3, i+6, i+7, i+8);
+  }
 }
 
 
@@ -955,9 +978,34 @@ function jeom_stl_print(tri) {
 //jeom_stl_print(jeom_cross());
 
 function _main() {
-  let pm = jeom_pillar_middle();
+  let pm = jeom_pillar();
+
+  //jeom_rotx(pm, Math.PI/2.0);
   jeom_stl_print(pm);
+  //jeom_off_print(pm);
+
+}
+
+
+
+function _debug() {
+  let _n = 16, _r = 0.25;
+  let _test_pgn = [];
+  for (let ii=0; ii<_n; ii++) {
+    let theta = 2.0*Math.PI*ii/_n;
+    let f = Math.random()/4 + 0.8;
+    _test_pgn.push({ "X": f*Math.cos(theta)*_r, "Y": -f*Math.sin(theta)*_r });
+  }
+  //_test_pgn.push({"X": 0, "Y":0.0});
+
+  //for (let ii=0; ii<_test_pgn.length; ii++) {
+  //  console.log(_test_pgn[ii].X, _test_pgn[ii].Y);
+  //}
+
+  let _debug_tri = jeom_extrude(_test_pgn);
+  jeom_stl_print(_debug_tri);
 
 }
 
 _main();
+//_debug();
