@@ -2,8 +2,145 @@ var numeric = require("./numeric.js");
 //var _CSG = require("./csg.js");
 //var CSG = _CSG.CSG;
 
-var Delaunay = require("./delaunay.js");
-var ClipperLib = require("./clipper.js");
+//var Delaunay = require("./delaunay.js");
+//var ClipperLib = require("./clipper.js");
+
+//-----------
+//-----------
+
+let _VERSION = "0.1.0";
+
+var getopt = require("posix-getopt");
+
+function show_version(fp) {
+  fp.write("version: " + _VERSION + "\n");
+}
+
+let shape_choice = [
+  "cube",
+  "pillar",
+  "sphere",
+  "cross",
+  "road",
+  "stair",
+  "bend",
+  "tee"
+];
+
+function show_help(fp) {
+  show_version(fp);
+  fp.write("\n");
+  fp.write("usage:\n");
+  fp.write("\n");
+  fp.write("    jeom [-h] [-v] [options]\n");
+  fp.write("\n");
+  fp.write("  [-s shape]      shape (" + shape_choice.join(",") + ")\n");
+  fp.write("  [-X a]          rotate around x axis by angle a (radians)\n");
+  fp.write("  [-Y a]          rotate around y axis by angle a (radians)\n");
+  fp.write("  [-Z a]          rotate around z axis by angle a (radians)\n");
+  fp.write("  [-x dx]         translate by x\n");
+  fp.write("  [-y dy]         translate by y\n");
+  fp.write("  [-z dz]         translate by z\n");
+  fp.write("  [-S s]          scale by s\n");
+  fp.write("  [-o fn]         output file (default stdout)\n");
+  fp.write("  [-O fmt]        output format (obj,stl,gnuplot,off)\n");
+  fp.write("  [-v]            show version\n");
+  fp.write("  [-h]            show help (this screen)\n");
+  fp.write("\n");
+  fp.write("\n");
+}
+
+let jeom_opt = {
+  "ofp": process.stdout,
+  "outfmt": "gnuplot",
+  "outfn": "-",
+  "stitch": false,
+  "shape": "",
+  "scale": 1.0,
+  "dx": 0.0,
+  "dy": 0.0,
+  "dz": 0.0,
+  "rx": 0.0,
+  "ry": 0.0,
+  "rz": 0.0
+};
+
+let long_opt = [
+  "X", ":(rx)",
+  "Y", ":(ry)",
+  "Z", ":(rz)",
+  "x", ":(dx)",
+  "y", ":(dy)",
+  "z", ":(dz)",
+  "s", ":(shape)",
+  "S", ":(scale)",
+  "o", ":(output)",
+  "O", ":(output-format)"
+];
+
+
+let parser = new getopt.BasicParser("vhD" + long_opt.join(""), process.argv);
+while ((opt = parser.getopt()) !== undefined) {
+  switch(opt.option) {
+    case 'v':
+      show_version(process.stdout);
+      process.exit(0);
+      break;
+    case 'h':
+      show_help(process.stdout);
+      process.exit(0);
+      break;
+
+    case 's':
+      jeom_opt.shape = opt.optarg;
+      break;
+
+    case 'D':
+      jeom_opt.stitch = true;
+      break;
+
+    case 'x':
+      jeom_opt.dx = parseFloat(opt.optarg);
+      break;
+    case 'y':
+      jeom_opt.dy = parseFloat(opt.optarg);
+      break;
+    case 'z':
+      jeom_opt.dz = parseFloat(opt.optarg);
+      break;
+
+    case 'X':
+      jeom_opt.rx = parseFloat(opt.optarg);
+      break;
+    case 'Y':
+      jeom_opt.ry = parseFloat(opt.optarg);
+      break;
+    case 'Z':
+      jeom_opt.rz = parseFloat(opt.optarg);
+      break;
+
+    case 'S':
+      jeom_opt.scale = parseFloat(opt.optarg);
+      break;
+
+    case 'o':
+      jeom_opt.outfn = opt.optarg;
+      if (jeom_opt.outfn == "-") { jeom_opt.ofp = process.stdout; }
+      break;
+    case 'O':
+      jeom_opt.outfmt = opt.optarg;
+      break;
+
+    default:
+      show_help(process.stderr);
+      process.exit(-1);
+      break;
+  }
+}
+
+//-----------
+//-----------
+
 
 var jeom_info = {
   "w": 1/4,
@@ -885,16 +1022,16 @@ function jeom_csg2tri(_csg) {
     tri.push(pos2.x, pos2.y, pos2.z);
 
     if (_debug) {
-    console.log(ii, "pos0:", pos0, vertices[0].normal);
-    console.log(ii, "pos1:", pos1, vertices[1].normal);
-    console.log(ii, "pos2:", pos2, vertices[2].normal);
+      console.log(ii, "pos0:", pos0, vertices[0].normal);
+      console.log(ii, "pos1:", pos1, vertices[1].normal);
+      console.log(ii, "pos2:", pos2, vertices[2].normal);
     }
 
     if (vertices.length > 3) {
       let pos3 = vertices[3].pos;
 
       if (_debug) {
-    console.log(ii, "pos3:", pos3, vertices[3].normal);
+        console.log(ii, "pos3:", pos3, vertices[3].normal);
       }
 
       tri.push(pos2.x, pos2.y, pos2.z);
@@ -903,20 +1040,21 @@ function jeom_csg2tri(_csg) {
     }
 
     if (_debug) {
-    console.log("");
+      console.log("");
     }
 
   }
   return tri;
 }
 
-function jeom_stl_print(tri) {
+function jeom_stl_print(fp, tri) {
 
   let x = 0, y = 0, z = 0;
   let d = 1;
   let _eps = (1.0/(1024.0*1024.0));
 
-  console.log("solid");
+  //console.log("solid");
+  fp.write("solid\n");
   for (let i=0; i<tri.length; i+=9) {
     let ax = x + tri[i + 0]*d ;
     let ay = y + tri[i + 1]*d ;
@@ -943,50 +1081,212 @@ function jeom_stl_print(tri) {
       _n = numeric.mul(_n, 1.0/_nn);
     }
 
+    //console.log("facet normal", _n[0], _n[1], _n[2]);
+    //console.log("  outer loop");
+    //console.log("    vertex", ax, ay, az);
+    //console.log("    vertex", bx, by, bz);
+    //console.log("    vertex", cx, cy, cz);
+    //console.log("  endloop");
+    //console.log("endfacet");
 
-    console.log("facet normal", _n[0], _n[1], _n[2]);
-    console.log("  outer loop");
-    console.log("    vertex", ax, ay, az);
-    console.log("    vertex", bx, by, bz);
-    console.log("    vertex", cx, cy, cz);
-    console.log("  endloop");
-    console.log("endfacet");
-
+    fp.write("facet normal " +  _n[0].toString() + " " +  _n[1].toString() + " " + _n[2].toString() + "\n");
+    fp.write("  outer loop\n");
+    fp.write("    vertex " + ax.toString() + " " +  ay.toString() + " " +  az.toString() + "\n" );
+    fp.write("    vertex " + bx.toString() + " " +  by.toString() + " " +  bz.toString() + "\n" );
+    fp.write("    vertex " + cx.toString() + " " +  cy.toString() + " " +  cz.toString() + "\n" );
+    fp.write("  endloop\n");
+    fp.write("endfacet\n");
 
   }
-  console.log("endsolid");
+  //console.log("endsolid");
+  fp.write("endsolid\n");
 
 }
 
-function jeom_off_print(tri) {
+function jeom_gnuplot_print(fp, tri) {
 
-  console.log("OFF");
-  console.log(tri.length/3, tri.length/9, 0);
-  for (let i=0; i<tri.length; i+=3) {
-    console.log(tri[i], tri[i+1], tri[i+2]);
-  }
   for (let i=0; i<tri.length; i+=9) {
-    console.log(3, i+0, i+1, i+2);
-    console.log(3, i+3, i+4, i+5);
-    console.log(3, i+6, i+7, i+8);
+    fp.write(tri[i+0].toString() + " " + tri[i+1].toString() + " " + tri[i+2].toString() + "\n");
+    fp.write(tri[i+3].toString() + " " + tri[i+4].toString() + " " + tri[i+5].toString() + "\n");
+    fp.write(tri[i+6].toString() + " " + tri[i+7].toString() + " " + tri[i+8].toString() + "\n");
+    fp.write("\n\n");
+  }
+
+}
+
+function jeom_off_print(fp, tri, face) {
+  let implicit_face = ((typeof face === "undefined") ? true : false );
+
+  //console.log("OFF");
+  fp.write("OFF\n");
+
+  //console.log(tri.length/3, tri.length/9, 0);
+  if (implicit_face) {
+    fp.write( (tri.length/3).toString() + " " + (tri.length/9).toString() + " 0\n");
+  }
+  else {
+    fp.write( (tri.length/3).toString() + " " + (face.length/3).toString() + " 0\n");
+  }
+
+  for (let i=0; i<tri.length; i+=3) {
+    //console.log(tri[i], tri[i+1], tri[i+2]);
+    fp.write(tri[i].toString() + " " + tri[i+1].toString() + " " + tri[i+2].toString() + "\n");
+  }
+
+  if (implicit_face) {
+    for (let i=0; i<tri.length; i+=9) {
+      //console.log(3, i+0, i+1, i+2);
+      //console.log(3, i+3, i+4, i+5);
+      //console.log(3, i+6, i+7, i+8);
+
+      fp.write("3 " + (i+0).toString() + " " + (i+1).toString() + " " + (i+2).toString() + "\n");
+      fp.write("3 " + (i+3).toString() + " " + (i+4).toString() + " " + (i+5).toString() + "\n");
+      fp.write("3 " + (i+6).toString() + " " + (i+7).toString() + " " + (i+8).toString() + "\n");
+    }
+  }
+  else {
+    for (let i=0; i<face.length; i+=3) {
+      fp.write("3 " + face[i+0].toString() + " " + face[i+1].toString() + " " + face[i+2].toString() + "\n");
+    }
   }
 }
 
+function jeom_obj_print(fp, tri) {
+  for (let i=0; i<tri.length; i+=3) {
 
-//jeom_stl_print(jeom_stair());
-//jeom_stl_print(jeom_tee());
-//jeom_stl_print(jeom_cross());
+    //console.log("v", tri[i+0], tri[i+1], tri[i+2]);
+    fp.write("v " + tri[i+0].toString() + " " + tri[i+1].toString() + " " + tri[i+2].toString() + "\n");
+  }
 
-function _main() {
-  let pm = jeom_pillar();
+  let v0=0, v1=0, v2=0;
+  for (let i=0; i<tri.length; i+=9) {
+    v0 = Math.floor((i+0)/3);
+    v1 = Math.floor((i+3)/3);
+    v2 = Math.floor((i+6)/3);
 
-  //jeom_rotx(pm, Math.PI/2.0);
-  jeom_stl_print(pm);
-  //jeom_off_print(pm);
-
+    //console.log("f", v0+1, v1+1, v2+1);
+    fp.write("f " + (v0+1).toString() + " "  + (v1+1).toString() + " " + (v2+1).toString() + "\n" );
+  }
 }
 
+function _vkey(v, _eps) {
+  _eps = ((typeof _eps === "undefined") ? (1/(1024*1024)) : _eps);
+  let N = Math.floor(1/_eps);
+  let ix = Math.floor(N*v[0]);
+  let iy = Math.floor(N*v[1]);
+  let iz = Math.floor(N*v[2]);
+  let key = ix.toString() + ":" + iy.toString() + ":" + iz.toString();
+  return key;
+}
 
+function jeom_stitch(tri, _eps) {
+  _eps = ((typeof _eps === "undefined") ? (1/(1024*1024)) : _eps);
+
+  //let _h = {};
+  //let _repr = {};
+
+  let vtx_uniq = [];
+  let vtx_rep_idx = {};
+
+  let vtx = [];
+
+  let N = Math.floor(1/_eps);
+  for (let idx=0; idx<tri.length; idx+=3) {
+    /*
+    let ix = Math.floor(N*tri[idx+0]);
+    let iy = Math.floor(N*tri[idx+1]);
+    let iz = Math.floor(N*tri[idx+2]);
+    let key = ix.toString() + ":" + iy.toString() + ":" + iz.toString();
+    */
+    let key = _vkey([ tri[idx+0], tri[idx+1], tri[idx+2] ], _eps);
+
+    if (!(key in vtx_rep_idx)) {
+      //_h[key] = [];
+      //_repr[key] = idx;
+
+      let uniq_idx = vtx_uniq.length;
+
+      vtx.push( tri[idx+0], tri[idx+1], tri[idx+2] );
+
+      vtx_uniq.push( { "name": key, "p": [ tri[idx+0], tri[idx+1], tri[idx+2] ] } );
+      vtx_rep_idx[key] = uniq_idx;
+    }
+    //_h[key].push( Math.floor(idx/3) );
+
+  }
+
+  let face = [];
+
+  for (let idx=0; idx<tri.length; idx+=9) {
+    let v0 = [ tri[idx+0], tri[idx+1], tri[idx+2] ];
+    let v1 = [ tri[idx+3], tri[idx+4], tri[idx+5] ];
+    let v2 = [ tri[idx+6], tri[idx+7], tri[idx+8] ];
+
+    let k0 = _vkey(v0);
+    let k1 = _vkey(v1);
+    let k2 = _vkey(v2);
+
+    let i0 = vtx_rep_idx[k0];
+    let i1 = vtx_rep_idx[k1];
+    let i2 = vtx_rep_idx[k2];
+
+    face.push( i0, i1, i2 );
+
+  }
+
+  return { "v": vtx, "f": face };
+}
+
+function _main(_opt) {
+
+  let _geom = [];
+
+  if (_opt.shape == "pillar") {
+    _geom = jeom_pillar();
+  }
+  else if (_opt.shape == "cross") {
+    _geom = jeom_cross();
+  }
+  else if (_opt.shape == "road") {
+    _geom = jeom_road();
+  }
+  else if (_opt.shape == "tee") {
+    _geom = jeom_tee();
+  }
+  else if (_opt.shape == "bend") {
+    _geom = jeom_bend();
+  }
+  else if (_opt.shape == "stair") {
+    _geom = jeom_stair();
+  }
+
+
+  jeom_scale(_geom, [ _opt.scale, _opt.scale, _opt.scale ] );
+  jeom_mov(_geom, [ _opt.dx, _opt.dy, _opt.dz ] );
+
+  jeom_rotx(_geom, _opt.rx);
+  jeom_roty(_geom, _opt.ry);
+  jeom_rotz(_geom, _opt.rz);
+
+  if      (_opt.outfmt == "stl") { jeom_stl_print(_opt.ofp, _geom); }
+  else if (_opt.outfmt == "off") {
+    if (_opt.stitch) {
+
+      let vf = jeom_stitch(_geom);
+      jeom_off_print(_opt.ofp, vf.v, vf.f);
+
+    }
+    else {
+      jeom_off_print(_opt.ofp, _geom);
+    }
+  }
+  else if (_opt.outfmt == "obj") { jeom_obj_print(_opt.ofp, _geom); }
+  else if (_opt.outfmt == "gnuplot") { jeom_gnuplot_print(_opt.ofp, _geom); }
+  else {
+    jeom_gnuplot_print(_opt.ofp, _geom);
+  }
+
+}
 
 function _debug() {
   let _n = 16, _r = 0.25;
@@ -1007,5 +1307,5 @@ function _debug() {
 
 }
 
-_main();
+_main(jeom_opt);
 //_debug();
