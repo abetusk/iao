@@ -24,7 +24,12 @@ let shape_choice = [
   "road",
   "stair",
   "bend",
-  "tee"
+  "tee",
+
+  //wip
+  "sphere",
+  "torus"
+
 ];
 
 function show_help(fp) {
@@ -44,6 +49,7 @@ function show_help(fp) {
   fp.write("  [-S s]          scale by s\n");
   fp.write("  [-o fn]         output file (default stdout)\n");
   fp.write("  [-O fmt]        output format (obj,stl,gnuplot,off)\n");
+  fp.write("  [-D]            stitch flag\n");
   fp.write("  [-v]            show version\n");
   fp.write("  [-h]            show help (this screen)\n");
   fp.write("\n");
@@ -80,6 +86,12 @@ let long_opt = [
 
 
 let parser = new getopt.BasicParser("vhD" + long_opt.join(""), process.argv);
+
+if (parser.optind() == process.argv.length) {
+  show_help(process.stderr);
+  process.exit(-1);
+}
+
 while ((opt = parser.getopt()) !== undefined) {
   switch(opt.option) {
     case 'v':
@@ -248,12 +260,71 @@ function _3rect_zy(w,h,x,y,z,o) {
   return tri_a;
 }
 
+// info.n  - number of segments
+// info.v  - rotation vector (currently unimplemented)
+// info.d  - direction vector (currently unimplemented)
+//
+// pgn is in 'clipper' format:
+//
+//   [ {"X": 0.0, "Y": 0.2}, {"X":0.25, "Y": 0.22}, ... , {"X":-1, "Y":0.2} ]
+//
+//
+// pgn is assumed to by X-Z plane.
+// That is, X -> x, Y -> z.
+//
+function jeom_extrude_angle(pgn, info) {
+  info = ((typeof info === "undefined") ? {} : info);
+  let seg_n = ((typeof info.n === "undefined") ? 16 : info.n);
+  let rot_v = ((typeof info.v === "undefined") ? [0,0,1/seg_n] : info.v);
+  let dir_v = ((typeof info.d === "undefined") ? [0,0,1/seg_n] : info.d);
+
+  let tri = [];
+  for (let seg=0; seg<seg_n; seg++) {
+    let a_prv = 2.0*Math.PI*(seg/seg_n);
+    let a_nxt = 2.0*Math.PI*((seg+1)/seg_n);
+
+    for (let pgn_idx=0; pgn_idx<pgn.length; pgn_idx++) {
+      let idx_prv = pgn_idx;
+      let idx_nxt = ((pgn_idx+1)%pgn.length);
+
+      let pnt0 = [ pgn[idx_prv].X, 0.0, pgn[idx_prv].Y ];
+      let pnt1 = [ pgn[idx_nxt].X, 0.0, pgn[idx_nxt].Y ];
+
+
+      let pnt2 = [ pnt1[0], pnt1[1], pnt1[2] ];
+      let pnt3 = [ pnt0[0], pnt0[1], pnt0[2] ];
+
+      jeom_rotz(pnt0, a_prv);
+      jeom_rotz(pnt1, a_prv);
+
+      jeom_rotz(pnt2, a_nxt);
+      jeom_rotz(pnt3, a_nxt);
+
+      tri.push( pnt2[0], pnt2[1], pnt2[2] );
+      tri.push( pnt1[0], pnt1[1], pnt1[2] );
+      tri.push( pnt0[0], pnt0[1], pnt0[2] );
+
+      tri.push( pnt0[0], pnt0[1], pnt0[2] );
+      tri.push( pnt3[0], pnt3[1], pnt3[2] );
+      tri.push( pnt2[0], pnt2[1], pnt2[2] );
+
+    }
+  }
+
+
+  return tri;
+}
+
 // info.v   - vector
 // info.a   - how much to rotate
 // info.c   - center [0,0,0]
 // info.n   - number of stacks (default 1)
 // info.h   - height
-// info.
+//
+// pgn is in 'clipper' format:
+//
+//   [ {"X": 0.0, "Y": 0.2}, {"X":0.25, "Y": 0.22}, ... , {"X":-1, "Y":0.2} ]
+//
 //
 function jeom_extrude(pgn, info) {
   info = ((typeof info === "undefined") ? {} : info);
@@ -361,6 +432,115 @@ function _cross(a,b) {
   ];
 
   return numeric.dot(ax,b);
+}
+
+function jeom_sphere(info) {
+  info = ((typeof info === "undefined") ? jeom_info : info);
+  let slice_zdir = ((typeof info.slice === "undefined") ? 8 : info.slice_v );
+  let slice_a = ((typeof info.slice === "undefined") ? 8 : info.slice );
+  let r = ((typeof info.r === "undefined") ? 0.5 : info.r );
+  let rx = ((typeof info.rx === "undefined") ? r : info.rx );
+  let ry = ((typeof info.ry === "undefined") ? r : info.ry );
+  let rz = ((typeof info.rz === "undefined") ? r : info.rz );
+
+
+  let n = slice_zdir,
+      m = slice_a;
+
+  // theta x-y
+  // phi up z
+  //
+
+  let vert = [ ];
+
+  for (let i=0; i<n; i++) {
+    let v_prv = (i/(n));
+    let v_nxt = (((i+1)%(n+1))/n);
+    for (let j=0; j<m; j++) {
+      let u_prv = (j/(m));
+      let u_nxt = (((j+1)%(m+1))/m);
+
+      let theta = 2*Math.PI*u_prv;
+      let phi = Math.acos(1 - (2*v_prv));
+      let x = rx*Math.sin(phi)*Math.cos(theta);
+      let y = ry*Math.sin(phi)*Math.sin(theta);
+      let z = rz*Math.cos(phi);
+
+      let p0 = [x,y,z];
+
+      theta = 2*Math.PI*u_nxt;
+      phi = Math.acos(1 - (2*v_prv));
+      x = rx*Math.sin(phi)*Math.cos(theta);
+      y = ry*Math.sin(phi)*Math.sin(theta);
+      z = rz*Math.cos(phi);
+
+      let p1 = [x,y,z];
+
+      theta = 2*Math.PI*u_nxt;
+      phi = Math.acos(1 - (2*v_nxt));
+      x = rx*Math.sin(phi)*Math.cos(theta);
+      y = ry*Math.sin(phi)*Math.sin(theta);
+      z = rz*Math.cos(phi);
+
+      let p2 = [x,y,z];
+
+      theta = 2*Math.PI*u_prv;
+      phi = Math.acos(1 - (2*v_nxt));
+      x = rx*Math.sin(phi)*Math.cos(theta);
+      y = ry*Math.sin(phi)*Math.sin(theta);
+      z = rz*Math.cos(phi);
+
+      let p3 = [x,y,z];
+
+      if ((i>0) && (j>0)) {
+
+        //if ( (i<(n-1))  ) {
+
+        //if ((i<(n-1)) || (j<(m-1))) { 
+          vert.push(p2[0], p2[1], p2[2]);
+          vert.push(p1[0], p1[1], p1[2]);
+          vert.push(p0[0], p0[1], p0[2]);
+        //}
+
+      }
+
+      //if ((i<(n-1)) || (j<(m-1))) { 
+        vert.push(p0[0], p0[1], p0[2]);
+        vert.push(p3[0], p3[1], p3[2]);
+        vert.push(p2[0], p2[1], p2[2]);
+      //}
+
+    }
+  }
+
+  return vert;
+}
+
+// info.n_i  - number of points in circle
+// info.n    - number of segments
+// info.r_i  - 'inner' radius of torus tire
+// info.r_o  - 'outer' radius of where the circle center
+//
+function jeom_torus(info) {
+  info = ((typeof info === "undefined") ? jeom_info : info);
+  let n = ((typeof info.n_i === "undefined") ? 8 : info.n_i);
+  let r = ((typeof info.r_i === "undefined") ? 0.25 : info.r_i);
+  let dx = ((typeof info.r_o === "undefined") ? 0.75  : info.r_o);
+
+  let dy = 0;
+
+  let pgn = [];
+  for (let i=0; i<n; i++) {
+    let a = 2.0*Math.PI*(i/n);
+    let x = r*Math.cos(a) + dx;
+    let y = r*Math.sin(a) + dy;
+
+    pgn.push( { "X": x, "Y": y } );
+  }
+
+  let tri = jeom_extrude_angle(pgn);
+  return tri;
+
 }
 
 // flat part on z,
@@ -1258,6 +1438,12 @@ function _main(_opt) {
   }
   else if (_opt.shape == "stair") {
     _geom = jeom_stair();
+  }
+  else if (_opt.shape == "sphere") {
+    _geom = jeom_sphere();
+  }
+  else if (_opt.shape == "torus") {
+    _geom = jeom_torus();
   }
 
 
