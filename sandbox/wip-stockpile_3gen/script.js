@@ -9,7 +9,6 @@
 
 // requires jsclipper
 
-
 var g_info = {
   "PROJECT" : "I Stockpile Dreams With Tragedies",
   "VERSION" : "2.0.0",
@@ -218,6 +217,211 @@ var g_info = {
   "f_hist":[]
 
 };
+
+//-----
+// palette generation
+
+
+//---
+// https://stackoverflow.com/a/17946089
+// CC-BY-SA MightyPork (https://stackoverflow.com/users/2180189/mightypork)
+//
+function _rgba2int(red,green,blue,alpha) {
+  var r = red & 0xFF;
+  var g = green & 0xFF;
+  var b = blue & 0xFF;
+  var a = alpha & 0xFF;
+
+  var rgb = (r << 24) + (g << 16) + (b << 8) + (a);
+
+  return rgb;
+}
+//
+//---
+
+
+function _li(x, sx, ex, a, b) {
+  x = (x - sx) / (ex - sx);
+  return x*(b-a) + a;
+}
+
+function lpnorm(x,y,p) {
+  return Math.pow( Math.pow(Math.abs(x),p) + Math.pow(Math.abs(y),p), 1.0/p );
+}
+function hsl_wheel(x, y, _chrom) {
+  let _hue = Math.atan2(y,x) + Math.PI;
+  _hue = (_hue * 360) / (Math.PI*2);
+
+  let _light = 1.0 - Math.sqrt( x*x + y*y );
+  if (_light < 0) { _light = 0; }
+  if (_light > 1) { _light = 1; }
+
+  let c = chroma.hsl( _hue, _chrom, _light);
+  let rgb = c.rgb();
+  //let hx = jimp.rgbaToInt( rgb[0], rgb[1], rgb[2], 255 );
+  let hx = _rgba2int( rgb[0], rgb[1], rgb[2], 255 );
+
+  let _hex_s = _rgb2hex( rgb[0], rgb[1], rgb[2] );
+
+  return { "hsl": [ _hue, _chrom, _light ], "rgb": rgb, "i" : hx, "hex": _hex_s };
+}
+
+function lch_wheel(x, y, _chrom) {
+  let _hue = Math.atan2(y,x) + Math.PI;
+  _hue = (_hue * 360) / (Math.PI*2);
+
+  let _light = 1.0 - Math.sqrt( x*x + y*y );
+  if (_light < 0) { _light = 0; }
+  if (_light > 1) { _light = 1; }
+
+  _light = _li(_light, 0, 1, -100, 150);
+  _chrom = _li(_chrom, 0, 1, 0, 150);
+
+  //let c = chroma.hsl( _hue, _chrom, _light);
+  //let rgb = c.rgb();
+
+  let c = chroma.lch( _light, _chrom, _hue );
+  let rgb = c.rgb();
+  //let hx = jimp.rgbaToInt( rgb[0], rgb[1], rgb[2], 255 );
+  let hx = _rgba2int( rgb[0], rgb[1], rgb[2], 255 );
+
+  let _hex_s = _rgb2hex( rgb[0], rgb[1], rgb[2] );
+
+  return { "lch": [ _light, _chrom, _hue ], "rgb": rgb, "i" : hx, "hex": _hex_s };
+}
+
+// again trying to do random palettes
+//
+// * chose a random point in a circle
+// * find the direction to center, get a length
+//   of the line to draw
+// * perturb the direction by a (small) random
+//   angle
+// * if it's bezier, find a control point to the left
+//   or right
+// * subdivide the line into n points
+//
+function palette_pal(_opt) {
+  //_chrom = ((typeof _chrom === "undefined") ? 0.5 : _chrom);
+
+  let _default_opt = {
+    "f": "lch",
+    "chroma" : 1,
+    "li" : "bezier",
+    "len": -1,
+    "n": 5
+  };
+
+  _opt = ((typeof _opt === "undefined") ? _default_opt : _opt);
+  for (var _key in _default_opt) {
+    if (!(_key in _opt)) {
+      _opt[_key] = _default_opt[_key];
+    }
+  }
+  console.log(_opt);
+
+  let _chrom = _opt.chroma;
+
+  let _eps = 1.0 / (1024*1024);
+
+  let _rtheta=0, _l0=0,
+    p0 = [0,0], v=[0,0],
+    d = 0;
+
+  do {
+
+
+    _rtheta = Math.PI * _rnd(-1, 1);
+    //let _l0 = _rnd(0.25,1.25);
+    _l0 = _rnd(0.45,0.55);
+
+    //let p0 = [ _rnd(-1,0), _rnd(-1,1) ];
+    p0 = [ Math.cos(_rtheta)*_l0, Math.sin(_rtheta)*_l0 ];
+    v = [ -p0[0], -p0[1] ];
+    d = Math.sqrt((v[0]*v[0]) + (v[1]*v[1]));
+  } while (Math.abs(d) < _eps);
+
+    /*
+  while (Math.abs(d) < _eps) {
+    p0 = [ _rnd(-1,0), _rnd(-1,0) ];
+    v = [ -p0[0], -p0[1] ];
+    d = Math.sqrt((v[0]*v[0]) + (v[1]*v[1]));
+  }
+  */
+
+
+  v[0] = v[0]/d;
+  v[1] = v[1]/d;
+  // nudge v in some direction
+  //
+  let tv = [v[0], v[1]];
+  let _va = Math.PI * _rnd(-0.125, 0.125);
+
+  v = [
+     Math.cos(_va)*v[0] + Math.sin(_va)*v[1],
+    -Math.sin(_va)*v[0] + Math.cos(_va)*v[1],
+  ];
+
+
+  //let l = _rnd(0.125,0.65) + d;
+  //let l = _rnd(0.45,0.55) + d;
+  let _e1 = 1 - d - 0.05;
+  let _s1 = _e1/2;
+  let l = _opt.len;
+  if (l<0) { l = _rnd(_s1,_e1) + d; }
+
+  let p_end = [ p0[0] + v[0]*l, p0[1] + v[1]*l ];
+
+  let pal = [];
+  let n = _opt.n;
+
+  console.log("p0:", p0);
+  console.log("v:", v, "(orig:", tv, ")");
+  console.log("p_end:", p_end, "{", _s1, _e1, "}");
+  console.log("d:", d);
+  console.log("l:", l, "(", d, "+ [", _s1, _e1, "])");
+  console.log("_va:", _va);
+
+  let dp = [ p_end[0] - p0[0], p_end[1] - p0[1] ];
+  let dp_l = _rnd(-1/5,1/5);
+  let mp = [ p0[0] + (dp[0]/2), p0[1] + (dp[1]/2) ];
+  let pc = [ mp[0] - (dp_l*dp[1]), mp[1] + (dp_l*dp[0]) ];
+
+
+  let bi = new Bezier(p0[0],p0[1], pc[0],pc[1], p_end[0],p_end[1]);
+
+  for (let i=0; i<n; i++) {
+    let x = 0, y = 0;
+
+
+    if (_opt.li == "linear") {
+      x = _li( i/(n-1), 0, 1, p0[0], p_end[0] );
+      y = _li( i/(n-1), 0, 1, p0[1], p_end[1] );
+    }
+    else if (_opt.li == "bezier") {
+      let _xy = bi.get( i/(n-1) );
+      x = _xy.x;
+      y = _xy.y;
+    }
+
+    console.log("i:", i, x, y);
+
+    if (_opt.f == "hsl") {
+      pal.push( hsl_wheel(x, y, _chrom) );
+    }
+    else {
+      pal.push( lch_wheel(x, y, _chrom) );
+    }
+  }
+
+  return pal;
+}
+
+
+
+
+//-----
+
 
 // choose from a 'probability distribution'
 // array.
@@ -2139,6 +2343,16 @@ function init_param() {
   //
   g_info.palette_choice = _arnd( g_info.palette );
 
+  //EXPERIMENTAL
+  let _cur_pal = {
+    "name":"custom",
+    "colors":[]
+  };
+  let _pal = palette_pal();
+  for (let ii=0; ii<_pal.length; ii++) { _cur_pal.colors.push( _pal[ii].hex ); }
+  g_info.palette_choice = _cur_pal;
+  g_info._pal = _pal;
+
   g_info.features["Shape Library"] = f_name.join(", ");
   g_info.features["Color Palette"] = g_info.palette_choice.name;
 
@@ -2253,6 +2467,10 @@ function init_fin() {
         let dx = (fxrand()/12)*_winsz;
         let dy = (fxrand()/12)*_winsz;
 
+        fwin = 1.0;
+        dx = 0;
+        dy = 0;
+
         let opt = {
           "f_hist": g_info.f_hist,
           "x": _x + dx,
@@ -2315,6 +2533,9 @@ function init_fin() {
       let dx = (fxrand()/12)*_winsz;
       let dy = (fxrand()/12)*_winsz;
 
+      fwin = 1.0;
+      dx = 0;
+      dy = 0;
 
       let opt = {
         "f_hist": g_info.f_hist,
@@ -2368,6 +2589,10 @@ function init_fin() {
       let dx = (fxrand()/12)*_winsz;
       let dy = (fxrand()/12)*_winsz;
 
+      fwin = 1.0;
+      dx = 0;
+      dy = 0;
+
       let opt = {
         "f_hist": g_info.f_hist,
         "x": _x + dx,
@@ -2418,6 +2643,10 @@ function init_fin() {
         let fwin = (fxrand() + 0.5);
         let dx = (fxrand()/12)*_winsz;
         let dy = (fxrand()/12)*_winsz;
+
+        fwin = 1.0;
+        dx = 0;
+        dy = 0;
 
         let opt = {
           "f_hist": g_info.f_hist,

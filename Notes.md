@@ -57,7 +57,7 @@ Artists
 
 ### Libre/Free Artists
 
-* (3dlyfer](https://alifeinlimbo.xyz/) [objkt](https://objkt.com/profile/alifeinlimbo/created)
+* [3dlyfer](https://alifeinlimbo.xyz/) [objkt](https://objkt.com/profile/alifeinlimbo/created)
 
 
 Ideas

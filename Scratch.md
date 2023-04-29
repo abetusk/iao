@@ -1,6 +1,14 @@
 Scratch Space
 ===
 
+Ideas
+---
+
+* boids in 3 space with topological neighbors
+
+Misc
+---
+
 
 General scratch space for notes particular to this project.
 
