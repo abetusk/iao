@@ -21,9 +21,10 @@ function drand(a,b) {
   return (RND()*(b-a)) + a;
 }
 
-function irnd(a) {
+function irnd(a,b) {
   a = ((typeof a === "undefined") ? 2 : a);
-  return Math.floor( drand() * a );
+  return Math.floor( drand(a,b) );
+  //return Math.floor( drand() * a );
 }
 
 function downloadSVG() {
@@ -32,8 +33,7 @@ function downloadSVG() {
   saveAs(b, "mstp.svg");
 }
 
-
-function grid_r(g, x,y, r, lvl, max_lvl, prob_prof) {
+function _grid_r(g, x,y, r, lvl, max_lvl, prob_prof) {
   max_lvl = ((typeof max_lvl === "undefined") ? 10 : max_lvl);
   if (lvl >= max_lvl) { return; }
 
@@ -71,7 +71,7 @@ function grid_r(g, x,y, r, lvl, max_lvl, prob_prof) {
   else if (p < prob_prof[1]) {
 
     for (let i=0; i<4; i++) {
-      grid_r(g, x + dxy[i][0], y + dxy[i][1], r/2, lvl+1, max_lvl, prob_prof);
+      _grid_r(g, x + dxy[i][0], y + dxy[i][1], r/2, lvl+1, max_lvl, prob_prof);
     }
   }
 
@@ -83,7 +83,7 @@ function grid_r(g, x,y, r, lvl, max_lvl, prob_prof) {
     g.push( [x,y,r,irnd(7),lvl] );
     if (p < prob_prof[2]) {
       for (let i=0; i<4; i++) {
-        grid_r(g, x + dxy[i][0], y + dxy[i][1], r/2, lvl+1, max_lvl, prob_prof);
+        _grid_r(g, x + dxy[i][0], y + dxy[i][1], r/2, lvl+1, max_lvl, prob_prof);
       }
     }
 
@@ -91,6 +91,63 @@ function grid_r(g, x,y, r, lvl, max_lvl, prob_prof) {
 
   return g;
 }
+
+function grid_r(g, x,y, r, lvl, opt) {
+  let max_lvl = opt.max_level;
+  let prob_prof = opt.prob_profile;
+
+  if (lvl >= max_lvl) { return; }
+  let two = g_data.two;
+
+  let lvl_parity = lvl%2;
+
+  let r2 = r/2;
+
+  let dxy = [
+    [ r2, -r2 ],
+    [-r2, -r2 ],
+    [-r2,  r2 ],
+    [ r2,  r2 ]
+  ];
+
+  let n = prob_prof.length;
+  let pat_a = opt.pattern_choice;
+
+  let p = drand();
+  if (lvl == 0) { p = drand(prob_prof[0], prob_prof[n-2]);  }
+
+
+  // terminate
+  //
+  if      (p < prob_prof[0]) {
+  }
+
+  // subdivide
+  //
+  else if (p < prob_prof[1]) {
+
+    for (let i=0; i<4; i++) {
+      grid_r(g, x + dxy[i][0], y + dxy[i][1], r/2, lvl+1, opt);
+    }
+  }
+
+  // display tile
+  //
+  else {
+
+    //g.push( [x,y,r,irnd(),lvl] );
+    g.push( [x,y,r,irnd(pat_a.length),lvl] );
+    if (p < prob_prof[2]) {
+      for (let i=0; i<4; i++) {
+        grid_r(g, x + dxy[i][0], y + dxy[i][1], r/2, lvl+1, opt);
+      }
+    }
+
+  }
+
+  return g;
+}
+
 
 function pat0(xy,r,pat_idx, c0, c1) {
   pat_idx = ((typeof pat_idx === "undefined") ? irnd() : pat_idx);
@@ -220,6 +277,7 @@ function pat0(xy,r,pat_idx, c0, c1) {
 
 }
 
+
 function init_twojs(canvas_id) {
   canvas_id = ((typeof canvas_id === "undefined") ? CANVAS_ID : canvas_id);
   let two = new Two({"fitted":true});
@@ -268,6 +326,16 @@ function rand_pal_colorsjs() {
   return [ COLORS[col_idx0].hex, COLORS[col_idx1].hex, col_idx0, col_idx1 ];
 }
 
+function fisher_yates_shuffle(a) {
+  var t, n = a.length;
+  for (var i=0; i<(n-1); i++) {
+    var idx = i + Math.floor(Math.random()*(n-i));
+    t = a[i];
+    a[i] = a[idx];
+    a[idx] = t;
+  }
+}
+
 function web_init() {
   let two = init_twojs();
   g_data["two"] = two;
@@ -287,10 +355,25 @@ function web_init() {
 
   let cxy = [400,400];
   let R = 200;
-  let max_lvl = 7;
+  let max_lvl = 6;
+
+  let all_pat = [0,1,2,3,4,5,6];
+  fisher_yates_shuffle(all_pat);
+  let _m = irnd(all_pat.length-2);
+  for (let i=0; i<_m; i++) { all_pat.pop(); }
+
+  let opt = {
+    "max_level": max_lvl,
+    //"pattern_choice": [0,1,2,3,4,5,6],
+    //"pattern_choice": [0,1],
+    "pattern_choice": all_pat,
+    "prob_profile": p_prof
+  };
+
+  g_data["opt"] = opt;
 
   let g = [];
-  grid_r(g, cxy[0], cxy[1], R, 0, max_lvl, p_prof );
+  grid_r(g, cxy[0], cxy[1], R, 0, opt );
 
   g.sort( mstp_sort );
 
