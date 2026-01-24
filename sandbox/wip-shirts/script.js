@@ -18,31 +18,34 @@ var g_data = {
     "checkerboard.red" : [20,20, 1],
     "checkerboard.blue" : [20,20, 1],
     "%" : [20,20, 1],
-    "/" : [10,10, 1],
-    "\\" : [10,10, 1],
+    "/" : [10,10, 1.25],
+    "\\" : [10,10, 1.25],
     "o" : [10,10, 1],
     ":" : [10,10, 1],
-    "z" : [10,10,1],
-    "Z" : [10,10,1],
+    "z" : [10,10,1.5],
+    "Z" : [10,10,1.5],
     "|" : [20,20,0.5],
     "x" : [20,20,0.5],
 
     "~" : [52,26, 0.5],
     "v" : [80,80, 0.25],
     "*" : [180,180, 0.25],
-    "^" : [60,60,1.0],
+    "^" : [60,60,1.75],
     "$" : [100,20,0.5],
-    "c" : [56,28,0.5],
-    "p" : [40,40, 1],
-    "?" : [24,40,0.5],
-    "#" : [44,12,0.5],
+    "c" : [56,28,0.75],
+    "p" : [40,40, 1.5],
+    "?" : [24,40,1.0],
+    "#" : [44,12,1.0],
     "X" : [32,64,0.5],
     "T" : [152,152,0.25],
     "F" : [260,260,0.125],
     "@" : [80,105,0.5],
     "A" : [88,24,0.5],
     "m" : [80,88,0.25],
-    "R" : [84,84,0.25]
+    "R" : [84,84,0.25],
+    "h" : [40,40,0.35],
+    "S" : [10, 10, 1],
+    "s" : [10, 10, 1]
   },
 
   "f_pat_info": [
@@ -72,7 +75,10 @@ var g_data = {
     [ pat_zigzag0,            "z" ],
     [ pat_zigzag1,            "Z" ],
     [ pat_grid0,              "|" ],
-    [ pat_grid1,              "x" ]
+    [ pat_grid1,              "x" ],
+    [ pat_houndstooth,        "h" ],
+    [ pat_stripe0,            "S" ],
+    [ pat_stripe1,            "s" ]
   ],
 
   "f_pat": [
@@ -102,7 +108,10 @@ var g_data = {
     pat_zigzag0,
     pat_zigzag1,
     pat_grid0,
-    pat_grid1
+    pat_grid1,
+    pat_houndstooth,
+    pat_stripe0,
+    pat_stripe1
   ],
 
   "svg_pattern" : []
@@ -222,6 +231,7 @@ function pat_diag0(dx,dy, w,h, s,lw, mt_idx) {
     add.line(0,-h,2*w,h).stroke({"color":"#000", "linecap":"square", "width":lw});
     add.line(-w,0,w,2*h).stroke({"color":"#000", "linecap":"square", "width":lw});
   });
+  p.scale(s);
   p.translate(dx,dy);
 
   document.getElementById("pattern_defs").appendChild( p.node );
@@ -267,6 +277,7 @@ function pat_circ0(dx,dy,w,h,s,lw, mt_idx) {
     add.circle(w/3).center(w,h);
     add.circle(w/3).center(w,0);
   });
+  p.scale(s);
   p.translate(dx,dy);
 
   document.getElementById("pattern_defs").appendChild( p.node );
@@ -291,6 +302,7 @@ function pat_circ1(dx,dy,w,h,s,lw, mt_idx) {
     add.circle(w/3).center(w,h);
     add.circle(w/3).center(w,0);
   });
+  p.scale(s);
   p.translate(dx,dy);
 
   document.getElementById("pattern_defs").appendChild( p.node );
@@ -837,36 +849,78 @@ function pat_grid1(dx,dy,w,h,s,lw, mt_idx) {
   return p.url();;
 }
 
-
-
-/*
-function pat0(dx,dy) {
+// houndstooth
+//
+//----
+//
+// Copyright (C) 2014-07-19 Kevin L. Durette
+// This work is licensed under a Creative Commons Attribution 4.0 International License.
+//
+function pat_houndstooth(dx,dy,w,h,s,lw, mt_idx) {
+  w = ((typeof w === "undefined") ? g_data.default_pattern_period["x"][0] : w );
+  h = ((typeof h === "undefined") ? g_data.default_pattern_period["x"][1] : h );
+  s = ((typeof s === "undefined") ? g_data.default_pattern_period["x"][2] : s );
+  lw = ((typeof lw === "undefined") ? 1 : lw);
   let draw = g_data.svg_draw;
-  var p = draw.pattern(20, 20, function(add) {
-    let lw = 1;
-    add.rect(20,20).fill("#fff");
-    add.line(0,0,20,20).stroke({"color":"#000", "linecap":"square", "width":lw});
-    add.line(0,-20,40,20).stroke({"color":"#000", "linecap":"square", "width":lw});
-    add.line(-20,0,20,40).stroke({"color":"#000", "linecap":"square", "width":lw});
+  var p = draw.pattern(w, h, function(add) {
+    add.polygon("0,0, 20,0, 40,20, 30,20, 20,10, 20,20, 10,20, 20,30, 20,40, 0,20, 0,0").fill('black').stroke({"width": 0});
+    add.polygon("40,0, 40,10, 30,0, 40, 0").fill('black').stroke({"width":0});
+    add.polygon("0,40, 10,40, 0,30, 0, 40").fill('black').stroke({"width":0});
   });
+  p.scale(s);
   p.translate(dx,dy);
-  return p.url();
-}
 
-function pat1(dx,dy) {
-  let draw = g_data.svg_draw;
-  var p = draw.pattern(20, 20, function(add) {
-    let lw = 1;
-    add.rect(20,20).fill("#fff");
-    add.line(20,0,0,20).stroke({"color":"#000", "linecap":"butt", "width":lw});
-    add.line(40,0,0,40).stroke({"color":"#000", "linecap":"butt", "width":lw});
-    add.line(20,-20,-20,20).stroke({"color":"#000", "linecap":"butt", "width":lw});
-  });
-  p.translate(dx,dy);
+  document.getElementById("pattern_defs").appendChild( p.node );
+  g_data.svg_pattern.push( [p.node, mt_idx] );
 
   return p.url();;
 }
-*/
+//
+//----
+
+// strip
+//
+function pat_stripe0(dx,dy,w,h,s,lw, mt_idx) {
+  w = ((typeof w === "undefined") ? g_data.default_pattern_period["x"][0] : w );
+  h = ((typeof h === "undefined") ? g_data.default_pattern_period["x"][1] : h );
+  s = ((typeof s === "undefined") ? g_data.default_pattern_period["x"][2] : s );
+  lw = ((typeof lw === "undefined") ? 1 : lw);
+  let draw = g_data.svg_draw;
+  var p = draw.pattern(w, h, function(add) {
+    add.rect(w,h).fill("#fff");
+    add.rect(w,h/2);
+  });
+  p.scale(s);
+  p.translate(dx,dy);
+
+  document.getElementById("pattern_defs").appendChild( p.node );
+  g_data.svg_pattern.push( [p.node, mt_idx] );
+
+  return p.url();;
+}
+
+// strip
+//
+function pat_stripe1(dx,dy,w,h,s,lw, mt_idx) {
+  w = ((typeof w === "undefined") ? g_data.default_pattern_period["x"][0] : w );
+  h = ((typeof h === "undefined") ? g_data.default_pattern_period["x"][1] : h );
+  s = ((typeof s === "undefined") ? g_data.default_pattern_period["x"][2] : s );
+  lw = ((typeof lw === "undefined") ? 1 : lw);
+  let draw = g_data.svg_draw;
+  var p = draw.pattern(w, h, function(add) {
+    add.rect(w,h).fill("#fff");
+    add.rect(w/2,h);
+  });
+  p.scale(s);
+  p.translate(dx,dy);
+
+  document.getElementById("pattern_defs").appendChild( p.node );
+  g_data.svg_pattern.push( [p.node, mt_idx] );
+
+  return p.url();;
+}
+
+
 
 function _grid_r(g, x,y, r, lvl, max_lvl, prob_prof) {
   max_lvl = ((typeof max_lvl === "undefined") ? 10 : max_lvl);
@@ -1407,17 +1461,23 @@ function web_init() {
   let _i0 = irnd(f_pat_info.length);
   let _i1 = irnd(f_pat_info.length);
 
-  //_i0 = 10;
+  //DEBUG
+  //_i0 = 24;
   //_i1 = 2;
 
   let pat0_func = f_pat_info[ _i0 ][0];
   let pat1_func = f_pat_info[ _i1 ][0];
 
-  g_data.pattern_period[0][0] = g_data.default_pattern_period[ f_pat_info[_i0][1] ][0];
-  g_data.pattern_period[0][1] = g_data.default_pattern_period[ f_pat_info[_i0][1] ][1];
+  let pat0_code = f_pat_info[ _i0 ][1];
+  let pat1_code = f_pat_info[ _i1 ][1];
 
-  g_data.pattern_period[1][0] = g_data.default_pattern_period[ f_pat_info[_i1][1] ][0];
-  g_data.pattern_period[1][1] = g_data.default_pattern_period[ f_pat_info[_i1][1] ][1];
+  let DPP = g_data.default_pattern_period;
+
+  g_data.pattern_period[0][0] = DPP[ f_pat_info[_i0][1] ][0];
+  g_data.pattern_period[0][1] = DPP[ f_pat_info[_i0][1] ][1];
+
+  g_data.pattern_period[1][0] = DPP[ f_pat_info[_i1][1] ][0];
+  g_data.pattern_period[1][1] = DPP[ f_pat_info[_i1][1] ][1];
 
   g_data["f_info"] = {
     "pat" : [ f_pat_info[_i0][1], f_pat_info[_i1][1] ]
@@ -1441,8 +1501,8 @@ function web_init() {
     //pps1 = 1;
   }
   else {
-    pps0 = drand(0.25,1.7);
-    pps1 = drand(0.25,1.7);
+    pps0 = DPP[ pat0_code ][2] * drand(0.25,1.7);
+    pps1 = DPP[ pat1_code ][2] * drand(0.25,1.7);
   }
 
   g_data.pattern_period[0][0] = ppx0;
@@ -1491,8 +1551,80 @@ function web_init() {
   window.requestAnimationFrame(anim);
 }
 
-var GX = [0,0],
-    GY = [0,0];
+// e - ellipse
+// w - linear + wiggle
+//
+
+var twopi = 2*Math.PI;
+
+var animation_ctx = [
+  {
+    "x" : 0, "y" : 0,
+    "type": "e",
+
+    "f" : [[3/16,5/16], [1/8, 1/14]],
+
+    //fase debug
+    //"f" : [[5/2,7/2], [1/8, 1/14]],
+
+    "c" : [[4.1,4.2], [1/5, 1/6]],
+    "p" : [[0.1,0.5], [0.2, 0.3]]
+  },
+
+  {
+    "x" : 0, "y" : 0,
+    "type": "w",
+    "v" : [15,16],
+    "u" : [ [5,-6] ],
+    "f" : [[3/4,2/4] ],
+    "c" : [[1,1] ],
+    "p" : [[0,0.5] ]
+  }
+];
+
+function motion_animate(ctx, t) {
+
+  if      (ctx.type == 'e') { return motion_ellipse(ctx, t); }
+  else if (ctx.type == 'w') { return motion_wiggle(ctx, t); }
+
+  return [0,0];
+}
+
+function motion_ellipse(ctx, t) {
+  let n = ctx.f.length;
+
+  let xy = [0,0];
+
+  for (let i=0; i<n; i++) {
+    let fx = ctx.f[i][0],
+        cx = ctx.c[i][0],
+        px = ctx.p[i][0];
+
+    let fy = ctx.f[i][1],
+        cy = ctx.c[i][1],
+        py = ctx.p[i][1];
+
+    xy[0] += cx*Math.cos(2*Math.PI*((fx*t) + px));
+    xy[1] += cy*Math.cos(2*Math.PI*((fy*t) + py));
+  }
+
+  return xy;
+}
+
+let foo = 0;
+
+function motion_wiggle(ctx, t) {
+
+  let n = ctx.f.length;
+
+  let xy = [ t*ctx.v[0], t*ctx.v[1] ];
+  for (let i=0; i<n; i++) {
+    xy[0] += ctx.u[i][0] + (ctx.c[i][0] * Math.cos( (2*Math.PI)*((ctx.f[i][0]*t) + ctx.p[i][0]) ) );
+    xy[1] += ctx.u[i][1] + (ctx.c[i][1] * Math.cos( (2*Math.PI)*((ctx.f[i][1]*t) + ctx.p[i][1]) ) );
+  }
+
+  return xy;
+}
 
 var ANIMATE = true;
 
@@ -1500,36 +1632,34 @@ function anim() {
 
   if (ANIMATE) {
 
-    let xmod = [
-      g_data.pattern_period[0][0],
-      g_data.pattern_period[1][0]
+    let Ts = Date.now() / 1000;
+
+    let xymod = [
+      [ g_data.pattern_period[0][0], g_data.pattern_period[0][1] ],
+      [ g_data.pattern_period[1][0], g_data.pattern_period[1][1] ]
+    ]
+
+    let xyxy = [
+      motion_animate(animation_ctx[0], Ts),
+      motion_animate(animation_ctx[1], Ts),
     ];
 
-    let ymod = [
-      g_data.pattern_period[0][1],
-      g_data.pattern_period[1][1]
-    ];
+    xyxy[0][0] = qrem( xyxy[0][0], xymod[0][0] );
+    xyxy[0][1] = qrem( xyxy[0][1], xymod[0][1] );
+
+    xyxy[1][0] = qrem( xyxy[1][0], xymod[1][0] );
+    xyxy[1][1] = qrem( xyxy[1][1], xymod[1][1] );
+
+    //console.log(xyxy[1][0], xyxy[1][1]);
+
 
     for (let i=0; i<g_data.svg_pattern.length; i++) {
       let p = g_data.svg_pattern[i][0];
       let mt_idx = g_data.svg_pattern[i][1];
 
-      p.setAttribute('x', GX[mt_idx]);
-      p.setAttribute('y', GY[mt_idx]);
+      p.setAttribute('x', xyxy[mt_idx][0]);
+      p.setAttribute('y', xyxy[mt_idx][1]);
     }
-
-
-    GX[0]++;
-    GY[0]++;
-
-    GX[1]++;
-    GY[1]++;
-
-    GX[0] = qrem( GX[0], xmod[0] );
-    GY[0] = qrem( GY[0], ymod[0] );
-
-    GX[1] = qrem( GX[1], xmod[1] );
-    GY[1] = qrem( GY[1], ymod[1] );
 
   }
 
