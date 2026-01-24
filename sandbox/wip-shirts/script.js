@@ -6,19 +6,24 @@
 // work.  If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 //
 
+var RND = $fx.rand;
+
 var CANVAS_ID = 'iao_canvas';
 var g_data = {
   "two": undefined,
-  //"pattern_period": [ [20,20], [20,20] ]
+
+  "pattern_period": [ [7,7,1], [7,7,1] ],
+
   "default_pattern_period": {
     "checkerboard.red" : [20,20, 1],
     "checkerboard.blue" : [20,20, 1],
+    "%" : [20,20, 1],
     "/" : [10,10, 1],
     "\\" : [10,10, 1],
     "o" : [10,10, 1],
     ":" : [10,10, 1],
     "z" : [10,10,1],
-    "Z" : [20,20,1],
+    "Z" : [10,10,1],
     "|" : [20,20,0.5],
     "x" : [20,20,0.5],
 
@@ -43,13 +48,14 @@ var g_data = {
   "f_pat_info": [
     [ pat_checkboard_red,     "checkerboard.red" ],
     [ pat_checkerboard_blue,  "checkerboard.blue" ],
+    [ pat_checkerboard,       "%" ],
     [ pat_diag0,              "/" ],
     [ pat_diag1,              "\\" ],
     [ pat_circ0,              "o" ],
     [ pat_circ1,              ":" ],
     [ pat_wiggle,             "~" ],
-    [ pat_anchor,             "v" ],
-    [ pat_glam,               "*" ],
+    //[ pat_anchor,             "v" ],
+    //[ pat_glam,               "*" ],
     [ pat_diamond,            "^" ],
     [ pat_bank,               "$" ],
     [ pat_cloud,              "c" ],
@@ -58,12 +64,13 @@ var g_data = {
     [ pat_curtain,            "#" ],
     [ pat_aztec,              "X" ],
     [ pat_temple,             "T" ],
-    [ pat_food,               "F" ],
+    //[ pat_food,               "F" ],
     [ pat_nomoon,             "@" ],
     [ pat_autumn,             "A" ],
     [ pat_moroccan,           "m" ],
     [ pat_rounded,            "R" ],
     [ pat_zigzag0,            "z" ],
+    [ pat_zigzag1,            "Z" ],
     [ pat_grid0,              "|" ],
     [ pat_grid1,              "x" ]
   ],
@@ -71,14 +78,15 @@ var g_data = {
   "f_pat": [
     pat_checkboard_red,
     pat_checkerboard_blue,
+    pat_checkerboard,
     pat_diag0,
     pat_diag1,
     pat_circ0,
     pat_circ1,
     pat_wiggle,
-    pat_anchor,
+    //pat_anchor,
     pat_glam,
-    pat_diamond,
+    //pat_diamond,
     pat_bank,
     pat_cloud,
     pat_parkay,
@@ -86,21 +94,28 @@ var g_data = {
     pat_curtain,
     pat_aztec,
     pat_temple,
-    pat_food,
+    //pat_food,
     pat_nomoon,
     pat_autumn,
     pat_moroccan,
     pat_rounded,
     pat_zigzag0,
+    pat_zigzag1,
     pat_grid0,
     pat_grid1
   ],
-  "pattern_period": [ [7,7], [7,7] ]
+
+  "svg_pattern" : []
 };
 
+function _downloadSVG() {
+  var ele = document.getElementById(CANVAS_ID);
+  var b = new Blob([ ele.innerHTML ]);
+  saveAs(b, "mstp.svg");
+}
 
 
-function _dl() {
+function downloadSVG() {
   var ele = document.getElementById(CANVAS_ID);
   let defs = document.getElementById("pattern_defs");
 
@@ -123,24 +138,6 @@ function _dl() {
 
 }
 
-// 2. Function to download the canvas as a PNG
-function downloadPng() {
-  let two = g_data.two;
-  var canvas = two.renderer.domElement;
-  var dataURL = canvas.toDataURL('image/png'); // Get the data URL
-
-  var link = document.createElement('a');
-  link.download = 'two-js-scene.png'; // Set the download filename
-  link.href = dataURL; // Set the data URL as the link's href
-  document.body.appendChild(link);
-  link.click(); // Programmatically click the link to trigger download
-  document.body.removeChild(link);
-}
-
-var RND = Math.random;
-
-
-
 function drand(a,b) {
   if (typeof a === "undefined") { a = 0; b = 1; }
   else if (typeof b === "undefined") { b = a; a = 0; }
@@ -151,47 +148,69 @@ function drand(a,b) {
 function irnd(a,b) {
   a = ((typeof a === "undefined") ? 2 : a);
   return Math.floor( drand(a,b) );
-  //return Math.floor( drand() * a );
 }
 
-function downloadSVG() {
-  var ele = document.getElementById(CANVAS_ID);
-  var b = new Blob([ ele.innerHTML ]);
-  saveAs(b, "mstp.svg");
-}
-
-function pat_checkboard_red(dx,dy, w,h, s) {
+function pat_checkboard_red(dx,dy, w,h, s, lw, mt_idx) {
   w = ((typeof w === "undefined") ? g_data.default_pattern_period["checkerboard.red"][0] : w );
   h = ((typeof h === "undefined") ? g_data.default_pattern_period["checkerboard.red"][1] : h );
+  s = ((typeof s === "undefined") ? g_data.default_pattern_period["checkerboard.red"][2] : s );
   let draw = g_data.svg_draw;
-  var p = draw.pattern(20, 20, function(add) {
-    add.rect(20,20).fill('#f06');
-    add.rect(10,10);
-    add.rect(10,10).move(10,10);
+  var p = draw.pattern(w, h, function(add) {
+    add.rect(w,h).fill('#f06');
+    add.rect(w/2,h/2);
+    add.rect(w/2,h/2).move(w/2,h/2);
   });
+  p.scale(s);
   p.translate(dx,dy);
+
+  document.getElementById("pattern_defs").appendChild( p.node );
+  g_data.svg_pattern.push( [p.node, mt_idx] );
+
   return p.url();
 }
 
-function pat_checkerboard_blue(dx,dy, w,h, s) {
+function pat_checkerboard_blue(dx,dy, w,h, s, lw, mt_idx) {
   w = ((typeof w === "undefined") ? g_data.default_pattern_period["checkerboard.blue"][0] : w );
   h = ((typeof h === "undefined") ? g_data.default_pattern_period["checkerboard.blue"][1] : h );
+  s = ((typeof s === "undefined") ? g_data.default_pattern_period["checkerboard.blue"][2] : s );
   let draw = g_data.svg_draw;
   var p = draw.pattern(w, h, function(add) {
     add.rect(w,h).fill('#06f');
     add.rect(w/2,h/2);
     add.rect(w/2,h/2).move(w/2,h/2);
   });
+  p.scale(s);
   p.translate(dx,dy);
 
   document.getElementById("pattern_defs").appendChild( p.node );
+  g_data.svg_pattern.push( [p.node, mt_idx] );
+
+  return p.url();;
+}
+
+function pat_checkerboard(dx,dy, w,h, s, lw, mt_idx) {
+  w = ((typeof w === "undefined") ? g_data.default_pattern_period["checkerboard.blue"][0] : w );
+  h = ((typeof h === "undefined") ? g_data.default_pattern_period["checkerboard.blue"][1] : h );
+  s = ((typeof s === "undefined") ? g_data.default_pattern_period["checkerboard.blue"][2] : s );
+  let draw = g_data.svg_draw;
+  var p = draw.pattern(w, h, function(add) {
+    //add.rect(w,h).fill('#06f');
+    //add.rect(w,h);
+    add.rect(w/2,h/2);
+    add.rect(w/2,h/2).move(w/2,h/2);
+  });
+  p.scale(s);
+  p.translate(dx,dy);
+
+  document.getElementById("pattern_defs").appendChild( p.node );
+  g_data.svg_pattern.push( [p.node, mt_idx] );
 
   return p.url();;
 }
 
 // lower left to upper right diagonal
 //
-function pat_diag0(dx,dy, w,h, s,lw) {
+function pat_diag0(dx,dy, w,h, s,lw, mt_idx) {
   w = ((typeof w === "undefined") ? g_data.default_pattern_period["/"][0] : w );
   h = ((typeof h === "undefined") ? g_data.default_pattern_period["/"][1] : h );
   s = ((typeof s === "undefined") ? g_data.default_pattern_period["/"][2] : s );
@@ -206,13 +225,14 @@ function pat_diag0(dx,dy, w,h, s,lw) {
   p.translate(dx,dy);
 
   document.getElementById("pattern_defs").appendChild( p.node );
+  g_data.svg_pattern.push( [p.node, mt_idx] );
 
   return p.url();
 }
 
 // lower right to upper left diagonal
 //
-function pat_diag1(dx,dy,w,h,s,lw) {
+function pat_diag1(dx,dy,w,h,s,lw, mt_idx) {
   w = ((typeof w === "undefined") ? g_data.default_pattern_period["\\"][0] : w );
   h = ((typeof h === "undefined") ? g_data.default_pattern_period["\\"][1] : h );
   s = ((typeof s === "undefined") ? g_data.default_pattern_period["\\"][2] : s );
@@ -228,13 +248,14 @@ function pat_diag1(dx,dy,w,h,s,lw) {
   p.translate(dx,dy);
 
   document.getElementById("pattern_defs").appendChild( p.node );
+  g_data.svg_pattern.push( [p.node, mt_idx] );
 
   return p.url();;
 }
 
 // circle grid stack
 //
-function pat_circ0(dx,dy,w,h,s,lw) {
+function pat_circ0(dx,dy,w,h,s,lw, mt_idx) {
   w = ((typeof w === "undefined") ? g_data.default_pattern_period["o"][0] : w );
   h = ((typeof h === "undefined") ? g_data.default_pattern_period["o"][1] : h );
   lw = ((typeof lw === "undefined") ? 1 : lw);
@@ -249,6 +270,7 @@ function pat_circ0(dx,dy,w,h,s,lw) {
   p.translate(dx,dy);
 
   document.getElementById("pattern_defs").appendChild( p.node );
+  g_data.svg_pattern.push( [p.node, mt_idx] );
 
   return p.url();;
 }
@@ -256,7 +278,7 @@ function pat_circ0(dx,dy,w,h,s,lw) {
 
 // offset circle
 //
-function pat_circ1(dx,dy,w,h,s,lw) {
+function pat_circ1(dx,dy,w,h,s,lw, mt_idx) {
   w = ((typeof w === "undefined") ? g_data.default_pattern_period[":"][0] : w );
   h = ((typeof h === "undefined") ? g_data.default_pattern_period[":"][1] : h );
   lw = ((typeof lw === "undefined") ? 1 : lw);
@@ -272,13 +294,14 @@ function pat_circ1(dx,dy,w,h,s,lw) {
   p.translate(dx,dy);
 
   document.getElementById("pattern_defs").appendChild( p.node );
+  g_data.svg_pattern.push( [p.node, mt_idx] );
 
   return p.url();;
 }
 
 // cc-by Steve Schoger (https://heropatterns.com/)
 //
-function pat_wiggle(dx,dy, w,h, s, lw) {
+function pat_wiggle(dx,dy, w,h, s, lw, mt_idx) {
   w = ((typeof w === "undefined") ? g_data.default_pattern_period["~"][0] : w );
   h = ((typeof h === "undefined") ? g_data.default_pattern_period["~"][1] : h );
   s = ((typeof s === "undefined") ? g_data.default_pattern_period["~"][2] : s );
@@ -298,13 +321,14 @@ function pat_wiggle(dx,dy, w,h, s, lw) {
   p.translate(dx,dy);
 
   document.getElementById("pattern_defs").appendChild( p.node );
+  g_data.svg_pattern.push( [p.node, mt_idx] );
 
   return p.url();;
 }
 
 // cc-by Steve Schoger (https://heropatterns.com/)
 //
-function pat_anchor(dx,dy, w,h, s,lw) {
+function pat_anchor(dx,dy, w,h, s,lw, mt_idx) {
   w = ((typeof w === "undefined") ? g_data.default_pattern_period["v"][0] : w );
   h = ((typeof h === "undefined") ? g_data.default_pattern_period["v"][1] : h );
   s = ((typeof s === "undefined") ? g_data.default_pattern_period["v"][2] : s );
@@ -323,13 +347,14 @@ function pat_anchor(dx,dy, w,h, s,lw) {
   p.translate(dx,dy);
 
   document.getElementById("pattern_defs").appendChild( p.node );
+  g_data.svg_pattern.push( [p.node, mt_idx] );
 
   return p.url();;
 }
 
 // cc-by Steve Schoger (https://heropatterns.com/)
 //
-function pat_glam(dx,dy, w,h, s, lw) {
+function pat_glam(dx,dy, w,h, s, lw, mt_idx) {
   w = ((typeof w === "undefined") ? g_data.default_pattern_period["*"][0] : w );
   h = ((typeof h === "undefined") ? g_data.default_pattern_period["*"][1] : h );
   s = ((typeof s === "undefined") ? g_data.default_pattern_period["*"][2] : s );
@@ -348,13 +373,14 @@ function pat_glam(dx,dy, w,h, s, lw) {
   p.translate(dx,dy);
 
   document.getElementById("pattern_defs").appendChild( p.node );
+  g_data.svg_pattern.push( [p.node, mt_idx] );
 
   return p.url();;
 }
 
 // cc-by Steve Schoger (https://heropatterns.com/)
 //
-function pat_diamond(dx,dy, w,h, s,lw) {
+function pat_diamond(dx,dy, w,h, s,lw, mt_idx) {
   w = ((typeof w === "undefined") ? g_data.default_pattern_period["^"][0] : w );
   h = ((typeof h === "undefined") ? g_data.default_pattern_period["^"][1] : h );
   s = ((typeof s === "undefined") ? g_data.default_pattern_period["^"][2] : s );
@@ -373,13 +399,14 @@ function pat_diamond(dx,dy, w,h, s,lw) {
   p.translate(dx,dy);
 
   document.getElementById("pattern_defs").appendChild( p.node );
+  g_data.svg_pattern.push( [p.node, mt_idx] );
 
   return p.url();;
 }
 
 // cc-by Steve Schoger (https://heropatterns.com/)
 //
-function pat_bank(dx,dy, w,h, lw) {
+function pat_bank(dx,dy, w,h, s,lw, mt_idx) {
   w = ((typeof w === "undefined") ? g_data.default_pattern_period["$"][0] : w );
   h = ((typeof h === "undefined") ? g_data.default_pattern_period["$"][1] : h );
   s = ((typeof s === "undefined") ? g_data.default_pattern_period["$"][2] : s );
@@ -398,13 +425,14 @@ function pat_bank(dx,dy, w,h, lw) {
   p.translate(dx,dy);
 
   document.getElementById("pattern_defs").appendChild( p.node );
+  g_data.svg_pattern.push( [p.node, mt_idx] );
 
   return p.url();;
 }
 
 // cc-by Steve Schoger (https://heropatterns.com/)
 //
-function pat_cloud(dx,dy, w,h, s,lw) {
+function pat_cloud(dx,dy, w,h, s,lw, mt_idx) {
   w = ((typeof w === "undefined") ? g_data.default_pattern_period["c"][0] : w );
   h = ((typeof h === "undefined") ? g_data.default_pattern_period["c"][1] : h );
   s = ((typeof s === "undefined") ? g_data.default_pattern_period["c"][2] : s );
@@ -423,13 +451,14 @@ function pat_cloud(dx,dy, w,h, s,lw) {
   p.translate(dx,dy);
 
   document.getElementById("pattern_defs").appendChild( p.node );
+  g_data.svg_pattern.push( [p.node, mt_idx] );
 
   return p.url();;
 }
 
 // cc-by Steve Schoger (https://heropatterns.com/)
 //
-function pat_parkay(dx,dy, w,h, s,lw) {
+function pat_parkay(dx,dy, w,h, s,lw, mt_idx) {
   w = ((typeof w === "undefined") ? g_data.default_pattern_period["p"][0] : w );
   h = ((typeof h === "undefined") ? g_data.default_pattern_period["p"][1] : h );
   s = ((typeof s === "undefined") ? g_data.default_pattern_period["p"][2] : s );
@@ -448,13 +477,14 @@ function pat_parkay(dx,dy, w,h, s,lw) {
   p.translate(dx,dy);
 
   document.getElementById("pattern_defs").appendChild( p.node );
+  g_data.svg_pattern.push( [p.node, mt_idx] );
 
   return p.url();;
 }
 
 // cc-by Steve Schoger (https://heropatterns.com/)
 //
-function pat_groovy(dx,dy, w,h, s,lw) {
+function pat_groovy(dx,dy, w,h, s,lw, mt_idx) {
   w = ((typeof w === "undefined") ? g_data.default_pattern_period["?"][0] : w );
   h = ((typeof h === "undefined") ? g_data.default_pattern_period["?"][1] : h );
   s = ((typeof s === "undefined") ? g_data.default_pattern_period["?"][2] : s );
@@ -473,13 +503,14 @@ function pat_groovy(dx,dy, w,h, s,lw) {
   p.translate(dx,dy);
 
   document.getElementById("pattern_defs").appendChild( p.node );
+  g_data.svg_pattern.push( [p.node, mt_idx] );
 
   return p.url();;
 }
 
 // cc-by Steve Schoger (https://heropatterns.com/)
 //
-function pat_curtain(dx,dy, w,h, s,lw) {
+function pat_curtain(dx,dy, w,h, s,lw, mt_idx) {
   w = ((typeof w === "undefined") ? g_data.default_pattern_period["#"][0] : w );
   h = ((typeof h === "undefined") ? g_data.default_pattern_period["#"][1] : h );
   s = ((typeof s === "undefined") ? g_data.default_pattern_period["#"][2] : s );
@@ -498,13 +529,14 @@ function pat_curtain(dx,dy, w,h, s,lw) {
   p.translate(dx,dy);
 
   document.getElementById("pattern_defs").appendChild( p.node );
+  g_data.svg_pattern.push( [p.node, mt_idx] );
 
   return p.url();;
 }
 
 // cc-by Steve Schoger (https://heropatterns.com/)
 //
-function pat_aztec(dx,dy, w,h, s,lw) {
+function pat_aztec(dx,dy, w,h, s,lw, mt_idx) {
   w = ((typeof w === "undefined") ? g_data.default_pattern_period["X"][0] : w );
   h = ((typeof h === "undefined") ? g_data.default_pattern_period["X"][1] : h );
   s = ((typeof s === "undefined") ? g_data.default_pattern_period["X"][2] : s );
@@ -523,13 +555,14 @@ function pat_aztec(dx,dy, w,h, s,lw) {
   p.translate(dx,dy);
 
   document.getElementById("pattern_defs").appendChild( p.node );
+  g_data.svg_pattern.push( [p.node, mt_idx] );
 
   return p.url();;
 }
 
 // cc-by Steve Schoger (https://heropatterns.com/)
 //
-function pat_temple(dx,dy, w,h, s,lw) {
+function pat_temple(dx,dy, w,h, s,lw, mt_idx) {
   w = ((typeof w === "undefined") ? g_data.default_pattern_period["T"][0] : w );
   h = ((typeof h === "undefined") ? g_data.default_pattern_period["T"][1] : h );
   s = ((typeof s === "undefined") ? g_data.default_pattern_period["T"][2] : s );
@@ -551,6 +584,7 @@ function pat_temple(dx,dy, w,h, s,lw) {
   p.translate(dx,dy);
 
   document.getElementById("pattern_defs").appendChild( p.node );
+  g_data.svg_pattern.push( [p.node, mt_idx] );
 
   return p.url();;
 }
@@ -560,7 +594,7 @@ function pat_temple(dx,dy, w,h, s,lw) {
 
 // cc-by Steve Schoger (https://heropatterns.com/)
 //
-function pat_food(dx,dy, w,h, s,lw) {
+function pat_food(dx,dy, w,h, s,lw, mt_idx) {
   w = ((typeof w === "undefined") ? g_data.default_pattern_period["F"][0] : w );
   h = ((typeof h === "undefined") ? g_data.default_pattern_period["F"][1] : h );
   s = ((typeof s === "undefined") ? g_data.default_pattern_period["F"][2] : s );
@@ -591,6 +625,7 @@ function pat_food(dx,dy, w,h, s,lw) {
   p.translate(dx,dy);
 
   document.getElementById("pattern_defs").appendChild( p.node );
+  g_data.svg_pattern.push( [p.node, mt_idx] );
 
   return p.url();;
 }
@@ -598,7 +633,7 @@ function pat_food(dx,dy, w,h, s,lw) {
 
 // cc-by Steve Schoger (https://heropatterns.com/)
 //
-function pat_nomoon(dx,dy, w,h, s,lw) {
+function pat_nomoon(dx,dy, w,h, s,lw, mt_idx) {
   w = ((typeof w === "undefined") ? g_data.default_pattern_period["@"][0] : w );
   h = ((typeof h === "undefined") ? g_data.default_pattern_period["@"][1] : h );
   s = ((typeof s === "undefined") ? g_data.default_pattern_period["@"][2] : s );
@@ -617,13 +652,14 @@ function pat_nomoon(dx,dy, w,h, s,lw) {
   p.translate(dx,dy);
 
   document.getElementById("pattern_defs").appendChild( p.node );
+  g_data.svg_pattern.push( [p.node, mt_idx] );
 
   return p.url();;
 }
 
 // cc-by Steve Schoger (https://heropatterns.com/)
 //
-function pat_autumn(dx,dy, w,h, s,lw) {
+function pat_autumn(dx,dy, w,h, s,lw, mt_idx) {
   w = ((typeof w === "undefined") ? g_data.default_pattern_period["A"][0] : w );
   h = ((typeof h === "undefined") ? g_data.default_pattern_period["A"][1] : h );
   s = ((typeof s === "undefined") ? g_data.default_pattern_period["A"][2] : s );
@@ -642,13 +678,14 @@ function pat_autumn(dx,dy, w,h, s,lw) {
   p.translate(dx,dy);
 
   document.getElementById("pattern_defs").appendChild( p.node );
+  g_data.svg_pattern.push( [p.node, mt_idx] );
 
   return p.url();;
 }
 
 // cc-by Steve Schoger (https://heropatterns.com/)
 //
-function pat_moroccan(dx,dy, w,h, s,lw) {
+function pat_moroccan(dx,dy, w,h, s,lw, mt_idx) {
   w = ((typeof w === "undefined") ? g_data.default_pattern_period["m"][0] : w );
   h = ((typeof h === "undefined") ? g_data.default_pattern_period["m"][1] : h );
   s = ((typeof s === "undefined") ? g_data.default_pattern_period["m"][2] : s );
@@ -668,13 +705,14 @@ function pat_moroccan(dx,dy, w,h, s,lw) {
   p.translate(dx,dy);
 
   document.getElementById("pattern_defs").appendChild( p.node );
+  g_data.svg_pattern.push( [p.node, mt_idx] );
 
   return p.url();;
 }
 
 // cc-by Steve Schoger (https://heropatterns.com/)
 //
-function pat_rounded(dx,dy, w,h, s,lw) {
+function pat_rounded(dx,dy, w,h, s,lw, mt_idx) {
   w = ((typeof w === "undefined") ? g_data.default_pattern_period["R"][0] : w );
   h = ((typeof h === "undefined") ? g_data.default_pattern_period["R"][1] : h );
   s = ((typeof s === "undefined") ? g_data.default_pattern_period["R"][2] : s );
@@ -694,6 +732,7 @@ function pat_rounded(dx,dy, w,h, s,lw) {
   p.translate(dx,dy);
 
   document.getElementById("pattern_defs").appendChild( p.node );
+  g_data.svg_pattern.push( [p.node, mt_idx] );
 
   return p.url();;
 }
@@ -702,7 +741,7 @@ function pat_rounded(dx,dy, w,h, s,lw) {
 
 // offset circle
 //
-function pat_zigzag0(dx,dy,w,h,s,lw) {
+function pat_zigzag0(dx,dy,w,h,s,lw, mt_idx) {
   w = ((typeof w === "undefined") ? g_data.default_pattern_period["z"][0] : w );
   h = ((typeof h === "undefined") ? g_data.default_pattern_period["z"][1] : h );
   s = ((typeof s === "undefined") ? g_data.default_pattern_period["z"][2] : s );
@@ -722,13 +761,14 @@ function pat_zigzag0(dx,dy,w,h,s,lw) {
   p.translate(dx,dy);
 
   document.getElementById("pattern_defs").appendChild( p.node );
+  g_data.svg_pattern.push( [p.node, mt_idx] );
 
   return p.url();;
 }
 
 // offset circle
 //
-function ziza_pat1(dx,dy,w,h,s,lw) {
+function pat_zigzag1(dx,dy,w,h,s,lw, mt_idx) {
   w = ((typeof w === "undefined") ? g_data.default_pattern_period["Z"][0] : w );
   h = ((typeof h === "undefined") ? g_data.default_pattern_period["Z"][1] : h );
   s = ((typeof s === "undefined") ? g_data.default_pattern_period["Z"][2] : s );
@@ -744,16 +784,18 @@ function ziza_pat1(dx,dy,w,h,s,lw) {
     add.line(3*w/2,h/2,w,h).stroke({"color":"#000", "linecap":"square", "width":lw});
 
   });
+  p.scale(s);
   p.translate(dx,dy);
 
   document.getElementById("pattern_defs").appendChild( p.node );
+  g_data.svg_pattern.push( [p.node, mt_idx] );
 
   return p.url();;
 }
 
 // grid, axis aligned
 //
-function pat_grid0(dx,dy,w,h,s,lw) {
+function pat_grid0(dx,dy,w,h,s,lw, mt_idx) {
   w = ((typeof w === "undefined") ? g_data.default_pattern_period["|"][0] : w );
   h = ((typeof h === "undefined") ? g_data.default_pattern_period["|"][1] : h );
   s = ((typeof s === "undefined") ? g_data.default_pattern_period["|"][2] : s );
@@ -768,13 +810,14 @@ function pat_grid0(dx,dy,w,h,s,lw) {
   p.translate(dx,dy);
 
   document.getElementById("pattern_defs").appendChild( p.node );
+  g_data.svg_pattern.push( [p.node, mt_idx] );
 
   return p.url();;
 }
 
 // gird, cross pattern
 //
-function pat_grid1(dx,dy,w,h,s,lw) {
+function pat_grid1(dx,dy,w,h,s,lw, mt_idx) {
   w = ((typeof w === "undefined") ? g_data.default_pattern_period["x"][0] : w );
   h = ((typeof h === "undefined") ? g_data.default_pattern_period["x"][1] : h );
   s = ((typeof s === "undefined") ? g_data.default_pattern_period["x"][2] : s );
@@ -789,6 +832,7 @@ function pat_grid1(dx,dy,w,h,s,lw) {
   p.translate(dx,dy);
 
   document.getElementById("pattern_defs").appendChild( p.node );
+  g_data.svg_pattern.push( [p.node, mt_idx] );
 
   return p.url();;
 }
@@ -940,224 +984,7 @@ function grid_r(g, x,y, r, lvl, opt) {
 }
 
 
-function _multiscale_truchet_pattern(xy,r,pat_idx, c0, c1) {
-  pat_idx = ((typeof pat_idx === "undefined") ? irnd() : pat_idx);
-  c0 = ((typeof c0 === "undefined") ?  "rgb(200,200,200)" : c0);
-  c1 = ((typeof c1 === "undefined") ?  "rgb(50,50,50)" : c1);
-
-  let two = g_data.two;
-
-  let r_1_3 = r/3;
-  let r_2_3 = 2*r/3;
-
-  let d = 2*r;
-
-  let d_1_3 = 1*d / 3;
-  let d_2_3 = 2*d / 3;
-
-  let _tol = [];
-
-  // background square
-  //
-  let sbg = two.makeRectangle( xy[0], xy[1], d, d );
-  sbg.fill = "rgb(255,255,255)";
-  sbg.noStroke();
-
-  _tol.push(sbg);
-
-  let s = two.makeRectangle( xy[0], xy[1], d, d );
-  s.fill = c0;
-  s.noStroke();
-
-  _tol.push(s);
-
-  // inner tube \
-  //
-  if (pat_idx == 0) {
-    let a0bg = two.makeArcSegment( xy[0] + r, xy[1] - r, 0, d_2_3, Math.PI/2, Math.PI );
-    a0bg.noStroke();
-    a0bg.fill = "rgb(255,255,255)";
-    let a2bg = two.makeArcSegment( xy[0] - r, xy[1] + r, 0, d_2_3, 0, -Math.PI/2 );
-    a2bg.noStroke();
-    a2bg.fill = "rgb(255,255,255)";
-
-    let a0 = two.makeArcSegment( xy[0] + r, xy[1] - r, 0, d_2_3, Math.PI/2, Math.PI );
-    a0.noStroke();
-    a0.fill = c1;
-
-    let a2 = two.makeArcSegment( xy[0] - r, xy[1] + r, 0, d_2_3, 0, -Math.PI/2 );
-    a2.noStroke();
-    a2.fill = c1;
-
-    _tol.push(a0bg,a2bg,a0,a2);
-  }
-
-  // inner tube /
-  //
-  else if (pat_idx == 1) {
-    let a0bg = two.makeArcSegment( xy[0] - r, xy[1] - r, 0, d_2_3, Math.PI/2, 0 );
-    a0bg.noStroke();
-    a0bg.fill = "rgb(255,255,255)";
-    let a2bg = two.makeArcSegment( xy[0] + r, xy[1] + r, 0, d_2_3, -Math.PI, -Math.PI/2 );
-    a2bg.noStroke();
-    a2bg.fill = "rgb(255,255,255)";
-
-    let a0 = two.makeArcSegment( xy[0] - r, xy[1] - r, 0, d_2_3, Math.PI/2, 0 );
-    a0.noStroke();
-    a0.fill = c1;
-
-    let a2 = two.makeArcSegment( xy[0] + r, xy[1] + r, 0, d_2_3, -Math.PI, -Math.PI/2 );
-    a2.noStroke();
-    a2.fill = c1;
-
-    _tol.push(a0bg,a2bg,a0,a2);
-  }
-
-  // inner tube /
-  //
-  else if (pat_idx == 2) {
-    let a0bg = two.makeArcSegment( xy[0] - r, xy[1] - r, 0, d_2_3, Math.PI/2, 0 );
-    a0bg.noStroke();
-    a0bg.fill = "rgb(255,255,255)";
-
-    let a0 = two.makeArcSegment( xy[0] - r, xy[1] - r, 0, d_2_3, Math.PI/2, 0 );
-    a0.noStroke();
-    a0.fill = c1;
-
-    _tol.push(a0bg,a0);
-  }
-
-  else if (pat_idx == 3) {
-    let a2bg = two.makeArcSegment( xy[0] + r, xy[1] + r, 0, d_2_3, -Math.PI, -Math.PI/2 );
-    a2bg.noStroke();
-    a2bg.fill = "rgb(255,255,255)";
-
-    let a2 = two.makeArcSegment( xy[0] + r, xy[1] + r, 0, d_2_3, -Math.PI, -Math.PI/2 );
-    a2.noStroke();
-    a2.fill = c1;
-
-    _tol.push(a2bg,a2);
-  }
-
-  if (pat_idx == 4) {
-    let a0bg = two.makeArcSegment( xy[0] + r, xy[1] - r, 0, d_2_3, Math.PI/2, Math.PI );
-    a0bg.noStroke();
-    a0bg.fill = "rgb(255,255,255)";
-
-    let a0 = two.makeArcSegment( xy[0] + r, xy[1] - r, 0, d_2_3, Math.PI/2, Math.PI );
-    a0.noStroke();
-    a0.fill = c1;
-
-    _tol.push(a0bg,a0);
-  }
-
-  else if (pat_idx == 5) {
-    let a2bg = two.makeArcSegment( xy[0] - r, xy[1] + r, 0, d_2_3, 0, -Math.PI/2 );
-    a2bg.noStroke();
-    a2bg.fill = "rgb(255,255,255)";
-
-    let a2 = two.makeArcSegment( xy[0] - r, xy[1] + r, 0, d_2_3, 0, -Math.PI/2 );
-    a2.noStroke();
-    a2.fill = c1;
-
-    _tol.push(a2bg,a2);
-  }
-
-
-  // fat cross
-  //
-  else if (pat_idx == 6) {
-    let _fcbg = two.makeRectangle( xy[0], xy[1], d, d );
-    _fcbg.fill = "rgb(255,255,255)";
-    _fcbg.noStroke();
-
-    let _fc = two.makeRectangle( xy[0], xy[1], d, d );
-    _fc.fill = c0;
-    _fc.noStroke();
-
-    _tol.push(_fcbg,_fc);
-  }
-
-  else { }
-
-
-  // tube ends
-  //
-
-  let e0bg = two.makeCircle(xy[0] + r, xy[1], r_1_3 );
-  e0bg.noStroke();
-  e0bg.fill = "rgb(255,255,255)";
-  let e1bg = two.makeCircle(xy[0], xy[1] - r, r_1_3 );
-  e1bg.noStroke();
-  e1bg.fill = "rgb(255,255,255)";
-  let e2bg = two.makeCircle(xy[0] - r, xy[1], r_1_3 );
-  e2bg.noStroke();
-  e2bg.fill = "rgb(255,255,255)";
-  let e3bg = two.makeCircle(xy[0], xy[1] + r, r_1_3 );
-  e3bg.noStroke();
-  e3bg.fill = "rgb(255,255,255)";
-
-
-  let e0 = two.makeCircle(xy[0] + r, xy[1], r_1_3 );
-  e0.noStroke();
-  e0.fill = c1;
-
-  let e1 = two.makeCircle(xy[0], xy[1] - r, r_1_3 );
-  e1.noStroke();
-  e1.fill = c1;
-
-  let e2 = two.makeCircle(xy[0] - r, xy[1], r_1_3 );
-  e2.noStroke();
-  e2.fill = c1;
-
-  let e3 = two.makeCircle(xy[0], xy[1] + r, r_1_3 );
-  e3.noStroke();
-  e3.fill = c1;
-
-  _tol.push(e0bg,e1bg,e2bg,e3bg,e0,e1,e2,e3);
-
-  //wings
-  //
-
-  let w0bg = two.makeCircle( xy[0] + r, xy[1] - r, d_1_3 );
-  w0bg.noStroke();
-  w0bg.fill = "rgb(255,255,255)";
-  let w1bg = two.makeCircle( xy[0] - r, xy[1] - r, d_1_3 );
-  w1bg.noStroke();
-  w1bg.fill = "rgb(255,255,255)";
-  let w2bg = two.makeCircle( xy[0] - r, xy[1] + r, d_1_3 );
-  w2bg.noStroke();
-  w2bg.fill = "rgb(255,255,255)";
-  let w3bg = two.makeCircle( xy[0] + r, xy[1] + r, d_1_3 );
-  w3bg.noStroke();
-  w3bg.fill = "rgb(255,255,255)";
-
-  let w0 = two.makeCircle( xy[0] + r, xy[1] - r, d_1_3 );
-  w0.noStroke();
-  w0.fill = c0;
-
-  let w1 = two.makeCircle( xy[0] - r, xy[1] - r, d_1_3 );
-  w1.noStroke();
-  w1.fill = c0;
-
-  let w2 = two.makeCircle( xy[0] - r, xy[1] + r, d_1_3 );
-  w2.noStroke();
-  w2.fill = c0;
-
-  let w3 = two.makeCircle( xy[0] + r, xy[1] + r, d_1_3 );
-  w3.noStroke();
-  w3.fill = c0;
-
-  _tol.push(w0bg,w1bg,w2bg,w3bg,w0,w1,w2,w3);
-
-  return _tol;
-}
-
 function multiscale_truchet_pattern(xy,r,pat_idx, lvl, _f_pat0, _f_pat1) {
-  pat_idx = ((typeof pat_idx === "undefined") ? irnd() : pat_idx);
-  c0 = ((typeof c0 === "undefined") ?  "rgb(200,200,200)" : c0);
-  c1 = ((typeof c1 === "undefined") ?  "rgb(50,50,50)" : c1);
-
   let two = g_data.two;
 
   let lvl2 = lvl%2;
@@ -1165,22 +992,24 @@ function multiscale_truchet_pattern(xy,r,pat_idx, lvl, _f_pat0, _f_pat1) {
   let pattern_period = g_data.pattern_period;
   let pp0x = pattern_period[lvl2][0],
       pp0y = pattern_period[lvl2][1],
+      pp0s = pattern_period[lvl2][2],
       pp1x = pattern_period[1-lvl2][0],
-      pp1y = pattern_period[1-lvl2][1];
+      pp1y = pattern_period[1-lvl2][1],
+      pp1s = pattern_period[1-lvl2][2];
 
-  let f_pat0 = _f_pat0;
-  let f_pat1 = _f_pat1;
+  pp0x *= pp0s;
+  pp0y *= pp0s;
 
-  if (lvl2) {
-    f_pat0 = _f_pat1;
-    f_pat1 = _f_pat0;
-  }
+  pp1x *= pp1s;
+  pp1y *= pp1s;
+
+  let f_pat0 = (lvl2 ? _f_pat1 : _f_pat0);
+  let f_pat1 = (lvl2 ? _f_pat0 : _f_pat1);
 
   let r_1_3 = r/3;
   let r_2_3 = 2*r/3;
 
   let d = 2*r;
-
   let d_1_3 = 1*d / 3;
   let d_2_3 = 2*d / 3;
 
@@ -1578,9 +1407,11 @@ function web_init() {
   let _i0 = irnd(f_pat_info.length);
   let _i1 = irnd(f_pat_info.length);
 
+  //_i0 = 10;
+  //_i1 = 2;
+
   let pat0_func = f_pat_info[ _i0 ][0];
   let pat1_func = f_pat_info[ _i1 ][0];
-
 
   g_data.pattern_period[0][0] = g_data.default_pattern_period[ f_pat_info[_i0][1] ][0];
   g_data.pattern_period[0][1] = g_data.default_pattern_period[ f_pat_info[_i0][1] ][1];
@@ -1592,47 +1423,117 @@ function web_init() {
     "pat" : [ f_pat_info[_i0][1], f_pat_info[_i1][1] ]
   };
 
+  let ppx0 = g_data.pattern_period[0][0];
+  let ppy0 = g_data.pattern_period[0][1];
+  let pps0 = g_data.pattern_period[0][2];
+
+  let ppx1 = g_data.pattern_period[1][0];
+  let ppy1 = g_data.pattern_period[1][1];
+  let pps1 = g_data.pattern_period[1][2];
+
+  let _experiment = 1;
+  if (_experiment == 0) {
+    ppx0 = 17;
+    ppy0 = 9;
+    //pps0 = 1;
+    ppx1 = 20;
+    ppy1 = 20;
+    //pps1 = 1;
+  }
+  else {
+    pps0 = drand(0.25,1.7);
+    pps1 = drand(0.25,1.7);
+  }
+
+  g_data.pattern_period[0][0] = ppx0;
+  g_data.pattern_period[0][1] = ppy0;
+  g_data.pattern_period[0][2] = pps0;
+
+  g_data.pattern_period[1][0] = ppx1;
+  g_data.pattern_period[1][1] = ppy1;
+  g_data.pattern_period[1][2] = pps1;
+
+  let f_wrap0 = (function(_f,_w,_h,_s) {
+    return function(_dx,_dy) {
+      return _f( _dx, _dy, _w, _h, _s, undefined, 0 );
+    };
+  })( pat0_func, ppx0, ppy0, pps0 );
+
+  let f_wrap1 = (function(_f,_w,_h,_s) {
+    return function(_dx,_dy) {
+      return _f( _dx, _dy, _w, _h, _s, undefined, 1 );
+    };
+  })( pat1_func, ppx1, ppy1, pps1 );
 
 
   g_data["opt"] = opt;
 
   let g = [];
   grid_r(g, cxy[0], cxy[1], R, 0, opt );
-
   g.sort( mstp_sort );
-
   g_data["g"] = g;
 
   g_data["draw_list"] = [];
 
   let svg_draw = g_data.svg_draw;
 
+  //DEBUG
+  //g = [ [300,300, 100, 0, 0 ] ];
+
   for (let i=0; i<g.length; i++) {
     let v = g[i];
-
-    let lp = v[4]%2;
-
-    let dx = qrem(v[0], 10);
-    let dy = qrem(v[1], 10);
-
-
-
-    //                                      x     y      r    pat   col0      col1
-    //
-    //let _l = multiscale_truchet_pattern( [v[0], v[1]], v[2], v[3], pal[lp], pal[1-lp] );
-    //let _l = multiscale_truchet_pattern( [v[0], v[1]], v[2], v[3], pat0.url(), pat1.url() );
-    //let _l = multiscale_truchet_pattern( [v[0], v[1]], v[2], v[3], pat0, pat1 );
-    //let _l = multiscale_truchet_pattern( [v[0], v[1]], v[2], v[3], diag_pat0, pat1 );
-    //let _l = multiscale_truchet_pattern( [v[0], v[1]], v[2], v[3], circ_pat0, circ_pat1 );
-    //let _l = multiscale_truchet_pattern( [v[0], v[1]], v[2], v[3], ziza_pat0, ziza_pat1 );
-    //let _l = multiscale_truchet_pattern( [v[0], v[1]], v[2], v[3], ziza_pat0, diag_pat0);
-    //let _l = multiscale_truchet_pattern( [v[0], v[1]], v[2], v[3], pat_food, ziza_pat1 );
-    let _l = multiscale_truchet_pattern( [v[0], v[1]], v[2], v[3], v[4], pat0_func, pat1_func);
-
+    let _l = multiscale_truchet_pattern( [v[0], v[1]], v[2], v[3], v[4], f_wrap0, f_wrap1 );
     g_data.draw_list.push(_l);
   }
 
   two.update();
+
+  window.requestAnimationFrame(anim);
+}
+
+var GX = [0,0],
+    GY = [0,0];
+
+var ANIMATE = true;
+
+function anim() {
+
+  if (ANIMATE) {
+
+    let xmod = [
+      g_data.pattern_period[0][0],
+      g_data.pattern_period[1][0]
+    ];
+
+    let ymod = [
+      g_data.pattern_period[0][1],
+      g_data.pattern_period[1][1]
+    ];
+
+    for (let i=0; i<g_data.svg_pattern.length; i++) {
+      let p = g_data.svg_pattern[i][0];
+      let mt_idx = g_data.svg_pattern[i][1];
+
+      p.setAttribute('x', GX[mt_idx]);
+      p.setAttribute('y', GY[mt_idx]);
+    }
+
+
+    GX[0]++;
+    GY[0]++;
+
+    GX[1]++;
+    GY[1]++;
+
+    GX[0] = qrem( GX[0], xmod[0] );
+    GY[0] = qrem( GY[0], ymod[0] );
+
+    GX[1] = qrem( GX[1], xmod[1] );
+    GY[1] = qrem( GY[1], ymod[1] );
+
+  }
+
+  window.requestAnimationFrame(anim);
 }
 
 
