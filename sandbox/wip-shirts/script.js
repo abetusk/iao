@@ -15,63 +15,63 @@ var g_data = {
   "pattern_period": [ [7,7,1], [7,7,1] ],
 
   "default_pattern_period": {
-    "checkerboard.red" : [20,20, 1],
-    "checkerboard.blue" : [20,20, 1],
-    "%" : [20,20, 1],
-    "/" : [10,10, 1.25],
-    "\\" : [10,10, 1.25],
-    "o" : [10,10, 1],
-    ":" : [10,10, 1],
-    "z" : [10,10,1.5],
-    "Z" : [10,10,1.5],
-    "|" : [20,20,0.5],
-    "x" : [20,20,0.5],
+    "checkerboard.red" : [20,20, 2],
+    "checkerboard.blue" : [20,20, 2],
+    "%" : [20,20, 2],
+    "/" : [10,10, 2.0],
+    "\\" : [10,10, 2.0],
+    "o" : [10,10, 2],
+    ":" : [10,10, 2],
+    "z" : [10,10,2.0],
+    "Z" : [10,10,2.0],
+    "|" : [20,20,1.25],
+    "x" : [20,20,2.0],
 
-    "~" : [52,26, 0.5],
+    "~" : [52,26, 1],
     "v" : [80,80, 0.25],
     "*" : [180,180, 0.25],
     "^" : [60,60,1.75],
-    "$" : [100,20,0.5],
-    "c" : [56,28,0.75],
+    "$" : [100,20,2],
+    "c" : [56,28,2.0],
     "p" : [40,40, 1.5],
-    "?" : [24,40,1.0],
-    "#" : [44,12,1.0],
-    "X" : [32,64,0.5],
-    "T" : [152,152,0.25],
+    "?" : [24,40,1.5],
+    "#" : [44,12,2.0],
+    "X" : [32,64,0.75],
+    "T" : [152,152,0.5],
     "F" : [260,260,0.125],
-    "@" : [80,105,0.5],
-    "A" : [88,24,0.5],
-    "m" : [80,88,0.25],
+    "@" : [80,105,1.5],
+    "A" : [88,24,1.0],
+    "m" : [80,88,0.5],
     "R" : [84,84,0.25],
-    "h" : [40,40,0.35],
-    "S" : [10, 10, 1],
-    "s" : [10, 10, 1]
+    "h" : [40,40,1.0],
+    "S" : [10, 10, 2.5],
+    "s" : [10, 10, 2.5]
   },
 
   "f_pat_info": [
     [ pat_checkboard_red,     "checkerboard.red" ],
     [ pat_checkerboard_blue,  "checkerboard.blue" ],
     [ pat_checkerboard,       "%" ],
-    [ pat_diag0,              "/" ],
-    [ pat_diag1,              "\\" ],
+    [ pat_diag0,              "\\" ],
+    [ pat_diag1,              "/" ],
     [ pat_circ0,              "o" ],
     [ pat_circ1,              ":" ],
     [ pat_wiggle,             "~" ],
     //[ pat_anchor,             "v" ],
     //[ pat_glam,               "*" ],
-    [ pat_diamond,            "^" ],
+    //[ pat_diamond,            "^" ],
     [ pat_bank,               "$" ],
     [ pat_cloud,              "c" ],
-    [ pat_parkay,             "p" ],
+    //[ pat_parkay,             "p" ],
     [ pat_groovy,             "?" ],
     [ pat_curtain,            "#" ],
-    [ pat_aztec,              "X" ],
-    [ pat_temple,             "T" ],
+    //[ pat_aztec,              "X" ],
+    //[ pat_temple,             "T" ],
     //[ pat_food,               "F" ],
     [ pat_nomoon,             "@" ],
     [ pat_autumn,             "A" ],
     [ pat_moroccan,           "m" ],
-    [ pat_rounded,            "R" ],
+    //[ pat_rounded,            "R" ],
     [ pat_zigzag0,            "z" ],
     [ pat_zigzag1,            "Z" ],
     [ pat_grid0,              "|" ],
@@ -95,16 +95,16 @@ var g_data = {
     //pat_diamond,
     pat_bank,
     pat_cloud,
-    pat_parkay,
+    //pat_parkay,
     pat_groovy,
     pat_curtain,
-    pat_aztec,
-    pat_temple,
+    //pat_aztec,
+    //pat_temple,
     //pat_food,
     pat_nomoon,
     pat_autumn,
     pat_moroccan,
-    pat_rounded,
+    //pat_rounded,
     pat_zigzag0,
     pat_zigzag1,
     pat_grid0,
@@ -220,9 +220,9 @@ function pat_checkerboard(dx,dy, w,h, s, lw, mt_idx) {
 // lower left to upper right diagonal
 //
 function pat_diag0(dx,dy, w,h, s,lw, mt_idx) {
-  w = ((typeof w === "undefined") ? g_data.default_pattern_period["/"][0] : w );
-  h = ((typeof h === "undefined") ? g_data.default_pattern_period["/"][1] : h );
-  s = ((typeof s === "undefined") ? g_data.default_pattern_period["/"][2] : s );
+  w = ((typeof w === "undefined") ? g_data.default_pattern_period["\\"][0] : w );
+  h = ((typeof h === "undefined") ? g_data.default_pattern_period["\\"][1] : h );
+  s = ((typeof s === "undefined") ? g_data.default_pattern_period["\\"][2] : s );
   lw = ((typeof lw === "undefined") ? 1 : lw);
   let draw = g_data.svg_draw;
   var p = draw.pattern(w, h, function(add) {
@@ -243,9 +243,9 @@ function pat_diag0(dx,dy, w,h, s,lw, mt_idx) {
 // lower right to upper left diagonal
 //
 function pat_diag1(dx,dy,w,h,s,lw, mt_idx) {
-  w = ((typeof w === "undefined") ? g_data.default_pattern_period["\\"][0] : w );
-  h = ((typeof h === "undefined") ? g_data.default_pattern_period["\\"][1] : h );
-  s = ((typeof s === "undefined") ? g_data.default_pattern_period["\\"][2] : s );
+  w = ((typeof w === "undefined") ? g_data.default_pattern_period["/"][0] : w );
+  h = ((typeof h === "undefined") ? g_data.default_pattern_period["/"][1] : h );
+  s = ((typeof s === "undefined") ? g_data.default_pattern_period["/"][2] : s );
   lw = ((typeof lw === "undefined") ? 1 : lw);
   let draw = g_data.svg_draw;
   var p = draw.pattern(w, h, function(add) {
@@ -881,9 +881,9 @@ function pat_houndstooth(dx,dy,w,h,s,lw, mt_idx) {
 // strip
 //
 function pat_stripe0(dx,dy,w,h,s,lw, mt_idx) {
-  w = ((typeof w === "undefined") ? g_data.default_pattern_period["x"][0] : w );
-  h = ((typeof h === "undefined") ? g_data.default_pattern_period["x"][1] : h );
-  s = ((typeof s === "undefined") ? g_data.default_pattern_period["x"][2] : s );
+  w = ((typeof w === "undefined") ? g_data.default_pattern_period["S"][0] : w );
+  h = ((typeof h === "undefined") ? g_data.default_pattern_period["S"][1] : h );
+  s = ((typeof s === "undefined") ? g_data.default_pattern_period["S"][2] : s );
   lw = ((typeof lw === "undefined") ? 1 : lw);
   let draw = g_data.svg_draw;
   var p = draw.pattern(w, h, function(add) {
@@ -902,9 +902,9 @@ function pat_stripe0(dx,dy,w,h,s,lw, mt_idx) {
 // strip
 //
 function pat_stripe1(dx,dy,w,h,s,lw, mt_idx) {
-  w = ((typeof w === "undefined") ? g_data.default_pattern_period["x"][0] : w );
-  h = ((typeof h === "undefined") ? g_data.default_pattern_period["x"][1] : h );
-  s = ((typeof s === "undefined") ? g_data.default_pattern_period["x"][2] : s );
+  w = ((typeof w === "undefined") ? g_data.default_pattern_period["s"][0] : w );
+  h = ((typeof h === "undefined") ? g_data.default_pattern_period["s"][1] : h );
+  s = ((typeof s === "undefined") ? g_data.default_pattern_period["s"][2] : s );
   lw = ((typeof lw === "undefined") ? 1 : lw);
   let draw = g_data.svg_draw;
   var p = draw.pattern(w, h, function(add) {
@@ -1462,8 +1462,8 @@ function web_init() {
   let _i1 = irnd(f_pat_info.length);
 
   //DEBUG
-  //_i0 = 24;
-  //_i1 = 2;
+  //_i0 = 3;
+  //_i1 = 4;
 
   let pat0_func = f_pat_info[ _i0 ][0];
   let pat1_func = f_pat_info[ _i1 ][0];
@@ -1491,19 +1491,12 @@ function web_init() {
   let ppy1 = g_data.pattern_period[1][1];
   let pps1 = g_data.pattern_period[1][2];
 
-  let _experiment = 1;
-  if (_experiment == 0) {
-    ppx0 = 17;
-    ppy0 = 9;
-    //pps0 = 1;
-    ppx1 = 20;
-    ppy1 = 20;
-    //pps1 = 1;
-  }
-  else {
-    pps0 = DPP[ pat0_code ][2] * drand(0.25,1.7);
-    pps1 = DPP[ pat1_code ][2] * drand(0.25,1.7);
-  }
+  pps0 = DPP[ pat0_code ][2] * drand(0.25,1.0);
+  pps1 = DPP[ pat1_code ][2] * drand(0.25,1.0);
+
+  //pps0 = DPP[ pat0_code ][2] * 0.25;
+  //pps1 = DPP[ pat1_code ][2] * 0.25;
+
 
   g_data.pattern_period[0][0] = ppx0;
   g_data.pattern_period[0][1] = ppy0;
