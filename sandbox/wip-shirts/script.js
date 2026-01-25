@@ -1,7 +1,7 @@
 // To the extent possible under law, the person who associated CC0 with
 // this project has waived all copyright and related or neighboring rights
 // to this project.
-// 
+//
 // You should have received a copy of the CC0 legalcode along with this
 // work.  If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 //
@@ -922,66 +922,7 @@ function pat_stripe1(dx,dy,w,h,s,lw, mt_idx) {
 
 
 
-function _grid_r(g, x,y, r, lvl, max_lvl, prob_prof) {
-  max_lvl = ((typeof max_lvl === "undefined") ? 10 : max_lvl);
-  if (lvl >= max_lvl) { return; }
-
-  let pal = [
-    "rgb(200,200,200)",
-    "rgb(50,50,50)"
-  ];
-
-  let two = g_data.two;
-
-  let lvl_parity = lvl%2;
-
-  let r2 = r/2;
-
-  let dxy = [
-    [ r2, -r2 ],
-    [-r2, -r2 ],
-    [-r2,  r2 ],
-    [ r2,  r2 ]
-  ];
-
-  let n = prob_prof.length;
-
-  let p = drand();
-  if (lvl == 0) { p = drand(prob_prof[0], prob_prof[n-2]);  }
-
-
-  // terminate
-  //
-  if      (p < prob_prof[0]) {
-  }
-
-  // subdivide
-  //
-  else if (p < prob_prof[1]) {
-
-    for (let i=0; i<4; i++) {
-      _grid_r(g, x + dxy[i][0], y + dxy[i][1], r/2, lvl+1, max_lvl, prob_prof);
-    }
-  }
-
-  // display tile
-  //
-  else {
-
-    //g.push( [x,y,r,irnd(),lvl] );
-    g.push( [x,y,r,irnd(7),lvl] );
-    if (p < prob_prof[2]) {
-      for (let i=0; i<4; i++) {
-        _grid_r(g, x + dxy[i][0], y + dxy[i][1], r/2, lvl+1, max_lvl, prob_prof);
-      }
-    }
-
-  }
-
-  return g;
-}
-
-function grid_r(g, x,y, r, lvl, opt) {
+function grid_r(ctx, x,y, r, lvl, opt) {
   let max_lvl = opt.max_level;
   let prob_prof = opt.prob_profile;
 
@@ -1005,36 +946,338 @@ function grid_r(g, x,y, r, lvl, opt) {
   let p = drand();
   if (lvl == 0) { p = drand(prob_prof[0], prob_prof[n-2]);  }
 
-
   // terminate
   //
-  if      (p < prob_prof[0]) {
-  }
+  if      (p < prob_prof[0]) { }
 
   // subdivide
   //
   else if (p < prob_prof[1]) {
-
     for (let i=0; i<4; i++) {
-      grid_r(g, x + dxy[i][0], y + dxy[i][1], r/2, lvl+1, opt);
+      grid_r(ctx, x + dxy[i][0], y + dxy[i][1], r/2, lvl+1, opt);
     }
   }
 
   // display tile
   //
   else {
-
-    //g.push( [x,y,r,irnd(),lvl] );
-    g.push( [x,y,r,irnd(pat_a.length),lvl] );
+    ctx.g.push( [x,y,r,irnd(pat_a.length),lvl] );
     if (p < prob_prof[2]) {
       for (let i=0; i<4; i++) {
-        grid_r(g, x + dxy[i][0], y + dxy[i][1], r/2, lvl+1, opt);
+        grid_r(ctx, x + dxy[i][0], y + dxy[i][1], r/2, lvl+1, opt);
       }
     }
+  }
+
+  return ctx;
+}
+
+function _clone_a(a) {
+  let b = [];
+  for (let i=0; i<a.length; i++) {
+    b.push(a[i]);
+  }
+  return b;
+}
+
+// transform p quadrent array by transform
+//
+// 2 3
+// 1 0
+//
+function p_transform(sym_code, p) {
+  let u = [];
+
+  let T = {
+    'i'  : [0,1,2,3],
+    '='  : [0,1,2,3],
+    'H'  : [0,1,2,3],
+    '#'  : [0,1,2,3],
+
+    '|'  : [1,0,3,2],
+    '-'  : [3,2,1,0],
+    '\\' : [0,3,2,1],
+    '/'  : [2,1,0,3],
+
+    'r0' : [0,1,2,3],
+    'r1' : [1,2,3,0],
+    'r2' : [2,3,0,1],
+    'r3' : [3,0,1,2]
+  };
+
+  let Ta = T[sym_code];
+
+  for (let i=0; i<p.length; i++) {
+    u.push( Ta[p[i]] );
+  }
+  return u;
+}
+
+function p2xy(cx,cy,p, R) {
+  let dxy = [
+    [ 1, -1],
+    [-1, -1],
+    [-1,  1],
+    [ 1,  1]
+  ];
+
+  let r = R;
+  let r2 = r/2;
+
+  let xy = [cx,cy];
+
+  for (let i=0; i<p.length; i++) {
+
+    xy[0] += r*dxy[ p[i] ][0];
+    xy[1] += r*dxy[ p[i] ][1];
+
+    r = r2;
+    r2 /= 2;
 
   }
 
-  return g;
+  return xy;
+}
+
+function grid_sym_r(ctx, x,y, r, lvl, opt) {
+  let max_lvl = opt.max_level;
+  let prob_prof = opt.prob_profile;
+
+  //DEBUG
+  //if (lvl >= 3) { return; }
+
+  if (lvl >= max_lvl) { return; }
+  let two = g_data.two;
+
+  let lvl_parity = lvl%2;
+
+  let r2 = r/2;
+
+  // 2 3
+  // 1 0
+  //
+  let dxy = [
+    [ r2, -r2 ],
+    [-r2, -r2 ],
+    [-r2,  r2 ],
+    [ r2,  r2 ]
+  ];
+
+  let n = prob_prof.length;
+  let pat_a = opt.pattern_choice;
+
+  if (lvl==0) { 
+    console.log(">>>", opt.symmetry);
+  }
+
+  if ((lvl == 0) && (opt.symmetry != 'i')) {
+
+    let symmetry_map = {};
+
+    let sym_lib = opt.symmetry_lib[ opt.symmetry ];
+
+    for (let i=0; i<sym_lib.length; i++) {
+      symmetry_map[ sym_lib[i][0] ] = sym_lib[i][1];
+    }
+
+    let sym_map_all = {};
+    for (let sym_code in opt.symmetry_lib) {
+      sym_map_all[ sym_code ] = {};
+      let _lib = opt.symmetry_lib[ sym_code ];
+      for (let i=0; i<_lib.length; i++) {
+        sym_map_all[ sym_code ][ _lib[i][0] ] = _lib[i][1];
+      }
+    }
+
+    if (opt.symmetry == '=') {
+
+      ctx.p.push(1);
+      grid_sym_r(ctx, x + dxy[1][0], y + dxy[1][1], r/2, lvl+1, opt);
+      ctx.p.pop();
+
+      ctx.p.push(2);
+      grid_sym_r(ctx, x + dxy[2][0], y + dxy[2][1], r/2, lvl+1, opt);
+      ctx.p.pop();
+
+      let n = ctx.g.length;
+      for (let i=0; i<n; i++) {
+        let u_g = _clone_a( ctx.g[i] );
+        let u_g_p = _clone_a( ctx.g_p[i] );
+        if      (u_g_p[0] == 1) { u_g[0] += r; u_g_p[0] = 0; }
+        else if (u_g_p[0] == 2) { u_g[0] += r; u_g_p[0] = 3; }
+        ctx.g.push(u_g);
+        ctx.p.push(u_g_p);
+      }
+    }
+
+    else if (opt.symmetry == 'H') {
+
+      ctx.p.push(0);
+      grid_sym_r(ctx, x + dxy[0][0], y + dxy[0][1], r/2, lvl+1, opt);
+      ctx.p.pop();
+
+      ctx.p.push(1);
+      grid_sym_r(ctx, x + dxy[1][0], y + dxy[1][1], r/2, lvl+1, opt);
+      ctx.p.pop();
+
+      let n = ctx.g.length;
+      for (let i=0; i<n; i++) {
+        let u_g = _clone_a( ctx.g[i] );
+        let u_g_p = _clone_a( ctx.g_p[i] );
+        if      (u_g_p[0] == 0) { u_g[1] += r; u_g_p[0] = 3; }
+        else if (u_g_p[0] == 1) { u_g[1] += r; u_g_p[0] = 2; }
+        ctx.g.push(u_g);
+        ctx.p.push(u_g_p);
+      }
+
+    }
+
+    else if (opt.symmetry == '#') {
+
+      ctx.p.push(0);
+      grid_sym_r(ctx, x + dxy[0][0], y + dxy[0][1], r/2, lvl+1, opt);
+      ctx.p.pop();
+
+      let tdxy = [ [0,0], [-r,0], [-r,r], [0,r] ];
+      let n = ctx.g.length;
+      for (let i=0; i<n; i++) {
+
+        for (let ridx=1; ridx<4; ridx++) {
+          let u_g = _clone_a( ctx.g[i] );
+          let u_g_p = _clone_a( ctx.g_p[i] );
+          u_g_p[0] = ridx;
+          u_g[0] += tdxy[ridx][0];
+          u_g[1] += tdxy[ridx][1];
+          ctx.g.push(u_g);
+          ctx.p.push(u_g_p);
+        }
+
+      }
+
+    }
+
+    else if (opt.symmetry == '|') {
+
+      ctx.p.push(1);
+      grid_sym_r(ctx, x + dxy[1][0], y + dxy[1][1], r/2, lvl+1, opt);
+      ctx.p.pop();
+
+      ctx.p.push(2);
+      grid_sym_r(ctx, x + dxy[2][0], y + dxy[2][1], r/2, lvl+1, opt);
+      ctx.p.pop();
+
+      let n = ctx.g.length;
+      for (let i=0; i<n; i++) {
+
+        let u_g_p = p_transform( opt.symmetry, ctx.g_p[i] );
+        let u_g   = _clone_a( ctx.g[i] );
+        let xy = p2xy( x,y, u_g_p, r/2 );
+        u_g[0] = xy[0];
+        u_g[1] = xy[1];
+
+        u_g[3] = symmetry_map[ ctx.g[i][3]  ];
+
+        ctx.g.push(u_g);
+        ctx.p.push(u_g_p);
+      }
+
+    }
+
+    else if (opt.symmetry == '-') {
+
+      ctx.p.push(0);
+      grid_sym_r(ctx, x + dxy[0][0], y + dxy[0][1], r/2, lvl+1, opt);
+      ctx.p.pop();
+
+      ctx.p.push(1);
+      grid_sym_r(ctx, x + dxy[1][0], y + dxy[1][1], r/2, lvl+1, opt);
+      ctx.p.pop();
+
+      let n = ctx.g.length;
+      for (let i=0; i<n; i++) {
+
+        let u_g_p = p_transform( opt.symmetry, ctx.g_p[i] );
+        let u_g   = _clone_a( ctx.g[i] );
+        let xy = p2xy( x,y, u_g_p, r/2 );
+        u_g[0] = xy[0];
+        u_g[1] = xy[1];
+
+        u_g[3] = symmetry_map[ ctx.g[i][3]  ];
+
+        ctx.g.push(u_g);
+        ctx.p.push(u_g_p);
+      }
+
+    }
+
+    else if (opt.symmetry == 'r0') {
+
+      ctx.p.push(0);
+      grid_sym_r(ctx, x + dxy[0][0], y + dxy[0][1], r/2, lvl+1, opt);
+      ctx.p.pop();
+
+      let n = ctx.g.length;
+      for (let i=0; i<n; i++) {
+
+        for (let ridx=1; ridx<4; ridx++) {
+          let sym_code = 'r0';
+
+          if      (ridx == 1) { sym_code = '|'; }
+          else if (ridx == 2) { sym_code = 'r2'; }
+          else if (ridx == 3) { sym_code = '-'; }
+
+          let u_g_p = p_transform( sym_code, ctx.g_p[i] );
+          let u_g   = _clone_a( ctx.g[i] );
+
+          let xy = p2xy( x,y, u_g_p, r/2 );
+          u_g[0] = xy[0];
+          u_g[1] = xy[1];
+
+          u_g[3] = sym_map_all[ sym_code ][ ctx.g[i][3] ];
+
+          ctx.g.push(u_g);
+          ctx.p.push(u_g_p);
+        }
+
+      }
+
+    }
+
+    return ctx;
+  }
+
+  let p = drand();
+  if (lvl == 0) { p = drand(prob_prof[0], prob_prof[n-2]);  }
+
+  // terminate
+  //
+  if      (p < prob_prof[0]) { }
+
+  // subdivide
+  //
+  else if (p < prob_prof[1]) {
+    for (let i=0; i<4; i++) {
+      ctx.p.push(i);
+      grid_sym_r(ctx, x + dxy[i][0], y + dxy[i][1], r/2, lvl+1, opt);
+      ctx.p.pop();
+    }
+  }
+
+  // display tile
+  //
+  else {
+    ctx.g_p.push( _clone_a(ctx.p) );
+    ctx.g.push( [x,y,r,irnd(pat_a.length),lvl] );
+    if (p < prob_prof[2]) {
+      for (let i=0; i<4; i++) {
+        ctx.p.push(i);
+        grid_sym_r(ctx, x + dxy[i][0], y + dxy[i][1], r/2, lvl+1, opt);
+        ctx.p.pop();
+      }
+    }
+  }
+
+  return ctx;
 }
 
 
@@ -1206,10 +1449,61 @@ function multiscale_truchet_pattern(xy,r,pat_idx, lvl, _f_pat0, _f_pat1) {
 
     let _fc = two.makeRectangle( xy[0], xy[1], d, d );
     _fc.fill = f_pat0( -qrem(xy[0], pp0x), -qrem(xy[1], pp0y) );
-    _fc.storke = f_pat0( -qrem(xy[0], pp0x), -qrem(xy[1], pp0y) );
+    _fc.stroke = f_pat0( -qrem(xy[0], pp0x), -qrem(xy[1], pp0y) );
     _fc.linewidth = 1;
 
-    _tol.push(_fcbg,_fc);
+    let a0bg = two.makeArcSegment( xy[0] + r, xy[1] - r, 0, d_2_3+fudge, Math.PI/2, Math.PI );
+    a0bg.stroke = "rgb(255,255,255)";
+    a0bg.fill = "rgb(255,255,255)";
+    a0bg.linewidth = 1;
+
+    let a0 = two.makeArcSegment( xy[0] + r, xy[1] - r, 0, d_2_3, Math.PI/2, Math.PI );
+    a0.stroke = f_pat1( -qrem(xy[0]+r, pp1x), -qrem(xy[1]-r, pp1y) );
+    a0.fill = f_pat1( -qrem(xy[0]+r, pp1x), -qrem(xy[1]-r, pp1y) );
+    a0.linewidth = 1;
+
+    let a2bg = two.makeArcSegment( xy[0] - r, xy[1] + r, 0, d_2_3+fudge, 0, -Math.PI/2 );
+    a2bg.stroke = "rgb(255,255,255)";
+    a2bg.fill = "rgb(255,255,255)";
+    a2bg.linewidth = 1;
+
+    let a2 = two.makeArcSegment( xy[0] - r, xy[1] + r, 0, d_2_3, 0, -Math.PI/2 );
+    a2.stroke = f_pat1( -qrem(xy[0]-r, pp1x), -qrem(xy[1]+r, pp1y) );
+    a2.fill = f_pat1( -qrem(xy[0]-r, pp1x), -qrem(xy[1]+r, pp1y) );
+    a2.linewidth = 1;
+
+
+    let a1bg = two.makeArcSegment( xy[0] - r, xy[1] - r, 0, d_2_3+fudge, Math.PI/2, 0 );
+    a1bg.stroke = "rgb(255,255,255)";
+    a1bg.fill = "rgb(255,255,255)";
+    a1bg.linewidth = 1;
+    let a3bg = two.makeArcSegment( xy[0] + r, xy[1] + r, 0, d_2_3+fudge, -Math.PI, -Math.PI/2 );
+    a3bg.stroke = "rgb(255,255,255)";
+    a3bg.fill = "rgb(255,255,255)";
+    a3bg.linewidth = 1;
+
+    let a1 = two.makeArcSegment( xy[0] - r, xy[1] - r, 0, d_2_3, Math.PI/2, 0 );
+    a1.stroke = f_pat1( -qrem(xy[0]-r, pp1x), -qrem(xy[1]-r, pp1y) );
+    a1.fill = f_pat1( -qrem(xy[0]-r, pp1x), -qrem(xy[1]-r, pp1y) );
+    a1.linewidth = 1;
+
+    let a3 = two.makeArcSegment( xy[0] + r, xy[1] + r, 0, d_2_3, -Math.PI, -Math.PI/2 );
+    a3.stroke = f_pat1( -qrem(xy[0]+r, pp1x), -qrem(xy[1]+r, pp1y) );
+    a3.fill = f_pat1( -qrem(xy[0]+r, pp1x), -qrem(xy[1]+r, pp1y) );
+    a3.linewidth = 1;
+
+    let srbg = two.makeRectangle( xy[0], xy[1], r_1_3, r_1_3 );
+    srbg.stroke = "rgb(255,255,255)";
+    srbg.fill = "rgb(255,255,255)";
+    srbg.linewidth = 1;
+
+    let sr = two.makeRectangle( xy[0], xy[1], r_1_3, r_1_3 );
+    sr.stroke = f_pat1( -qrem(xy[0], pp1x), -qrem(xy[1], pp1y) );
+    sr.fill = f_pat1( -qrem(xy[0], pp1x), -qrem(xy[1], pp1y) );
+    sr.linewidth = 1;
+
+
+    _tol.push(_fcbg,_fc, a0bg, a0, a1bg, a1, a2bg, a2, a3bg, a3, srbg, sr);
   }
 
   else { }
@@ -1417,6 +1711,15 @@ function qrem(n, m) {
   return n - (m*q);
 }
 
+//--------------------
+//               _
+//   __ _  ___ _(_)__
+//  /  ' \/ _ `/ / _ \
+// /_/_/_/\_,_/_/_//_/
+//
+//--------------------
+
+
 function web_init() {
   let two = init_twojs();
   g_data["two"] = two;
@@ -1444,16 +1747,48 @@ function web_init() {
   let R = 200;
   let max_lvl = 5;
 
-  let all_pat = [0,1,2,3,4,5,6];
+  let all_pat = [0,1,2,3,4,5,6, 7];
   fisher_yates_shuffle(all_pat);
   let _m = irnd(all_pat.length-2);
   for (let i=0; i<_m; i++) { all_pat.pop(); }
+
+  let sym_choice = ['i', '=', 'H', '#', 'r0', '|', '-' ];
+  let _sc = sym_choice[ irnd(sym_choice.length) ];
 
   let opt = {
     "max_level": max_lvl,
     //"pattern_choice": [0,1,2,3,4,5,6],
     //"pattern_choice": [0,1],
     "pattern_choice": all_pat,
+
+    //"symmetry" : "=",
+    //"symmetry" : "H",
+    //"symmetry" : "|",
+    //"symmetry" : "r0",
+    "symmetry" : _sc,
+
+    "symmetry_lib": {
+
+      // equal corner, left/right, up/down
+      //
+      "i"  : [[0,0], [1,1], [2,2], [3,3], [4,4], [5,5], [6,6], [7,7] ],
+      "#"  : [[0,0], [1,1], [2,2], [3,3], [4,4], [5,5], [6,6], [7,7] ],
+      "="  : [[0,0], [1,1], [2,2], [3,3], [4,4], [5,5], [6,6], [7,7] ],
+      "H"  : [[0,0], [1,1], [2,2], [3,3], [4,4], [5,5], [6,6], [7,7] ],
+
+      "r0"  : [[0,0], [1,1], [2,2], [3,3], [4,4], [5,5], [6,6], [7,7] ],
+      "r1"  : [[0,1], [1,0], [2,5], [3,4], [4,2], [5,3], [6,6], [7,7] ],
+      "r2"  : [[0,0], [1,1], [2,3], [3,2], [4,5], [5,4], [6,6], [7,7] ],
+      "r3"  : [[0,1], [1,0], [2,4], [3,5], [4,3], [5,2], [6,6], [7,7] ],
+
+      // mirror symmetry, left/right, top/down,
+      // lower left/upper right, upper left/lower right
+      //
+      "|"  : [[0,1], [1,0], [2,4], [4,2], [3,5], [5,3], [6,6], [7,7] ],
+      "-"  : [[0,1], [1,0], [2,5], [5,2], [3,4], [4,3], [6,6], [7,7] ],
+      "\\" : [[0,0], [1,1], [2,2], [3,3], [4,5], [5,4], [6,6], [7,7] ],
+      "/"  : [[0,0], [1,1], [2,3], [3,2], [4,4], [5,5], [6,6], [7,7] ]
+    },
     "prob_profile": p_prof
   };
 
@@ -1462,8 +1797,8 @@ function web_init() {
   let _i1 = irnd(f_pat_info.length);
 
   //DEBUG
-  //_i0 = 3;
-  //_i1 = 4;
+  //_i0 = 0;
+  //_i1 = 1;
 
   let pat0_func = f_pat_info[ _i0 ][0];
   let pat1_func = f_pat_info[ _i1 ][0];
@@ -1521,10 +1856,17 @@ function web_init() {
 
   g_data["opt"] = opt;
 
-  let g = [];
-  grid_r(g, cxy[0], cxy[1], R, 0, opt );
-  g.sort( mstp_sort );
-  g_data["g"] = g;
+  let grid_ctx = {
+    "g": [],
+    "p": [],
+    "g_p": []
+  };
+
+  //grid_r(grid_ctx, cxy[0], cxy[1], R, 0, opt );
+  grid_sym_r(grid_ctx, cxy[0], cxy[1], R, 0, opt );
+  grid_ctx.g.sort( mstp_sort );
+
+  g_data["grid_ctx"] = grid_ctx;
 
   g_data["draw_list"] = [];
 
@@ -1532,9 +1874,16 @@ function web_init() {
 
   //DEBUG
   //g = [ [300,300, 100, 0, 0 ] ];
+  //grid_ctx.g = [
+  //  [300,500, 100, 6, 1 ],
+  //  [500,500, 100, 6, 1 ]
+  //];
 
-  for (let i=0; i<g.length; i++) {
-    let v = g[i];
+  for (let i=0; i<grid_ctx.g.length; i++) {
+    let v = grid_ctx.g[i];
+
+    //                                     x      y     r    pat    lvl    f_fg     f_bg
+    //
     let _l = multiscale_truchet_pattern( [v[0], v[1]], v[2], v[3], v[4], f_wrap0, f_wrap1 );
     g_data.draw_list.push(_l);
   }
@@ -1543,6 +1892,16 @@ function web_init() {
 
   window.requestAnimationFrame(anim);
 }
+
+
+//------------------------------
+//      ___          __
+//  ___/ (_)__ ___  / /__ ___ __
+// / _  / (_-</ _ \/ / _ `/ // /
+// \_,_/_/___/ .__/_/\_,_/\_, /
+//          /_/          /___/
+//------------------------------
+
 
 // e - ellipse
 // w - linear + wiggle

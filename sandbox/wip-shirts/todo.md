@@ -1,7 +1,7 @@
 todo
 ---
 
-* symmetry weighting
+* ~symmetry weighting~
 * base templates
 * color
 
