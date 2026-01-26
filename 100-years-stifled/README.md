@@ -72,3 +72,18 @@ Tags
 
 generative, pattern, truchet, multiscale truchet, animated
 
+
+License
+---
+
+Check individual files for license details.
+
+Unless otherwise specified, all files associated with this project are under a CC0 license.
+
+
+> To the extent possible under law, the person who associated CC0 with
+> this project has waived all copyright and related or neighboring rights
+> to this project.
+> 
+> You should have received a copy of the CC0 legalcode along with this
+> work.  If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
