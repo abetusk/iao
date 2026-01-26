@@ -12,6 +12,7 @@ var CANVAS_ID = 'iao_canvas';
 var g_data = {
   "two": undefined,
 
+  "ANIMATE": true,
   "BG" : ['#fff', '#fff'],
   "FG" : ['#000', '#000'],
 
@@ -1977,6 +1978,15 @@ function web_init() {
   //  [500,500, 100, 6, 1 ]
   //];
 
+  // pick our colors, I guess
+  //
+
+  let co_pal = color500[ irnd(color500.length) ];
+  g_data.BG[0] = co_pal[0];
+  g_data.FG[0] = co_pal[1];
+  g_data.FG[1] = co_pal[3];
+  g_data.BG[1] = co_pal[4];
+
   for (let i=0; i<grid_ctx.g.length; i++) {
     let v = grid_ctx.g[i];
 
@@ -2033,18 +2043,14 @@ var animation_ctx = [
 ];
 
 function motion_animate(ctx, t) {
-
   if      (ctx.type == 'e') { return motion_ellipse(ctx, t); }
   else if (ctx.type == 'w') { return motion_wiggle(ctx, t); }
-
   return [0,0];
 }
 
 function motion_ellipse(ctx, t) {
   let n = ctx.f.length;
-
   let xy = [0,0];
-
   for (let i=0; i<n; i++) {
     let fx = ctx.f[i][0],
         cx = ctx.c[i][0],
@@ -2057,30 +2063,23 @@ function motion_ellipse(ctx, t) {
     xy[0] += cx*Math.cos(2*Math.PI*((fx*t) + px));
     xy[1] += cy*Math.cos(2*Math.PI*((fy*t) + py));
   }
-
   return xy;
 }
 
-let foo = 0;
-
 function motion_wiggle(ctx, t) {
-
   let n = ctx.f.length;
-
   let xy = [ t*ctx.v[0], t*ctx.v[1] ];
   for (let i=0; i<n; i++) {
     xy[0] += ctx.u[i][0] + (ctx.c[i][0] * Math.cos( (2*Math.PI)*((ctx.f[i][0]*t) + ctx.p[i][0]) ) );
     xy[1] += ctx.u[i][1] + (ctx.c[i][1] * Math.cos( (2*Math.PI)*((ctx.f[i][1]*t) + ctx.p[i][1]) ) );
   }
-
   return xy;
 }
 
-var ANIMATE = true;
 
 function anim() {
 
-  if (ANIMATE) {
+  if (g_data.ANIMATE) {
 
     let Ts = Date.now() / 1000;
 
@@ -2100,9 +2099,6 @@ function anim() {
     xyxy[1][0] = qrem( xyxy[1][0], xymod[1][0] );
     xyxy[1][1] = qrem( xyxy[1][1], xymod[1][1] );
 
-    //console.log(xyxy[1][0], xyxy[1][1]);
-
-
     for (let i=0; i<g_data.svg_pattern.length; i++) {
       let p = g_data.svg_pattern[i][0];
       let mt_idx = g_data.svg_pattern[i][1];
@@ -2115,5 +2111,4 @@ function anim() {
 
   window.requestAnimationFrame(anim);
 }
-
 
