@@ -11,7 +11,7 @@
 outfn=100_years_stifled.zip
 rm -f $outfn
 
-zip $outfn 500.js FileSaver.js fxhash.min.js script.js svg.js two.jsindex.html LICENSE README.md
+zip $outfn 500.js FileSaver.js fxhash.min.js script.js svg.js two.js index.html LICENSE README.md
 
 
 
