@@ -12,6 +12,13 @@ var CANVAS_ID = 'iao_canvas';
 var g_data = {
   "two": undefined,
 
+  "BG" : ['#fff', '#fff'],
+  "FG" : ['#000', '#000'],
+
+  //DEBUG
+  //"BG" : ['#f00', '#0f0'],
+  //"FG" : ['#f0f', '#00f'],
+
   "pattern_period": [ [7,7,1], [7,7,1] ],
 
   "default_pattern_period": {
@@ -49,8 +56,8 @@ var g_data = {
   },
 
   "f_pat_info": [
-    [ pat_checkboard_red,     "checkerboard.red" ],
-    [ pat_checkerboard_blue,  "checkerboard.blue" ],
+    //[ pat_checkerboard_red,     "checkerboard.red" ],
+    //[ pat_checkerboard_blue,  "checkerboard.blue" ],
     [ pat_checkerboard,       "%" ],
     [ pat_diag0,              "\\" ],
     [ pat_diag1,              "/" ],
@@ -82,8 +89,8 @@ var g_data = {
   ],
 
   "f_pat": [
-    pat_checkboard_red,
-    pat_checkerboard_blue,
+    //pat_checkerboard_red,
+    //pat_checkerboard_blue,
     pat_checkerboard,
     pat_diag0,
     pat_diag1,
@@ -159,7 +166,7 @@ function irnd(a,b) {
   return Math.floor( drand(a,b) );
 }
 
-function pat_checkboard_red(dx,dy, w,h, s, lw, mt_idx) {
+function pat_checkerboard_red(dx,dy, w,h, s, lw, mt_idx) {
   w = ((typeof w === "undefined") ? g_data.default_pattern_period["checkerboard.red"][0] : w );
   h = ((typeof h === "undefined") ? g_data.default_pattern_period["checkerboard.red"][1] : h );
   s = ((typeof s === "undefined") ? g_data.default_pattern_period["checkerboard.red"][2] : s );
@@ -203,10 +210,13 @@ function pat_checkerboard(dx,dy, w,h, s, lw, mt_idx) {
   s = ((typeof s === "undefined") ? g_data.default_pattern_period["checkerboard.blue"][2] : s );
   let draw = g_data.svg_draw;
   var p = draw.pattern(w, h, function(add) {
-    //add.rect(w,h).fill('#06f');
-    //add.rect(w,h);
-    add.rect(w/2,h/2);
-    add.rect(w/2,h/2).move(w/2,h/2);
+    //add.rect(w/2,h/2);
+    //add.rect(w/2,h/2).move(w/2,h/2);
+
+    add.rect(w,h).fill( g_data.BG[mt_idx] );
+    add.rect(w/2,h/2).fill( g_data.FG[mt_idx] );
+    add.rect(w/2,h/2).move(w/2,h/2).fill(g_data.FG[mt_idx]);
+
   });
   p.scale(s);
   p.translate(dx,dy);
@@ -226,10 +236,15 @@ function pat_diag0(dx,dy, w,h, s,lw, mt_idx) {
   lw = ((typeof lw === "undefined") ? 1 : lw);
   let draw = g_data.svg_draw;
   var p = draw.pattern(w, h, function(add) {
-    add.rect(w,h).fill("#fff");
-    add.line(0,0,w,h).stroke({"color":"#000", "linecap":"square", "width":lw});
-    add.line(0,-h,2*w,h).stroke({"color":"#000", "linecap":"square", "width":lw});
-    add.line(-w,0,w,2*h).stroke({"color":"#000", "linecap":"square", "width":lw});
+    //add.rect(w,h).fill("#fff");
+    add.rect(w,h).fill( g_data.BG[mt_idx] );
+
+    //add.line(0,0,w,h).stroke({"color":"#000", "linecap":"square", "width":lw});
+    //add.line(0,-h,2*w,h).stroke({"color":"#000", "linecap":"square", "width":lw});
+    //add.line(-w,0,w,2*h).stroke({"color":"#000", "linecap":"square", "width":lw});
+    add.line(0,0,w,h).stroke({"color":g_data.FG[mt_idx], "linecap":"square", "width":lw});
+    add.line(0,-h,2*w,h).stroke({"color":g_data.FG[mt_idx], "linecap":"square", "width":lw});
+    add.line(-w,0,w,2*h).stroke({"color":g_data.FG[mt_idx], "linecap":"square", "width":lw});
   });
   p.scale(s);
   p.translate(dx,dy);
@@ -249,10 +264,15 @@ function pat_diag1(dx,dy,w,h,s,lw, mt_idx) {
   lw = ((typeof lw === "undefined") ? 1 : lw);
   let draw = g_data.svg_draw;
   var p = draw.pattern(w, h, function(add) {
-    add.rect(w,h).fill("#fff");
-    add.line(w,0,0,h).stroke({"color":"#000", "linecap":"butt", "width":lw});
-    add.line(2*w,0,0,2*h).stroke({"color":"#000", "linecap":"butt", "width":lw});
-    add.line(w,-h,-w,h).stroke({"color":"#000", "linecap":"butt", "width":lw});
+    //add.rect(w,h).fill("#fff");
+    //add.line(w,0,0,h).stroke({"color":"#000", "linecap":"butt", "width":lw});
+    //add.line(2*w,0,0,2*h).stroke({"color":"#000", "linecap":"butt", "width":lw});
+    //add.line(w,-h,-w,h).stroke({"color":"#000", "linecap":"butt", "width":lw});
+
+    add.rect(w,h).fill( g_data.BG[mt_idx] );
+    add.line(w,0,0,h).stroke({"color":g_data.FG[mt_idx], "linecap":"butt", "width":lw});
+    add.line(2*w,0,0,2*h).stroke({"color":g_data.FG[mt_idx], "linecap":"butt", "width":lw});
+    add.line(w,-h,-w,h).stroke({"color":g_data.FG[mt_idx], "linecap":"butt", "width":lw});
   });
   p.scale(s);
   p.translate(dx,dy);
@@ -271,11 +291,19 @@ function pat_circ0(dx,dy,w,h,s,lw, mt_idx) {
   lw = ((typeof lw === "undefined") ? 1 : lw);
   let draw = g_data.svg_draw;
   var p = draw.pattern(w, h, function(add) {
-    add.rect(w,h).fill("#fff");
-    add.circle(w/3).center(0,0);
-    add.circle(w/3).center(0,h);
-    add.circle(w/3).center(w,h);
-    add.circle(w/3).center(w,0);
+
+    //add.rect(w,h).fill("#fff");
+    //add.circle(w/3).center(0,0);
+    //add.circle(w/3).center(0,h);
+    //add.circle(w/3).center(w,h);
+    //add.circle(w/3).center(w,0);
+
+    add.rect(w,h).fill(g_data.BG[mt_idx]);
+    add.circle(w/3).center(0,0).fill(g_data.FG[mt_idx]);
+    add.circle(w/3).center(0,h).fill(g_data.FG[mt_idx]);
+    add.circle(w/3).center(w,h).fill(g_data.FG[mt_idx]);
+    add.circle(w/3).center(w,0).fill(g_data.FG[mt_idx]);
+
   });
   p.scale(s);
   p.translate(dx,dy);
@@ -295,12 +323,19 @@ function pat_circ1(dx,dy,w,h,s,lw, mt_idx) {
   lw = ((typeof lw === "undefined") ? 1 : lw);
   let draw = g_data.svg_draw;
   var p = draw.pattern(w, h, function(add) {
-    add.rect(w,h).fill("#fff");
-    add.circle(w/3).center(w/2,h/2);
-    add.circle(w/3).center(0,0);
-    add.circle(w/3).center(0,h);
-    add.circle(w/3).center(w,h);
-    add.circle(w/3).center(w,0);
+    //add.rect(w,h).fill("#fff");
+    //add.circle(w/3).center(w/2,h/2);
+    //add.circle(w/3).center(0,0);
+    //add.circle(w/3).center(0,h);
+    //add.circle(w/3).center(w,h);
+    //add.circle(w/3).center(w,0);
+
+    add.rect(w,h).fill(g_data.BG[mt_idx]);
+    add.circle(w/3).center(w/2,h/2).fill(g_data.FG[mt_idx]);
+    add.circle(w/3).center(0,0).fill(g_data.FG[mt_idx]);
+    add.circle(w/3).center(0,h).fill(g_data.FG[mt_idx]);
+    add.circle(w/3).center(w,h).fill(g_data.FG[mt_idx]);
+    add.circle(w/3).center(w,0).fill(g_data.FG[mt_idx]);
   });
   p.scale(s);
   p.translate(dx,dy);
@@ -323,8 +358,8 @@ function pat_wiggle(dx,dy, w,h, s, lw, mt_idx) {
   //
   let draw = g_data.svg_draw;
   var p = draw.pattern(w, h, function(add) {
-    add.rect(w,h).fill("#fff");
-
+    add.rect(w,h).fill(g_data.BG[mt_idx]);
+    add.fill( g_data.FG[mt_idx] );
     add.path("M10 10c0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6h2c0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4v2c-3.314 0-6-2.686-6-6 0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6zm25.464-1.95l8.486 8.486-1.414 1.414-8.486-8.486 1.414-1.414z");
 
   });
@@ -350,7 +385,10 @@ function pat_anchor(dx,dy, w,h, s,lw, mt_idx) {
 
   let draw = g_data.svg_draw;
   var p = draw.pattern(w, h, function(add) {
-    add.rect(w,h).fill("#fff");
+    add.rect(w,h).fill(g_data.BG[mt_idx]);
+
+    add.fill( g_data.FG[mt_idx] );
+    add.stroke({"color": g_data.FG[mt_idx] });
 
     add.path("M14 16H9v-2h5V9.87a4 4 0 1 1 2 0V14h5v2h-5v15.95A10 10 0 0 0 23.66 27l-3.46-2 8.2-2.2-2.9 5a12 12 0 0 1-21 0l-2.89-5 8.2 2.2-3.47 2A10 10 0 0 0 14 31.95V16zm40 40h-5v-2h5v-4.13a4 4 0 1 1 2 0V54h5v2h-5v15.95A10 10 0 0 0 63.66 67l-3.47-2 8.2-2.2-2.88 5a12 12 0 0 1-21.02 0l-2.88-5 8.2 2.2-3.47 2A10 10 0 0 0 54 71.95V56zm-39 6a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm40-40a2 2 0 1 1 0-4 2 2 0 0 1 0 4zM15 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm40 40a2 2 0 1 0 0-4 2 2 0 0 0 0 4z");
 
@@ -376,7 +414,10 @@ function pat_glam(dx,dy, w,h, s, lw, mt_idx) {
 
   let draw = g_data.svg_draw;
   var p = draw.pattern(w, h, function(add) {
-    add.rect(w,h).fill("#fff");
+    add.rect(w,h).fill(g_data.BG[mt_idx]);
+
+    add.fill( g_data.FG[mt_idx] );
+    add.stroke({"color": g_data.FG[mt_idx] });
 
     add.path("M81.2792408,88 L68.4142136,88 L87.7117544,107.297541 L81.2792408,88 L81.2792408,88 Z M83.3874259,88 L96.6125741,88 L90,107.837722 L83.3874259,88 L83.3874259,88 Z M98.7207592,88 L111.585786,88 L92.2882456,107.297541 L98.7207592,88 L98.7207592,88 Z M65.7928932,85.7928932 L73.5857864,78 L75.2071068,78 L105.792893,78 L106.414214,78 L106.914214,78.5 L114.207107,85.7928932 L115.414214,87 L90.7071068,111.707107 L90,112.414214 L64.5857864,87 L64.5857864,87 L65.7928932,85.7928932 L65.7928932,85.7928932 Z M68.4142136,86 L74,80.4142136 L79.5857864,86 L68.4142136,86 L68.4142136,86 Z M84.4142136,86 L90,80.4142136 L95.5857864,86 L84.4142136,86 L84.4142136,86 Z M100.414214,86 L106,80.4142136 L111.585786,86 L100.414214,86 L100.414214,86 Z M92.4142136,80 L103.585786,80 L98,85.5857864 L92.4142136,80 L92.4142136,80 Z M82,85.5857864 L87.5857864,80 L76.4142136,80 L82,85.5857864 L82,85.5857864 Z M17.4142136,0 L0.707106781,16.7071068 L0,17.4142136 L0,0 L17.4142136,0 L17.4142136,0 Z M4.27924078,0 L0,12.8377223 L0,0 L4.27924078,0 L4.27924078,0 Z M14.5857864,0 L2.28824561,12.2975408 L6.38742589,0 L14.5857864,0 L14.5857864,0 Z M180,17.4142136 L162.585786,0 L180,0 L180,17.4142136 L180,17.4142136 Z M165.414214,0 L177.711754,12.2975408 L173.612574,0 L165.414214,0 Z M180,12.8377223 L175.720759,0 L180,0 L180,12.8377223 L180,12.8377223 Z M1.42108547e-14,163 L15.7928932,163 L16.4142136,163 L16.9142136,163.5 L24.2071068,170.792893 L25.4142136,172 L17.4142136,180 L0,180 L0,163 L1.42108547e-14,163 Z M0,173 L6.61257411,173 L4.27924078,180 L0,180 L0,173 Z M14.5857864,180 L21.5857864,173 L8.72075922,173 L6.38742589,180 L14.5857864,180 Z M2.4158453e-13,165.414214 L5.58578644,171 L0,171 L0,165.414214 L2.4158453e-13,165.414214 Z M10.4142136,171 L16,165.414214 L21.5857864,171 L10.4142136,171 Z M2.41421356,165 L13.5857864,165 L8,170.585786 L2.41421356,165 Z M180,163 L165.207107,163 L163.585786,163 L155.792893,170.792893 L155.792893,170.792893 L154.585786,172 L162.585786,180 L180,180 L180,163 Z M165.414214,180 L158.414214,173 L171.279241,173 L173.612574,180 L165.414214,180 Z M180,173 L173.387426,173 L175.720759,180 L180,180 L180,173 Z M158.414214,171 L164,165.414214 L169.585786,171 L158.414214,171 Z M180,165.414214 L174.414214,171 L180,171 L180,165.414214 Z M172,170.585786 L177.585786,165 L166.414214,165 L172,170.585786 Z M152.932504,25.6532829 L154.346717,27.0674965 L120.405592,61.008622 L118.991378,59.5944084 L152.932504,25.6532829 Z M154.346717,152.932504 L152.932504,154.346717 L118.991378,120.405592 L120.405592,118.991378 L154.346717,152.932504 Z M27.0674965,154.346717 L25.6532829,152.932504 L59.5944084,118.991378 L61.008622,120.405592 L27.0674965,154.346717 Z M25.6532829,27.0674965 L27.0674965,25.6532829 L61.008622,59.5944084 L59.5944084,61.008622 L25.6532829,27.0674965 Z M0,85 C2.209139,85 4,86.790861 4,89 C4,91.209139 2.209139,93 0,93 L0,85 Z M180,85 C177.790861,85 176,86.790861 176,89 C176,91.209139 177.790861,93 180,93 L180,85 Z M94,0 C94,2.209139 92.209139,4 90,4 C87.790861,4 86,2.209139 86,0 L94,0 Z M94,180 C94,177.790861 92.209139,176 90,176 C87.790861,176 86,177.790861 86,180 L94,180 Z");
 
@@ -402,7 +443,10 @@ function pat_diamond(dx,dy, w,h, s,lw, mt_idx) {
 
   let draw = g_data.svg_draw;
   var p = draw.pattern(w, h, function(add) {
-    add.rect(w,h).fill("#fff");
+    add.rect(w,h).fill(g_data.BG[mt_idx]);
+
+    add.fill( g_data.FG[mt_idx] );
+    //add.stroke({"color": g_data.FG[mt_idx] });
 
     add.path("M54.627417,1.33226763e-15 L55.4558441,0.828427125 L54.0416306,2.24264069 L51.7989899,-1.44328993e-15 L54.627417,7.10542736e-15 L54.627417,1.33226763e-15 Z M5.372583,-5.55111512e-16 L4.54415588,0.828427125 L5.95836944,2.24264069 L8.20101013,-1.44328993e-15 L5.372583,-7.77156117e-16 L5.372583,-5.55111512e-16 Z M48.9705627,6.32827124e-15 L52.627417,3.65685425 L51.2132034,5.07106781 L46.1421356,-1.44328993e-15 L48.9705627,5.21804822e-15 L48.9705627,6.32827124e-15 Z M11.0294373,-1.44328993e-15 L7.372583,3.65685425 L8.78679656,5.07106781 L13.8578644,1.22124533e-15 L11.0294373,-3.33066907e-16 L11.0294373,-1.44328993e-15 Z M43.3137085,2.10942375e-15 L49.7989899,6.48528137 L48.3847763,7.89949494 L40.4852814,2.10942375e-15 L43.3137085,-1.44328993e-15 L43.3137085,2.10942375e-15 Z M16.6862915,3.33066907e-16 L10.2010101,6.48528137 L11.6152237,7.89949494 L19.5147186,-3.33066907e-16 L16.6862915,-1.44328993e-15 L16.6862915,3.33066907e-16 Z M37.6568542,2.55351296e-15 L46.9705627,9.3137085 L45.5563492,10.7279221 L34.8284271,-5.55111512e-16 L37.6568542,-1.44328993e-15 L37.6568542,2.55351296e-15 Z M22.3431458,5.55111512e-16 L13.0294373,9.3137085 L14.4436508,10.7279221 L25.1715729,-1.11022302e-16 L22.3431458,-1.44328993e-15 L22.3431458,5.55111512e-16 Z M32,-3.33066907e-16 L44.1421356,12.1421356 L42.7279221,13.5563492 L30,0.828427125 L17.2720779,13.5563492 L15.8578644,12.1421356 L28,-3.33066907e-16 L32,-1.44328993e-15 L32,-3.33066907e-16 Z M0.284271247,-1.44328993e-15 L28.2842712,28 L26.8700577,29.4142136 L-2.15508222e-16,2.54415588 L-2.15508222e-16,4.71844785e-16 L0.284271247,4.71844785e-16 L0.284271247,-1.44328993e-15 Z M1.80408836e-15,5.372583 L25.4558441,30.8284271 L24.0416306,32.2426407 L3.33720546e-15,8.20101013 L-2.15508222e-16,5.372583 L1.80408836e-15,5.372583 Z M-2.15508222e-16,11.0294373 L22.627417,33.6568542 L21.2132034,35.0710678 L4.80878765e-15,13.8578644 L1.25607397e-15,11.0294373 L-2.15508222e-16,11.0294373 Z M-2.15508222e-16,16.6862915 L19.7989899,36.4852814 L18.3847763,37.8994949 L7.73346434e-15,19.5147186 L6.28036983e-16,16.6862915 L-2.15508222e-16,16.6862915 Z M1.66860273e-15,22.3431458 L16.9705627,39.3137085 L15.5563492,40.7279221 L-2.15508222e-16,25.1715729 L-2.15508222e-16,22.3431458 L1.66860273e-15,22.3431458 Z M-2.15508222e-16,28 L14.1421356,42.1421356 L12.7279221,43.5563492 L-2.15508222e-16,30.8284271 L-2.15508222e-16,28 L-2.15508222e-16,28 Z M-2.15508222e-16,33.6568542 L11.3137085,44.9705627 L9.89949494,46.3847763 L5.20282872e-16,36.4852814 L5.20282872e-16,33.6568542 L-2.15508222e-16,33.6568542 Z M-2.15508222e-16,39.3137085 L8.48528137,47.7989899 L7.07106781,49.2132034 L3.55271368e-15,42.1421356 L3.55271368e-15,39.3137085 L-2.15508222e-16,39.3137085 Z M-2.15508222e-16,44.9705627 L5.65685425,50.627417 L4.24264069,52.0416306 L3.55271368e-15,47.7989899 L2.66453526e-15,44.9705627 L-2.15508222e-16,44.9705627 Z M-2.15508222e-16,50.627417 L2.82842712,53.4558441 L1.41421356,54.8700577 L2.48058749e-15,53.4558441 L2.48058749e-15,50.627417 L-2.15508222e-16,50.627417 Z M54.627417,60 L30,35.372583 L5.372583,60 L8.20101013,60 L30,38.2010101 L51.7989899,60 L54.627417,60 L54.627417,60 Z M48.9705627,60 L30,41.0294373 L11.0294373,60 L13.8578644,60 L30,43.8578644 L46.1421356,60 L48.9705627,60 L48.9705627,60 Z M43.3137085,60 L30,46.6862915 L16.6862915,60 L19.5147186,60 L30,49.5147186 L40.4852814,60 L43.3137085,60 L43.3137085,60 Z M37.6568542,60 L30,52.3431458 L22.3431458,60 L25.1715729,60 L30,55.1715729 L34.8284271,60 L37.6568542,60 L37.6568542,60 Z M32,60 L30,58 L28,60 L32,60 L32,60 Z M59.7157288,3.33066907e-16 L31.7157288,28 L33.1299423,29.4142136 L60,2.54415588 L60,-1.44328993e-15 L59.7157288,-1.44328993e-15 L59.7157288,3.33066907e-16 Z M60,5.372583 L34.5441559,30.8284271 L35.9583694,32.2426407 L60,8.20101013 L60,5.372583 L60,5.372583 Z M60,11.0294373 L37.372583,33.6568542 L38.7867966,35.0710678 L60,13.8578644 L60,11.0294373 L60,11.0294373 Z M60,16.6862915 L40.2010101,36.4852814 L41.6152237,37.8994949 L60,19.5147186 L60,16.6862915 L60,16.6862915 Z M60,22.3431458 L43.0294373,39.3137085 L44.4436508,40.7279221 L60,25.1715729 L60,22.3431458 L60,22.3431458 Z M60,28 L45.8578644,42.1421356 L47.2720779,43.5563492 L60,30.8284271 L60,28 L60,28 Z M60,33.6568542 L48.6862915,44.9705627 L50.1005051,46.3847763 L60,36.4852814 L60,33.6568542 L60,33.6568542 Z M60,39.3137085 L51.5147186,47.7989899 L52.9289322,49.2132034 L60,42.1421356 L60,39.3137085 L60,39.3137085 Z M60,44.9705627 L54.3431458,50.627417 L55.7573593,52.0416306 L60,47.7989899 L60,44.9705627 L60,44.9705627 Z M60,50.627417 L57.1715729,53.4558441 L58.5857864,54.8700577 L60,53.4558441 L60,50.627417 L60,50.627417 Z M39.8994949,16.3847763 L41.3137085,14.9705627 L30,3.65685425 L18.6862915,14.9705627 L20.1005051,16.3847763 L30,6.48528137 L39.8994949,16.3847763 L39.8994949,16.3847763 Z M37.0710678,19.2132034 L38.4852814,17.7989899 L30,9.3137085 L21.5147186,17.7989899 L22.9289322,19.2132034 L30,12.1421356 L37.0710678,19.2132034 L37.0710678,19.2132034 Z M34.2426407,22.0416306 L35.6568542,20.627417 L30,14.9705627 L24.3431458,20.627417 L25.7573593,22.0416306 L30,17.7989899 L34.2426407,22.0416306 L34.2426407,22.0416306 Z M31.4142136,24.8700577 L32.8284271,23.4558441 L30,20.627417 L27.1715729,23.4558441 L28.5857864,24.8700577 L30,23.4558441 L31.4142136,24.8700577 L31.4142136,24.8700577 Z M56.8700577,59.4142136 L58.2842712,58 L30,29.7157288 L1.71572875,58 L3.12994231,59.4142136 L30,32.5441559 L56.8700577,59.4142136 L56.8700577,59.4142136 Z");
 
@@ -428,7 +472,10 @@ function pat_bank(dx,dy, w,h, s,lw, mt_idx) {
 
   let draw = g_data.svg_draw;
   var p = draw.pattern(w, h, function(add) {
-    add.rect(w,h).fill("#fff");
+    add.rect(w,h).fill(g_data.BG[mt_idx]);
+
+    add.fill( g_data.FG[mt_idx] );
+    //add.stroke({"color": g_data.FG[mt_idx] });
 
     add.path("M21.1841339,20 C21.5411448,19.869748 21.9037256,19.7358773 22.272392,19.5983261 C22.6346445,19.4631679 23.8705367,18.9999982 24.0399055,18.9366758 C33.6397477,15.3475548 39.6469349,14 50,14 C60.2711361,14 65.3618399,15.2217689 74.6286093,18.9284767 C75.584355,19.310775 76.4978747,19.6675274 77.3787841,20 L83.604005,20 C81.0931362,19.2694473 78.4649665,18.3089537 75.3713907,17.0715233 C65.8881601,13.2782311 60.5621972,12 50,12 C39.3741437,12 33.144814,13.3973866 23.3395101,17.0633242 C23.1688625,17.1271247 21.9338538,17.5899633 21.5732596,17.7245028 C19.0984715,18.6478581 16.912678,19.3994574 14.8494171,20 L21.1841339,20 L21.1841339,20 Z M21.1841339,0 C13.2575214,2.89194861 8.07672845,4 7.87150385e-14,4 L7.81597009e-14,4 L0,2 C5.74391753,2 9.9514017,1.4256397 14.8494171,1.40165657e-15 L21.1841339,6.9388939e-17 L21.1841339,0 Z M77.3787841,2.21705987e-12 C85.238555,2.9664329 90.5022896,4 100,4 L100,2 C93.1577329,2 88.6144135,1.4578092 83.604005,1.04805054e-13 L77.3787841,0 L77.3787841,2.21705987e-12 Z M7.87150385e-14,14 C8.44050043,14 13.7183277,12.7898887 22.272392,9.59832609 C22.6346445,9.46316794 23.8705367,8.99999822 24.0399055,8.9366758 C33.6397477,5.34755477 39.6469349,4 50,4 C60.2711361,4 65.3618399,5.2217689 74.6286093,8.92847669 C84.1118399,12.7217689 89.4378028,14 100,14 L100,12 C89.7288639,12 84.6381601,10.7782311 75.3713907,7.07152331 C65.8881601,3.2782311 60.5621972,2 50,2 C39.3741437,2 33.144814,3.39738661 23.3395101,7.0633242 C23.1688625,7.12712472 21.9338538,7.58996334 21.5732596,7.72450279 C13.2235239,10.8398294 8.16350991,12 0,12 L7.81597009e-14,14 L7.87150385e-14,14 L7.87150385e-14,14 Z");
 
@@ -454,7 +501,9 @@ function pat_cloud(dx,dy, w,h, s,lw, mt_idx) {
 
   let draw = g_data.svg_draw;
   var p = draw.pattern(w, h, function(add) {
-    add.rect(w,h).fill("#fff");
+    //add.rect(w,h).fill("#fff");
+    add.rect(w,h).fill(g_data.BG[mt_idx]);
+    add.fill( g_data.FG[mt_idx] );
 
     add.path("M56 26v2h-7.75c2.3-1.27 4.94-2 7.75-2zm-26 2a2 2 0 1 0-4 0h-4.09A25.98 25.98 0 0 0 0 16v-2c.67 0 1.34.02 2 .07V14a2 2 0 0 0-2-2v-2a4 4 0 0 1 3.98 3.6 28.09 28.09 0 0 1 2.8-3.86A8 8 0 0 0 0 6V4a9.99 9.99 0 0 1 8.17 4.23c.94-.95 1.96-1.83 3.03-2.63A13.98 13.98 0 0 0 0 0h7.75c2 1.1 3.73 2.63 5.1 4.45 1.12-.72 2.3-1.37 3.53-1.93A20.1 20.1 0 0 0 14.28 0h2.7c.45.56.88 1.14 1.29 1.74 1.3-.48 2.63-.87 4-1.15-.11-.2-.23-.4-.36-.59H26v.07a28.4 28.4 0 0 1 4 0V0h4.09l-.37.59c1.38.28 2.72.67 4.01 1.15.4-.6.84-1.18 1.3-1.74h2.69a20.1 20.1 0 0 0-2.1 2.52c1.23.56 2.41 1.2 3.54 1.93A16.08 16.08 0 0 1 48.25 0H56c-4.58 0-8.65 2.2-11.2 5.6 1.07.8 2.09 1.68 3.03 2.63A9.99 9.99 0 0 1 56 4v2a8 8 0 0 0-6.77 3.74c1.03 1.2 1.97 2.5 2.79 3.86A4 4 0 0 1 56 10v2a2 2 0 0 0-2 2.07 28.4 28.4 0 0 1 2-.07v2c-9.2 0-17.3 4.78-21.91 12H30zM7.75 28H0v-2c2.81 0 5.46.73 7.75 2zM56 20v2c-5.6 0-10.65 2.3-14.28 6h-2.7c4.04-4.89 10.15-8 16.98-8zm-39.03 8h-2.69C10.65 24.3 5.6 22 0 22v-2c6.83 0 12.94 3.11 16.97 8zm15.01-.4a28.09 28.09 0 0 1 2.8-3.86 8 8 0 0 0-13.55 0c1.03 1.2 1.97 2.5 2.79 3.86a4 4 0 0 1 7.96 0zm14.29-11.86c1.3-.48 2.63-.87 4-1.15a25.99 25.99 0 0 0-44.55 0c1.38.28 2.72.67 4.01 1.15a21.98 21.98 0 0 1 36.54 0zm-5.43 2.71c1.13-.72 2.3-1.37 3.54-1.93a19.98 19.98 0 0 0-32.76 0c1.23.56 2.41 1.2 3.54 1.93a15.98 15.98 0 0 1 25.68 0zm-4.67 3.78c.94-.95 1.96-1.83 3.03-2.63a13.98 13.98 0 0 0-22.4 0c1.07.8 2.09 1.68 3.03 2.63a9.99 9.99 0 0 1 16.34 0z");
 
@@ -480,7 +529,8 @@ function pat_parkay(dx,dy, w,h, s,lw, mt_idx) {
 
   let draw = g_data.svg_draw;
   var p = draw.pattern(w, h, function(add) {
-    add.rect(w,h).fill("#fff");
+    add.rect(w,h).fill(g_data.BG[mt_idx]);
+    add.fill( g_data.FG[mt_idx] );
 
     add.path("M20,20.5 L20,18 L0,18 L0,16 L20,16 L20,14 L0,14 L0,12 L20,12 L20,10 L0,10 L0,8 L20,8 L20,6 L0,6 L0,4 L20,4 L20,2 L0,2 L0,0 L20.5,0 L22,0 L22,20 L24,20 L24,0 L26,0 L26,20 L28,20 L28,0 L30,0 L30,20 L32,20 L32,0 L34,0 L34,20 L36,20 L36,0 L38,0 L38,20 L40,20 L40,22 L20,22 L20,20.5 L20,20.5 Z M0,20 L2,20 L2,40 L0,40 L0,20 L0,20 Z M4,20 L6,20 L6,40 L4,40 L4,20 L4,20 Z M8,20 L10,20 L10,40 L8,40 L8,20 L8,20 Z M12,20 L14,20 L14,40 L12,40 L12,20 L12,20 Z M16,20 L18,20 L18,40 L16,40 L16,20 L16,20 Z M20,24 L40,24 L40,26 L20,26 L20,24 L20,24 Z M20,28 L40,28 L40,30 L20,30 L20,28 L20,28 Z M20,32 L40,32 L40,34 L20,34 L20,32 L20,32 Z M20,36 L40,36 L40,38 L20,38 L20,36 L20,36 Z");
 
@@ -506,7 +556,8 @@ function pat_groovy(dx,dy, w,h, s,lw, mt_idx) {
 
   let draw = g_data.svg_draw;
   var p = draw.pattern(w, h, function(add) {
-    add.rect(w,h).fill("#fff");
+    add.rect(w,h).fill(g_data.BG[mt_idx]);
+    add.fill( g_data.FG[mt_idx] );
 
     add.path("M0,40 C5.5228475,40 10,35.5228475 10,30 L10,20 L10,0 C4.4771525,0 0,4.4771525 0,10 L0,20 L0,40 Z M22,40 C16.4771525,40 12,35.5228475 12,30 L12,20 L12,0 C17.5228475,0 22,4.4771525 22,10 L22,20 L22,40 Z");
 
@@ -532,7 +583,8 @@ function pat_curtain(dx,dy, w,h, s,lw, mt_idx) {
 
   let draw = g_data.svg_draw;
   var p = draw.pattern(w, h, function(add) {
-    add.rect(w,h).fill("#fff");
+    add.rect(w,h).fill(g_data.BG[mt_idx]);
+    add.fill( g_data.FG[mt_idx] );
 
     add.path("M20,12 L20,10 L0,0 L0,10 L4,12 L20,12 L20,12 Z M38,12 L42,10 L42,0 L22,10 L22,12 L38,12 Z M20,0 L20,8 L4,1.77635684e-15 L20,0 L20,0 Z M38,8.8817842e-16 L22,8 L22,0 L38,5.55111512e-16 L38,8.8817842e-16 Z");
 
@@ -558,7 +610,8 @@ function pat_aztec(dx,dy, w,h, s,lw, mt_idx) {
 
   let draw = g_data.svg_draw;
   var p = draw.pattern(w, h, function(add) {
-    add.rect(w,h).fill("#fff");
+    add.rect(w,h).fill(g_data.BG[mt_idx]);
+    add.fill( g_data.FG[mt_idx] );
 
     add.path("M0,28 L20,28 L20,16 L16,16 L16,24 L4,24 L4,4 L32,4 L32,32 L28,32 L28,8 L8,8 L8,20 L12,20 L12,12 L24,12 L24,32 L0,32 L0,28 Z M12,36 L32,36 L32,40 L16,40 L16,64 L0,64 L0,60 L12,60 L12,36 Z M28,48 L24,48 L24,60 L32,60 L32,64 L20,64 L20,44 L32,44 L32,56 L28,56 L28,48 Z M0,36 L8,36 L8,56 L0,56 L0,52 L4,52 L4,40 L0,40 L0,36 Z");
 
@@ -586,7 +639,8 @@ function pat_temple(dx,dy, w,h, s,lw, mt_idx) {
 
   let draw = g_data.svg_draw;
   var p = draw.pattern(w, h, function(add) {
-    add.rect(w,h).fill("#fff");
+    add.rect(w,h).fill(g_data.BG[mt_idx]);
+    add.fill( g_data.FG[mt_idx] );
 
     let _p = add.path("M152 150v2H0v-2h28v-8H8v-20H0v-2h8V80h42v20h20v42H30v8h90v-8H80v-42h20V80h42v40h8V30h-8v40h-42V50H80V8h40V0h2v8h20v20h8V0h2v150zm-2 0v-28h-8v20h-20v8h28zM82 30v18h18V30H82zm20 18h20v20h18V30h-20V10H82v18h20v20zm0 2v18h18V50h-18zm20-22h18V10h-18v18zm-54 92v-18H50v18h18zm-20-18H28V82H10v38h20v20h38v-18H48v-20zm0-2V82H30v18h18zm-20 22H10v18h18v-18zm54 0v18h38v-20h20V82h-18v20h-20v20H82zm18-20H82v18h18v-18zm2-2h18V82h-18v18zm20 40v-18h18v18h-18zM30 0h-2v8H8v20H0v2h8v40h42V50h20V8H30V0zm20 48h18V30H50v18zm18-20H48v20H28v20H10V30h20V10h38v18zM30 50h18v18H30V50zm-2-40H10v18h18V10z");
     _p.attr('fill-rule', 'evenodd');
@@ -616,7 +670,8 @@ function pat_food(dx,dy, w,h, s,lw, mt_idx) {
 
   let draw = g_data.svg_draw;
   var p = draw.pattern(w, h, function(add) {
-    add.rect(w,h).fill("#fff");
+    add.rect(w,h).fill(g_data.BG[mt_idx]);
+    add.fill( g_data.FG[mt_idx] );
 
     let p_list = [];
 
@@ -655,7 +710,8 @@ function pat_nomoon(dx,dy, w,h, s,lw, mt_idx) {
 
   let draw = g_data.svg_draw;
   var p = draw.pattern(w, h, function(add) {
-    add.rect(w,h).fill("#fff");
+    add.rect(w,h).fill(g_data.BG[mt_idx]);
+    add.fill( g_data.FG[mt_idx] );
 
     add.path("M20 10a5 5 0 0 1 10 0v50a5 5 0 0 1-10 0V10zm15 35a5 5 0 0 1 10 0v50a5 5 0 0 1-10 0V45zM20 75a5 5 0 0 1 10 0v20a5 5 0 0 1-10 0V75zm30-65a5 5 0 0 1 10 0v50a5 5 0 0 1-10 0V10zm0 65a5 5 0 0 1 10 0v20a5 5 0 0 1-10 0V75zM35 10a5 5 0 0 1 10 0v20a5 5 0 0 1-10 0V10zM5 45a5 5 0 0 1 10 0v50a5 5 0 0 1-10 0V45zm0-35a5 5 0 0 1 10 0v20a5 5 0 0 1-10 0V10zm60 35a5 5 0 0 1 10 0v50a5 5 0 0 1-10 0V45zm0-35a5 5 0 0 1 10 0v20a5 5 0 0 1-10 0V10z");
 
@@ -681,7 +737,8 @@ function pat_autumn(dx,dy, w,h, s,lw, mt_idx) {
 
   let draw = g_data.svg_draw;
   var p = draw.pattern(w, h, function(add) {
-    add.rect(w,h).fill("#fff");
+    add.rect(w,h).fill(g_data.BG[mt_idx]);
+    add.fill( g_data.FG[mt_idx] );
 
     add.path("M10 0l30 15 2 1V2.18A10 10 0 0 0 41.76 0H39.7a8 8 0 0 1 .3 2.18v10.58L14.47 0H10zm31.76 24a10 10 0 0 0-5.29-6.76L4 1 2 0v13.82a10 10 0 0 0 5.53 8.94L10 24h4.47l-6.05-3.02A8 8 0 0 1 4 13.82V3.24l31.58 15.78A8 8 0 0 1 39.7 24h2.06zM78 24l2.47-1.24A10 10 0 0 0 86 13.82V0l-2 1-32.47 16.24A10 10 0 0 0 46.24 24h2.06a8 8 0 0 1 4.12-4.98L84 3.24v10.58a8 8 0 0 1-4.42 7.16L73.53 24H78zm0-24L48 15l-2 1V2.18A10 10 0 0 1 46.24 0h2.06a8 8 0 0 0-.3 2.18v10.58L73.53 0H78z");
 
@@ -707,7 +764,8 @@ function pat_moroccan(dx,dy, w,h, s,lw, mt_idx) {
 
   let draw = g_data.svg_draw;
   var p = draw.pattern(w, h, function(add) {
-    add.rect(w,h).fill("#fff");
+    add.rect(w,h).fill(g_data.BG[mt_idx]);
+    add.fill( g_data.FG[mt_idx] );
 
     let _p = add.path("M22,21.910316 L22,26 L19.9989006,26 C10.0613799,26 2,34.0588745 2,44 C2,53.9433113 10.0583823,62 19.9989006,62 L22,62 L22,66.0897789 C30.0119364,66.8120156 36.7852126,71.8280516 39.9995613,78.820232 C43.2123852,71.8285229 49.9832383,66.8116352 58,66.089684 L58,62 L60.0010994,62 C69.9386201,62 78,53.9411255 78,44 C78,34.0566887 69.9416177,26 60.0010994,26 L58,26 L58,21.9102211 C49.9880636,21.1879844 43.2147874,16.1719484 40.0004387,9.17976804 C36.7876148,16.1714771 30.0167617,21.1883648 22,21.910316 L22,21.910316 Z M54,58 L54,62.6957274 C48.4256128,64.0124934 43.5445087,67.1235896 40,71.385704 C36.4554913,67.1235896 31.5743872,64.0124934 26,62.6957274 L26,58 L20.0071931,58 C12.2712339,58 6,51.7336865 6,44 C6,36.2680135 12.2753906,30 20.0071931,30 L26,30 L26,25.3042726 C31.5743872,23.9875066 36.4554913,20.8764104 40,16.614296 C43.5445087,20.8764104 48.4256128,23.9875066 54,25.3042726 L54,30 L59.9928069,30 C67.7287661,30 74,36.2663135 74,44 C74,51.7319865 67.7246094,58 59.9928069,58 L54,58 L54,58 Z M42,88 C42,78.0588745 50.0613799,70 59.9989006,70 L62,70 L62,65.910316 L62,65.910316 C70.0163968,65.1883977 76.7869984,60.1719338 80,53.1807228 L80,60.614296 C76.4554913,64.8764104 71.5743872,67.9875066 66,69.3042726 L66,74 L60.0071931,74 C52.2753906,74 46,80.2680135 46,88 L42,88 Z M38,88 C38,78.0566887 29.9416177,70 20.0010994,70 L18,70 L18,65.9102211 C9.98806359,65.1879844 3.21478738,60.1719484 0.000438743025,53.179768 L0,60.614296 C3.54450873,64.8764104 8.42561275,67.9875066 14,69.3042726 L14,74 L19.9928069,74 C27.7287661,74 34,80.2663135 34,88 L38,88 Z M42,7.10542736e-15 C42,9.94331128 50.0583823,18 59.9989006,18 L62,18 L62,22.0897789 C70.0119364,22.8120156 76.7852126,27.8280516 79.9995613,34.820232 L80,27.385704 C76.4554913,23.1235896 71.5743872,20.0124934 66,18.6957274 L66,14 L60.0071931,14 C52.2712339,14 46,7.73368655 46,1.42108547e-14 L42,1.42108547e-14 L42,7.10542736e-15 Z M-2.27373675e-13,34.8192772 C3.21300164,27.8280662 9.98360316,22.8116023 18,22.089684 L18,18 L20.0010994,18 C29.9386201,18 38,9.9411255 38,7.10542736e-15 L34,7.10542736e-15 C34,7.7319865 27.7246094,14 19.9928069,14 L14,14 L14,14 L14,18.6957274 C8.42561275,20.0124934 3.54450873,23.1235896 8.31903435e-11,27.385704 L2.84217094e-14,34.8192772 L-2.27373675e-13,34.8192772 Z");
     _p.attr('fill-rule', 'evenodd');
@@ -734,7 +792,8 @@ function pat_rounded(dx,dy, w,h, s,lw, mt_idx) {
 
   let draw = g_data.svg_draw;
   var p = draw.pattern(w, h, function(add) {
-    add.rect(w,h).fill("#fff");
+    add.rect(w,h).fill(g_data.BG[mt_idx]);
+    add.fill( g_data.FG[mt_idx] );
 
     let _p = add.path("M84 23c-4.417 0-8-3.584-8-7.998V8h-7.002C64.58 8 61 4.42 61 0H23c0 4.417-3.584 8-7.998 8H8v7.002C8 19.42 4.42 23 0 23v38c4.417 0 8 3.584 8 7.998V76h7.002C19.42 76 23 79.58 23 84h38c0-4.417 3.584-8 7.998-8H76v-7.002C76 64.58 79.58 61 84 61V23zM59.05 83H43V66.95c5.054-.5 9-4.764 9-9.948V52h5.002c5.18 0 9.446-3.947 9.95-9H83v16.05c-5.054.5-9 4.764-9 9.948V74h-5.002c-5.18 0-9.446 3.947-9.95 9zm-34.1 0H41V66.95c-5.053-.502-9-4.768-9-9.948V52h-5.002c-5.184 0-9.447-3.946-9.95-9H1v16.05c5.053.502 9 4.768 9 9.948V74h5.002c5.184 0 9.447 3.946 9.95 9zm0-82H41v16.05c-5.054.5-9 4.764-9 9.948V32h-5.002c-5.18 0-9.446 3.947-9.95 9H1V24.95c5.054-.5 9-4.764 9-9.948V10h5.002c5.18 0 9.446-3.947 9.95-9zm34.1 0H43v16.05c5.053.502 9 4.768 9 9.948V32h5.002c5.184 0 9.447 3.946 9.95 9H83V24.95c-5.053-.502-9-4.768-9-9.948V10h-5.002c-5.184 0-9.447-3.946-9.95-9zM50 50v7.002C50 61.42 46.42 65 42 65c-4.417 0-8-3.584-8-7.998V50h-7.002C22.58 50 19 46.42 19 42c0-4.417 3.584-8 7.998-8H34v-7.002C34 22.58 37.58 19 42 19c4.417 0 8 3.584 8 7.998V34h7.002C61.42 34 65 37.58 65 42c0 4.417-3.584 8-7.998 8H50z");
     _p.attr('fill-rule', 'evenodd');
@@ -760,13 +819,14 @@ function pat_zigzag0(dx,dy,w,h,s,lw, mt_idx) {
   lw = ((typeof lw === "undefined") ? 1 : lw);
   let draw = g_data.svg_draw;
   var p = draw.pattern(w, h, function(add) {
-    add.rect(w,h).fill("#fff");
+    add.rect(w,h).fill(g_data.BG[mt_idx]);
+    //add.fill( g_data.FG[mt_idx] );
 
-    add.line(  0,   0, w/2,  h/2).stroke({"color":"#000", "linecap":"square", "width":lw});
-    add.line(w/2, h/2,   w,    0).stroke({"color":"#000", "linecap":"square", "width":lw});
+    add.line(  0,   0, w/2,  h/2).stroke({"color":g_data.FG[mt_idx], "linecap":"square", "width":lw});
+    add.line(w/2, h/2,   w,    0).stroke({"color":g_data.FG[mt_idx], "linecap":"square", "width":lw});
 
-    add.line(  0,     h,  w/2, 3*h/2).stroke({"color":"#000", "linecap":"square", "width":lw});
-    add.line(w/2, 3*h/2,    w,     h).stroke({"color":"#000", "linecap":"square", "width":lw});
+    add.line(  0,     h,  w/2, 3*h/2).stroke({"color":g_data.FG[mt_idx], "linecap":"square", "width":lw});
+    add.line(w/2, 3*h/2,    w,     h).stroke({"color":g_data.FG[mt_idx], "linecap":"square", "width":lw});
 
   });
   p.scale(s);
@@ -787,13 +847,13 @@ function pat_zigzag1(dx,dy,w,h,s,lw, mt_idx) {
   lw = ((typeof lw === "undefined") ? 1 : lw);
   let draw = g_data.svg_draw;
   var p = draw.pattern(w, h, function(add) {
-    add.rect(w,h).fill("#fff");
+    add.rect(w,h).fill(g_data.BG[mt_idx]);
 
-    add.line(0,0,w/2,h/2).stroke({"color":"#000", "linecap":"square", "width":lw});
-    add.line(w/2,h/2,0,h).stroke({"color":"#000", "linecap":"square", "width":lw});
+    add.line(0,0,w/2,h/2).stroke({"color":g_data.FG[mt_idx], "linecap":"square", "width":lw});
+    add.line(w/2,h/2,0,h).stroke({"color":g_data.FG[mt_idx], "linecap":"square", "width":lw});
 
-    add.line(w,0,3*h/2,h/2).stroke({"color":"#000", "linecap":"square", "width":lw});
-    add.line(3*w/2,h/2,w,h).stroke({"color":"#000", "linecap":"square", "width":lw});
+    add.line(w,0,3*h/2,h/2).stroke({"color":g_data.FG[mt_idx], "linecap":"square", "width":lw});
+    add.line(3*w/2,h/2,w,h).stroke({"color":g_data.FG[mt_idx], "linecap":"square", "width":lw});
 
   });
   p.scale(s);
@@ -814,9 +874,9 @@ function pat_grid0(dx,dy,w,h,s,lw, mt_idx) {
   lw = ((typeof lw === "undefined") ? 1 : lw);
   let draw = g_data.svg_draw;
   var p = draw.pattern(w, h, function(add) {
-    add.rect(w,h).fill("#fff");
-    add.line(w/2,0,w/2,h).stroke({"color":"#000", "linecap":"square", "width":lw});
-    add.line(0,h/2,w,h/2).stroke({"color":"#000", "linecap":"square", "width":lw});
+    add.rect(w,h).fill(g_data.BG[mt_idx]);
+    add.line(w/2,0,w/2,h).stroke({"color":g_data.FG[mt_idx], "linecap":"square", "width":lw});
+    add.line(0,h/2,w,h/2).stroke({"color":g_data.FG[mt_idx], "linecap":"square", "width":lw});
   });
   p.scale(s);
   p.translate(dx,dy);
@@ -836,9 +896,9 @@ function pat_grid1(dx,dy,w,h,s,lw, mt_idx) {
   lw = ((typeof lw === "undefined") ? 1 : lw);
   let draw = g_data.svg_draw;
   var p = draw.pattern(w, h, function(add) {
-    add.rect(w,h).fill("#fff");
-    add.line(0,0, w,h).stroke({"color":"#000", "linecap":"square", "width":lw});
-    add.line(w,0,0,h).stroke({"color":"#000", "linecap":"square", "width":lw});
+    add.rect(w,h).fill(g_data.BG[mt_idx]);
+    add.line(0,0, w,h).stroke({"color":g_data.FG[mt_idx], "linecap":"square", "width":lw});
+    add.line(w,0,0,h).stroke({"color":g_data.FG[mt_idx], "linecap":"square", "width":lw});
   });
   p.scale(s);
   p.translate(dx,dy);
@@ -863,9 +923,10 @@ function pat_houndstooth(dx,dy,w,h,s,lw, mt_idx) {
   lw = ((typeof lw === "undefined") ? 1 : lw);
   let draw = g_data.svg_draw;
   var p = draw.pattern(w, h, function(add) {
-    add.polygon("0,0, 20,0, 40,20, 30,20, 20,10, 20,20, 10,20, 20,30, 20,40, 0,20, 0,0").fill('black').stroke({"width": 0});
-    add.polygon("40,0, 40,10, 30,0, 40, 0").fill('black').stroke({"width":0});
-    add.polygon("0,40, 10,40, 0,30, 0, 40").fill('black').stroke({"width":0});
+    add.rect(w,h).fill(g_data.BG[mt_idx]);
+    add.polygon("0,0, 20,0, 40,20, 30,20, 20,10, 20,20, 10,20, 20,30, 20,40, 0,20, 0,0").fill(g_data.FG[mt_idx]).stroke({"width": 0});
+    add.polygon("40,0, 40,10, 30,0, 40, 0").fill(g_data.FG[mt_idx]).stroke({"width":0});
+    add.polygon("0,40, 10,40, 0,30, 0, 40").fill(g_data.FG[mt_idx]).stroke({"width":0});
   });
   p.scale(s);
   p.translate(dx,dy);
@@ -887,8 +948,8 @@ function pat_stripe0(dx,dy,w,h,s,lw, mt_idx) {
   lw = ((typeof lw === "undefined") ? 1 : lw);
   let draw = g_data.svg_draw;
   var p = draw.pattern(w, h, function(add) {
-    add.rect(w,h).fill("#fff");
-    add.rect(w,h/2);
+    add.rect(w,h).fill(g_data.BG[mt_idx]);
+    add.rect(w,h/2).fill(g_data.FG[mt_idx]);
   });
   p.scale(s);
   p.translate(dx,dy);
@@ -908,8 +969,8 @@ function pat_stripe1(dx,dy,w,h,s,lw, mt_idx) {
   lw = ((typeof lw === "undefined") ? 1 : lw);
   let draw = g_data.svg_draw;
   var p = draw.pattern(w, h, function(add) {
-    add.rect(w,h).fill("#fff");
-    add.rect(w/2,h);
+    add.rect(w,h).fill(g_data.BG[mt_idx]);
+    add.rect(w/2,h).fill(g_data.FG[mt_idx]);
   });
   p.scale(s);
   p.translate(dx,dy);
@@ -1316,12 +1377,14 @@ function multiscale_truchet_pattern(xy,r,pat_idx, lvl, _f_pat0, _f_pat1) {
 
   // background square
   //
+  /*
   let sbg = two.makeRectangle( xy[0], xy[1], d+fudge, d+fudge );
   sbg.fill = "rgb(255,255,255)";
   sbg.stroke = "rgb(255,255,255)";
   sbg.linewidth = 1;
+  */
 
-  _tol.push(sbg);
+  //_tol.push(sbg);
 
   let s = two.makeRectangle( xy[0], xy[1], d, d );
   s.fill = f_pat0( -qrem(xy[0], pp0x), -qrem(xy[1], pp0y) );
@@ -1333,6 +1396,7 @@ function multiscale_truchet_pattern(xy,r,pat_idx, lvl, _f_pat0, _f_pat1) {
   // inner tube \
   //
   if (pat_idx == 0) {
+    /*
     let a0bg = two.makeArcSegment( xy[0] + r, xy[1] - r, 0, d_2_3+fudge, Math.PI/2, Math.PI );
     a0bg.stroke = "rgb(255,255,255)";
     a0bg.fill = "rgb(255,255,255)";
@@ -1341,6 +1405,7 @@ function multiscale_truchet_pattern(xy,r,pat_idx, lvl, _f_pat0, _f_pat1) {
     a2bg.stroke = "rgb(255,255,255)";
     a2bg.fill = "rgb(255,255,255)";
     a2bg.linewidth = 1;
+    */
 
     let a0 = two.makeArcSegment( xy[0] + r, xy[1] - r, 0, d_2_3, Math.PI/2, Math.PI );
     a0.stroke = f_pat1( -qrem(xy[0]+r, pp1x), -qrem(xy[1]-r, pp1y) );
@@ -1352,12 +1417,14 @@ function multiscale_truchet_pattern(xy,r,pat_idx, lvl, _f_pat0, _f_pat1) {
     a2.fill = f_pat1( -qrem(xy[0]-r, pp1x), -qrem(xy[1]+r, pp1y) );
     a2.linewidth = 1;
 
-    _tol.push(a0bg,a2bg,a0,a2);
+    //_tol.push(a0bg,a2bg,a0,a2);
+    _tol.push(a0,a2);
   }
 
   // inner tube /
   //
   else if (pat_idx == 1) {
+    /*
     let a0bg = two.makeArcSegment( xy[0] - r, xy[1] - r, 0, d_2_3+fudge, Math.PI/2, 0 );
     a0bg.stroke = "rgb(255,255,255)";
     a0bg.fill = "rgb(255,255,255)";
@@ -1366,6 +1433,7 @@ function multiscale_truchet_pattern(xy,r,pat_idx, lvl, _f_pat0, _f_pat1) {
     a2bg.stroke = "rgb(255,255,255)";
     a2bg.fill = "rgb(255,255,255)";
     a2bg.linewidth = 1;
+    */
 
     let a0 = two.makeArcSegment( xy[0] - r, xy[1] - r, 0, d_2_3, Math.PI/2, 0 );
     a0.stroke = f_pat1( -qrem(xy[0]-r, pp1x), -qrem(xy[1]-r, pp1y) );
@@ -1377,95 +1445,114 @@ function multiscale_truchet_pattern(xy,r,pat_idx, lvl, _f_pat0, _f_pat1) {
     a2.fill = f_pat1( -qrem(xy[0]+r, pp1x), -qrem(xy[1]+r, pp1y) );
     a2.linewidth = 1;
 
-    _tol.push(a0bg,a2bg,a0,a2);
+    //_tol.push(a0bg,a2bg,a0,a2);
+    _tol.push(a0,a2);
   }
 
   // inner tube /
   //
   else if (pat_idx == 2) {
+    /*
     let a0bg = two.makeArcSegment( xy[0] - r, xy[1] - r, 0, d_2_3+fudge, Math.PI/2, 0 );
     a0bg.stroke = "rgb(255,255,255)";
     a0bg.fill = "rgb(255,255,255)";
     a0bg.linewidth = 1;
+    */
 
     let a0 = two.makeArcSegment( xy[0] - r, xy[1] - r, 0, d_2_3, Math.PI/2, 0 );
     a0.stroke = f_pat1( -qrem(xy[0]-r, pp1x), -qrem(xy[1]-r, pp1y) );
     a0.fill = f_pat1( -qrem(xy[0]-r, pp1x), -qrem(xy[1]-r, pp1y) );
     a0.linewidth = 1;
 
-    _tol.push(a0bg,a0);
+    //_tol.push(a0bg,a0);
+    _tol.push(a0);
   }
 
   else if (pat_idx == 3) {
+    /*
     let a2bg = two.makeArcSegment( xy[0] + r, xy[1] + r, 0, d_2_3+fudge, -Math.PI, -Math.PI/2 );
     a2bg.stroke = "rgb(255,255,255)";
     a2bg.fill = "rgb(255,255,255)";
     a2bg.linewidth = 1;
+    */
 
     let a2 = two.makeArcSegment( xy[0] + r, xy[1] + r, 0, d_2_3, -Math.PI, -Math.PI/2 );
     a2.stroke = f_pat1( -qrem(xy[0]+r, pp1x), -qrem(xy[1]+r, pp1y) );
     a2.fill = f_pat1( -qrem(xy[0]+r, pp1x), -qrem(xy[1]+r, pp1y) );
     a2.linewidth = 1;
 
-    _tol.push(a2bg,a2);
+    //_tol.push(a2bg,a2);
+    _tol.push(a2);
   }
 
   if (pat_idx == 4) {
+    /*
     let a0bg = two.makeArcSegment( xy[0] + r, xy[1] - r, 0, d_2_3+fudge, Math.PI/2, Math.PI );
     a0bg.stroke = "rgb(255,255,255)";
     a0bg.fill = "rgb(255,255,255)";
     a0bg.linewidth = 1;
+    */
 
     let a0 = two.makeArcSegment( xy[0] + r, xy[1] - r, 0, d_2_3, Math.PI/2, Math.PI );
     a0.stroke = f_pat1( -qrem(xy[0]+r, pp1x), -qrem(xy[1]-r, pp1y) );
     a0.fill = f_pat1( -qrem(xy[0]+r, pp1x), -qrem(xy[1]-r, pp1y) );
     a0.linewidth = 1;
 
-    _tol.push(a0bg,a0);
+    //_tol.push(a0bg,a0);
+    _tol.push(a0);
   }
 
   else if (pat_idx == 5) {
+    /*
     let a2bg = two.makeArcSegment( xy[0] - r, xy[1] + r, 0, d_2_3+fudge, 0, -Math.PI/2 );
     a2bg.stroke = "rgb(255,255,255)";
     a2bg.fill = "rgb(255,255,255)";
     a2bg.linewidth = 1;
+    */
 
     let a2 = two.makeArcSegment( xy[0] - r, xy[1] + r, 0, d_2_3, 0, -Math.PI/2 );
     a2.stroke = f_pat1( -qrem(xy[0]-r, pp1x), -qrem(xy[1]+r, pp1y) );
     a2.fill = f_pat1( -qrem(xy[0]-r, pp1x), -qrem(xy[1]+r, pp1y) );
     a2.linewidth = 1;
 
-    _tol.push(a2bg,a2);
+    //_tol.push(a2bg,a2);
+    _tol.push(a2);
   }
 
 
   // fat cross
   //
   else if (pat_idx == 6) {
+    /*
     let _fcbg = two.makeRectangle( xy[0], xy[1], d+fudge, d+fudge );
     _fcbg.fill = "rgb(255,255,255)";
     _fcbg.stroke = "rgb(255,255,255)";
     _fcbg.linewidth = 1;
+    */
 
     let _fc = two.makeRectangle( xy[0], xy[1], d, d );
     _fc.fill = f_pat0( -qrem(xy[0], pp0x), -qrem(xy[1], pp0y) );
     _fc.stroke = f_pat0( -qrem(xy[0], pp0x), -qrem(xy[1], pp0y) );
     _fc.linewidth = 1;
 
+    /*
     let a0bg = two.makeArcSegment( xy[0] + r, xy[1] - r, 0, d_2_3+fudge, Math.PI/2, Math.PI );
     a0bg.stroke = "rgb(255,255,255)";
     a0bg.fill = "rgb(255,255,255)";
     a0bg.linewidth = 1;
+    */
 
     let a0 = two.makeArcSegment( xy[0] + r, xy[1] - r, 0, d_2_3, Math.PI/2, Math.PI );
     a0.stroke = f_pat1( -qrem(xy[0]+r, pp1x), -qrem(xy[1]-r, pp1y) );
     a0.fill = f_pat1( -qrem(xy[0]+r, pp1x), -qrem(xy[1]-r, pp1y) );
     a0.linewidth = 1;
 
+    /*
     let a2bg = two.makeArcSegment( xy[0] - r, xy[1] + r, 0, d_2_3+fudge, 0, -Math.PI/2 );
     a2bg.stroke = "rgb(255,255,255)";
     a2bg.fill = "rgb(255,255,255)";
     a2bg.linewidth = 1;
+    */
 
     let a2 = two.makeArcSegment( xy[0] - r, xy[1] + r, 0, d_2_3, 0, -Math.PI/2 );
     a2.stroke = f_pat1( -qrem(xy[0]-r, pp1x), -qrem(xy[1]+r, pp1y) );
@@ -1473,6 +1560,7 @@ function multiscale_truchet_pattern(xy,r,pat_idx, lvl, _f_pat0, _f_pat1) {
     a2.linewidth = 1;
 
 
+    /*
     let a1bg = two.makeArcSegment( xy[0] - r, xy[1] - r, 0, d_2_3+fudge, Math.PI/2, 0 );
     a1bg.stroke = "rgb(255,255,255)";
     a1bg.fill = "rgb(255,255,255)";
@@ -1481,6 +1569,7 @@ function multiscale_truchet_pattern(xy,r,pat_idx, lvl, _f_pat0, _f_pat1) {
     a3bg.stroke = "rgb(255,255,255)";
     a3bg.fill = "rgb(255,255,255)";
     a3bg.linewidth = 1;
+    */
 
     let a1 = two.makeArcSegment( xy[0] - r, xy[1] - r, 0, d_2_3, Math.PI/2, 0 );
     a1.stroke = f_pat1( -qrem(xy[0]-r, pp1x), -qrem(xy[1]-r, pp1y) );
@@ -1492,10 +1581,12 @@ function multiscale_truchet_pattern(xy,r,pat_idx, lvl, _f_pat0, _f_pat1) {
     a3.fill = f_pat1( -qrem(xy[0]+r, pp1x), -qrem(xy[1]+r, pp1y) );
     a3.linewidth = 1;
 
+    /*
     let srbg = two.makeRectangle( xy[0], xy[1], r_1_3, r_1_3 );
     srbg.stroke = "rgb(255,255,255)";
     srbg.fill = "rgb(255,255,255)";
     srbg.linewidth = 1;
+    */
 
     let sr = two.makeRectangle( xy[0], xy[1], r_1_3, r_1_3 );
     sr.stroke = f_pat1( -qrem(xy[0], pp1x), -qrem(xy[1], pp1y) );
@@ -1503,7 +1594,8 @@ function multiscale_truchet_pattern(xy,r,pat_idx, lvl, _f_pat0, _f_pat1) {
     sr.linewidth = 1;
 
 
-    _tol.push(_fcbg,_fc, a0bg, a0, a1bg, a1, a2bg, a2, a3bg, a3, srbg, sr);
+    //_tol.push(_fcbg,_fc, a0bg, a0, a1bg, a1, a2bg, a2, a3bg, a3, srbg, sr);
+    _tol.push(_fc, a0, a1, a2, a3, sr);
   }
 
   else { }
@@ -1512,6 +1604,7 @@ function multiscale_truchet_pattern(xy,r,pat_idx, lvl, _f_pat0, _f_pat1) {
   // tube ends
   //
 
+  /*
   let e0bg = two.makeCircle(xy[0] + r, xy[1], r_1_3+fudge );
   e0bg.noStroke();
   e0bg.fill = "rgb(255,255,255)";
@@ -1528,6 +1621,7 @@ function multiscale_truchet_pattern(xy,r,pat_idx, lvl, _f_pat0, _f_pat1) {
   e3bg.noStroke();
   e3bg.fill = "rgb(255,255,255)";
   e3bg.linewidth = 1;
+  */
 
 
   let e0 = two.makeCircle(xy[0] + r, xy[1], r_1_3 );
@@ -1550,11 +1644,13 @@ function multiscale_truchet_pattern(xy,r,pat_idx, lvl, _f_pat0, _f_pat1) {
   e3.fill = f_pat1( -qrem(xy[0], pp1x), -qrem(xy[1]+r, pp1y) );
   e3.linewidth = 1;
 
-  _tol.push(e0bg,e1bg,e2bg,e3bg,e0,e1,e2,e3);
+  //_tol.push(e0bg,e1bg,e2bg,e3bg,e0,e1,e2,e3);
+  _tol.push(e0,e1,e2,e3);
 
   //wings
   //
 
+  /*
   let w0bg = two.makeCircle( xy[0] + r, xy[1] - r, d_1_3+fudge );
   w0bg.noStroke();
   w0bg.fill = "rgb(255,255,255)";
@@ -1571,6 +1667,7 @@ function multiscale_truchet_pattern(xy,r,pat_idx, lvl, _f_pat0, _f_pat1) {
   w3bg.noStroke();
   w3bg.fill = "rgb(255,255,255)";
   w3bg.linewidth=1;
+  */
 
   let w0 = two.makeCircle( xy[0] + r, xy[1] - r, d_1_3 );
   w0.noStroke();
@@ -1592,7 +1689,8 @@ function multiscale_truchet_pattern(xy,r,pat_idx, lvl, _f_pat0, _f_pat1) {
   w3.fill = f_pat0( -qrem(xy[0]+r, pp0x), -qrem(xy[1]+r, pp0y) );
   w3.linewidth = 1;
 
-  _tol.push(w0bg,w1bg,w2bg,w3bg,w0,w1,w2,w3);
+  //_tol.push(w0bg,w1bg,w2bg,w3bg,w0,w1,w2,w3);
+  _tol.push(w0,w1,w2,w3);
 
   return _tol;
 }
@@ -1797,8 +1895,8 @@ function web_init() {
   let _i1 = irnd(f_pat_info.length);
 
   //DEBUG
-  //_i0 = 0;
-  //_i1 = 1;
+  //_i0 = 7;
+  //_i1 = 7;
 
   let pat0_func = f_pat_info[ _i0 ][0];
   let pat1_func = f_pat_info[ _i1 ][0];
