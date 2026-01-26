@@ -1770,31 +1770,6 @@ function _amin(a) {
   return _m;
 }
 
-function rand_pal_colorsjs() {
-  let col_idx0 = irnd( COLORS.length );
-  let col_nei = COLORS[col_idx0].combinations;
-
-  let max_iter = 200;
-
-  for (let i=0; i<max_iter; i++) {
-    if ( (_amin(col_nei)-1) < COLORS.length ) { break; }
-    col_idx0 = irnd( COLORS.length );
-    col_nei = COLORS[col_idx0].combinations ;
-  }
-
-  let col_idx1 = -1;
-  for (let i=0; i<max_iter; i++) {
-    let idx = col_nei[ irnd(col_nei.length) ] - 1;
-    if (idx < COLORS.length) { col_idx1 = idx; break; }
-  }
-
-  if (col_idx1 < 0) {
-    console.log("DEFAULT PALETTE, couldn't resolve:", col_idx0, col_idx1);
-    return [ "rgb(200,200,200)", "rgb(50,50,50)" ];
-  }
-  return [ COLORS[col_idx0].hex, COLORS[col_idx1].hex, col_idx0, col_idx1 ];
-}
-
 function fisher_yates_shuffle(a) {
   var t, n = a.length;
   for (var i=0; i<(n-1); i++) {
@@ -1831,16 +1806,14 @@ function web_init() {
 
   let pal = [ c0,c1 ];
 
-  pal = rand_pal_colorsjs();
-
   pal[0] = "url(#pattern-" + (irnd(41)+1).toString() + ")";
   pal[1] = "url(#pattern-" + (irnd(41)+1).toString() + ")";
 
-  g_data["pal_idx"] = [pal[2], pal[3] ];
-  g_data["pal"] = [pal[0], pal[1]];
+  g_data["pal_idx"] = [ pal[2], pal[3] ];
+  g_data["pal"]     = [ pal[0], pal[1] ];
 
   let p_prof = [ 1/32, 0.55, 0.75, 1 ];
-  p_prof = [ 2/32, 0.55, 0.68, 1 ];
+  p_prof = [ 1/32, 0.55, 0.68, 1 ];
 
   let cxy = [400,400];
   let R = 200;
@@ -1954,21 +1927,54 @@ function web_init() {
 
 
   g_data["opt"] = opt;
-
   let grid_ctx = {
     "g": [],
     "p": [],
     "g_p": []
   };
 
-  //grid_r(grid_ctx, cxy[0], cxy[1], R, 0, opt );
-  grid_sym_r(grid_ctx, cxy[0], cxy[1], R, 0, opt );
+  while (grid_ctx.g.length == 0) {
+    grid_sym_r(grid_ctx, cxy[0], cxy[1], R, 0, opt );
+
+    let _lvl_threshold = 2,
+        _lvl_m = -1;
+    for (let i=0; i<grid_ctx.g.length; i++) {
+      if (grid_ctx.g[i][4] > _lvl_m) {
+        _lvl_m = grid_ctx.g[i][4];
+      }
+    }
+
+    // if we get back nothing try again
+    //
+    if (_lvl_m < 0) {
+      //console.log("REJECT ZERO");
+      continue;
+    }
+
+    // if the resulting pattern is too simple
+    // (max level is 1), accept with some small
+    // prbability, otherwise, retry
+    //
+
+    if (_lvl_m < 2) {
+      if (drand() > (1/32)) {
+        //console.log("REJECT SIMPLE");
+
+        grid_ctx = { "g": [], "p": [], "g_p": [] };
+        continue;
+      }
+
+      //console.log("ACCEPT SIMPLE");
+    }
+
+  }
+
+  // sort by size (level)
+  //
   grid_ctx.g.sort( mstp_sort );
 
   g_data["grid_ctx"] = grid_ctx;
-
   g_data["draw_list"] = [];
-
   let svg_draw = g_data.svg_draw;
 
   //DEBUG
@@ -1978,14 +1984,43 @@ function web_init() {
   //  [500,500, 100, 6, 1 ]
   //];
 
-  // pick our colors, I guess
+  // pick our colors, I guess (foreground/background)
   //
-
   let co_pal = color500[ irnd(color500.length) ];
-  g_data.BG[0] = co_pal[0];
-  g_data.FG[0] = co_pal[1];
-  g_data.FG[1] = co_pal[3];
-  g_data.BG[1] = co_pal[4];
+
+    g_data.BG[0] = co_pal[0];
+    g_data.FG[0] = co_pal[1];
+    g_data.FG[1] = co_pal[2];
+    g_data.BG[1] = co_pal[3];
+
+    //let bg_rect = two.makeRectangle( two.width/2, two.height/2, two.width, two.height );
+    //bg_rect.fill = co_pal[4];
+
+  /*
+  if ( drand() < 0.5 ) {
+
+    g_data.BG[0] = co_pal[0];
+    g_data.FG[0] = co_pal[1];
+    g_data.FG[1] = co_pal[2];
+    g_data.BG[1] = co_pal[3];
+
+    let bg_rect = two.makeRectangle( two.width/2, two.height/2, two.width, two.height );
+    bg_rect.fill = co_pal[4];
+
+  }
+  else {
+
+    console.log("desc");
+
+    g_data.BG[0] = co_pal[4];
+    g_data.FG[0] = co_pal[3];
+    g_data.FG[1] = co_pal[2];
+    g_data.BG[1] = co_pal[1];
+
+    let bg_rect = two.makeRectangle( two.width/2, two.height/2, two.width, two.height );
+    bg_rect.fill = co_pal[0];
+  }
+  */
 
   for (let i=0; i<grid_ctx.g.length; i++) {
     let v = grid_ctx.g[i];
@@ -1995,6 +2030,8 @@ function web_init() {
     let _l = multiscale_truchet_pattern( [v[0], v[1]], v[2], v[3], v[4], f_wrap0, f_wrap1 );
     g_data.draw_list.push(_l);
   }
+
+  randomize_animation();
 
   two.update();
 
@@ -2010,13 +2047,82 @@ function web_init() {
 //          /_/          /___/
 //------------------------------
 
+function randomize_animation() {
+
+  let anim_type = [ 'i', 'e', 'w' ];
+
+  for (let i=0; i<2; i++) {
+    animation_ctx[i].type = anim_type[ irnd(anim_type.length) ];
+
+    //animation_ctx[i].type ='e';
+
+    if (animation_ctx[i].type == 'e') {
+
+      animation_ctx[i] = {
+        "x":0, "y": 0, "type":"e",
+
+        "f": [[0,0]],
+        "c": [[0,0]],
+        "p": [[0,0]]
+      };
+
+      let f0 = drand(1/32,10/32);
+      let f1 = drand(1/32,10/32);
+
+      animation_ctx[i].f[0][0] = f0;
+      animation_ctx[i].f[0][1] = f1;
+
+      animation_ctx[i].c[0][0] = drand(3,8);
+      animation_ctx[i].c[0][1] = drand(3,8)
+    }
+
+    else if (animation_ctx[i].type == 'w') {
+
+      animation_ctx[i] = {
+        "x":0, "y": 0, "type":"w",
+        "v": [0,0],
+        "u": [[0,0]],
+        "f": [[0,0]],
+        "c": [[0,0]],
+        "p": [[0,0]]
+      };
+
+      let theta = 2*Math.PI*drand();
+      let ds = drand(-2,7);
+
+      animation_ctx[i].v[0] = (5 + ds)*Math.cos(theta);
+      animation_ctx[i].v[1] = (5 + ds)*Math.sin(theta);
+
+      //kiss
+      //
+      if (0) {
+      for (let j=0; j<1; j++) {
+        animation_ctx[i].u[j][0] = -animation_ctx[i].v[1]/8;
+        animation_ctx[i].u[j][1] =  animation_ctx[i].v[0]/8;
+
+        let f = [ drand((3/4) - (1/32), (3/4) + (1/32)), drand((3/4) + (1/32), (3/4)+(1/32)) ];
+        let c = [ drand(0.9, 1.1), drand(0.9,1.1) ];
+        let p = [ drand(0.5) , drand(0.5) ];
+
+        animation_ctx[i].f[j][0] = f[0];
+        animation_ctx[i].f[j][1] = f[1];
+
+        animation_ctx[i].c[j][0] = c[0];
+        animation_ctx[i].c[j][1] = c[1];
+
+        animation_ctx[i].p[j][0] = p[0];
+        animation_ctx[i].p[j][1] = p[1];
+      }
+      }
+    }
+
+  }
+
+}
 
 // e - ellipse
 // w - linear + wiggle
 //
-
-var twopi = 2*Math.PI;
-
 var animation_ctx = [
   {
     "x" : 0, "y" : 0,
