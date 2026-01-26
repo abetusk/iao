@@ -143,3 +143,13 @@ Works
 
 [live](https://abetusk.github.io/iao/like-go-up)
 
+---
+
+###### [100 Years, Stifled](https://github.com/abetusk/iao/tree/main/100-years-stifled)
+
+| |
+|---|
+| [![Like Go Up](img/100_years.png)](https://github.com/abetusk/iao/tree/main/100-years-stifled) |
+
+[live](https://abetusk.github.io/iao/100-years-stifled)
+
