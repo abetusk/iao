@@ -1,6 +1,11 @@
 100 years, stifled
 ===
 
+[![sample image](../img/100_years.png)](https://github.com/abetusk/iao/tree/main/100-years-stifled)
+
+Available on [fxhash](https://www.fxhash.xyz/project/100-years-stifled)
+
+
 Short Statement
 ---
 
