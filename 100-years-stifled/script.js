@@ -988,56 +988,6 @@ function pat_stripe1(dx,dy,w,h,s,lw, mt_idx) {
 
 
 
-function grid_r(ctx, x,y, r, lvl, opt) {
-  let max_lvl = opt.max_level;
-  let prob_prof = opt.prob_profile;
-
-  if (lvl >= max_lvl) { return; }
-  let two = g_data.two;
-
-  let lvl_parity = lvl%2;
-
-  let r2 = r/2;
-
-  let dxy = [
-    [ r2, -r2 ],
-    [-r2, -r2 ],
-    [-r2,  r2 ],
-    [ r2,  r2 ]
-  ];
-
-  let n = prob_prof.length;
-  let pat_a = opt.pattern_choice;
-
-  let p = drand();
-  if (lvl == 0) { p = drand(prob_prof[0], prob_prof[n-2]);  }
-
-  // terminate
-  //
-  if      (p < prob_prof[0]) { }
-
-  // subdivide
-  //
-  else if (p < prob_prof[1]) {
-    for (let i=0; i<4; i++) {
-      grid_r(ctx, x + dxy[i][0], y + dxy[i][1], r/2, lvl+1, opt);
-    }
-  }
-
-  // display tile
-  //
-  else {
-    ctx.g.push( [x,y,r,irnd(pat_a.length),lvl] );
-    if (p < prob_prof[2]) {
-      for (let i=0; i<4; i++) {
-        grid_r(ctx, x + dxy[i][0], y + dxy[i][1], r/2, lvl+1, opt);
-      }
-    }
-  }
-
-  return ctx;
-}
-
 function _clone_a(a) {
   let b = [];
   for (let i=0; i<a.length; i++) {
@@ -1167,8 +1117,9 @@ function grid_sym_r(ctx, x,y, r, lvl, opt) {
         let u_g_p = _clone_a( ctx.g_p[i] );
         if      (u_g_p[0] == 1) { u_g[0] += r; u_g_p[0] = 0; }
         else if (u_g_p[0] == 2) { u_g[0] += r; u_g_p[0] = 3; }
+        u_g[5] = _clone_a( u_g_p );
         ctx.g.push(u_g);
-        ctx.p.push(u_g_p);
+        ctx.g_p.push(u_g_p);
       }
     }
 
@@ -1188,8 +1139,9 @@ function grid_sym_r(ctx, x,y, r, lvl, opt) {
         let u_g_p = _clone_a( ctx.g_p[i] );
         if      (u_g_p[0] == 0) { u_g[1] += r; u_g_p[0] = 3; }
         else if (u_g_p[0] == 1) { u_g[1] += r; u_g_p[0] = 2; }
+        u_g[5] = _clone_a( u_g_p );
         ctx.g.push(u_g);
-        ctx.p.push(u_g_p);
+        ctx.g_p.push(u_g_p);
       }
 
     }
@@ -1210,8 +1162,9 @@ function grid_sym_r(ctx, x,y, r, lvl, opt) {
           u_g_p[0] = ridx;
           u_g[0] += tdxy[ridx][0];
           u_g[1] += tdxy[ridx][1];
+          u_g[5] = _clone_a( u_g_p );
           ctx.g.push(u_g);
-          ctx.p.push(u_g_p);
+          ctx.g_p.push(u_g_p);
         }
 
       }
@@ -1238,9 +1191,10 @@ function grid_sym_r(ctx, x,y, r, lvl, opt) {
         u_g[1] = xy[1];
 
         u_g[3] = symmetry_map[ ctx.g[i][3]  ];
+        u_g[5] = _clone_a( u_g_p );
 
         ctx.g.push(u_g);
-        ctx.p.push(u_g_p);
+        ctx.g_p.push(u_g_p);
       }
 
     }
@@ -1265,9 +1219,10 @@ function grid_sym_r(ctx, x,y, r, lvl, opt) {
         u_g[1] = xy[1];
 
         u_g[3] = symmetry_map[ ctx.g[i][3]  ];
+        u_g[5] = _clone_a( u_g_p );
 
         ctx.g.push(u_g);
-        ctx.p.push(u_g_p);
+        ctx.g_p.push(u_g_p);
       }
 
     }
@@ -1296,9 +1251,10 @@ function grid_sym_r(ctx, x,y, r, lvl, opt) {
           u_g[1] = xy[1];
 
           u_g[3] = sym_map_all[ sym_code ][ ctx.g[i][3] ];
+          u_g[5] = _clone_a( u_g_p );
 
           ctx.g.push(u_g);
-          ctx.p.push(u_g_p);
+          ctx.g_p.push(u_g_p);
         }
 
       }
@@ -1329,7 +1285,7 @@ function grid_sym_r(ctx, x,y, r, lvl, opt) {
   //
   else {
     ctx.g_p.push( _clone_a(ctx.p) );
-    ctx.g.push( [x,y,r,irnd(pat_a.length),lvl] );
+    ctx.g.push( [x,y,r,irnd(pat_a.length),lvl, _clone_a(ctx.p) ] );
     if (p < prob_prof[2]) {
       for (let i=0; i<4; i++) {
         ctx.p.push(i);
@@ -1933,6 +1889,7 @@ function web_init() {
     };
   })( pat1_func, ppx1, ppy1, pps1 );
 
+  g_data["func"] = [ f_wrap0, f_wrap1 ];
 
   g_data["opt"] = opt;
   let grid_ctx = {
@@ -1995,6 +1952,9 @@ function web_init() {
   g_data.FG[1] = co_pal[2];
   g_data.BG[1] = co_pal[3];
 
+  randomize_animation();
+
+  /*
   for (let i=0; i<grid_ctx.g.length; i++) {
     let v = grid_ctx.g[i];
 
@@ -2003,8 +1963,10 @@ function web_init() {
     let _l = multiscale_truchet_pattern( [v[0], v[1]], v[2], v[3], v[4], f_wrap0, f_wrap1 );
     g_data.draw_list.push(_l);
   }
+  two.update();
+  */
 
-  randomize_animation();
+  DISP();
 
   // piece summary information
   //
@@ -2018,7 +1980,6 @@ function web_init() {
   g_data.piece_info["pattern_code"] = [ pat0_code, pat1_code ];
   g_data.piece_info["pattern_scale"] = [ pps0, pps1 ];
 
-  two.update();
 
   document.addEventListener('keydown', function(ev) {
     if      (ev.key == 's') { downloadSVG(); }
@@ -2027,14 +1988,60 @@ function web_init() {
   });
 
   window.addEventListener('resize', function(ev) {
-    console.log(">>>", window.innerWidth, window.innerHeight);
-    //resize_redraw();
+    g_data.W = window.innerWidth;
+    g_data.H = window.innerHeight;
+    g_data.S = ( (g_data.W<g_data.H) ? g_data.W : g_data.H );
+
+    DISP();
   });
 
   welcome();
 
   window.requestAnimationFrame(anim);
 }
+
+
+function DISP() {
+  let two = g_data.two;
+  let grid_ctx = g_data.grid_ctx;
+
+  let f_wrap0 = g_data.func[0];
+  let f_wrap1 = g_data.func[1];
+
+  two.clear();
+  two.renderer.setSize( g_data.S, g_data.S );
+
+  let cxy = [ g_data.S/2, g_data.S/2 ];
+  let R = (1/4)*g_data.S;
+
+  for (let i=0; i<grid_ctx.g.length; i++) {
+    let g_p = grid_ctx.g[i][5];
+    let xy = p2xy( cxy[0], cxy[1], g_p, R/2 );
+    let r = R*Math.pow( (1/2), g_p.length );
+
+    grid_ctx.g[i][0] = xy[0];
+    grid_ctx.g[i][1] = xy[1];
+    grid_ctx.g[i][2] = r;
+
+  }
+  //grid_ctx.g.sort( mstp_sort );
+
+  g_data.draw_list = [];
+  for (let i=0; i<grid_ctx.g.length; i++) {
+    let v = grid_ctx.g[i];
+
+
+    //                                      x      y     r   pat   lvl    f_fg     f_bg
+    //
+    let _l = multiscale_truchet_pattern( [v[0], v[1]], v[2], v[3], v[4], f_wrap0, f_wrap1 );
+    //let _l = multiscale_truchet_pattern( [xy[0], xy[1]], r, v[3], v[4], f_wrap0, f_wrap1 );
+    g_data.draw_list.push(_l);
+  }
+
+  two.update();
+}
+
+
 
 function welcome() {
   let lines = [
