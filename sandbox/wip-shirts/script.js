@@ -38,7 +38,7 @@ var g_data = {
     "~" : [52,26, 1],
     "v" : [80,80, 0.25],
     "*" : [180,180, 0.25],
-    "^" : [60,60,1.75],
+    "^" : [60,60,1.125],
     "$" : [100,20,2],
     "c" : [56,28,2.0],
     "p" : [40,40, 1.5],
@@ -70,10 +70,10 @@ var g_data = {
     //[ pat_diamond,            "^" ],
     [ pat_bank,               "$" ],
     [ pat_cloud,              "c" ],
-    //[ pat_parkay,             "p" ],
+    [ pat_parkay,             "p" ],
     [ pat_groovy,             "?" ],
     [ pat_curtain,            "#" ],
-    //[ pat_aztec,              "X" ],
+    [ pat_aztec,              "X" ],
     //[ pat_temple,             "T" ],
     //[ pat_food,               "F" ],
     [ pat_nomoon,             "@" ],
@@ -99,14 +99,14 @@ var g_data = {
     pat_circ1,
     pat_wiggle,
     //pat_anchor,
-    pat_glam,
+    //pat_glam,
     //pat_diamond,
     pat_bank,
     pat_cloud,
-    //pat_parkay,
+    pat_parkay,
     pat_groovy,
     pat_curtain,
-    //pat_aztec,
+    pat_aztec,
     //pat_temple,
     //pat_food,
     pat_nomoon,
@@ -389,7 +389,7 @@ function pat_anchor(dx,dy, w,h, s,lw, mt_idx) {
     add.rect(w,h).fill(g_data.BG[mt_idx]);
 
     add.fill( g_data.FG[mt_idx] );
-    add.stroke({"color": g_data.FG[mt_idx] });
+    //add.stroke({"color": g_data.FG[mt_idx] });
 
     add.path("M14 16H9v-2h5V9.87a4 4 0 1 1 2 0V14h5v2h-5v15.95A10 10 0 0 0 23.66 27l-3.46-2 8.2-2.2-2.9 5a12 12 0 0 1-21 0l-2.89-5 8.2 2.2-3.47 2A10 10 0 0 0 14 31.95V16zm40 40h-5v-2h5v-4.13a4 4 0 1 1 2 0V54h5v2h-5v15.95A10 10 0 0 0 63.66 67l-3.47-2 8.2-2.2-2.88 5a12 12 0 0 1-21.02 0l-2.88-5 8.2 2.2-3.47 2A10 10 0 0 0 54 71.95V56zm-39 6a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm40-40a2 2 0 1 1 0-4 2 2 0 0 1 0 4zM15 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm40 40a2 2 0 1 0 0-4 2 2 0 0 0 0 4z");
 
@@ -1869,8 +1869,8 @@ function web_init() {
   let _i1 = irnd(f_pat_info.length);
 
   //DEBUG
-  //_i0 = 7;
-  //_i1 = 7;
+  //_i0 = 6;
+  //_i1 = 6;
 
   let pat0_func = f_pat_info[ _i0 ][0];
   let pat1_func = f_pat_info[ _i1 ][0];
