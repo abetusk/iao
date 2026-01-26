@@ -4,6 +4,39 @@
 Short Statement
 ---
 
+"100 years, stifled" is an experimental generative
+art piece that attempts to highlight overly long
+copyright terms.
+
+The conversation around copyright often centers
+around pleas to morality and artistic control.
+Rarely is the focus on the outsized benefits large corporations
+reap from lengthy copyright terms, how much our
+culture fades without the ability to copy and extend it
+or how we support century long monopolies through taxation.
+
+We live, now, in an era where mass artistic replication, interpretation
+and creation is possible.
+Often the response is to be even more draconian about
+copyright restrictions and terms.
+
+What is a pragmatic copyright length?
+How do we incentivize and reward artists for their creative work?
+How do we uphold our ideals of rewarding innovation while
+enriching the commons?
+
+"100 years, stifled" aims to provoke more thoughtful discussion
+around copyright terms, around intellectual property in general
+and the realities of our modern physical
+and digital ecosystem.
+
+
+Tags
+---
+
+generative, pattern, truchet, multiscale truchet, animated
+
+
 Long Statement
 ---
 
@@ -66,12 +99,11 @@ that allow for commercial reuse (please see
 the LICENSE section for more details).
 
 
-
-Tags
+References
 ---
 
-generative, pattern, truchet, multiscale truchet, animated
-
+* ["Multi-scale Truchet Patterns" by Christopher Carlson](https://christophercarlson.com/portfolio/multi-scale-truchet-patterns/)
+* ["Multi-Scale Truchet Patterns" by Christopher Carlson, Bridges Conference 2018](https://archive.bridgesmathart.org/2018/bridges2018-39.pdf)
 
 License
 ---
