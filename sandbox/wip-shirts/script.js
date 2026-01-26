@@ -1747,11 +1747,25 @@ function _debug() {
 }
 
 
-function init_twojs(canvas_id) {
+function init_twojs(canvas_id, w,h) {
   canvas_id = ((typeof canvas_id === "undefined") ? CANVAS_ID : canvas_id);
+  w = ((typeof w === "undefined") ? 800 : w);
+  h = ((typeof h === "undefined") ? 800 : h);
+
   let two = new Two({"fitted":true});
-  let ele = document.getElementById(CANVAS_ID);
-  two.appendTo(ele);
+  let canvas = document.getElementById(CANVAS_ID);
+
+
+  g_data["ui_canvas"] = canvas;
+  //canvas.style.width = window.innerWidth.toString() + "px";
+  //canvas.style.height= window.innerHeight.toString() + "px";
+
+  canvas.style.width = w.toString() + "px";
+  canvas.style.height= h.toString() + "px";
+
+  //console.log("???", canvas.style.width, window.innerWidth);
+
+  two.appendTo(canvas);
   two.update();
   return two;
 }
@@ -1795,28 +1809,26 @@ function qrem(n, m) {
 
 
 function web_init() {
-  let two = init_twojs();
+
+  g_data["piece_info"] = {};
+
+  g_data["W"] = window.innerWidth;
+  g_data["H"] = window.innerHeight;
+  g_data["S"] = ( (g_data.W<g_data.H) ? g_data.W : g_data.H );
+
+
+  let two = init_twojs( CANVAS_ID, g_data.S, g_data.S );
   g_data["two"] = two;
 
   var draw = SVG().addTo('body');
   g_data["svg_draw"] = draw;
 
-  let c0 = "rgb(200,200,200)";
-  let c1 = "rgb(50,50,50)";
-
-  let pal = [ c0,c1 ];
-
-  pal[0] = "url(#pattern-" + (irnd(41)+1).toString() + ")";
-  pal[1] = "url(#pattern-" + (irnd(41)+1).toString() + ")";
-
-  g_data["pal_idx"] = [ pal[2], pal[3] ];
-  g_data["pal"]     = [ pal[0], pal[1] ];
-
   let p_prof = [ 1/32, 0.55, 0.75, 1 ];
   p_prof = [ 1/32, 0.55, 0.68, 1 ];
 
-  let cxy = [400,400];
-  let R = 200;
+  let cxy = [ g_data.S/2, g_data.S/2 ];
+  let R = (1/4)*g_data.S;
+
   let max_lvl = 5;
 
   let all_pat = [0,1,2,3,4,5,6, 7];
@@ -1901,10 +1913,6 @@ function web_init() {
   pps0 = DPP[ pat0_code ][2] * drand(0.25,1.0);
   pps1 = DPP[ pat1_code ][2] * drand(0.25,1.0);
 
-  //pps0 = DPP[ pat0_code ][2] * 0.25;
-  //pps1 = DPP[ pat1_code ][2] * 0.25;
-
-
   g_data.pattern_period[0][0] = ppx0;
   g_data.pattern_period[0][1] = ppy0;
   g_data.pattern_period[0][2] = pps0;
@@ -1933,11 +1941,13 @@ function web_init() {
     "g_p": []
   };
 
+  let _lvl_threshold = 2,
+      _lvl_m = -1;
+
   while (grid_ctx.g.length == 0) {
     grid_sym_r(grid_ctx, cxy[0], cxy[1], R, 0, opt );
 
-    let _lvl_threshold = 2,
-        _lvl_m = -1;
+    _lvl_m = -1;
     for (let i=0; i<grid_ctx.g.length; i++) {
       if (grid_ctx.g[i][4] > _lvl_m) {
         _lvl_m = grid_ctx.g[i][4];
@@ -1946,25 +1956,17 @@ function web_init() {
 
     // if we get back nothing try again
     //
-    if (_lvl_m < 0) {
-      //console.log("REJECT ZERO");
-      continue;
-    }
+    if (_lvl_m < 0) { continue; }
 
     // if the resulting pattern is too simple
     // (max level is 1), accept with some small
     // prbability, otherwise, retry
     //
-
     if (_lvl_m < 2) {
       if (drand() > (1/32)) {
-        //console.log("REJECT SIMPLE");
-
         grid_ctx = { "g": [], "p": [], "g_p": [] };
         continue;
       }
-
-      //console.log("ACCEPT SIMPLE");
     }
 
   }
@@ -1988,39 +1990,10 @@ function web_init() {
   //
   let co_pal = color500[ irnd(color500.length) ];
 
-    g_data.BG[0] = co_pal[0];
-    g_data.FG[0] = co_pal[1];
-    g_data.FG[1] = co_pal[2];
-    g_data.BG[1] = co_pal[3];
-
-    //let bg_rect = two.makeRectangle( two.width/2, two.height/2, two.width, two.height );
-    //bg_rect.fill = co_pal[4];
-
-  /*
-  if ( drand() < 0.5 ) {
-
-    g_data.BG[0] = co_pal[0];
-    g_data.FG[0] = co_pal[1];
-    g_data.FG[1] = co_pal[2];
-    g_data.BG[1] = co_pal[3];
-
-    let bg_rect = two.makeRectangle( two.width/2, two.height/2, two.width, two.height );
-    bg_rect.fill = co_pal[4];
-
-  }
-  else {
-
-    console.log("desc");
-
-    g_data.BG[0] = co_pal[4];
-    g_data.FG[0] = co_pal[3];
-    g_data.FG[1] = co_pal[2];
-    g_data.BG[1] = co_pal[1];
-
-    let bg_rect = two.makeRectangle( two.width/2, two.height/2, two.width, two.height );
-    bg_rect.fill = co_pal[0];
-  }
-  */
+  g_data.BG[0] = co_pal[0];
+  g_data.FG[0] = co_pal[1];
+  g_data.FG[1] = co_pal[2];
+  g_data.BG[1] = co_pal[3];
 
   for (let i=0; i<grid_ctx.g.length; i++) {
     let v = grid_ctx.g[i];
@@ -2032,6 +2005,19 @@ function web_init() {
   }
 
   randomize_animation();
+
+  // piece summary information
+  //
+
+  g_data.piece_info["symmetry_code"] = _sc;
+  g_data.piece_info["pattern_index"] = _clone_a( all_pat );
+  g_data.piece_info["probability_profile"] = _clone_a(p_prof);
+  g_data.piece_info["max_recursion_level"] = 5;
+  g_data.piece_info["recursion_level"] = _lvl_m;
+  g_data.piece_info["palette"] = [ g_data.BG[0], g_data.BG[1], g_data.FG[0], g_data.FG[1] ];
+  g_data.piece_info["pattern_code"] = [ pat0_code, pat1_code ];
+  g_data.piece_info["pattern_scale"] = [ pps0, pps1 ];
+
 
   two.update();
 
