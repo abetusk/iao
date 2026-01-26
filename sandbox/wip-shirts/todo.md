@@ -1,8 +1,8 @@
 todo
 ---
 
-* ~symmetry weighting~
 * base templates
+* ~symmetry weighting~
 * ~animation randomness~
 * ~color~
 * ~make sure non trivial realization~

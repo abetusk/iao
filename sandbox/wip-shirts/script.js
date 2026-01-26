@@ -12,6 +12,11 @@ var CANVAS_ID = 'iao_canvas';
 var g_data = {
   "two": undefined,
 
+  "PROJECT": "100 years, stifled",
+  "VERSION" : "0.0.0",
+  "download_filename" : "100_years_stifled.svg",
+
+
   "ANIMATE": true,
   "BG" : ['#fff', '#fff'],
   "FG" : ['#000', '#000'],
@@ -128,7 +133,7 @@ var g_data = {
 function _downloadSVG() {
   var ele = document.getElementById(CANVAS_ID);
   var b = new Blob([ ele.innerHTML ]);
-  saveAs(b, "mstp.svg");
+  saveAs(b, g_data.download_filename );
 }
 
 
@@ -151,8 +156,7 @@ function downloadSVG() {
   fin_txt += svg_txt.slice(pos + _defs.length);
 
   var b = new Blob([ fin_txt ]);
-  saveAs(b, "fig.svg");
-
+  saveAs(b, g_data.download_filename );
 }
 
 function drand(a,b) {
@@ -1128,10 +1132,6 @@ function grid_sym_r(ctx, x,y, r, lvl, opt) {
   let n = prob_prof.length;
   let pat_a = opt.pattern_choice;
 
-  if (lvl==0) { 
-    console.log(">>>", opt.symmetry);
-  }
-
   if ((lvl == 0) && (opt.symmetry != 'i')) {
 
     let symmetry_map = {};
@@ -2018,10 +2018,54 @@ function web_init() {
   g_data.piece_info["pattern_code"] = [ pat0_code, pat1_code ];
   g_data.piece_info["pattern_scale"] = [ pps0, pps1 ];
 
-
   two.update();
 
+  document.addEventListener('keydown', function(ev) {
+    if      (ev.key == 's') { downloadSVG(); }
+    else if (ev.key == 'p') { g_data.ANIMATE = (g_data.ANIMATE ? false : true ); }
+    return false;
+  });
+
+  window.addEventListener('resize', function(ev) {
+    console.log(">>>", window.innerWidth, window.innerHeight);
+    //resize_redraw();
+  });
+
+  welcome();
+
   window.requestAnimationFrame(anim);
+}
+
+function welcome() {
+  let lines = [
+    "  _           ",
+    " (_)__ _ ___  ",
+    " | / _` / _ \\ ",
+    " |_\\__,_\\___/ ",
+    "              "
+  ];
+
+  console.log(lines.join("\n"));
+  console.log("Welcome, gentle programmer.");
+  console.log("All code is libre/free. Please see individual files for license details.");
+  console.log("--");
+  console.log("Project:", g_data.PROJECT);
+  console.log("Version", g_data.VERSION);
+  console.log("fxhash:", $fx.hash);
+
+  console.log("--");
+  console.log("commands:");
+  console.log("--");
+  console.log(" s   - export SVG");
+  console.log(" p   - pause animation");
+
+  /*
+  console.log("Features:");
+  for (let key in g_data.features) {
+    console.log(key + ":", g_data.features[key]);
+  }
+  */
+
 }
 
 
@@ -2113,12 +2157,7 @@ var animation_ctx = [
   {
     "x" : 0, "y" : 0,
     "type": "e",
-
     "f" : [[3/16,5/16], [1/8, 1/14]],
-
-    //fase debug
-    //"f" : [[5/2,7/2], [1/8, 1/14]],
-
     "c" : [[4.1,4.2], [1/5, 1/6]],
     "p" : [[0.1,0.5], [0.2, 0.3]]
   },
