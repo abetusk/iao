@@ -16,6 +16,16 @@ var g_data = {
   "VERSION" : "0.0.0",
   "download_filename" : "100_years_stifled.svg",
 
+  "template_dxy_idx": 0,
+
+  "template_dxy_lib" : [
+    [ [ 1, -1], [-1, -1], [-1,  1], [ 1, 1] ],
+    [ [ 1, -1], [-1, -1], [-1,  1], [-1, 3], [ 1, 3], [ 1, 1] ],
+    [ [ 1, -1], [-1, -1], [-1,  1], [ 1, 1], [ 3, 1], [ 3,-1] ]
+  ],
+
+
+  "template_dxy" : [],
 
   "ANIMATE": true,
   "BG" : ['#fff', '#fff'],
@@ -1001,7 +1011,7 @@ function _clone_a(a) {
 // 2 3
 // 1 0
 //
-function p_transform(sym_code, p) {
+function p_transform2x2(sym_code, p) {
   let u = [];
 
   let T = {
@@ -1029,13 +1039,40 @@ function p_transform(sym_code, p) {
   return u;
 }
 
-function p2xy(cx,cy,p, R) {
-  let dxy = [
-    [ 1, -1],
-    [-1, -1],
-    [-1,  1],
-    [ 1,  1]
-  ];
+function p_transform(s,p) { return p_transform2x2(s,p); }
+
+function p_transform2x3(sym_code, p) {
+  let u = [];
+
+  let T = {
+    'i'  : [0,1,2,3],
+    '='  : [0,1,2,3],
+    'H'  : [0,1,2,3],
+    '#'  : [0,1,2,3],
+
+    '|'  : [1,0,5,4,3,2],
+    '-'  : [3,2,1,0],
+    '\\' : [0,3,2,1],
+    '/'  : [2,1,0,3],
+
+    'r0' : [0,1,2,3],
+    'r1' : [1,2,3,0],
+    'r2' : [2,3,0,1],
+    'r3' : [3,0,1,2]
+  };
+
+  let Ta = T[sym_code];
+
+  for (let i=0; i<p.length; i++) {
+    u.push( Ta[p[i]] );
+  }
+  return u;
+}
+
+function p2xy(cx,cy,p, R, dxy) {
+  if (typeof dxy === "undefined") {
+    dxy = [ [ 1, -1], [-1, -1], [-1,  1], [ 1,  1] ];
+  }
 
   let r = R;
   let r2 = r/2;
@@ -1069,15 +1106,11 @@ function grid_sym_r(ctx, x,y, r, lvl, opt) {
 
   let r2 = r/2;
 
-  // 2 3
-  // 1 0
-  //
-  let dxy = [
-    [ r2, -r2 ],
-    [-r2, -r2 ],
-    [-r2,  r2 ],
-    [ r2,  r2 ]
-  ];
+  let dxy = [];
+  let tdxy = g_data.template_dxy;
+  for (let i=0; i<tdxy.length; i++) {
+    dxy.push( [r2*tdxy[i][0], r2*tdxy[i][1]] );
+  }
 
   let n = prob_prof.length;
   let pat_a = opt.pattern_choice;
@@ -1103,6 +1136,22 @@ function grid_sym_r(ctx, x,y, r, lvl, opt) {
 
     if (opt.symmetry == '=') {
 
+      let reg_code = [1,2];
+      let reg_code_map = { '1':0, '2': 3 };
+
+      if (g_data.template_dxy_idx == 1) {
+        reg_code = [1,2,3];
+        reg_code_map = { '1':0, '2': 5, '3':4 };
+      }
+
+      for (let i=0; i<reg_code.length; i++) {
+        let rc = reg_code[i];
+        ctx.p.push(rc);
+        grid_sym_r(ctx, x + dxy[rc][0], y + dxy[rc][1], r/2, lvl+1, opt);
+        ctx.p.pop();
+      }
+
+      /*
       ctx.p.push(1);
       grid_sym_r(ctx, x + dxy[1][0], y + dxy[1][1], r/2, lvl+1, opt);
       ctx.p.pop();
@@ -1110,13 +1159,21 @@ function grid_sym_r(ctx, x,y, r, lvl, opt) {
       ctx.p.push(2);
       grid_sym_r(ctx, x + dxy[2][0], y + dxy[2][1], r/2, lvl+1, opt);
       ctx.p.pop();
+      */
 
       let n = ctx.g.length;
       for (let i=0; i<n; i++) {
+
         let u_g = _clone_a( ctx.g[i] );
         let u_g_p = _clone_a( ctx.g_p[i] );
-        if      (u_g_p[0] == 1) { u_g[0] += r; u_g_p[0] = 0; }
-        else if (u_g_p[0] == 2) { u_g[0] += r; u_g_p[0] = 3; }
+        //if      (u_g_p[0] == 1) { u_g[0] += r; u_g_p[0] = 0; }
+        //else if (u_g_p[0] == 2) { u_g[0] += r; u_g_p[0] = 3; }
+        for (let j=0; j<reg_code.length; j++) {
+          if (u_g_p[0] == reg_code[j]) {
+            u_g[0] += r;
+            u_g_p[0] = reg_code_map[reg_code[j]];
+          }
+        }
         u_g[5] = _clone_a( u_g_p );
         ctx.g.push(u_g);
         ctx.g_p.push(u_g_p);
@@ -1173,6 +1230,7 @@ function grid_sym_r(ctx, x,y, r, lvl, opt) {
 
     else if (opt.symmetry == '|') {
 
+      /*
       ctx.p.push(1);
       grid_sym_r(ctx, x + dxy[1][0], y + dxy[1][1], r/2, lvl+1, opt);
       ctx.p.pop();
@@ -1180,13 +1238,34 @@ function grid_sym_r(ctx, x,y, r, lvl, opt) {
       ctx.p.push(2);
       grid_sym_r(ctx, x + dxy[2][0], y + dxy[2][1], r/2, lvl+1, opt);
       ctx.p.pop();
+      */
+
+      let reg_code = [1,2];
+      let reg_code_map = { '1':0, '2': 3 };
+      let _f_pt = p_transform2x2;
+
+      if (g_data.template_dxy_idx == 1) {
+        reg_code = [1,2,3];
+        reg_code_map = { '1':0, '2': 5, '3':4 };
+        _f_pt = p_transform2x3;
+      }
+
+      console.log(reg_code, reg_code_map);
+
+      for (let i=0; i<reg_code.length; i++) {
+        let rc = reg_code[i];
+        ctx.p.push(rc);
+        grid_sym_r(ctx, x + dxy[rc][0], y + dxy[rc][1], r/2, lvl+1, opt);
+        ctx.p.pop();
+      }
 
       let n = ctx.g.length;
       for (let i=0; i<n; i++) {
 
-        let u_g_p = p_transform( opt.symmetry, ctx.g_p[i] );
+        //let u_g_p = p_transform2x3( opt.symmetry, ctx.g_p[i] );
+        let u_g_p = _f_pt( opt.symmetry, ctx.g_p[i] );
         let u_g   = _clone_a( ctx.g[i] );
-        let xy = p2xy( x,y, u_g_p, r/2 );
+        let xy = p2xy( x,y, u_g_p, r/2, g_data.template_dxy );
         u_g[0] = xy[0];
         u_g[1] = xy[1];
 
@@ -1274,7 +1353,8 @@ function grid_sym_r(ctx, x,y, r, lvl, opt) {
   // subdivide
   //
   else if (p < prob_prof[1]) {
-    for (let i=0; i<4; i++) {
+    //for (let i=0; i<4; i++) {
+    for (let i=0; i<dxy.length; i++) {
       ctx.p.push(i);
       grid_sym_r(ctx, x + dxy[i][0], y + dxy[i][1], r/2, lvl+1, opt);
       ctx.p.pop();
@@ -1287,7 +1367,8 @@ function grid_sym_r(ctx, x,y, r, lvl, opt) {
     ctx.g_p.push( _clone_a(ctx.p) );
     ctx.g.push( [x,y,r,irnd(pat_a.length),lvl, _clone_a(ctx.p) ] );
     if (p < prob_prof[2]) {
-      for (let i=0; i<4; i++) {
+      //for (let i=0; i<4; i++) {
+      for (let i=0; i<dxy.length; i++) {
         ctx.p.push(i);
         grid_sym_r(ctx, x + dxy[i][0], y + dxy[i][1], r/2, lvl+1, opt);
         ctx.p.pop();
@@ -1711,15 +1792,10 @@ function init_twojs(canvas_id, w,h) {
   let two = new Two({"fitted":true});
   let canvas = document.getElementById(CANVAS_ID);
 
-
   g_data["ui_canvas"] = canvas;
-  //canvas.style.width = window.innerWidth.toString() + "px";
-  //canvas.style.height= window.innerHeight.toString() + "px";
 
   canvas.style.width = w.toString() + "px";
   canvas.style.height= h.toString() + "px";
-
-  //console.log("???", canvas.style.width, window.innerWidth);
 
   two.appendTo(canvas);
   two.update();
@@ -1773,14 +1849,24 @@ function web_init() {
   g_data["S"] = ( (g_data.W<g_data.H) ? g_data.W : g_data.H );
 
 
-  let two = init_twojs( CANVAS_ID, g_data.S, g_data.S );
+  //let two = init_twojs( CANVAS_ID, g_data.S, g_data.S );
+  let two = init_twojs( CANVAS_ID, g_data.S, g_data.S*4);
   g_data["two"] = two;
 
   var draw = SVG().addTo('body');
   g_data["svg_draw"] = draw;
 
   let p_prof = [ 1/32, 0.55, 0.75, 1 ];
-  p_prof = [ 1/32, 0.55, 0.68, 1 ];
+
+  if (g_data.template_dxy_idx == 0) {
+    p_prof = [ 1/32, 0.55, 0.68, 1 ];
+  }
+  else if (g_data.template_dxy_idx == 1) {
+    p_prof = [ .4, 0.65, 0.75, 1 ];
+  }
+  else if (g_data.template_dxy_idx == 2) {
+    p_prof = [ .4, 0.65, 0.75, 1 ];
+  }
 
   let cxy = [ g_data.S/2, g_data.S/2 ];
   let R = (1/4)*g_data.S;
@@ -1797,14 +1883,8 @@ function web_init() {
 
   let opt = {
     "max_level": max_lvl,
-    //"pattern_choice": [0,1,2,3,4,5,6],
-    //"pattern_choice": [0,1],
     "pattern_choice": all_pat,
 
-    //"symmetry" : "=",
-    //"symmetry" : "H",
-    //"symmetry" : "|",
-    //"symmetry" : "r0",
     "symmetry" : _sc,
 
     "symmetry_lib": {
@@ -1900,6 +1980,8 @@ function web_init() {
 
   let _lvl_threshold = 2,
       _lvl_m = -1;
+
+  g_data.template_dxy = g_data.template_dxy_lib[ g_data.template_dxy_idx ];
 
   while (grid_ctx.g.length == 0) {
     grid_sym_r(grid_ctx, cxy[0], cxy[1], R, 0, opt );
@@ -2009,14 +2091,15 @@ function DISP() {
   let f_wrap1 = g_data.func[1];
 
   two.clear();
-  two.renderer.setSize( g_data.S, g_data.S );
+  //two.renderer.setSize( g_data.S, g_data.S );
+  two.renderer.setSize( g_data.W, g_data.H );
 
   let cxy = [ g_data.S/2, g_data.S/2 ];
   let R = (1/4)*g_data.S;
 
   for (let i=0; i<grid_ctx.g.length; i++) {
     let g_p = grid_ctx.g[i][5];
-    let xy = p2xy( cxy[0], cxy[1], g_p, R/2 );
+    let xy = p2xy( cxy[0], cxy[1], g_p, R/2, g_data.template_dxy );
     let r = R*Math.pow( (1/2), g_p.length );
 
     grid_ctx.g[i][0] = xy[0];
